@@ -77,7 +77,7 @@ class CompressJPEG(QgsProcessingAlgorithm):
         return 'compressjpeg'
 
     def displayName(self):
-        return self.tr('Compress JPEG', 'Compressão JPEG')
+        return self.tr('JPEG Compress', 'Compressão JPEG')
 
     def group(self):
         return self.tr('Raster')
@@ -229,7 +229,7 @@ class CompressJPEG(QgsProcessingAlgorithm):
 
         feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
         feedback.pushInfo(self.tr('Leandro Franca - Cartographic Engineer', 'Leandro França - Eng Cart'))
-        
+
         self.CAMINHO = RGB_Output
         self.CARREGAR = Carregar
         return {self.RasterOUT: RGB_Output}

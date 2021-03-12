@@ -82,11 +82,12 @@ This algorithm transforms coordinates between the following reference systems:
 - geodetic <b>(λ, ϕ, h)</b>;
 - geocentric or ECEF <b>(X, Y, Z)</b>; and
 - topocentric in a local tangent plane <b>(E, N, U)</b>.
-Default values for origin coordinates can be applied to Recife / Brazil'''
+Default values for origin coordinates can be applied to Recife / Brazil.'''
         txt_pt = '''Este algoritmo transforma coordenadas entre os seguintes sistemas de referência:
 - Geodésico <b>(λ, ϕ, h)</b>
 - Geocêntrico ou ECEF <b>(X, Y, Z)</b>;
-- Topocêntrico <b>(E, N, U)</b>.'''
+- Topocêntrico <b>(E, N, U)</b>.
+Default: coordenadas de origem para Recife-PE, Brasil.'''
         social_BW = Imgs().social_BW
         footer = '''<div align="center">
                       <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/tutorial/survey_SGL_coord.jpg') +'''">

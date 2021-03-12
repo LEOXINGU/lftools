@@ -25,7 +25,7 @@ hasProcessingProvider=yes
 # Tags are comma separated with spaces allowed
 tags=cartography, survey, topography, raster, postgis, processing, statistics, reambulation, brazil
 
-homepage=http://leandrofranca.github.io
+homepage=https://github.com/LEOXINGU/lftools
 category=Cartography
 icon=images/lftoos_logo.png
 # experimental flag
