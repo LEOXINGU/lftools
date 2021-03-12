@@ -1,13 +1,11 @@
 
  
  <!-- PROJECT LOGO -->
-<br />
 <p align="center">
     <img src="images/lftoos_logo.png" alt="Logo" width="90" height="75">
   <h3 align="center">LF Tools</h3>
-
   <p align="center">
-    Tools for cartographic production, surveying, digital image processing and spatial analysis
+    <b><i>Tools for cartographic production, surveying, digital image processing and spatial analysis</i><b>
     <br />
   </p>
 </p>
