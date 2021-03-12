@@ -298,6 +298,7 @@ This tool creates a backup file in the ".sql" format for a PostgreSQL server dat
 
 ### Change SQL encoding
 This tool changes the encoding type of a .sql file. A new file will be created with the user-defined encoding.
+</br>
 In some cases, this process is necessary to make it possible to transfer data between different operating systems, for example from Window to Linux, and vice versa.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
@@ -311,6 +312,7 @@ In some cases, this process is necessary to make it possible to transfer data be
 
 ### Clone database
 This tool allows you to clone any PostgreSQL database. From a model database, another database that is exactly the same (schema and instances) is generated with a new name defined by the operator.
+</br>
 Note: To create more than one "clone", the new bank names must be filled in separated by a "comma".
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
@@ -323,11 +325,11 @@ Note: To create more than one "clone", the new bank names must be filled in sepa
 </div>
 
 ### Delete database
-This tool allows you to delete / drop any PostgreSQL database.
+This tool allows you to delete / drop any PostgreSQL database.</br>
 Notes:
 - To perform this operation, it is necessary that the database is disconnected, that is, it is not open in any software (PgAdmin, QGIS, etc.).
 - To delete more than one database, the names must be filled in separated by a "comma".
-Attention: This operation is irreversible, so be sure when performing it!
+</br>Attention: This operation is irreversible, so be sure when performing it!
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
@@ -353,7 +355,7 @@ This tool allows you to load a raster layer into a PostGIS database.
 
 ### Rename database
 This tool allows you to rename a PostgreSQL database.
-Note: To perform this operation, it is necessary that the database is disconnected, that is, it is not open in any software (PgAdmin, QGIS, etc.).
+</br>Note: To perform this operation, it is necessary that the database is disconnected, that is, it is not open in any software (PgAdmin, QGIS, etc.).
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
@@ -584,8 +586,8 @@ Generate gaussian (normal) random points in 2D space with a given mean position 
 ## Survey
 
 ### 2D Conformal Transformation
-Two-dimensional conformal coordinate transformation, also known as the four-parameter similarity transformation or Helmert 2D, has the characteristic that true shape is retained after transformation.
-It is typically used in surveying when converting separate surveys into a common reference coordinate system.
+Two-dimensional conformal coordinate transformation, also known as the four-parameter similarity transformation or Helmert 2D, has the characteristic that true shape is retained after transformation.</br>
+It is typically used in surveying when converting separate surveys into a common reference coordinate system.</br>
 This transformation involves: Scaling, Rotation and Translations.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
@@ -640,7 +642,7 @@ This tool calculates the coordinates (X, Y, Z) of a point from azimuth and zenit
 This algorithm transforms coordinates between the following reference systems:
 - geodetic (λ, ϕ, h);
 - geocentric or ECEF (X, Y, Z); and
-- topocentric in a local tangent plane (E, N, U).
+- topocentric in a local tangent plane (E, N, U).</br>
 Default values for origin coordinates can be applied to Recife / Brazil.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
@@ -696,10 +698,10 @@ Extends lines at their start and/or end points.
 
 
 ### Merge lines in direction
-This algorithm merges lines that touch at their starting or ending points and has the same direction (given a tolerance in degrees). 
+This algorithm merges lines that touch at their starting or ending points and has the same direction (given a tolerance in degrees).</br>
 For the attributes can be considered:
-1 - merge lines that have the same attributes; or
-2 - keep the attributes of the longest line.
+- merge lines that have the same attributes; or
+- keep the attributes of the longest line.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
