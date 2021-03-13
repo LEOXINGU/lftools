@@ -83,12 +83,14 @@ class DescriptiveTable(QgsProcessingAlgorithm):
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/document.png'))
 
+    figure = 'images/tutorial/doc_descriptive_table.jpg'
+    txt_en = '''This tool generates the Vertices and Sides Descriptive Table , also known as Synthetic Descriptive Memorial, based on the attributes, sequence and code, in the point layer's attribute table.'''
+    txt_pt = 'Esta ferramenta gera a Tabela Descriva de Vértices e Lados, também conhecida como Memorial Descritivo Sintético, a partir de uma camada de pontos com os atributos de código e ordem (sequência) dos pontos.'
+
     def shortHelpString(self):
-        txt_en = 'This tool generates the Descriptive Table of Vertices and Sides, also known as Synthetic Descriptive Memorial, from a layer of points with the attributes of code and order (sequence) of the points.'
-        txt_pt = 'Esta ferramenta gera a Tabela Descriva de Vértices e Lados, também conhecida como Memorial Descritivo Sintético, a partir de uma camada de pontos com os atributos de código e ordem (sequência) dos pontos.'
         social_BW = Imgs().social_BW
         footer = '''<div align="center">
-                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/tutorial/doc_descriptive_table.jpg') +'''">
+                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), self.figure) +'''">
                       </div>
                       <div align="right">
                       <div>''' + self.tr('This tool works properly only with data in "topogeo" modeling.',
@@ -99,7 +101,7 @@ class DescriptiveTable(QgsProcessingAlgorithm):
                                     'Clique aqui para saber mais sobre essa modelagem!') +'</a><br><br>'+ self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
                       </p>'''+ social_BW + '''</div>
                     </div>'''
-        return self.tr(txt_en, txt_pt) + footer
+        return self.tr(self.txt_en, self.txt_pt) + footer
 
     PONTOS = 'PONTOS'
     HTML = 'HTML'

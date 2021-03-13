@@ -78,19 +78,21 @@ class ExtendLines(QgsProcessingAlgorithm):
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/vetor.png'))
 
+    txt_en = 'Extends lines at their <b>start</b> and/or <b>end</b> points.'
+    txt_pt = 'Estende linhas nos seus pontos inicial e/ou final.'
+    figure = 'images/tutorial/vect_extend_lines.jpg'
+
     def shortHelpString(self):
-        txt_en = 'Extends lines at their <b>start</b> and/or <b>end</b> points.'
-        txt_pt = 'Estende linhas nos seus pontos inicial e/ou final.'
         social_BW = Imgs().social_BW
         footer = '''<div align="center">
-                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/tutorial/vect_extend_lines.jpg') +'''">
+                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), self.figure) +'''">
                       </div>
                       <div align="right">
                       <p align="right">
                       <b>'''+self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
                       </p>'''+ social_BW + '''</div>
                     </div>'''
-        return self.tr(txt_en, txt_pt) + footer
+        return self.tr(self.txt_en, self.txt_pt) + footer
 
 
     LINES = 'LINES'

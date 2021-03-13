@@ -76,28 +76,30 @@ class LocalTangentPlane(QgsProcessingAlgorithm):
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/total_station.png'))
 
-    def shortHelpString(self):
-        txt_en = '''
+    txt_en = '''
 This algorithm transforms coordinates between the following reference systems:
 - geodetic <b>(λ, ϕ, h)</b>;
 - geocentric or ECEF <b>(X, Y, Z)</b>; and
 - topocentric in a local tangent plane <b>(E, N, U)</b>.
 Default values for origin coordinates can be applied to Recife / Brazil.'''
-        txt_pt = '''Este algoritmo transforma coordenadas entre os seguintes sistemas de referência:
+    txt_pt = '''Este algoritmo transforma coordenadas entre os seguintes sistemas de referência:
 - Geodésico <b>(λ, ϕ, h)</b>
 - Geocêntrico ou ECEF <b>(X, Y, Z)</b>;
 - Topocêntrico <b>(E, N, U)</b>.
 Default: coordenadas de origem para Recife-PE, Brasil.'''
+    figure = 'images/tutorial/survey_SGL_coord.jpg'
+
+    def shortHelpString(self):
         social_BW = Imgs().social_BW
         footer = '''<div align="center">
-                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/tutorial/survey_SGL_coord.jpg') +'''">
+                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), self.figure) +'''">
                       </div>
                       <div align="right">
                       <p align="right">
                       <b>'''+self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
                       </p>'''+ social_BW + '''</div>
                     </div>'''
-        return self.tr(txt_en, txt_pt) + footer
+        return self.tr(self.txt_en, self.txt_pt) + footer
 
     def initAlgorithm(self, config=None):
         # INPUT

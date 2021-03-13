@@ -91,19 +91,21 @@ class DefineNullCell(QgsProcessingAlgorithm):
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/raster.png'))
 
+    txt_en = 'Cells of a raster with values outside the interval (minimum and maximum) are defined as null value.'
+    txt_pt = 'As células do raster com valores fora do intervalo (mínimo e máximo) são definidas como valor nulo.'
+    figure = 'images/tutorial/raster_define_null_px.jpg'
+
     def shortHelpString(self):
-        txt_en = 'Cells of a raster with values outside the interval (minimum and maximum) are defined as null value.'
-        txt_pt = 'As células do raster com valores fora do intervalo (mínimo e máximo) são definidas como valor nulo.'
         social_BW = Imgs().social_BW
         footer = '''<div align="center">
-                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/tutorial/raster_define_null_px.jpg') +'''">
+                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), self.figure) +'''">
                       </div>
                       <div align="right">
                       <p align="right">
                       <b>'''+self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
                       </p>'''+ social_BW + '''</div>
                     </div>'''
-        return self.tr(txt_en, txt_pt) + footer
+        return self.tr(self.txt_en, self.txt_pt) + footer
 
 
     RasterIN ='RasterIN'

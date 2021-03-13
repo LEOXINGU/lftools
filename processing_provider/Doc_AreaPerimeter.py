@@ -82,12 +82,14 @@ class AreaPerimterReport(QgsProcessingAlgorithm):
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/document.png'))
 
+    figure = 'images/tutorial/doc_analytical_results.jpg'
+    txt_en = 'This tool generates a Report for the Analytical Calculation of Area, Azimuths, Polygon Sides, UTM Projection and Geodetic Coordinates of a Property.'
+    txt_pt = 'Esta gera o Relatório de Cálculo Analítico de Área, Azimutes, Lados, Coordenadas Planas e Geodésicas de um Imóvel.'
+
     def shortHelpString(self):
-        txt_en = 'This tool generate the Report for the Analytical Calculation of Area, Azimuths, Sides, UTM Projected and Geodetic Coordinates of a Property.'
-        txt_pt = 'Esta gera o Relatório de Cálculo Analítico de Área, Azimutes, Lados, Coordenadas Planas e Geodésicas de um Imóvel.'
         social_BW = Imgs().social_BW
         footer = '''<div align="center">
-                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/tutorial/doc_analytical_results.jpg') +'''">
+                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), self.figure) +'''">
                       </div>
                       <div align="right">
                       <div>''' + self.tr('This tool works properly only with data in "topogeo" modeling.',
@@ -98,7 +100,7 @@ class AreaPerimterReport(QgsProcessingAlgorithm):
                                     'Clique aqui para saber mais sobre essa modelagem!') +'</a><br><br>'+ self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
                       </p>'''+ social_BW + '''</div>
                     </div>'''
-        return self.tr(txt_en, txt_pt) + footer
+        return self.tr(self.txt_en, self.txt_pt) + footer
 
     def initAlgorithm(self, config=None):
 

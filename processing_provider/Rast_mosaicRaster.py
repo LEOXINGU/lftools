@@ -95,19 +95,21 @@ class MosaicRaster(QgsProcessingAlgorithm):
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/raster.png'))
 
+    txt_en = 'Creates raster mosaic: a combination or merge of two or more images.'
+    txt_pt = 'Cria um mosaico: uma combinação ou mesclagem de duas ou mais imagens.'
+    figure = 'images/tutorial/raster_mosaic.jpg'
+
     def shortHelpString(self):
-        txt_en = 'Creates raster mosaic: a combination or merge of two or more images.'
-        txt_pt = 'Cria um mosaico: uma combinação ou mesclagem de duas ou mais imagens.'
         social_BW = Imgs().social_BW
         footer = '''<div align="center">
-                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/tutorial/raster_mosaic.jpg') +'''">
+                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), self.figure) +'''">
                       </div>
                       <div align="right">
                       <p align="right">
                       <b>'''+self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
                       </p>'''+ social_BW + '''</div>
                     </div>'''
-        return self.tr(txt_en, txt_pt) + footer
+        return self.tr(self.txt_en, self.txt_pt) + footer
 
     RASTERLIST ='RASTERLIST'
     CHANGERESOLUTION = 'CHANGERESOLUTION'

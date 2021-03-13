@@ -91,19 +91,21 @@ class LoadRasterByLocation(QgsProcessingAlgorithm):
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/raster.png'))
 
+    txt_en = 'Loads a set of raster files that intersect the geometries of an input vector layer.'
+    txt_pt = 'Carrega um conjunto de arquivos raster que interseptam as geometrias de uma camada vetorial de entrada.'
+    figure = 'images/tutorial/raster_loadByLocation.jpg'
+
     def shortHelpString(self):
-        txt_en = 'Loads a set of raster files that intersect the geometries of an input vector layer.'
-        txt_pt = 'Carrega um conjunto de arquivos raster que interseptam as geometrias de uma camada vetorial de entrada.'
         social_BW = Imgs().social_BW
         footer = '''<div align="center">
-                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/tutorial/raster_loadByLocation.jpg') +'''">
+                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), self.figure) +'''">
                       </div>
                       <div align="right">
                       <p align="right">
                       <b>'''+self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
                       </p>'''+ social_BW + '''</div>
                     </div>'''
-        return self.tr(txt_en, txt_pt) + footer
+        return self.tr(self.txt_en, self.txt_pt) + footer
 
 
     FOLDER ='FOLDER'

@@ -91,19 +91,21 @@ class CompressJPEG(QgsProcessingAlgorithm):
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/raster.png'))
 
+    txt_en = 'JPEG compression is a lossy method to reduce the raster file size (about to 10%). The degree of compression can be adjusted, allowing a selectable tradeoff between storage size and image quality.'
+    txt_pt = 'A compressão JPEG é um método "com perdas" para reduzir o tamanho de um arquivo raster (para aproximadamente 10%). O grau de compressão pode ser ajustado, permitindo um limiar entre o tamanho de armazenamento e a qualidade da imagem.'
+    figure = 'images/tutorial/raster_jpeg_compress.jpg'
+
     def shortHelpString(self):
-        txt_en = 'JPEG compression is a lossy method to reduce the raster file size (about to 10%). The degree of compression can be adjusted, allowing a selectable tradeoff between storage size and image quality.'
-        txt_pt = 'A compressão JPEG é um método "com perdas" para reduzir o tamanho de um arquivo raster (para aproximadamente 10%). O grau de compressão pode ser ajustado, permitindo um limiar entre o tamanho de armazenamento e a qualidade da imagem.'
         social_BW = Imgs().social_BW
         footer = '''<div align="center">
-                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/tutorial/raster_jpeg_compress.jpg') +'''">
+                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), self.figure) +'''">
                       </div>
                       <div align="right">
                       <p align="right">
                       <b>'''+self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
                       </p>'''+ social_BW + '''</div>
                     </div>'''
-        return self.tr(txt_en, txt_pt) + footer
+        return self.tr(self.txt_en, self.txt_pt) + footer
 
     def tags(self):
         return self.tr('jpeg,jpg,compressão,compression,compress,photo,comprimir,compact').split(',')

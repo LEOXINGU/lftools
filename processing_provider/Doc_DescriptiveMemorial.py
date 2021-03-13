@@ -86,12 +86,14 @@ class DescriptiveMemorial(QgisAlgorithm):
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/document.png'))
 
+    figure = 'images/tutorial/doc_descriptive_memorial.jpg'
+    txt_en = 'Elaboration of Descriptive Memorials based on vector layers that define a property.'
+    txt_pt = 'Elaboração de Memorial Descritivo a partir de camadas vetorias que definem uma propriedade.'
+
     def shortHelpString(self):
-        txt_en = 'Elaboration of Descriptive Memorials based on vector layers that define a property.'
-        txt_pt = 'Elaboração de Memorial Descritivo a partir de camadas vetorias que definem uma propriedade.'
         social_BW = Imgs().social_BW
         footer = '''<div align="center">
-                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/tutorial/doc_descriptive_memorial.jpg') +'''">
+                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), self.figure) +'''">
                       </div>
                       <div align="right">
                       <div>''' + self.tr('This tool works properly only with data in "topogeo" modeling.',
@@ -102,7 +104,7 @@ class DescriptiveMemorial(QgisAlgorithm):
                                     'Clique aqui para saber mais sobre essa modelagem!') +'</a><br><br>'+ self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
                       </p>'''+ social_BW + '''</div>
                     </div>'''
-        return self.tr(txt_en, txt_pt) + footer
+        return self.tr(self.txt_en, self.txt_pt) + footer
 
     def initAlgorithm(self, config=None):
         # 'INPUTS'

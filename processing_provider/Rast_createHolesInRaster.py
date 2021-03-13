@@ -90,19 +90,21 @@ class CreateHolesInRaster(QgsProcessingAlgorithm):
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/raster.png'))
 
+    txt_en = 'Creates holes in Raster by defining "no data" pixels (transparent) from the Polygon Layer.'
+    txt_pt = 'Cria buracos em Raster definindo pixels nulos (transparentes) a partir de Camada de Polígonos.'
+    figure = 'images/tutorial/raster_create_holes.jpg'
+    
     def shortHelpString(self):
-        txt_en = 'Creates holes in Raster by defining "no data" pixels (transparent) from the Polygon Layer.'
-        txt_pt = 'Cria buracos em Raster definindo pixels nulos (transparentes) a partir de Camada de Polígonos.'
         social_BW = Imgs().social_BW
         footer = '''<div align="center">
-                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/tutorial/raster_create_holes.jpg') +'''">
+                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), self.figure) +'''">
                       </div>
                       <div align="right">
                       <p align="right">
                       <b>'''+self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
                       </p>'''+ social_BW + '''</div>
                     </div>'''
-        return self.tr(txt_en, txt_pt) + footer
+        return self.tr(self.txt_en, self.txt_pt) + footer
 
     RasterIN ='RasterIN'
     HOLES = 'HOLES'

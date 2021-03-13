@@ -90,19 +90,21 @@ class RandomDist(QgsProcessingAlgorithm):
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/statistics.png'))
 
+    txt_en = 'Generate gaussian (normal) random points in 2D space with a given mean position (X0, Y0), standard deviation for X and Y, and rotation angle.'
+    txt_pt = 'Gera pontos aleatórios no espaço 2D a partir de um ponto central (X0, Y0), desvios-padrões para X e Y, e ângulo de rotação.'
+    figure = 'images/tutorial/stat_random_points.jpg'
+
     def shortHelpString(self):
-        txt_en = 'Generate gaussian (normal) random points in 2D space with a given mean position (X0, Y0), standard deviation for X and Y, and rotation angle.'
-        txt_pt = 'Gera pontos aleatórios no espaço 2D a partir de um ponto central (X0, Y0), desvios-padrões para X e Y, e ângulo de rotação.'
         social_BW = Imgs().social_BW
         footer = '''<div align="center">
-                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/tutorial/stat_random_points.jpg') +'''">
+                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), self.figure) +'''">
                       </div>
                       <div align="right">
                       <p align="right">
                       <b>'''+self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
                       </p>'''+ social_BW + '''</div>
                     </div>'''
-        return self.tr(txt_en, txt_pt) + footer
+        return self.tr(self.txt_en, self.txt_pt) + footer
 
     ORIGIN = 'ORIGIN'
     STDX = 'STDX'

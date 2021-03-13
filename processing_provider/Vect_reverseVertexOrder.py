@@ -70,19 +70,21 @@ class ReverseVertexOrder(QgsProcessingAlgorithm):
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/vetor.png'))
 
+    txt_en = 'Inverts vertex order for polygons and lines.'
+    txt_pt = 'Inverte a ordem dos vértices para polígonos e linhas.'
+    figure = 'images/tutorial/vect_reverse_vertex_sequence.jpg'
+
     def shortHelpString(self):
-        txt_en = 'Inverts vertex order for polygons and lines.'
-        txt_pt = 'Inverte a ordem dos vértices para polígonos e linhas.'
         social_BW = Imgs().social_BW
         footer = '''<div align="center">
-                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/tutorial/vect_reverse_vertex_sequence.jpg') +'''">
+                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), self.figure) +'''">
                       </div>
                       <div align="right">
                       <p align="right">
                       <b>'''+self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
                       </p>'''+ social_BW + '''</div>
                     </div>'''
-        return self.tr(txt_en, txt_pt) + footer
+        return self.tr(self.txt_en, self.txt_pt) + footer
 
 
 

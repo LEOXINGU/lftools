@@ -85,12 +85,14 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/document.png'))
 
+    txt_en = 'This tool generates monograph(s) of geodetic landmarks automatically from the "pto_ref_geod_topo_p" layer.'
+    txt_pt = 'Esta ferramenta gera monografia(s) de marcos geodésicos de forma automática a partir da camada "pto_ref_geod_topo_p".'
+    figure = 'images/tutorial/doc_mark.jpg'
+
     def shortHelpString(self):
-        txt_en = 'This tool generates monograph(s) of geodetic landmarks automatically from the "pto_ref_geod_topo_p" layer.'
-        txt_pt = 'Esta ferramenta gera monografia(s) de marcos geodésicos de forma automática a partir da camada "pto_ref_geod_topo_p".'
         social_BW = Imgs().social_BW
         footer = '''<div align="center">
-                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/tutorial/doc_mark.jpg') +'''">
+                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), self.figure) +'''">
                       </div>
                       <div align="right">
                       <div>''' + self.tr('This tool works properly only with data in "topogeo" modeling.',
@@ -101,7 +103,7 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
                                     'Clique aqui para saber mais sobre essa modelagem!') +'</a><br><br>'+ self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
                       </p>'''+ social_BW + '''</div>
                     </div>'''
-        return self.tr(txt_en, txt_pt) + footer
+        return self.tr(self.txt_en, self.txt_pt) + footer
 
     def initAlgorithm(self, config=None):
 

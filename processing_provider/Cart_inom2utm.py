@@ -70,19 +70,21 @@ class Inom2utmGrid(QgsProcessingAlgorithm):
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/cart_frame.png'))
 
+    figure = 'images/tutorial/grid_inom_utm.jpg'
+    txt_en = 'This algorithm returns the polygon correspondent to the frame related to a scale of the Brazilian Mapping System based on the Map Index (MI). Example: MI = 1214-1'
+    txt_pt = 'Este algoritmo retorna o polígono correspondente à <b>moldura</b> relativa a uma escala do <b>Mapeamento Sistemático Brasileiro</b>. Esta moldura é calculada a partir do Índice de Nomenclatura <b>INOM</b> ou Mapa Índice <b>MI</b> válido, que deve ser dado pelo usuário.'
+
     def shortHelpString(self):
-        txt_en = 'This algorithm returns the polygon correspondent to the <b>frame</b> related to a scale of the Brazilian Mapping System from name (map index).'
-        txt_pt = 'Este algoritmo retorna o polígono correspondente à <b>moldura</b> relativa a uma escala do <b>Mapeamento Sistemático Brasileiro</b>. Esta moldura é calculada a partir do Índice de Nomenclatura <b>INOM</b> ou Mapa Índice <b>MI</b> válido, que deve ser dado pelo usuário.'
         social_BW = Imgs().social_BW
         footer = '''<div align="center">
-                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/tutorial/grid_inom_utm.jpg') +'''">
+                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), self.figure) +'''">
                       </div>
                       <div align="right">
                       <p align="right">
                       <b>'''+self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
                       </p>'''+ social_BW + '''</div>
                     </div>'''
-        return self.tr(txt_en, txt_pt) + footer
+        return self.tr(self.txt_en, self.txt_pt) + footer
 
 
     def initAlgorithm(self, config=None):

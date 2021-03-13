@@ -90,19 +90,21 @@ class FillRasterwithPatches(QgsProcessingAlgorithm):
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/raster.png'))
 
+    txt_en = 'Fills Raster null pixels (no data) with data obtained from other smaller raster layers (Patches).'
+    txt_pt = 'Preenche vazios de Raster (pixels nulos) com dados obtidos de outras camadas raster menores (Remendos).'
+    figure = 'images/tutorial/raster_fill_holes.jpg'
+
     def shortHelpString(self):
-        txt_en = 'Fills Raster null pixels (no data) with data obtained from other smaller raster layers (Patches).'
-        txt_pt = 'Preenche vazios de Raster (pixels nulos) com dados obtidos de outras camadas raster menores (Remendos).'
         social_BW = Imgs().social_BW
         footer = '''<div align="center">
-                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/tutorial/raster_fill_holes.jpg') +'''">
+                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), self.figure) +'''">
                       </div>
                       <div align="right">
                       <p align="right">
                       <b>'''+self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
                       </p>'''+ social_BW + '''</div>
                     </div>'''
-        return self.tr(txt_en, txt_pt) + footer
+        return self.tr(self.txt_en, self.txt_pt) + footer
 
     RasterIN ='RasterIN'
     PATCHES = 'PATCHES'

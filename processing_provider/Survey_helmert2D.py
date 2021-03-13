@@ -68,25 +68,27 @@ class Helmert2D(QgsProcessingAlgorithm):
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/total_station.png'))
 
-    def shortHelpString(self):
-        txt_en = """Two-dimensional conformal coordinate transformation, also known as the four-parameter similarity transformation or Helmert 2D, has the characteristic that true shape is retained after transformation.
+    txt_en = """Two-dimensional conformal coordinate transformation, also known as the four-parameter similarity transformation or Helmert 2D, has the characteristic that true shape is retained after transformation.
 It is typically used in surveying when converting separate surveys into a common reference coordinate system.
 This transformation involves: Scaling, Rotation and Translations.
 """
-        txt_pt = """A transformação Conforme, também conhecida como transformação de similaridade de quatro parâmetros ou Helmert 2D, tem a característica de manter a forma (configuração) verdadeira da feição após a transformação.
+    txt_pt = """A transformação Conforme, também conhecida como transformação de similaridade de quatro parâmetros ou Helmert 2D, tem a característica de manter a forma (configuração) verdadeira da feição após a transformação.
 É normalmente utilizada para o correto georreferenciamento de levantamentos topográficos com coordenadas arbitrárias.
 Esta transformação envolve: Escala, Rotação e Translação.
 """
+    figure = 'images/tutorial/survey_helmert2D.jpg'
+
+    def shortHelpString(self):
         social_BW = Imgs().social_BW
         footer = '''<div align="center">
-                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/tutorial/survey_helmert2D.jpg') +'''">
+                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), self.figure) +'''">
                       </div>
                       <div align="right">
                       <p align="right">
                       <b>'''+self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
                       </p>'''+ social_BW + '''</div>
                     </div>'''
-        return self.tr(txt_en, txt_pt) + footer
+        return self.tr(self.txt_en, self.txt_pt) + footer
 
     def transformPoint(self, pnt, a, b, c, d):
         X, Y = pnt.x(), pnt.y()

@@ -71,19 +71,21 @@ class ClosedPolygonal(QgsProcessingAlgorithm):
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/total_station.png'))
 
+    txt_en = 'Calculates the adjusted coordinates from angles and horizontal distances of a Closed Polygonal.'
+    txt_pt = 'Cálculo das coordenadas ajustadas a partir de medições de ângulos e distâncias de uma poligonal fechada.'
+    figure = 'images/tutorial/survey_closed_polygonal.jpg'
+
     def shortHelpString(self):
-        txt_en = 'Calculates the adjusted coordinates from angles and horizontal distances of a Closed Polygonal.'
-        txt_pt = 'Cálculo das coordenadas ajustadas a partir de medições de ângulos e distâncias de uma poligonal fechada.'
         social_BW = Imgs().social_BW
         footer = '''<div align="center">
-                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/tutorial/survey_closed_polygonal.jpg') +'''">
+                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), self.figure) +'''">
                       </div>
                       <div align="right">
                       <p align="right">
                       <b>'''+self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
                       </p>'''+ social_BW + '''</div>
                     </div>'''
-        return self.tr(txt_en, txt_pt) + footer
+        return self.tr(self.txt_en, self.txt_pt) + footer
 
     def initAlgorithm(self, config=None):
 

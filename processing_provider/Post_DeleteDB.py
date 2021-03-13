@@ -72,27 +72,29 @@ class DeleteDB(QgsProcessingAlgorithm):
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/postgis.png'))
 
-    def shortHelpString(self):
-        txt_en = '''This tool allows you to delete / drop any PostgreSQL database.
+    txt_en = '''This tool allows you to delete / drop any PostgreSQL database.
 Notes:
 - To perform this operation, it is necessary that the database is disconnected, that is, it is not open in any software (PgAdmin, QGIS, etc.).
 - To delete more than one database, the names must be filled in separated by a "comma".
 <p style="color:red;">Attention: This operation is irreversible, so be sure when performing it!</p>'''
-        txt_pt = """Esta ferramenta permite apagar (delete/drop) qualquer banco do PostgreSQL.
+    txt_pt = """Esta ferramenta permite apagar (delete/drop) qualquer banco do PostgreSQL.
 Obs.:
 - Para realizar esta operação, é necessário que o banco esteja desconectado, ou seja, não esteja aberto em nenhum software (PgAdmin, QGIS, etc).
 - Para deletar mais de um BD, os nomes devem ser preenchidos separados por vírgula.
 <p style="color:red;">Atenção: Esta operação é irreversível, portanto esteja seguro quando for executá-la!</p>"""
+    figure = 'images/tutorial/post_deletedb.jpg'
+
+    def shortHelpString(self):
         social_BW = Imgs().social_BW
         footer = '''<div align="center">
-                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/tutorial/post_deletedb.jpg') +'''">
+                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), self.figure) +'''">
                       </div>
                       <div align="right">
                       <p align="right">
                       <b>'''+self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
                       </p>'''+ social_BW + '''</div>
                     </div>'''
-        return self.tr(txt_en, txt_pt) + footer
+        return self.tr(self.txt_en, self.txt_pt) + footer
 
     DELETED = 'DELETED'
     HOST = 'HOST'

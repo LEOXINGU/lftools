@@ -76,19 +76,21 @@ class SequencePoints(QgsProcessingAlgorithm):
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/vetor.png'))
 
+    txt_en = 'This script fills a certain attribute of the features of a layer of points according to its sequence in relation to the polygon of another layer.'
+    txt_pt = 'Este script preenche um determinado atributo das feições de uma camada de pontos de acordo com sua sequência em relação ao polígono de outra camada.'
+    figure = 'images/tutorial/vect_sequence_points.jpg'
+
     def shortHelpString(self):
-        txt_en = 'This script fills a certain attribute of the features of a layer of points according to its sequence in relation to the polygon of another layer.'
-        txt_pt = 'Este script preenche um determinado atributo das feições de uma camada de pontos de acordo com sua sequência em relação ao polígono de outra camada.'
         social_BW = Imgs().social_BW
         footer = '''<div align="center">
-                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/tutorial/vect_sequence_points.jpg') +'''">
+                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), self.figure) +'''">
                       </div>
                       <div align="right">
                       <p align="right">
                       <b>'''+self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
                       </p>'''+ social_BW + '''</div>
                     </div>'''
-        return self.tr(txt_en, txt_pt) + footer
+        return self.tr(self.txt_en, self.txt_pt) + footer
 
 
     def initAlgorithm(self, config=None):

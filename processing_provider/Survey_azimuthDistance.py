@@ -63,19 +63,21 @@ class AzimuthDistance(QgsProcessingAlgorithm):
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/total_station.png'))
 
+    txt_en = 'Calculation of points or line from a set of azimuths and distances.'
+    txt_pt = 'Cálculo de pontos ou linha a partir de um conjunto de azimutes e distâncias.'
+    figure = 'images/tutorial/survey_azimuth_distance.jpg'
+
     def shortHelpString(self):
-        txt_en = 'Calculation of points or line from a set of azimuths and distances.'
-        txt_pt = 'Cálculo de pontos ou linha a partir de um conjunto de azimutes e distâncias.'
         social_BW = Imgs().social_BW
         footer = '''<div align="center">
-                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/tutorial/survey_azimuth_distance.jpg') +'''">
+                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), self.figure) +'''">
                       </div>
                       <div align="right">
                       <p align="right">
                       <b>'''+self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
                       </p>'''+ social_BW + '''</div>
                     </div>'''
-        return self.tr(txt_en, txt_pt) + footer
+        return self.tr(self.txt_en, self.txt_pt) + footer
 
     POINT = 'POINT'
     AZIMUTHS = 'AZIMUTHS'

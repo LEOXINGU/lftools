@@ -62,19 +62,21 @@ class MeasureLayers(QgsProcessingAlgorithm):
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/easy.png'))
 
+    txt_en = """This tool calculates the line feature's lengths and polygon feature's perimeter and area in virtual fields for all vector layers."""
+    txt_pt = 'Esta ferramenta calcula em campos virtuais os comprimentos de feições do tipo linha e o perímetro e área de feições do tipo polígono para todas as camadas.'
+    figure = 'images/tutorial/easy_measure_layer.jpg'
+
     def shortHelpString(self):
-        txt_en = 'This tool calculates in virtual fields the lengths of features of the line type and the perimeter and area of features of the polygon type for all layers.'
-        txt_pt = 'Esta ferramenta calcula em campos virtuais os comprimentos de feições do tipo linha e o perímetro e área de feições do tipo polígono para todas as camadas.'
         social_BW = Imgs().social_BW
         footer = '''<div align="center">
-                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/tutorial/easy_measure_layer.jpg') +'''">
+                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), self.figure) +'''">
                       </div>
                       <div align="right">
                       <p align="right">
                       <b>'''+self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
                       </p>'''+ social_BW + '''</div>
                     </div>'''
-        return self.tr(txt_en, txt_pt) + footer
+        return self.tr(self.txt_en, self.txt_pt) + footer
 
     def initAlgorithm(self, config=None):
         units_dist = [self.tr('Meters (m)', 'Metros (m)'),

@@ -93,19 +93,21 @@ class ConfidenceEllipse(QgsProcessingAlgorithm):
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/statistics.png'))
 
+    txt_en = 'Creates ellipses based on the covariance matrix to summarize the spatial characteristics of point type geographic features: central tendency, dispersion, and directional trends.'
+    txt_pt = 'Cria elipses a partir da matriz variância-covariância para resumir as características espaciais de feções geográficas do tipo ponto: tendência central, dispersão e tendências direcionais.'
+    figure = 'images/tutorial/stat_ellipses.jpg'
+
     def shortHelpString(self):
-        txt_en = 'Creates ellipses based on the covariance matrix to summarize the spatial characteristics of point type geographic features: central tendency, dispersion, and directional trends.'
-        txt_pt = 'Cria elipses a partir da matriz variância-covariância para resumir as características espaciais de feções geográficas do tipo ponto: tendência central, dispersão e tendências direcionais.'
         social_BW = Imgs().social_BW
         footer = '''<div align="center">
-                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/tutorial/stat_ellipses.jpg') +'''">
+                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), self.figure) +'''">
                       </div>
                       <div align="right">
                       <p align="right">
                       <b>'''+self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
                       </p>'''+ social_BW + '''</div>
                     </div>'''
-        return self.tr(txt_en, txt_pt) + footer
+        return self.tr(self.txt_en, self.txt_pt) + footer
 
     INPUT = 'INPUT'
     TAM = 'TAM'

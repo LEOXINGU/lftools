@@ -68,19 +68,21 @@ class CoordinatesToLayer(QgsProcessingAlgorithm):
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/easy.png'))
 
+    txt_en = 'Generates a <b>point layer</b> from a coordinate table, whether it comes from a Microsoft <b>Excel</b> spreadsheet, Open Document Spreadsheet (ODS), or even attributes from another layer.'
+    txt_pt = 'Geração de uma camada de pontos a partir das coordenadas preenchidas em uma planilha do Excel ou Open Document Spreadsheet (ODS), ou até mesmo, a partir dos atributos de outra camada.'
+    figure = 'images/tutorial/easy_coord_layer.jpg'
+
     def shortHelpString(self):
-        txt_en = 'Generates a <b>point layer</b> from a coordinate table, whether it comes from a Microsoft <b>Excel</b> spreadsheet, Open Document Spreadsheet (ODS), or even attributes from another layer.'
-        txt_pt = 'Geração de uma camada de pontos a partir das coordenadas preenchidas em uma planilha do Excel ou Open Document Spreadsheet (ODS), ou até mesmo, a partir dos atributos de outra camada.'
         social_BW = Imgs().social_BW
         footer = '''<div align="center">
-                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/tutorial/easy_coord_layer.jpg') +'''">
+                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), self.figure) +'''">
                       </div>
                       <div align="right">
                       <p align="right">
                       <b>'''+self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
                       </p>'''+ social_BW + '''</div>
                     </div>'''
-        return self.tr(txt_en, txt_pt) + footer
+        return self.tr(self.txt_en, self.txt_pt) + footer
 
     def initAlgorithm(self, config=None):
         # INPUT

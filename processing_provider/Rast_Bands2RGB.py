@@ -87,19 +87,21 @@ class Bands2RGB(QgsProcessingAlgorithm):
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/raster.png'))
 
+    txt_en = 'Combine three image bands into one picture by display each band as either Red, Green or Blue.'
+    txt_pt = 'Realiza a combinação de três bandas em uma única imagem, apresentando-as nas bandas vermelha (R), verde (G) e Azul (B).'
+    figure = 'images/tutorial/raster_rgb.jpg'
+
     def shortHelpString(self):
-        txt_en = 'Combine three image bands into one picture by display each band as either Red, Green or Blue.'
-        txt_pt = 'Realiza a combinação de três bandas em uma única imagem, apresentando-as nas bandas vermelha (R), verde (G) e Azul (B).'
         social_BW = Imgs().social_BW
         footer = '''<div align="center">
-                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/tutorial/raster_rgb.jpg') +'''">
+                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), self.figure) +'''">
                       </div>
                       <div align="right">
                       <p align="right">
                       <b>'''+self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
                       </p>'''+ social_BW + '''</div>
                     </div>'''
-        return self.tr(txt_en, txt_pt) + footer
+        return self.tr(self.txt_en, self.txt_pt) + footer
 
     R = 'R'
     G = 'G'
@@ -223,7 +225,7 @@ class Bands2RGB(QgsProcessingAlgorithm):
 
         feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
         feedback.pushInfo(self.tr('Leandro Franca - Cartographic Engineer', 'Leandro França - Eng Cart'))
-        
+
         self.CAMINHO = RGB_Output
         self.CARREGAR = Carregar
         return {self.RGB: RGB_Output}

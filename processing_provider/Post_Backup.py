@@ -72,19 +72,21 @@ class Backup(QgsProcessingAlgorithm):
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/postgis.png'))
 
+    txt_en = 'This tool creates a <b>backup</b> file in the "<b>.sql</b>" format for a PostgreSQL server database.'
+    txt_pt = 'Esta ferramenta gera um arquivo de <b>backup</b> no formato "<b>.sql</b>" para um banco de dados de um servidor PostgreSQL.'
+    figure = 'images/tutorial/post_backup.jpg'
+
     def shortHelpString(self):
-        txt_en = 'This tool creates a <b>backup</b> file in the "<b>.sql</b>" format for a PostgreSQL server database.'
-        txt_pt = 'Esta ferramenta gera um arquivo de <b>backup</b> no formato "<b>.sql</b>" para um banco de dados de um servidor PostgreSQL.'
         social_BW = Imgs().social_BW
         footer = '''<div align="center">
-                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/tutorial/post_backup.jpg') +'''">
+                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), self.figure) +'''">
                       </div>
                       <div align="right">
                       <p align="right">
                       <b>'''+self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
                       </p>'''+ social_BW + '''</div>
                     </div>'''
-        return self.tr(txt_en, txt_pt) + footer
+        return self.tr(self.txt_en, self.txt_pt) + footer
 
 
     FOLDER ='FOLDER'

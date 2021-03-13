@@ -91,19 +91,21 @@ class RemoveAlphaBand(QgsProcessingAlgorithm):
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/raster.png'))
 
+    txt_en = 'This tool removes the 4th band (apha band), transfering the transparency information as "NoData" to pixels of the RGB output.'
+    txt_pt = 'Esta ferramenta remove a 4ª banda (banda alfa), transferindo a informação de transparência como "Sem Valor" para os pixels da imagem RGB de saída.'
+    figure = 'images/tutorial/raster_remove_alpha.jpg'
+
     def shortHelpString(self):
-        txt_en = 'This tool removes the 4th band (apha band), transfering the transparency information as "NoData" to pixels of the RGB output.'
-        txt_pt = 'Esta ferramenta remove a 4ª banda (banda alfa), transferindo a informação de transparência como "Sem Valor" para os pixels da imagem RGB de saída.'
         social_BW = Imgs().social_BW
         footer = '''<div align="center">
-                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/tutorial/raster_remove_alpha.jpg') +'''">
+                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), self.figure) +'''">
                       </div>
                       <div align="right">
                       <p align="right">
                       <b>'''+self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
                       </p>'''+ social_BW + '''</div>
                     </div>'''
-        return self.tr(txt_en, txt_pt) + footer
+        return self.tr(self.txt_en, self.txt_pt) + footer
 
 
     RasterIN ='RasterIN'

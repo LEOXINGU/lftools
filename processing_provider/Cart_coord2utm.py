@@ -66,19 +66,21 @@ class Coord2UTMGrid(QgsProcessingAlgorithm):
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/cart_frame.png'))
 
+    figure = 'images/tutorial/grid_coord_utm.jpg'
+    txt_en = 'This algorithm returns the frame related to a scale of the Brazilian Mapping System. The generated frame, which is a polygon, is calculated from a Point defined by the user.'
+    txt_pt = 'Este algoritmo retorna o polígono correspondente à <b>moldura</b> relativa a uma escala do <b>Mapeamento Sistemático Brasileiro</b>. Esta moldura é calculada a partir das coordenadas de um <b>Ponto</b> definido pelo usuário.'
+
     def shortHelpString(self):
-        txt_en = 'This algorithm returns the polygon correspondent to the <b>frame</b> related to a scale of the <b>Brazilian Mapping System</b>. That frame is calculated from a <b>Point</b> definied by the user.'
-        txt_pt = 'Este algoritmo retorna o polígono correspondente à <b>moldura</b> relativa a uma escala do <b>Mapeamento Sistemático Brasileiro</b>. Esta moldura é calculada a partir das coordenadas de um <b>Ponto</b> definido pelo usuário.'
         social_BW = Imgs().social_BW
         footer = '''<div align="center">
-                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/tutorial/grid_coord_utm.jpg') +'''">
+                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), self.figure) +'''">
                       </div>
                       <div align="right">
                       <p align="right">
                       <b>'''+self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
                       </p>'''+ social_BW + '''</div>
                     </div>'''
-        return self.tr(txt_en, txt_pt) + footer
+        return self.tr(self.txt_en, self.txt_pt) + footer
 
     def initAlgorithm(self, config=None):
 

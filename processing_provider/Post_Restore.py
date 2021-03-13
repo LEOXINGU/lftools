@@ -71,19 +71,21 @@ class Restore(QgsProcessingAlgorithm):
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/postgis.png'))
 
+    txt_en = 'This tool allows you to <b>restore</b>, that is, import a database on a PostgreSQL server, from a backup file in the "<b>.sql</b>" format.'
+    txt_pt = 'Esta ferramenta permite <b>restaurar</b>, ou seja, importar um banco de dados para um servidor PostgreSQL, a partir de um arquivo de backup no formato "<b>.sql</b>".'
+    figure = 'images/tutorial/post_restore.jpg'
+
     def shortHelpString(self):
-        txt_en = 'This tool allows you to <b>restore</b>, that is, import a database on a PostgreSQL server, from a backup file in the "<b>.sql</b>" format.'
-        txt_pt = 'Esta ferramenta permite <b>restaurar</b>, ou seja, importar um banco de dados para um servidor PostgreSQL, a partir de um arquivo de backup no formato "<b>.sql</b>".'
         social_BW = Imgs().social_BW
         footer = '''<div align="center">
-                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/tutorial/post_restore.jpg') +'''">
+                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), self.figure) +'''">
                       </div>
                       <div align="right">
                       <p align="right">
                       <b>'''+self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
                       </p>'''+ social_BW + '''</div>
                     </div>'''
-        return self.tr(txt_en, txt_pt) + footer
+        return self.tr(self.txt_en, self.txt_pt) + footer
 
 
     FILE ='FILE'

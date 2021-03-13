@@ -72,21 +72,23 @@ class CloneDB(QgsProcessingAlgorithm):
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/postgis.png'))
 
-    def shortHelpString(self):
-        txt_en = '''This tool allows you to clone any PostgreSQL database. From a model database, another database that is exactly the same (schema and instances) is generated with a new name defined by the operator.
+    txt_en = '''This tool allows you to clone any PostgreSQL database. From a model database, another database that is exactly the same (schema and instances) is generated with a new name defined by the operator.
 Note: To create more than one "clone", the new bank names must be filled in separated by a "comma".'''
-        txt_pt = """Esta ferramenta permite clonar qualquer banco PostgreSQL. A partir de um banco de dados modelo, é gerado um outro banco exatamente igual (esquema e instâncias) com um novo nome definido pelo operador.
+    txt_pt = """Esta ferramenta permite clonar qualquer banco PostgreSQL. A partir de um banco de dados modelo, é gerado um outro banco exatamente igual (esquema e instâncias) com um novo nome definido pelo operador.
 Obs.: Para criação de mais de um "clone", os novos nomes dos bancos devem ser inseridos "separados por vírgula"."""
+    figure = 'images/tutorial/post_clonedb.jpg'
+
+    def shortHelpString(self):
         social_BW = Imgs().social_BW
         footer = '''<div align="center">
-                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/tutorial/post_clonedb.jpg') +'''">
+                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), self.figure) +'''">
                       </div>
                       <div align="right">
                       <p align="right">
                       <b>'''+self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
                       </p>'''+ social_BW + '''</div>
                     </div>'''
-        return self.tr(txt_en, txt_pt) + footer
+        return self.tr(self.txt_en, self.txt_pt) + footer
 
 
     ORIGINALDB ='ORIGINALDB'

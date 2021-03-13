@@ -71,21 +71,23 @@ class ChangeEnconding(QgsProcessingAlgorithm):
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/postgis.png'))
 
+    figure = 'images/tutorial/post_encoding.jpg'
+    txt_en = '''This tool changes the encoding type of a .sql file. A new file will be created with the user-defined encoding.
+In some cases, this is a possible solution  to transfer data between different operating systems, for example from Windows to Linux, and vice versa.'''
+    txt_pt = '''Esta ferramenta realiza a troca do tipo de codificação de um arquivo <b>.sql</b>. Um novo arquivo será criado com a codificação definida pelo usuário.
+Em alguns casos, esse processo é uma possível solução para transferir dados entre diferentes sistemas operacionais, por exemplo de Window para Linux, e vice-versa.'''
+
     def shortHelpString(self):
-        txt_en = '''This tool changes the encoding type of a <b>.sql</b> file. A new file will be created with the user-defined encoding.
-In some cases, this process is necessary to make it possible to transfer data between different operating systems, for example from Window to Linux, and vice versa.'''
-        txt_pt = '''Esta ferramenta realizar a troca do tipo de codificação de um arquivo <b>.sql</b>. Um novo arquivo será criado com a codificação definida pelo usuário.
-Em alguns casos, esse processo é necessário para possibilitar  transferir dados entre diferentes sistemas operacionais, por exemplo de Window para Linux, e vice-versa.'''
         social_BW = Imgs().social_BW
         footer = '''<div align="center">
-                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/tutorial/post_encoding.jpg') +'''">
+                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), self.figure) +'''">
                       </div>
                       <div align="right">
                       <p align="right">
                       <b>'''+self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
                       </p>'''+ social_BW + '''</div>
                     </div>'''
-        return self.tr(txt_en, txt_pt) + footer
+        return self.tr(self.txt_en, self.txt_pt) + footer
 
 
     FILE ='FILE'

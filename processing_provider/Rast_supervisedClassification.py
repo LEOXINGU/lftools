@@ -91,19 +91,21 @@ class SupervisedClassification(QgsProcessingAlgorithm):
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/raster.png'))
 
+    txt_en = 'Performs the supervised classification of a raster layer with two or more bands.'
+    txt_pt = 'Realize a classificação supervisionada de camada raster com duas ou mais bandas.'
+    figure = 'images/tutorial/raster_classification.jpg'
+
     def shortHelpString(self):
-        txt_en = 'Performs the supervised classification of a raster layer with two or more bands.'
-        txt_pt = 'Realize a classificação supervisionada de camada raster com duas ou mais bandas.'
         social_BW = Imgs().social_BW
         footer = '''<div align="center">
-                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/tutorial/raster_classification.jpg') +'''">
+                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), self.figure) +'''">
                       </div>
                       <div align="right">
                       <p align="right">
                       <b>'''+self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
                       </p>'''+ social_BW + '''</div>
                     </div>'''
-        return self.tr(txt_en, txt_pt) + footer
+        return self.tr(self.txt_en, self.txt_pt) + footer
 
     RasterIN ='RasterIN'
     RasterOUT = 'RasterOUT'

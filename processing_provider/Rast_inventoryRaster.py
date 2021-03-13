@@ -91,19 +91,21 @@ class InventoryRaster(QgsProcessingAlgorithm):
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/raster.png'))
 
+    txt_en = 'Creates a vector layer with the inventory of raster files in a folder. The geometry type of the features of this layer can be Polygon (bounding box) or Point (centroid).'
+    txt_pt = 'Cria uma camada vetorial com o inventário de arquivos raster de uma pasta. O tipo de geometria das feições dessa camada pode ser Polígono (retângulo envolvente) ou Ponto (centroide).'
+    figure = 'images/tutorial/raster_inventory.jpg'
+
     def shortHelpString(self):
-        txt_en = 'Creates a vector layer with the inventory of raster files in a folder. The geometry type of the features of this layer can be Polygon (bounding box) or Point (centroid).'
-        txt_pt = 'Cria uma camada vetorial com o inventário de arquivos raster de uma pasta. O tipo de geometria das feições dessa camada pode ser Polígono (retângulo envolvente) ou Ponto (centroide).'
         social_BW = Imgs().social_BW
         footer = '''<div align="center">
-                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/tutorial/raster_inventory.jpg') +'''">
+                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), self.figure) +'''">
                       </div>
                       <div align="right">
                       <p align="right">
                       <b>'''+self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
                       </p>'''+ social_BW + '''</div>
                     </div>'''
-        return self.tr(txt_en, txt_pt) + footer
+        return self.tr(self.txt_en, self.txt_pt) + footer
 
 
     FOLDER ='FOLDER'

@@ -74,19 +74,21 @@ class DirectionalMerge(QgsProcessingAlgorithm):
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/vetor.png'))
 
+    txt_en = 'This algorithm merges lines that touch at their starting or ending points and has the same direction (given a tolerance in degrees). <p>For the attributes can be considered:</p>1 - merge lines that have the same attributes; or</li><li>2 - keep the attributes of the longest line.</li>'
+    txt_pt = 'Este algoritmo mescla linhas que se tocam nos seus pontos inicial ou final e tem a mesma direção (dada uma tolerância em graus).<p>Para os atributos pode ser considerado:</p><li>1 - mesclar linhas que tenham os mesmos atributos; ou</li><li>2 - manter os atributos da linha maior.</li>'
+    figure = 'images/tutorial/vect_directional_merge.jpg'
+
     def shortHelpString(self):
-        txt_en = 'This algorithm merges lines that touch at their starting or ending points and has the same direction (given a tolerance in degrees). <p>For the attributes can be considered:</p>1 - merge lines that have the same attributes; or</li><li>2 - keep the attributes of the longest line.</li>'
-        txt_pt = 'Este algoritmo mescla linhas que se tocam nos seus pontos inicial ou final e tem a mesma direção (dada uma tolerância em graus).<p>Para os atributos pode ser considerado:</p><li>1 - mesclar linhas que tenham os mesmos atributos; ou</li><li>2 - manter os atributos da linha maior.</li>'
         social_BW = Imgs().social_BW
         footer = '''<div align="center">
-                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/tutorial/vect_directional_merge.jpg') +'''">
+                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), self.figure) +'''">
                       </div>
                       <div align="right">
                       <p align="right">
                       <b>'''+self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
                       </p>'''+ social_BW + '''</div>
                     </div>'''
-        return self.tr(txt_en, txt_pt) + footer
+        return self.tr(self.txt_en, self.txt_pt) + footer
 
     LINES = 'LINES'
     TYPE = 'TYPE'
