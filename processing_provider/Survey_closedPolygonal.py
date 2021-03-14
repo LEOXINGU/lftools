@@ -57,7 +57,7 @@ class ClosedPolygonal(QgsProcessingAlgorithm):
         return 'planimetry'
 
     def displayName(self):
-        return self.tr('Closed Polygonal', 'Poligonal Fechada')
+        return self.tr('Closed polygonal', 'Poligonal fechada')
 
     def group(self):
         return self.tr('Survey', 'Agrimensura')

@@ -62,7 +62,7 @@ class LocalTangentPlane(QgsProcessingAlgorithm):
         return 'localtangentplane'
 
     def displayName(self):
-        return self.tr('Local Geodetic System Transform', 'Transformação para SGL')
+        return self.tr('Local Geodetic System transform', 'Transformação para SGL')
 
     def group(self):
         return self.tr('Survey', 'Agrimensura')

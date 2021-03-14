@@ -56,7 +56,7 @@ class Extent2UTMGrid(QgsProcessingAlgorithm):
 
     def displayName(self):
 
-        return self.tr('Extent to UTM Grids', 'Extensão para Molduras UTM')
+        return self.tr('Extent to UTM grids', 'Extensão para molduras UTM')
 
     def group(self):
 

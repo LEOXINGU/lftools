@@ -59,7 +59,7 @@ class Estimate3dCoord(QgsProcessingAlgorithm):
         return 'estimate3dcoord'
 
     def displayName(self):
-        return self.tr('Estimate 3D Coordinates', 'Estimar Coordenadas 3D')
+        return self.tr('Estimate 3D coordinates', 'Estimar coordenadas 3D')
 
     def group(self):
         return self.tr('Survey', 'Agrimensura')

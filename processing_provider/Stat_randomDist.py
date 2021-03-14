@@ -73,7 +73,7 @@ class RandomDist(QgsProcessingAlgorithm):
         return 'randomdist'
 
     def displayName(self):
-        return self.tr('Gaussian Random Points', 'Pontos Aleatórios Gaussiano')
+        return self.tr('Gaussian random points', 'Pontos aleatórios gaussiano')
 
     def tags(self):
         return self.tr('gaussian,random,distribution,normal,mean,variance').split(',')

@@ -71,7 +71,7 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
         return 'surveymarkdoc'
 
     def displayName(self):
-        return self.tr('Geodetic Landmark Informations', 'Monografia de Marco Geodésico')
+        return self.tr('Geodetic landmark informations', 'Monografia de marco geodésico')
 
     def group(self):
         return self.tr('Documents', 'Documentos')

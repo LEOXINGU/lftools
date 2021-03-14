@@ -77,7 +77,7 @@ class CompressJPEG(QgsProcessingAlgorithm):
         return 'compressjpeg'
 
     def displayName(self):
-        return self.tr('JPEG Compress', 'Compressão JPEG')
+        return self.tr('JPEG compress', 'Compressão JPEG')
 
     def group(self):
         return self.tr('Raster')
@@ -91,7 +91,7 @@ class CompressJPEG(QgsProcessingAlgorithm):
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/raster.png'))
 
-    txt_en = 'JPEG compression is a lossy method to reduce the raster file size (about to 10%). The degree of compression can be adjusted, allowing a selectable tradeoff between storage size and image quality.'
+    txt_en = 'JPEG compression is a lossy method to reduce the raster file size (about to 10%). The compression level can be adjusted, allowing a selectable tradeoff between storage size and image quality.'
     txt_pt = 'A compressão JPEG é um método "com perdas" para reduzir o tamanho de um arquivo raster (para aproximadamente 10%). O grau de compressão pode ser ajustado, permitindo um limiar entre o tamanho de armazenamento e a qualidade da imagem.'
     figure = 'images/tutorial/raster_jpeg_compress.jpg'
 

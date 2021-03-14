@@ -15,35 +15,35 @@
     <li>
       <a href="#cartography">Cartography</a>
       <ul>
-        <li><a href="#coordinates-to-utm-grid">Coordinates to UTM Grid</a></li>
+        <li><a href="#coordinates-to-utm-grid">Coordinates to UTM grid</a></li>
       </ul>
       <ul>
-        <li><a href="#extent-to-utm-grids">Extent to UTM Grids</a></li>
+        <li><a href="#extent-to-utm-grids">Extent to UTM grids</a></li>
       </ul>
       <ul>
-        <li><a href="#name-to-utm-grid">Name to UTM Grid</a></li>
+        <li><a href="#name-to-utm-grid">Name to UTM grid</a></li>
       </ul>
       </li><li>
       <a href="#documents">Documents</a>
       <ul>
-        <li><a href="#area-and-perimeter-report">Area and Perimeter Report</a></li>
+        <li><a href="#area-and-perimeter-report">Area and perimeter report</a></li>
       </ul>
       <ul>
-        <li><a href="#descriptive-memorial">Descriptive Memorial</a></li>
+        <li><a href="#descriptive-memorial">Descriptive memorial</a></li>
       </ul>
       <ul>
         <li><a href="#descriptive-table-of-vertices-and-sides">Descriptive table of vertices and sides</a></li>
       </ul>
       <ul>
-        <li><a href="#geodetic-landmark-informations">Geodetic Landmark Informations</a></li>
+        <li><a href="#geodetic-landmark-informations">Geodetic landmark informations</a></li>
       </ul>
       </li><li>
       <a href="#easy">Easy</a>
       <ul>
-        <li><a href="#coordinates-to-layer">Coordinates to Layer</a></li>
+        <li><a href="#measure-layers">Measure layers</a></li>
       </ul>
       <ul>
-        <li><a href="#measure-layers">Measure Layers</a></li>
+        <li><a href="#table-to-point-layer">Table to point layer</a></li>
       </ul>
       </li><li>
       <a href="#postgis">PostGIS</a>
@@ -60,7 +60,7 @@
         <li><a href="#delete-database">Delete database</a></li>
       </ul>
       <ul>
-        <li><a href="#import-raster">Import Raster</a></li>
+        <li><a href="#import-raster">Import raster</a></li>
       </ul>
       <ul>
         <li><a href="#rename-database">Rename database</a></li>
@@ -83,16 +83,16 @@
         <li><a href="#fill-with-patches">Fill with patches</a></li>
       </ul>
       <ul>
-        <li><a href="#jpeg-compress">JPEG Compress</a></li>
+        <li><a href="#jpeg-compress">JPEG compress</a></li>
       </ul>
       <ul>
-        <li><a href="#load-raster-by-location">Load Raster by Location</a></li>
+        <li><a href="#load-raster-by-location">Load raster by location</a></li>
       </ul>
       <ul>
         <li><a href="#mosaic-raster">Mosaic raster</a></li>
       </ul>
       <ul>
-        <li><a href="#rgb-composite">RGB Composite</a></li>
+        <li><a href="#rgb-composite">RGB composite</a></li>
       </ul>
       <ul>
         <li><a href="#raster-data-inventory">Raster data inventory</a></li>
@@ -109,35 +109,35 @@
       </li><li>
       <a href="#reambulation">Reambulation</a>
       <ul>
-        <li><a href="#photos-with-geotag">Photos with Geotag</a></li>
+        <li><a href="#photos-with-geotag">Photos with geotag</a></li>
       </ul>
       </li><li>
       <a href="#spatial-statistics">Spatial Statistics</a>
       <ul>
-        <li><a href="#confidence-ellipses">Confidence Ellipses</a></li>
+        <li><a href="#confidence-ellipses">Confidence ellipses</a></li>
       </ul>
       <ul>
-        <li><a href="#gaussian-random-points">Gaussian Random Points</a></li>
+        <li><a href="#gaussian-random-points">Gaussian random points</a></li>
       </ul>
       </li><li>
       <a href="#survey">Survey</a>
       <ul>
-        <li><a href="#2d-conformal-transformation">2D Conformal Transformation</a></li>
+        <li><a href="#2d-conformal-transformation">2D conformal transformation</a></li>
       </ul>
       <ul>
-        <li><a href="#azimuth-and-distance">Azimuth and Distance</a></li>
+        <li><a href="#azimuth-and-distance">Azimuth and distance</a></li>
       </ul>
       <ul>
-        <li><a href="#closed-polygonal">Closed Polygonal</a></li>
+        <li><a href="#closed-polygonal">Closed polygonal</a></li>
       </ul>
       <ul>
-        <li><a href="#estimate-3d-coordinates">Estimate 3D Coordinates</a></li>
+        <li><a href="#estimate-3d-coordinates">Estimate 3D coordinates</a></li>
       </ul>
       <ul>
-        <li><a href="#local-geodetic-system-transform">Local Geodetic System Transform</a></li>
+        <li><a href="#local-geodetic-system-transform">Local Geodetic System transform</a></li>
       </ul>
       <ul>
-        <li><a href="#traverse-adjustment">Traverse Adjustment</a></li>
+        <li><a href="#traverse-adjustment">Traverse adjustment</a></li>
       </ul>
       </li><li>
       <a href="#vector">Vector</a>
@@ -167,19 +167,19 @@
     <li>
       <a href="#agrimensura">Agrimensura</a>
       <ul>
-        <li><a href="#azimute-e-distância">Azimute e Distância</a></li>
+        <li><a href="#azimute-e-distância">Azimute e distância</a></li>
       </ul>
       <ul>
-        <li><a href="#estimar-coordenadas-3d">Estimar Coordenadas 3D</a></li>
+        <li><a href="#estimar-coordenadas-3d">Estimar coordenadas 3D</a></li>
       </ul>
       <ul>
-        <li><a href="#poligonal-enquadrada">Poligonal Enquadrada</a></li>
+        <li><a href="#poligonal-enquadrada">Poligonal enquadrada</a></li>
       </ul>
       <ul>
-        <li><a href="#poligonal-fechada">Poligonal Fechada</a></li>
+        <li><a href="#poligonal-fechada">Poligonal fechada</a></li>
       </ul>
       <ul>
-        <li><a href="#transformação-conforme-2d">Transformação Conforme 2D</a></li>
+        <li><a href="#transformação-conforme-2d">Transformação conforme 2D</a></li>
       </ul>
       <ul>
         <li><a href="#transformação-para-sgl">Transformação para SGL</a></li>
@@ -187,43 +187,43 @@
       </li><li>
       <a href="#cartografia">Cartografia</a>
       <ul>
-        <li><a href="#coordenadas-para-moldura-utm">Coordenadas para Moldura UTM</a></li>
+        <li><a href="#coordenadas-para-moldura-utm">Coordenadas para moldura UTM</a></li>
       </ul>
       <ul>
-        <li><a href="#extensão-para-molduras-utm">Extensão para Molduras UTM</a></li>
+        <li><a href="#extensão-para-molduras-utm">Extensão para molduras UTM</a></li>
       </ul>
       <ul>
-        <li><a href="#nome-para-moldura-utm">Nome para Moldura UTM</a></li>
+        <li><a href="#nome-para-moldura-utm">Nome para moldura UTM</a></li>
       </ul>
       </li><li>
       <a href="#documentos">Documentos</a>
       <ul>
-        <li><a href="#memorial-descritivo">Memorial Descritivo</a></li>
+        <li><a href="#memorial-descritivo">Memorial descritivo</a></li>
       </ul>
       <ul>
-        <li><a href="#memorial-sintético">Memorial Sintético</a></li>
+        <li><a href="#memorial-sintético">Memorial sintético</a></li>
       </ul>
       <ul>
-        <li><a href="#monografia-de-marco-geodésico">Monografia de Marco Geodésico</a></li>
+        <li><a href="#monografia-de-marco-geodésico">Monografia de marco geodésico</a></li>
       </ul>
       <ul>
-        <li><a href="#planilha-de-área-e-perímetro">Planilha de Área e Perímetro</a></li>
+        <li><a href="#planilha-de-área-e-perímetro">Planilha de área e perímetro</a></li>
       </ul>
       </li><li>
       <a href="#estatística-espacial">Estatística Espacial</a>
       <ul>
-        <li><a href="#elipses-de-confiança">Elipses de Confiança</a></li>
+        <li><a href="#elipses-de-confiança">Elipses de confiança</a></li>
       </ul>
       <ul>
-        <li><a href="#pontos-aleatórios-gaussiano">Pontos Aleatórios Gaussiano</a></li>
+        <li><a href="#pontos-aleatórios-gaussiano">Pontos aleatórios gaussiano</a></li>
       </ul>
       </li><li>
       <a href="#mão-na-roda">Mão na Roda</a>
       <ul>
-        <li><a href="#coordenadas-para-camada">Coordenadas para Camada</a></li>
+        <li><a href="#medir-camadas">Medir camadas</a></li>
       </ul>
       <ul>
-        <li><a href="#medir-camadas">Medir Camadas</a></li>
+        <li><a href="#planilha-para-camada-de-pontos">Planilha para camada de pontos</a></li>
       </ul>
       </li><li>
       <a href="#postgis">PostGIS</a>
@@ -237,7 +237,7 @@
         <li><a href="#deletar-bd">Deletar BD</a></li>
       </ul>
       <ul>
-        <li><a href="#importar-raster">Importar Raster</a></li>
+        <li><a href="#importar-raster">Importar raster</a></li>
       </ul>
       <ul>
         <li><a href="#renomear-bd">Renomear BD</a></li>
@@ -289,7 +289,7 @@
       </li><li>
       <a href="#reambulação">Reambulação</a>
       <ul>
-        <li><a href="#fotos-com-geotag">Fotos com Geotag</a></li>
+        <li><a href="#fotos-com-geotag">Fotos com geotag</a></li>
       </ul>
       </li><li>
       <a href="#vetor">Vetor</a>
@@ -318,7 +318,7 @@
 ## Cartography
 
 
-### Coordinates to UTM Grid
+### Coordinates to UTM grid
 This algorithm returns the frame related to a scale of the Brazilian Mapping System. The generated frame, which is a polygon, is calculated from a Point defined by the user.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
@@ -330,7 +330,7 @@ This algorithm returns the frame related to a scale of the Brazilian Mapping Sys
 </table>
 </div>
 
-### Extent to UTM Grids
+### Extent to UTM grids
 This algorithm returns the polygons correspondent to the <b>frames</b> related to a scale of the Brazilian Mapping System from a specific <b>extent</b> definied by the user.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
@@ -342,7 +342,7 @@ This algorithm returns the polygons correspondent to the <b>frames</b> related t
 </table>
 </div>
 
-### Name to UTM Grid
+### Name to UTM grid
 This algorithm returns the polygon correspondent to the frame related to a scale of the Brazilian Mapping System based on the Map Index (MI). Example: MI = 1214-1
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
@@ -359,7 +359,7 @@ This algorithm returns the polygon correspondent to the frame related to a scale
 ## Documents
 
 
-### Area and Perimeter Report
+### Area and perimeter report
 This tool generates a Report for the Analytical Calculation of Area, Azimuths, Polygon Sides, UTM Projection and Geodetic Coordinates of a Property.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
@@ -371,7 +371,7 @@ This tool generates a Report for the Analytical Calculation of Area, Azimuths, P
 </table>
 </div>
 
-### Descriptive Memorial
+### Descriptive memorial
 Elaboration of Descriptive Memorials based on vector layers that define a property.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
@@ -395,7 +395,7 @@ This tool generates the Vertices and Sides Descriptive Table , also known as Syn
 </table>
 </div>
 
-### Geodetic Landmark Informations
+### Geodetic landmark informations
 This tool generates monograph(s) of geodetic landmarks automatically from the "pto_ref_geod_topo_p" layer.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
@@ -412,25 +412,25 @@ This tool generates monograph(s) of geodetic landmarks automatically from the "p
 ## Easy
 
 
-### Coordinates to Layer
-Generates a <b>point layer</b> from a coordinate table, whether it comes from a Microsoft <b>Excel</b> spreadsheet, Open Document Spreadsheet (ODS), or even attributes from another layer.
-<div align="center">
-<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
-  <tbody>
-    <tr>
-      <td><img src="images/tutorial/easy_coord_layer.jpg"></td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-### Measure Layers
+### Measure layers
 This tool calculates the line feature's lengths and polygon feature's perimeter and area in virtual fields for all vector layers.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
       <td><img src="images/tutorial/easy_measure_layer.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Table to point layer
+Generates a <b>point layer</b> from a coordinate table, whether it comes from a Microsoft <b>Excel</b> spreadsheet (.xls), Open Document Spreadsheet (.ods), or even attributes from another layer.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/easy_coord_layer.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -466,7 +466,7 @@ This tool changes the encoding type of a .sql file. A new file will be created w
 </div>
 
 ### Clone database
-This tool allows you to clone any PostgreSQL database. From a model database, another database that is exactly the same (schema and instances) is generated with a new name defined by the operator.</br>Note: To create more than one "clone", the new bank names must be filled in separated by a "comma".
+This tool allows the user to clone any PostgreSQL database. From a model database, another database that has exactly the same (schema and instances) is generated with a new name defined by the operator.</br>Note: To create more than one "clone", the new database names must be filled and separated by "comma".
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
@@ -478,7 +478,7 @@ This tool allows you to clone any PostgreSQL database. From a model database, an
 </div>
 
 ### Delete database
-This tool allows you to delete / drop any PostgreSQL database.</br>Notes:</br>- To perform this operation, it is necessary that the database is disconnected, that is, it is not open in any software (PgAdmin, QGIS, etc.).</br>- To delete more than one database, the names must be filled in separated by a "comma".</br><p style="color:red;">Attention: This operation is irreversible, so be sure when performing it!</p>
+This tool allows you to delete / drop any PostgreSQL database.</br>Notes:</br>- To run this operation, the database must be disconnected. This means, that it must not be opened in any software (PgAdmin, QGIS, etc.).</br>- To delete more than one database, the names must be filled and separated by "comma".</br><p style="color:red;">Attention: This operation is irreversible, so be sure before running it!</p>
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
@@ -489,7 +489,7 @@ This tool allows you to delete / drop any PostgreSQL database.</br>Notes:</br>- 
 </table>
 </div>
 
-### Import Raster
+### Import raster
 This tool allows you to load a raster layer into a PostGIS database.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
@@ -502,7 +502,7 @@ This tool allows you to load a raster layer into a PostGIS database.
 </div>
 
 ### Rename database
-This tool allows you to rename a PostgreSQL database.</br>Note: To perform this operation, it is necessary that the database is disconnected, that is, it is not open in any software (PgAdmin, QGIS, etc.).
+This tool allows you to rename a PostgreSQL database.</br>Note: To run this operation, the database must be disconnected. This means, that it must not be opened in any software (PgAdmin, QGIS, etc.).
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
@@ -514,7 +514,7 @@ This tool allows you to rename a PostgreSQL database.</br>Note: To perform this 
 </div>
 
 ### Restore database
-This tool allows you to <b>restore</b>, that is, import a database on a PostgreSQL server, from a backup file in the "<b>.sql</b>" format.
+This tool allows you to restore a database content by importing all the backup information in a ".sql" file into a PostgreSQL server.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
@@ -578,8 +578,8 @@ Fills Raster null pixels (no data) with data obtained from other smaller raster 
 </table>
 </div>
 
-### JPEG Compress
-JPEG compression is a lossy method to reduce the raster file size (about to 10%). The degree of compression can be adjusted, allowing a selectable tradeoff between storage size and image quality.
+### JPEG compress
+JPEG compression is a lossy method to reduce the raster file size (about to 10%). The compression level can be adjusted, allowing a selectable tradeoff between storage size and image quality.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
@@ -590,7 +590,7 @@ JPEG compression is a lossy method to reduce the raster file size (about to 10%)
 </table>
 </div>
 
-### Load Raster by Location
+### Load raster by location
 Loads a set of raster files that intersect the geometries of an input vector layer.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
@@ -614,7 +614,7 @@ Creates raster mosaic: a combination or merge of two or more images.
 </table>
 </div>
 
-### RGB Composite
+### RGB composite
 Combine three image bands into one picture by display each band as either Red, Green or Blue.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
@@ -679,7 +679,7 @@ Performs the supervised classification of a raster layer with two or more bands.
 ## Reambulation
 
 
-### Photos with Geotag
+### Photos with geotag
 Imports photos with geotag to a Point Layer.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
@@ -696,7 +696,7 @@ Imports photos with geotag to a Point Layer.
 ## Spatial Statistics
 
 
-### Confidence Ellipses
+### Confidence ellipses
 Creates ellipses based on the covariance matrix to summarize the spatial characteristics of point type geographic features: central tendency, dispersion, and directional trends.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
@@ -708,7 +708,7 @@ Creates ellipses based on the covariance matrix to summarize the spatial charact
 </table>
 </div>
 
-### Gaussian Random Points
+### Gaussian random points
 Generate gaussian (normal) random points in 2D space with a given mean position (X0, Y0), standard deviation for X and Y, and rotation angle.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
@@ -725,7 +725,7 @@ Generate gaussian (normal) random points in 2D space with a given mean position 
 ## Survey
 
 
-### 2D Conformal Transformation
+### 2D conformal transformation
 Two-dimensional conformal coordinate transformation, also known as the four-parameter similarity transformation or Helmert 2D, has the characteristic that true shape is retained after transformation.</br>It is typically used in surveying when converting separate surveys into a common reference coordinate system.</br>This transformation involves: Scaling, Rotation and Translations.</br>
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
@@ -737,7 +737,7 @@ Two-dimensional conformal coordinate transformation, also known as the four-para
 </table>
 </div>
 
-### Azimuth and Distance
+### Azimuth and distance
 Calculation of points or line from a set of azimuths and distances.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
@@ -749,7 +749,7 @@ Calculation of points or line from a set of azimuths and distances.
 </table>
 </div>
 
-### Closed Polygonal
+### Closed polygonal
 Calculates the adjusted coordinates from angles and horizontal distances of a Closed Polygonal.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
@@ -761,7 +761,7 @@ Calculates the adjusted coordinates from angles and horizontal distances of a Cl
 </table>
 </div>
 
-### Estimate 3D Coordinates
+### Estimate 3D coordinates
 This tool calculates the coordinates (X, Y, Z) of a point from azimuth and zenith angle measurements observed from two or more stations with known coordinates using the Foward Intersection Method adjusted by the Minimum Distances.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
@@ -773,7 +773,7 @@ This tool calculates the coordinates (X, Y, Z) of a point from azimuth and zenit
 </table>
 </div>
 
-### Local Geodetic System Transform
+### Local Geodetic System transform
 </br>This algorithm transforms coordinates between the following reference systems:</br>- geodetic <b>(λ, ϕ, h)</b>;</br>- geocentric or ECEF <b>(X, Y, Z)</b>; and</br>- topocentric in a local tangent plane <b>(E, N, U)</b>.</br>Default values for origin coordinates can be applied to Recife / Brazil.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
@@ -785,7 +785,7 @@ This tool calculates the coordinates (X, Y, Z) of a point from azimuth and zenit
 </table>
 </div>
 
-### Traverse Adjustment
+### Traverse adjustment
 This algorithm performs the traverse adjustments of a framed polygonal by least squares method, where  the distances, angles, and directions observations are adjusted simultaneously, providing the most probable values for the given data set.  Futhermore, the observations can be rigorously weighted based on their estimated errors and adjusted accordingly.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
@@ -870,7 +870,7 @@ This script fills a certain attribute of the features of a layer of points accor
 ## Agrimensura
 
 
-### Azimute e Distância
+### Azimute e distância
 Cálculo de pontos ou linha a partir de um conjunto de azimutes e distâncias.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
@@ -882,7 +882,7 @@ Cálculo de pontos ou linha a partir de um conjunto de azimutes e distâncias.
 </table>
 </div>
 
-### Estimar Coordenadas 3D
+### Estimar coordenadas 3D
 Esta ferramenta calcula as coordenadas (X,Y,Z) de um ponto a partir de medições de azimute e ângulo zenital observados de duas ou mais estações de coordenadas conhecidas utilizando o Método de Interseção à Vante ajustado pelas Distâncias Mínimas.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
@@ -894,7 +894,7 @@ Esta ferramenta calcula as coordenadas (X,Y,Z) de um ponto a partir de mediçõe
 </table>
 </div>
 
-### Poligonal Enquadrada
+### Poligonal enquadrada
 Este algoritmo realiza o ajustamento de poligonal enquadrada pelo método dos mínimos quadrados, onde as observações de distâncias, ângulos e direções são ajustadas simultaneamente, fornecendo os valores mais prováveis para o conjunto de dados. Além disso, as observações podem ser rigorosamente ponderadas considerando os erros estimados e ajustados.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
@@ -906,7 +906,7 @@ Este algoritmo realiza o ajustamento de poligonal enquadrada pelo método dos m�
 </table>
 </div>
 
-### Poligonal Fechada
+### Poligonal fechada
 Cálculo das coordenadas ajustadas a partir de medições de ângulos e distâncias de uma poligonal fechada.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
@@ -918,7 +918,7 @@ Cálculo das coordenadas ajustadas a partir de medições de ângulos e distânc
 </table>
 </div>
 
-### Transformação Conforme 2D
+### Transformação conforme 2D
 A transformação Conforme, também conhecida como transformação de similaridade de quatro parâmetros ou Helmert 2D, tem a característica de manter a forma (configuração) verdadeira da feição após a transformação.</br>É normalmente utilizada para o correto georreferenciamento de levantamentos topográficos com coordenadas arbitrárias.</br>Esta transformação envolve: Escala, Rotação e Translação.</br>
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
@@ -947,7 +947,7 @@ Este algoritmo transforma coordenadas entre os seguintes sistemas de referência
 ## Cartografia
 
 
-### Coordenadas para Moldura UTM
+### Coordenadas para moldura UTM
 Este algoritmo retorna o polígono correspondente à <b>moldura</b> relativa a uma escala do <b>Mapeamento Sistemático Brasileiro</b>. Esta moldura é calculada a partir das coordenadas de um <b>Ponto</b> definido pelo usuário.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
@@ -959,7 +959,7 @@ Este algoritmo retorna o polígono correspondente à <b>moldura</b> relativa a u
 </table>
 </div>
 
-### Extensão para Molduras UTM
+### Extensão para molduras UTM
 Este algoritmo retorna os polígonos correspondentes às molduras relacionadas a uma escala do Mapeamento Sistemático Brasileiro para uma extensão específica definida pelo usuário.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
@@ -971,7 +971,7 @@ Este algoritmo retorna os polígonos correspondentes às molduras relacionadas a
 </table>
 </div>
 
-### Nome para Moldura UTM
+### Nome para moldura UTM
 Este algoritmo retorna o polígono correspondente à <b>moldura</b> relativa a uma escala do <b>Mapeamento Sistemático Brasileiro</b>. Esta moldura é calculada a partir do Índice de Nomenclatura <b>INOM</b> ou Mapa Índice <b>MI</b> válido, que deve ser dado pelo usuário.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
@@ -988,7 +988,7 @@ Este algoritmo retorna o polígono correspondente à <b>moldura</b> relativa a u
 ## Documentos
 
 
-### Memorial Descritivo
+### Memorial descritivo
 Elaboração de Memorial Descritivo a partir de camadas vetorias que definem uma propriedade.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
@@ -1000,7 +1000,7 @@ Elaboração de Memorial Descritivo a partir de camadas vetorias que definem uma
 </table>
 </div>
 
-### Memorial Sintético
+### Memorial sintético
 Esta ferramenta gera a Tabela Descriva de Vértices e Lados, também conhecida como Memorial Descritivo Sintético, a partir de uma camada de pontos com os atributos de código e ordem (sequência) dos pontos.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
@@ -1012,7 +1012,7 @@ Esta ferramenta gera a Tabela Descriva de Vértices e Lados, também conhecida c
 </table>
 </div>
 
-### Monografia de Marco Geodésico
+### Monografia de marco geodésico
 Esta ferramenta gera monografia(s) de marcos geodésicos de forma automática a partir da camada "pto_ref_geod_topo_p".
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
@@ -1024,7 +1024,7 @@ Esta ferramenta gera monografia(s) de marcos geodésicos de forma automática a 
 </table>
 </div>
 
-### Planilha de Área e Perímetro
+### Planilha de área e perímetro
 Esta gera o Relatório de Cálculo Analítico de Área, Azimutes, Lados, Coordenadas Planas e Geodésicas de um Imóvel.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
@@ -1041,7 +1041,7 @@ Esta gera o Relatório de Cálculo Analítico de Área, Azimutes, Lados, Coorden
 ## Estatística Espacial
 
 
-### Elipses de Confiança
+### Elipses de confiança
 Cria elipses a partir da matriz variância-covariância para resumir as características espaciais de feções geográficas do tipo ponto: tendência central, dispersão e tendências direcionais.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
@@ -1053,7 +1053,7 @@ Cria elipses a partir da matriz variância-covariância para resumir as caracter
 </table>
 </div>
 
-### Pontos Aleatórios Gaussiano
+### Pontos aleatórios gaussiano
 Gera pontos aleatórios no espaço 2D a partir de um ponto central (X0, Y0), desvios-padrões para X e Y, e ângulo de rotação.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
@@ -1070,25 +1070,25 @@ Gera pontos aleatórios no espaço 2D a partir de um ponto central (X0, Y0), des
 ## Mão na Roda
 
 
-### Coordenadas para Camada
-Geração de uma camada de pontos a partir das coordenadas preenchidas em uma planilha do Excel ou Open Document Spreadsheet (ODS), ou até mesmo, a partir dos atributos de outra camada.
-<div align="center">
-<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
-  <tbody>
-    <tr>
-      <td><img src="images/tutorial/easy_coord_layer.jpg"></td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-### Medir Camadas
+### Medir camadas
 Esta ferramenta calcula em campos virtuais os comprimentos de feições do tipo linha e o perímetro e área de feições do tipo polígono para todas as camadas.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
       <td><img src="images/tutorial/easy_measure_layer.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Planilha para camada de pontos
+Geração de uma camada de pontos a partir das coordenadas preenchidas em uma planilha do Excel (.xls) ou Open Document Spreadsheet (.ods), ou até mesmo, a partir dos atributos de outra camada.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/easy_coord_layer.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1135,7 +1135,7 @@ Esta ferramenta permite apagar (delete/drop) qualquer banco do PostgreSQL.</br>O
 </table>
 </div>
 
-### Importar Raster
+### Importar raster
 Esta ferramenta permite carregar uma camada raster para dentro de um banco de dados PostGIS.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
@@ -1337,7 +1337,7 @@ Esta ferramenta remove a 4ª banda (banda alfa), transferindo a informação de 
 ## Reambulação
 
 
-### Fotos com Geotag
+### Fotos com geotag
 Importa fotos com geotag para uma camada de pontos.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
@@ -1413,3 +1413,5 @@ Este script preenche um determinado atributo das feições de uma camada de pont
   </tbody>
 </table>
 </div>
+
+

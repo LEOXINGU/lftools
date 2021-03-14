@@ -71,7 +71,7 @@ class Restore(QgsProcessingAlgorithm):
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/postgis.png'))
 
-    txt_en = 'This tool allows you to <b>restore</b>, that is, import a database on a PostgreSQL server, from a backup file in the "<b>.sql</b>" format.'
+    txt_en = 'This tool allows you to restore a database content by importing all the backup information in a ".sql" file into a PostgreSQL server.'
     txt_pt = 'Esta ferramenta permite <b>restaurar</b>, ou seja, importar um banco de dados para um servidor PostgreSQL, a partir de um arquivo de backup no formato "<b>.sql</b>".'
     figure = 'images/tutorial/post_restore.jpg'
 

@@ -50,7 +50,7 @@ class Coord2UTMGrid(QgsProcessingAlgorithm):
 
     def displayName(self):
 
-        return self.tr('Coordinates to UTM Grid', 'Coordenadas para Moldura UTM')
+        return self.tr('Coordinates to UTM grid', 'Coordenadas para moldura UTM')
 
     def group(self):
 

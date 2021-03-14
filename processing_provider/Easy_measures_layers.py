@@ -48,7 +48,7 @@ class MeasureLayers(QgsProcessingAlgorithm):
         return 'measure_layers'
 
     def displayName(self):
-        return self.tr('Measure Layers', 'Medir Camadas')
+        return self.tr('Measure layers', 'Medir camadas')
 
     def group(self):
         return self.tr('Easy', 'Mão na Roda')

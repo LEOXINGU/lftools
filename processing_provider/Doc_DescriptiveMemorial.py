@@ -72,7 +72,7 @@ class DescriptiveMemorial(QgisAlgorithm):
         return 'descriptivememorial'
 
     def displayName(self):
-        return self.tr('Descriptive Memorial', 'Memorial Descritivo')
+        return self.tr('Descriptive memorial', 'Memorial descritivo')
 
     def group(self):
         return self.tr('Documents', 'Documentos')

@@ -74,9 +74,9 @@ class DeleteDB(QgsProcessingAlgorithm):
 
     txt_en = '''This tool allows you to delete / drop any PostgreSQL database.
 Notes:
-- To perform this operation, it is necessary that the database is disconnected, that is, it is not open in any software (PgAdmin, QGIS, etc.).
-- To delete more than one database, the names must be filled in separated by a "comma".
-<p style="color:red;">Attention: This operation is irreversible, so be sure when performing it!</p>'''
+- To run this operation, the database must be disconnected. This means, that it must not be opened in any software (PgAdmin, QGIS, etc.).
+- To delete more than one database, the names must be filled and separated by "comma".
+<p style="color:red;">Attention: This operation is irreversible, so be sure before running it!</p>'''
     txt_pt = """Esta ferramenta permite apagar (delete/drop) qualquer banco do PostgreSQL.
 Obs.:
 - Para realizar esta operação, é necessário que o banco esteja desconectado, ou seja, não esteja aberto em nenhum software (PgAdmin, QGIS, etc).

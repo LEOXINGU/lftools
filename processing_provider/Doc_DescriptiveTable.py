@@ -69,7 +69,7 @@ class DescriptiveTable(QgsProcessingAlgorithm):
         return 'descriptivetable'
 
     def displayName(self):
-        return self.tr('Descriptive table of vertices and sides', 'Memorial Sintético')
+        return self.tr('Descriptive table of vertices and sides', 'Memorial sintético')
 
     def group(self):
         return self.tr('Documents', 'Documentos')

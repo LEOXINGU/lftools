@@ -73,7 +73,7 @@ class Bands2RGB(QgsProcessingAlgorithm):
         return 'bands2rgb'
 
     def displayName(self):
-        return self.tr('RGB Composite', 'Composição RGB')
+        return self.tr('RGB composite', 'Composição RGB')
 
     def group(self):
         return self.tr('Raster')

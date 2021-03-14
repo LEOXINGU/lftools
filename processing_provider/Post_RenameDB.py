@@ -73,7 +73,7 @@ class RenameDB(QgsProcessingAlgorithm):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/postgis.png'))
 
     txt_en = '''This tool allows you to rename a PostgreSQL database.
-Note: To perform this operation, it is necessary that the database is disconnected, that is, it is not open in any software (PgAdmin, QGIS, etc.).'''
+Note: To run this operation, the database must be disconnected. This means, that it must not be opened in any software (PgAdmin, QGIS, etc.).'''
     txt_pt = """Esta ferramenta permite renomear um banco de dados do PostgreSQL.
 Nota: Para realizar esta operação, é necessário que o banco de dados esteja desconectado, ou seja, não esteja aberto em nenhum software (PgAdmin, QGIS, etc.)."""
     figure = 'images/tutorial/post_renamedb.jpg'

@@ -49,7 +49,7 @@ class AzimuthDistance(QgsProcessingAlgorithm):
         return 'azimuthdistance'
 
     def displayName(self):
-        return self.tr('Azimuth and Distance', 'Azimute e Distância')
+        return self.tr('Azimuth and distance', 'Azimute e distância')
 
     def group(self):
         return self.tr('Survey', 'Agrimensura')

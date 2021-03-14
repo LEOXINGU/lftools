@@ -69,7 +69,7 @@ class ImportPhotos(QgsProcessingAlgorithm):
         return 'importphotos'
 
     def displayName(self):
-        return self.tr('Photos with Geotag', 'Fotos com Geotag')
+        return self.tr('Photos with geotag', 'Fotos com geotag')
 
     def group(self):
         return self.tr('Reambulation', 'Reambulação')

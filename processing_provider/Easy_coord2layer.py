@@ -54,7 +54,7 @@ class CoordinatesToLayer(QgsProcessingAlgorithm):
         return 'coord2layer'
 
     def displayName(self):
-        return self.tr('Coordinates to Layer', 'Coordenadas para Camada')
+        return self.tr('Table to point layer', 'Planilha para camada de pontos')
 
     def group(self):
         return self.tr('Easy', 'Mão na Roda')
@@ -63,13 +63,13 @@ class CoordinatesToLayer(QgsProcessingAlgorithm):
         return 'easy'
 
     def tags(self):
-        return self.tr('easy,coordinate,layer,spreadsheet,excel,calc,csv,import,points').split(',')
+        return self.tr('easy,coordinate,table,layer,spreadsheet,excel,calc,csv,import,points').split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/easy.png'))
 
-    txt_en = 'Generates a <b>point layer</b> from a coordinate table, whether it comes from a Microsoft <b>Excel</b> spreadsheet, Open Document Spreadsheet (ODS), or even attributes from another layer.'
-    txt_pt = 'Geração de uma camada de pontos a partir das coordenadas preenchidas em uma planilha do Excel ou Open Document Spreadsheet (ODS), ou até mesmo, a partir dos atributos de outra camada.'
+    txt_en = 'Generates a <b>point layer</b> from a coordinate table, whether it comes from a Microsoft <b>Excel</b> spreadsheet (.xls), Open Document Spreadsheet (.ods), or even attributes from another layer.'
+    txt_pt = 'Geração de uma camada de pontos a partir das coordenadas preenchidas em uma planilha do Excel (.xls) ou Open Document Spreadsheet (.ods), ou até mesmo, a partir dos atributos de outra camada.'
     figure = 'images/tutorial/easy_coord_layer.jpg'
 
     def shortHelpString(self):

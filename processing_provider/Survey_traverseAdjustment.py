@@ -81,7 +81,7 @@ class TraverseAdjustment(QgsProcessingAlgorithm):
         return 'traverseadjustment'
 
     def displayName(self):
-        return self.tr('Traverse Adjustment', 'Poligonal Enquadrada')
+        return self.tr('Traverse adjustment', 'Poligonal enquadrada')
 
     def group(self):
         return self.tr('Survey', 'Agrimensura')

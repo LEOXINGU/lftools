@@ -58,7 +58,7 @@ class ImportRaster(QgsProcessingAlgorithm):
         return 'importraster'
 
     def displayName(self):
-        return self.tr('Import Raster', 'Importar Raster')
+        return self.tr('Import raster', 'Importar raster')
 
     def group(self):
         return self.tr('PostGIS')

@@ -77,7 +77,7 @@ class LoadRasterByLocation(QgsProcessingAlgorithm):
         return 'loadrasterbylocation'
 
     def displayName(self):
-        return self.tr('Load Raster by Location', 'Carregar raster pela localização')
+        return self.tr('Load raster by location', 'Carregar raster pela localização')
 
     def group(self):
         return self.tr('Raster')

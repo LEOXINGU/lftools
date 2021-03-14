@@ -73,7 +73,7 @@ class ConfidenceEllipse(QgsProcessingAlgorithm):
         return 'confidenceellipse'
 
     def displayName(self):
-        return self.tr('Confidence Ellipses', 'Elipses de Confiança')
+        return self.tr('Confidence ellipses', 'Elipses de confiança')
 
     def group(self):
         return self.tr('Spatial Statistics', 'Estatística Espacial')

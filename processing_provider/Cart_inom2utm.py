@@ -54,7 +54,7 @@ class Inom2utmGrid(QgsProcessingAlgorithm):
 
     def displayName(self):
 
-        return self.tr('Name to UTM Grid', 'Nome para Moldura UTM')
+        return self.tr('Name to UTM grid', 'Nome para moldura UTM')
 
     def group(self):
 
