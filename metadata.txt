@@ -6,7 +6,7 @@
 name=LF Tools
 qgisMinimumVersion=3.10
 description=Tools for cartographic production, surveying, digital image processing and spatial analysis.
-version=1.0
+version=1.0.1
 author=Leandro Franca
 email=geoleandro.franca@gmail.com
 
@@ -21,12 +21,13 @@ repository=https://github.com/LEOXINGU/lftools
 hasProcessingProvider=yes
 # Uncomment the following line and add your changelog:
 # changelog=
-	0.1   - Initial version
+	1.0.1 - Improvement in tools' translation and description.
+	1.0   - Initial version
 # Tags are comma separated with spaces allowed
 tags=cartography, survey, topography, raster, postgis, processing, statistics, reambulation, brazil
 
 homepage=https://github.com/LEOXINGU/lftools
-category=Cartography
+category=cartography
 icon=images/lftoos_logo.png
 # experimental flag
 experimental=True
