@@ -77,7 +77,7 @@ class CompressJPEG(QgsProcessingAlgorithm):
         return 'compressjpeg'
 
     def displayName(self):
-        return self.tr('JPEG compress', 'Compressão JPEG')
+        return self.tr('JPEG compression', 'Compressão JPEG')
 
     def group(self):
         return self.tr('Raster')
