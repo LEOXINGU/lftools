@@ -29,13 +29,13 @@
         <li><a href="#area-and-perimeter-report">Area and perimeter report</a></li>
       </ul>
       <ul>
-        <li><a href="#descriptive-memorial">Descriptive memorial</a></li>
+        <li><a href="#deed-description">Deed description</a></li>
       </ul>
       <ul>
-        <li><a href="#descriptive-table-of-vertices-and-sides">Descriptive table of vertices and sides</a></li>
+        <li><a href="#geodetic-mark-report">Geodetic mark report</a></li>
       </ul>
       <ul>
-        <li><a href="#geodetic-landmark-informations">Geodetic landmark informations</a></li>
+        <li><a href="#synthetic-deed-description">Synthetic deed description</a></li>
       </ul>
       </li><li>
       <a href="#easy">Easy</a>
@@ -83,7 +83,7 @@
         <li><a href="#fill-with-patches">Fill with patches</a></li>
       </ul>
       <ul>
-        <li><a href="#jpeg-compress">JPEG compress</a></li>
+        <li><a href="#jpeg-compression">JPEG compression</a></li>
       </ul>
       <ul>
         <li><a href="#load-raster-by-location">Load raster by location</a></li>
@@ -371,8 +371,8 @@ This tool generates a Report for the Analytical Calculation of Area, Azimuths, P
 </table>
 </div>
 
-### Descriptive memorial
-Elaboration of Descriptive Memorials based on vector layers that define a property.
+### Deed description
+Elaboration of Deed Description based on vector layers that define a property.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
@@ -383,25 +383,25 @@ Elaboration of Descriptive Memorials based on vector layers that define a proper
 </table>
 </div>
 
-### Descriptive table of vertices and sides
-This tool generates the Vertices and Sides Descriptive Table , also known as Synthetic Descriptive Memorial, based on the attributes, sequence and code, in the point layer's attribute table.
-<div align="center">
-<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
-  <tbody>
-    <tr>
-      <td><img src="images/tutorial/doc_descriptive_table.jpg"></td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-### Geodetic landmark informations
-This tool generates monograph(s) of geodetic landmarks automatically from the "pto_ref_geod_topo_p" layer.
+### Geodetic mark report
+This tool generates report(s) with the informations about a geodetic landmarks automatically from the "reference_point_p" layer.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
       <td><img src="images/tutorial/doc_mark.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Synthetic deed description
+This tool generates the Vertices and Sides Descriptive Table, also known as Synthetic Deed Description, based on the attributes, sequence and code, in the point layer's attribute table.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/doc_descriptive_table.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -578,7 +578,7 @@ Fills Raster null pixels (no data) with data obtained from other smaller raster 
 </table>
 </div>
 
-### JPEG compress
+### JPEG compression
 JPEG compression is a lossy method to reduce the raster file size (about to 10%). The compression level can be adjusted, allowing a selectable tradeoff between storage size and image quality.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
