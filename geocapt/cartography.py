@@ -72,6 +72,17 @@ def MeridianConvergence(lon, lat, src):
     return c
 
 
+def ScaleFactor(lon, lat):
+    # Calculo do Fuso
+    fuso = round((183+lon)/6.0)
+    # Calculo do Meridiano Central
+    MC = 6*fuso-183
+    kappaZero = 0.9996 # Fator de distorcao inicial
+    b = math.cos(math.radians(lat))*math.sin(math.radians(lon - MC))
+    k = kappaZero/math.sqrt(1 - b*b)
+    return k
+
+
 def SRC_Projeto(output_type):
     a = QgsProject.instance()
     b = a.crs()
@@ -79,7 +90,7 @@ def SRC_Projeto(output_type):
         return b.authid()
     else:
         return b.description()
-        
+
 
 def ChartSize(geom, zone, hemisf, escala):
     # Transformar Coordenadas de Geográficas para o sistema UTM
