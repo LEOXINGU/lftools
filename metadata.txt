@@ -7,7 +7,7 @@ name=LF Tools
 qgisMinimumVersion=3.10
 description=Tools for cartographic production, surveying, digital image processing and spatial analysis.
 version=1.0.1
-author=Leandro Franca
+author=Leandro França
 email=geoleandro.franca@gmail.com
 
 about=Processing Provider plugin with tools for cartographic production, surveying, database management, digital image processing and scientific spatial analysis.
@@ -21,6 +21,7 @@ repository=https://github.com/LEOXINGU/lftools
 hasProcessingProvider=yes
 # Uncomment the following line and add your changelog:
 # changelog=
+	1.1   - Expressions added and new script
 	1.0.1 - Improvement in tools' translation and description
 	1.0   - Initial version
 # Tags are comma separated with spaces allowed
