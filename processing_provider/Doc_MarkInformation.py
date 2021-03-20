@@ -71,7 +71,7 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
         return 'surveymarkdoc'
 
     def displayName(self):
-        return self.tr('Geodetic landmark informations', 'Monografia de marco geodésico')
+        return self.tr('Geodetic mark report', 'Monografia de marco geodésico')
 
     def group(self):
         return self.tr('Documents', 'Documentos')
@@ -80,12 +80,12 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
         return 'documents'
 
     def tags(self):
-        return self.tr('monograph,mark,geodetic,descriptive,memorial,property,topography,survey,real,estate,georreferencing,plan,cadastral,cadastre,documnt').split(',')
+        return self.tr('monograph,mark,report,geodetic,descriptive,memorial,property,topography,survey,real,estate,georreferencing,plan,cadastral,cadastre,documnt').split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/document.png'))
 
-    txt_en = 'This tool generates monograph(s) of geodetic landmarks automatically from the "pto_ref_geod_topo_p" layer.'
+    txt_en = 'This tool generates report(s) with the informations about a geodetic landmarks automatically from the "reference_point_p" layer.'
     txt_pt = 'Esta ferramenta gera monografia(s) de marcos geodésicos de forma automática a partir da camada "pto_ref_geod_topo_p".'
     figure = 'images/tutorial/doc_mark.jpg'
 
@@ -127,7 +127,7 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFileDestination(
                 self.HTML,
-                self.tr('Monograph of Geodetic Landmark', 'Monografia de Marco Geodésico'),
+                self.tr('Geodetic Landmark Report', 'Monografia de Marco Geodésico'),
                 self.tr('HTML files (*.html)')
             )
         )

@@ -72,7 +72,7 @@ class DescriptiveMemorial(QgisAlgorithm):
         return 'descriptivememorial'
 
     def displayName(self):
-        return self.tr('Descriptive memorial', 'Memorial descritivo')
+        return self.tr('Deed description', 'Memorial descritivo')
 
     def group(self):
         return self.tr('Documents', 'Documentos')
@@ -81,13 +81,13 @@ class DescriptiveMemorial(QgisAlgorithm):
         return 'documents'
 
     def tags(self):
-        return self.tr('area,perimeter,descriptive,memorial,property,topography,survey,real,estate,georreferencing,plan,cadastral,cadastre,documnt').split(',')
+        return self.tr('area,perimeter,deed,description,descriptive,memorial,property,topography,survey,real,estate,georreferencing,plan,cadastral,cadastre,documnt').split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/document.png'))
 
     figure = 'images/tutorial/doc_descriptive_memorial.jpg'
-    txt_en = 'Elaboration of Descriptive Memorials based on vector layers that define a property.'
+    txt_en = 'Elaboration of Deed Description based on vector layers that define a property.'
     txt_pt = 'Elaboração de Memorial Descritivo a partir de camadas vetorias que definem uma propriedade.'
 
     def shortHelpString(self):
@@ -133,7 +133,7 @@ class DescriptiveMemorial(QgisAlgorithm):
         self.addParameter(
             QgsProcessingParameterFileDestination(
                 'HTML',
-                self.tr('Descriptive Memorial', 'Memorial Descritivo'),
+                self.tr('Deed description', 'Memorial Descritivo'),
                 self.tr('HTML files (*.html)')
             )
         )

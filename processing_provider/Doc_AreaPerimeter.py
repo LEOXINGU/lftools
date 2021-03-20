@@ -208,7 +208,7 @@ class AreaPerimterReport(QgsProcessingAlgorithm):
 <span style="font-weight: bold;">''' + self.tr('GRS','SGR') + ''':</span>
 SIRGAS2000<br>
 <span style="font-weight: bold;">''' + self.tr('Projection', str2HTML('Projeção')) + ''':</span>
-[UTM] <br>
+[UTM] <br><br>
 </div>
 </div>
 <table style="text-align: center; width: 100%;" border="1"

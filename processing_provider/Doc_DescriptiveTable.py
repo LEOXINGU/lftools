@@ -69,7 +69,7 @@ class DescriptiveTable(QgsProcessingAlgorithm):
         return 'descriptivetable'
 
     def displayName(self):
-        return self.tr('Descriptive table of vertices and sides', 'Memorial sintético')
+        return self.tr('Synthetic deed description', 'Memorial sintético')
 
     def group(self):
         return self.tr('Documents', 'Documentos')
@@ -78,13 +78,13 @@ class DescriptiveTable(QgsProcessingAlgorithm):
         return 'documents'
 
     def tags(self):
-        return self.tr('monograph,table,geodetic,descriptive,syntetic,memorial,property,topography,survey,real,estate,georreferencing,plan,cadastral,cadastre,documnt').split(',')
+        return self.tr('monograph,table,deed,description,geodetic,descriptive,syntetic,memorial,property,topography,survey,real,estate,georreferencing,plan,cadastral,cadastre,documnt').split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/document.png'))
 
     figure = 'images/tutorial/doc_descriptive_table.jpg'
-    txt_en = '''This tool generates the Vertices and Sides Descriptive Table , also known as Synthetic Descriptive Memorial, based on the attributes, sequence and code, in the point layer's attribute table.'''
+    txt_en = '''This tool generates the Vertices and Sides Descriptive Table, also known as Synthetic Deed Description, based on the attributes, sequence and code, in the point layer's attribute table.'''
     txt_pt = 'Esta ferramenta gera a Tabela Descriva de Vértices e Lados, também conhecida como Memorial Descritivo Sintético, a partir de uma camada de pontos com os atributos de código e ordem (sequência) dos pontos.'
 
     def shortHelpString(self):
@@ -160,7 +160,7 @@ class DescriptiveTable(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFileDestination(
                 self.HTML,
-                self.tr('Descriptive table', 'Memorial Sintético'),
+                self.tr('Synthetic deed description', 'Memorial Sintético'),
                 self.tr('HTML files (*.html)')
             )
         )
@@ -268,7 +268,7 @@ class DescriptiveTable(QgsProcessingAlgorithm):
         texto = '''<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
         <html>
         <head>
-          <title>''' + self.tr('Descriptive table', str2HTML('Memorial Sintético')) + '''</title>
+          <title>''' + self.tr('Synthetic deed description', str2HTML('Memorial Sintético')) + '''</title>
         </head>
         <body>
         <table
@@ -276,7 +276,7 @@ class DescriptiveTable(QgsProcessingAlgorithm):
         border="1" cellpadding="0" cellspacing="0">
         <tbody>
         <tr>
-          <td colspan="7" rowspan="1">''' + self.tr('Descriptive table'.upper(), str2HTML('Memorial Sintético'.upper())) + '''[TITULO]</td>
+          <td colspan="7" rowspan="1">''' + self.tr('Synthetic deed description'.upper(), str2HTML('Memorial Sintético'.upper())) + '''[TITULO]</td>
         </tr>
         <tr>
           <td colspan="1" rowspan="2">''' + self.tr('VERTEX', str2HTML('VÉRTICE')) + '''</td>
