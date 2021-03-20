@@ -23,7 +23,7 @@
 """
 
 __author__ = 'Leandro Franca'
-__date__ = '2021-02-18'
+__date__ = '2021-03-01'
 __copyright__ = '(C) 2021 by Leandro Franca'
 
 # This will get replaced with a git SHA1 when you do a git archive
@@ -34,8 +34,16 @@ import os
 import sys
 import inspect
 
-from qgis.core import QgsProcessingAlgorithm, QgsApplication
+from qgis.core import (QgsProcessingAlgorithm,
+                       QgsApplication,
+                       QgsExpression)
+from PyQt5.QtCore import QCoreApplication
 from .lftools_provider import LFToolsProvider
+from .expressions import *
+
+exprs = (coord2inom, fieldstat, dd2dms, projectCRS,
+         deedtable, dms2dd, scalefactor, zonehemisf,
+         inom2mi, meridianconv, removespetialchar)
 
 cmd_folder = os.path.split(inspect.getfile(inspect.currentframe()))[0]
 
@@ -54,8 +62,15 @@ class LFToolsPlugin(object):
         self.provider = LFToolsProvider()
         QgsApplication.processingRegistry().addProvider(self.provider)
 
+
     def initGui(self):
         self.initProcessing()
+        for expr in exprs:
+            if not QgsExpression.isFunctionName(expr.name()):
+                QgsExpression.registerFunction(expr)
 
     def unload(self):
         QgsApplication.processingRegistry().removeProvider(self.provider)
+        for expr in exprs:
+            if QgsExpression.isFunctionName(expr.name()):
+                QgsExpression.unregisterFunction(expr.name())
