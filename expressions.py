@@ -76,7 +76,7 @@ def fieldstat(layer_name, field_name, type, feature, parent):
     for feat in layer.getFeatures():
         att = feat[field_name]
         if att:
-            lista += [att]
+            lista += [float(att)]
     if type == 'sum':
         return  float((array(lista)).sum())
     elif type == 'min':
@@ -130,70 +130,27 @@ def dms2dd(txt, feature, parent):
     return DMS2DD(txt)
 
 @qgsfunction(args='auto', group='LF Tools')
-def scalefactor(layer_name, feature, parent):
+def scalefactor(lon, lat, feature, parent):
     """
-    Calculates the Scale (Kappa) Factor based on a feature Centroid.
+    Calculates the Scale (Kappa) Factor based on a feature coordinates.
     <h2>Example usage:</h2>
     <ul>
-      <li>scalefactor('layer_name') -> 0.99138</li>
+      <li>scalefactor("lon", "lat") -> 0.99138</li>
     </ul>
     """
-    if len(QgsProject.instance().mapLayersByName(layer_name)) == 1:
-        layer = QgsProject.instance().mapLayersByName(layer_name)[0]
-    else:
-        layer = QgsProject.instance().mapLayer(layer_name)
-    SRC = layer.crs()
-    # Pegar centroide da
-    for feat in layer.getFeatures():
-        feat1 = feat
-        break
-    geom = feat1.geometry()
-    centroide = geom.centroid().asPoint()
-    # Verificar os SRC da camada
-    if not SRC.isGeographic():
-        # Transformar Coordenadas Projetadas do sistema UTM para geograficas
-        crsDest = QgsCoordinateReferenceSystem(SRC.geographicCrsAuthId())
-        coordinateTransformer = QgsCoordinateTransform()
-        coordinateTransformer.setDestinationCrs(crsDest)
-        coordinateTransformer.setSourceCrs(SRC)
-        centroide = coordinateTransformer.transform(centroide)
-    # Pegar coordenadas do Centroide
-    lon = centroide.x()
-    lat = centroide.y()
     return ScaleFactor(lon, lat)
 
 
 @qgsfunction(args='auto', group='LF Tools')
-def meridianconv(layer_name, feature, parent):
+def meridianconv(lon, lat, feature, parent):
     """
-    Calculates the Meridian Convergence based on a Polygon Centroid.
+    Calculates the Meridian Convergence based on a feature coordinates.
     <h2>Example usage:</h2>
     <ul>
-      <li>meridianconv('layer_name') -> -0.3451</li>
+      <li>meridianconv("lon", "lat") -> -0.3451</li>
     </ul>
     """
-    if len(QgsProject.instance().mapLayersByName(layer_name)) == 1:
-        layer = QgsProject.instance().mapLayersByName(layer_name)[0]
-    else:
-        layer = QgsProject.instance().mapLayer(layer_name)
-    SRC = layer.crs()
-    # Pegar centroide da
-    for feat in layer.getFeatures():
-        feat1 = feat
-        break
-    geom = feat1.geometry()
-    centroide = geom.centroid().asPoint()
-    # Verificar os SRC da camada
-    if not SRC.isGeographic():
-        # Transformar Coordenadas Projetadas do sistema UTM para geograficas
-        crsDest = QgsCoordinateReferenceSystem(SRC.geographicCrsAuthId())
-        coordinateTransformer = QgsCoordinateTransform()
-        coordinateTransformer.setDestinationCrs(crsDest)
-        coordinateTransformer.setSourceCrs(SRC)
-        centroide = coordinateTransformer.transform(centroide)
-    # Pegar coordenadas do Centroide
-    lon = centroide.x()
-    lat = centroide.y()
+    SRC = QgsCoordinateReferenceSystem('EPSG:4326')
     return MeridianConvergence(lon, lat, SRC)
 
 
@@ -275,7 +232,6 @@ def removespetialchar (palavra, feature, parent):
     # Unicode normalize transforma um caracter em seu equivalente em latin.
     nfkd = unicodedata.normalize('NFKD', palavra)
     palavraSemAcento = u"".join([c for c in nfkd if not unicodedata.combining(c)])
-
     # Usa expressão regular para retornar a palavra apenas com números, letras e espaço
     return re.sub('[^a-zA-Z0-9 \\\]', '', palavraSemAcento)
 
