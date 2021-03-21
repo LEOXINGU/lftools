@@ -31,7 +31,7 @@ homepage=https://github.com/LEOXINGU/lftools
 category=cartography
 icon=images/lftoos_logo.png
 # experimental flag
-experimental=True
+experimental=False
 
 # deprecated flag (applies to the whole plugin, not just a single version)
 deprecated=False
