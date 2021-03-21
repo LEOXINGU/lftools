@@ -21,7 +21,7 @@ repository=https://github.com/LEOXINGU/lftools
 hasProcessingProvider=yes
 # Uncomment the following line and add your changelog:
 # changelog=
-	1.1   - Expressions added
+	1.1.0   - Expressions added
 	1.0.1 - Improvement in tools' translation and description
 	1.0   - Initial version
 # Tags are comma separated with spaces allowed
