@@ -20,7 +20,6 @@ from qgis.core import *
 import qgis.utils
 from numpy import radians, array, sin, cos, sqrt, matrix, zeros, floor, identity, diag
 from numpy.linalg import pinv, norm
-import xlwt
 from lftools.geocapt.imgs import Imgs
 from lftools.geocapt.topogeo import str2HTML, String2CoordList, String2StringList, dms2dd
 import os
@@ -132,7 +131,7 @@ class Estimate3dCoord(QgsProcessingAlgorithm):
             QgsProcessingParameterFileDestination(
                 self.OUTPUT,
                 self.tr('Adjusted 3D Coordinates', 'Coordenadas 3D Ajustadas'),
-                fileFilter = '.xls'
+                fileFilter = '.csv'
             )
         )
 
@@ -195,8 +194,8 @@ class Estimate3dCoord(QgsProcessingAlgorithm):
             self.OUTPUT,
             context
         )
-        if output[-3:] != 'xls':
-            output += '.xls'
+        if output[-3:] != 'csv':
+            output += '.csv'
 
         html_output = self.parameterAsFileOutput(
             parameters,
@@ -275,22 +274,12 @@ class Estimate3dCoord(QgsProcessingAlgorithm):
             s_t += [round(float(sqrt(SigmaX[k+3, k+3])),3)]
 
         # Resultados
-        wb = xlwt.Workbook()
-        ws = wb.add_sheet(self.tr("Spreadsheet 1", "Planilha 1"))
-        ws.write(0, 0, 'X')
-        ws.write(0, 1, 'Y')
-        ws.write(0, 2, 'Z')
-        ws.write(0, 3, self.tr('type', 'tipo'))
-        ws.write(1, 0, x)
-        ws.write(1, 1, y)
-        ws.write(1, 2, z)
-        ws.write(1, 3, self.tr('Adjusted 3D Coordinates', 'Coordenadas 3D Ajustadas'))
+        arq = open(output, 'w')
+        arq.write('X,Y,Z,'+ self.tr('type', 'tipo') + '\n')
+        arq.write('{},{},{},'.format(x,y,z) + self.tr('Adjusted 3D Coordinates', 'Coordenadas 3D Ajustadas') + '\n')
         for k in range(len(Coords)):
-            ws.write(2+k, 0, Coords[k][0])
-            ws.write(2+k, 1, Coords[k][1])
-            ws.write(2+k, 2, Coords[k][2])
-            ws.write(2+k, 3, self.tr('Station', 'Estação') + ' ' + str(k+1))
-        wb.save(output)
+            arq.write('{},{},{},{}'.format(Coords[k][0],Coords[k][1],Coords[k][2], self.tr('Station', 'Estacao') + ' ' + str(k+1) ) + '\n')
+        arq.close()
 
         texto = '''<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
