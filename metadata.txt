@@ -6,7 +6,7 @@
 name=LF Tools
 qgisMinimumVersion=3.16
 description=Tools for cartographic production, surveying, digital image processing and spatial analysis.
-version=1.1.0
+version=1.1.1
 author=Leandro França
 email=geoleandro.franca@gmail.com
 
@@ -21,7 +21,8 @@ repository=https://github.com/LEOXINGU/lftools
 hasProcessingProvider=yes
 # Uncomment the following line and add your changelog:
 # changelog=
-	1.1.0   - Expressions added
+	1.1.1 - Bug fix of the estimated 3D coordinates tool for Linux
+	1.1.0 - Expressions added
 	1.0.1 - Improvement in tools' translation and description
 	1.0   - Initial version
 # Tags are comma separated with spaces allowed
