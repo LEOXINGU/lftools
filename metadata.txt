@@ -4,7 +4,7 @@
 
 [general]
 name=LF Tools
-qgisMinimumVersion=3.16
+qgisMinimumVersion=3.10
 description=Tools for cartographic production, surveying, digital image processing and spatial analysis.
 version=1.1.1
 author=Leandro França

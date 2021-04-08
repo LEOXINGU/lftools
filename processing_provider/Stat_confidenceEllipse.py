@@ -43,7 +43,7 @@ from qgis.core import (QgsProcessing,
 import processing
 import numpy as np
 from numpy import pi, cos, sin, sqrt
-from scipy.stats import chi2
+#from scipy.stats import chi2
 from lftools.geocapt.imgs import Imgs
 import os
 from qgis.PyQt.QtGui import QIcon
@@ -199,7 +199,8 @@ class ConfidenceEllipse(QgsProcessingAlgorithm):
         )
         porcent = [0.68, 0.90, 0.95, 0.99]
         confidence = porcent[size]
-        size = chi2.ppf(confidence, 2)
+        # size = chi2.ppf(confidence, 2)
+        size = [2.27886856637673, 4.605170185988092, 5.991464547107979, 9.21034037197618][size]
 
         Peso = self.parameterAsBool(
             parameters,
