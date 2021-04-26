@@ -33,7 +33,7 @@ class Extent2UTMGrid(QgsProcessingAlgorithm):
     MD = 'MD' # Magnetic Declination
     ZONE_HEMISF = 'ZONE_HEMISF'
 
-    LOC = QgsApplication.locale()
+    LOC = QgsApplication.locale()[:2]
 
     def translate(self, string):
         return QCoreApplication.translate('Processing', string)

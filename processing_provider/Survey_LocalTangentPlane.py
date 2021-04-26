@@ -40,7 +40,7 @@ class LocalTangentPlane(QgsProcessingAlgorithm):
     H_0 = 'H_0'
     OUTPUT = 'OUTPUT'
 
-    LOC = QgsApplication.locale()
+    LOC = QgsApplication.locale()[:2]
 
     def translate(self, string):
         return QCoreApplication.translate('Processing', string)

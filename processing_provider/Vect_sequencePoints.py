@@ -37,7 +37,7 @@ class SequencePoints(QgsProcessingAlgorithm):
     POLYGONS = 'POLYGONS'
     FIELD = 'FIELD'
     SAVE = 'SAVE'
-    LOC = QgsApplication.locale()
+    LOC = QgsApplication.locale()[:2]
 
     INPUT = 'INPUT'
     OUTPUT = 'OUTPUT'

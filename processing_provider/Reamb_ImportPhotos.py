@@ -47,7 +47,7 @@ from qgis.PyQt.QtGui import QIcon
 
 class ImportPhotos(QgsProcessingAlgorithm):
 
-    LOC = QgsApplication.locale()
+    LOC = QgsApplication.locale()[:2]
 
     def translate(self, string):
         return QCoreApplication.translate('Processing', string)
@@ -206,6 +206,9 @@ class ImportPhotos(QgsProcessingAlgorithm):
         crs.createFromSrid(4326)
         fields = QgsFields()
         fields.append(QgsField(self.tr('name','nome'), QVariant.String))
+        fields.append(QgsField(self.tr('longitude'), QVariant.Double))
+        fields.append(QgsField(self.tr('latitude'), QVariant.Double))
+        fields.append(QgsField(self.tr('altitude'), QVariant.Double))
         fields.append(QgsField(self.tr('azimuth','azimute'), QVariant.Int))
         fields.append(QgsField(self.tr('date_time','data_hora'), QVariant.String))
         fields.append(QgsField(self.tr('path','caminho'), QVariant.String))
@@ -236,10 +239,13 @@ class ImportPhotos(QgsProcessingAlgorithm):
                 lon, lat = 0, 0
                 Az = None
                 date_time = None
+                altitude = None
                 if 'GPSInfo' in exif:
                     lat, lon = coordenadas(exif)
                     if 17 in exif['GPSInfo']:
                         Az = azimute(exif)
+                    if 6 in exif['GPSInfo']:
+                        altitude = float(exif['GPSInfo'][6][0])/exif['GPSInfo'][6][1]
                 if 'DateTimeOriginal' in exif:
                     date_time = data_hora(exif['DateTimeOriginal'])
                 elif 'DateTime' in exif:
@@ -247,7 +253,7 @@ class ImportPhotos(QgsProcessingAlgorithm):
                 if lon != 0:
                     feature = QgsFeature(fields)
                     feature.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(lon, lat)))
-                    feature.setAttributes([arquivo, Az, date_time, os.path.join(pasta, arquivo)])
+                    feature.setAttributes([arquivo, lon, lat, altitude, Az, date_time, os.path.join(pasta, arquivo)])
                     sink.addFeature(feature, QgsFeatureSink.FastInsert)
                 else:
                     print()

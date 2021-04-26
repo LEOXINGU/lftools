@@ -49,7 +49,7 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
     CODIGO = 'CODIGO'
     HTML = 'HTML'
 
-    LOC = QgsApplication.locale()
+    LOC = QgsApplication.locale()[:2]
 
     def translate(self, string):
         return QCoreApplication.translate('Processing', string)
@@ -163,7 +163,7 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
         coordinateTransformer.setDestinationCrs(QgsProject.instance().crs())
         coordinateTransformer.setSourceCrs(vertice.sourceCrs())
 
-        expr = QgsExpression( "\"codigo\"='{}'".format( codigo ) )
+        expr = QgsExpression( "\"code\"='{}'".format( codigo ) )
         pnt = False
         for feat in vertice.getFeatures(QgsFeatureRequest( expr )):
             pnt = feat.geometry().asMultiPoint()[0]
@@ -180,8 +180,9 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
         fieldnames = [field.name() for field in Fields]
         for fieldname in fieldnames:
             att = ponto[fieldname]
-            if not att or att in ['', ' ']:
-                raise QgsProcessingException(self.tr('All attributes of the class "survey_landmark" must be filled!', 'Todos os atributos da classe "pnt_ref_geod_topo" devem ser preenchidos!'))
+            if fieldname not in ['survey_ref_base']:
+                if not att or att in ['', ' ']:
+                    raise QgsProcessingException(self.tr('The attributes of the class "reference_point_p" must be filled!', 'Os atributos da classe "Ponto de Referência Geodésica" devem ser preenchidos!'))
 
         # Coordenada em UTM
         pnt_UTM = coordinateTransformer.transform(pnt)
@@ -296,7 +297,7 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
     </tr>
     <tr>
       <td style="text-align: center;" colspan="2" rowspan="1"><img style="width: 200px; height: 150px;" alt="marco" src="data:image/jpg;base64,[FOTO_MARCO]"></td>
-      <td style="text-align: center;" colspan="3" rowspan="3"><img style="width: 400px; height: 300px;" alt="imagem" src="data:image/jpg;base64,[IMAGEM_AER]"></td>
+      <td style="text-align: center;" colspan="3" rowspan="3"><img style="width: 400px;" alt="imagem" src="data:image/jpg;base64,[IMAGEM_AER]"></td>
     </tr>
     <tr style="font-weight: bold;">
       <td style="text-align: center;" colspan="2" rowspan="1">'''+ self.tr('PANORAMIC PHOTO',str2HTML('FOTO PANORÂMICA')) + '''</td>
@@ -334,39 +335,39 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
 
 
         # Inserindo dados iniciais do levantamento
-        itens = {'[CD]': str2HTML(ponto['codigo']),
-                '[TP]':  str2HTML(tipos[ponto['tipoptorefgeodtopo']]) ,
-                '[NI]':  str2HTML(ponto['imóvel']),
-                '[MUN]': str2HTML(ponto['município']),
-                '[UF]':  str2HTML(ponto['UF']),
+        itens = {'[CD]': str2HTML(ponto['code']),
+                '[TP]':  str2HTML(tipos[ponto['type']]) ,
+                '[NI]':  str2HTML(ponto['property']),
+                '[MUN]': str2HTML(ponto['county']),
+                '[UF]':  str2HTML(ponto['state']),
                 '[LON]': str2HTML(dd2dms(pnt.x(),4)),
                 '[LAT]': str2HTML(dd2dms(pnt.y(),4)),
-                '[h]': '{:,.3f}'.format(ponto['altitude']).replace(',', 'X').replace('.', ',').replace('X', '.'),
-                '[H]': '{:,.3f}'.format(ponto['altitudeortometrica']).replace(',', 'X').replace('.', ',').replace('X', '.'),
+                '[h]': '{:,.3f}'.format(ponto['ellip_height']).replace(',', 'X').replace('.', ',').replace('X', '.'),
+                '[H]': '{:,.3f}'.format(ponto['ortho_height']).replace(',', 'X').replace('.', ',').replace('X', '.'),
                 '[E]': '{:,.3f}'.format(pnt_UTM.x()).replace(',', 'X').replace('.', ',').replace('X', '.'),
                 '[N]': '{:,.3f}'.format(pnt_UTM.y()).replace(',', 'X').replace('.', ',').replace('X', '.'),
                 '[MC]':  str(CentralMeridian(pnt)),
                 '[sigma_x]': '{:,.3f}'.format(ponto['sigma_x']).replace(',', 'X').replace('.', ',').replace('X', '.'),
                 '[sigma_y]': '{:,.3f}'.format(ponto['sigma_y']).replace(',', 'X').replace('.', ',').replace('X', '.'),
                 '[sigma_h]': '{:,.3f}'.format(ponto['sigma_h']).replace(',', 'X').replace('.', ',').replace('X', '.'),
-                '[EQP]':  str2HTML(ponto['equipamento']),
-                '[MET]':  str2HTML(metodo[ponto['lev_metodo']]),
-                '[BASE]':  str2HTML(ponto['lev_base_ref']),
+                '[EQP]':  str2HTML(ponto['equipment']),
+                '[MET]':  str2HTML(metodo[ponto['survey_method']]),
+                '[BASE]':  str2HTML(ponto['survey_ref_base']),
                 '[SOFT]':  str2HTML(ponto['software']),
-                '[LEV_DT]': str2HTML(((ponto['lev_data']).toPyDate()).strftime("%d/%m/%Y")),
-                '[LEV_RESP]': str2HTML(ponto['lev_resp']),
-                '[PROC_DT]': str2HTML(((ponto['proc_data']).toPyDate()).strftime("%d/%m/%Y")),
-                '[PROC_RESP]': str2HTML(ponto['proc_resp']),
-                '[MON_DT]': str2HTML(((ponto['monografia_data']).toPyDate()).strftime("%d/%m/%Y")),
-                '[MON_RESP]': str2HTML(ponto['monografia_resp']),
-                '[REP_TEC]':  str2HTML(ponto['Resp_Tecnico']),
-                '[CREA]': str2HTML(ponto['CREA']),
-                '[COD_INCRA]': str2HTML(ponto['codigo_credenciado']),
-                '[DESCR]': str2HTML(ponto['descricao']),
-                '[FOTO_MARCO]': img2html_resized(ponto['foto_marco']) if ponto['foto_marco'] else '',
-                '[FOTO_PAN]': img2html_resized(ponto['foto_panoramica']) if ponto['foto_panoramica'] else '',
-                '[IMAGEM_AER]': img2html_resized(ponto['imagem_aerea']) if ponto['imagem_aerea'] else '',
-                '[OBS]': str2HTML(ponto['obs'])
+                '[LEV_DT]': str2HTML(((ponto['survey_date']).toPyDate()).strftime("%d/%m/%Y")),
+                '[LEV_RESP]': str2HTML(ponto['survey_resp']),
+                '[PROC_DT]': str2HTML(((ponto['processing_date']).toPyDate()).strftime("%d/%m/%Y")),
+                '[PROC_RESP]': str2HTML(ponto['processing_resp']),
+                '[MON_DT]': str2HTML(((ponto['report_date']).toPyDate()).strftime("%d/%m/%Y")),
+                '[MON_RESP]': str2HTML(ponto['report_resp']),
+                '[REP_TEC]':  str2HTML(ponto['tech_manager']),
+                '[CREA]': str2HTML(ponto['profession']),
+                '[COD_INCRA]': str2HTML(ponto['profession_id']),
+                '[DESCR]': str2HTML(ponto['description']),
+                '[FOTO_MARCO]': img2html_resized(ponto['mark_photo']) if ponto['mark_photo'] else '',
+                '[FOTO_PAN]': img2html_resized(ponto['pan_photo']) if ponto['pan_photo'] else '',
+                '[IMAGEM_AER]': img2html_resized(ponto['aerial_image']) if ponto['aerial_image'] else '',
+                '[OBS]': str2HTML(ponto['observation'])
                     }
         for item in itens:
                 TEXTO = TEXTO.replace(item, itens[item])

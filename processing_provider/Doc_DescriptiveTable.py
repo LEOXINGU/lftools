@@ -47,7 +47,7 @@ from qgis.PyQt.QtGui import QIcon
 
 class DescriptiveTable(QgsProcessingAlgorithm):
 
-    LOC = QgsApplication.locale()
+    LOC = QgsApplication.locale()[:2]
 
     def translate(self, string):
         return QCoreApplication.translate('Processing', string)
@@ -222,7 +222,7 @@ class DescriptiveTable(QgsProcessingAlgorithm):
         ordem_list = list(range(1,vertices.featureCount()+1))
         ordem_comp = []
         for feat in vertices.getFeatures():
-            ordem_comp += [feat['ordem']]
+            ordem_comp += [feat['sequence']]
             codigo_item = feat['codigo']
             if not codigo_item or codigo_item in ['', ' ']:
                 raise QgsProcessingException(self.tr('The code attribute must be filled in for all features!', 'O atributo código deve ser preenchido para todas as feições!'))
@@ -240,7 +240,7 @@ class DescriptiveTable(QgsProcessingAlgorithm):
         pnts_UTM = {}
         for feat in vertices.getFeatures():
             pnt = feat.geometry().asMultiPoint()[0]
-            pnts_UTM[feat['ordem']] = [coordinateTransformer.transform(pnt), feat['tipo'], feat['codigo'], MeridianConvergence(pnt.x(), pnt.y(), crsDest) ]
+            pnts_UTM[feat['sequence']] = [coordinateTransformer.transform(pnt), feat['tipo'], feat['codigo'], MeridianConvergence(pnt.x(), pnt.y(), crsDest) ]
 
         # Calculo dos Azimutes e Distancias
         tam = len(pnts_UTM)

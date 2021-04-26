@@ -35,7 +35,7 @@ class ClosedPolygonal(QgsProcessingAlgorithm):
     POINTS = 'POINTS'
     HTML = 'HTML'
 
-    LOC = QgsApplication.locale()
+    LOC = QgsApplication.locale()[:2]
 
     def translate(self, string):
         return QCoreApplication.translate('Processing', string)

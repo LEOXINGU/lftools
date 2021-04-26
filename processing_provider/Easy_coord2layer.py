@@ -32,7 +32,7 @@ class CoordinatesToLayer(QgsProcessingAlgorithm):
     BOOL = 'BOOL'
     CRS = 'CRS'
     LAYER = 'LAYER'
-    LOC = QgsApplication.locale()
+    LOC = QgsApplication.locale()[:2]
 
     def translate(self, string):
         return QCoreApplication.translate('Processing', string)

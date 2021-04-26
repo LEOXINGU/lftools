@@ -38,7 +38,7 @@ from qgis.PyQt.QtGui import QIcon
 
 class DirectionalMerge(QgsProcessingAlgorithm):
 
-    LOC = QgsApplication.locale()
+    LOC = QgsApplication.locale()[:2]
 
     def translate(self, string):
         return QCoreApplication.translate('Processing', string)

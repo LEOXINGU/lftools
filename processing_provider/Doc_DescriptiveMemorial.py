@@ -49,7 +49,7 @@ class DescriptiveMemorial(QgisAlgorithm):
     INPUT1 = 'INPUT1'
     INPUT2 = 'INPUT2'
     INPUT3 = 'INPUT3'
-    LOC = QgsApplication.locale()
+    LOC = QgsApplication.locale()[:2]
 
 
     def translate(self, string):
@@ -118,7 +118,7 @@ class DescriptiveMemorial(QgisAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 'INPUT2',
-                self.tr('Neighborhood Dividing Line', 'Elemento Confrontante'),
+                self.tr('Neighborhood Dividing Lines', 'Elementos Confrontantes'),
                 types=[QgsProcessing.TypeVectorLine]
             )
         )
@@ -154,7 +154,7 @@ class DescriptiveMemorial(QgisAlgorithm):
         meses = {1: 'janeiro', 2:'fevereiro', 3: 'março', 4:'abril', 5:'maio', 6:'junho', 7:'julho', 8:'agosto', 9:'setembro', 10:'outubro', 11:'novembro', 12:'dezembro'}
 
         # VALIDAÇÃO DOS DADOS DE ENTRADA!!!
-        # atributos codigo deve ser preenchido
+        # atributos code deve ser preenchido
         # ordem do numeros
 
         # Pegando informações dos confrontantes (limites)
@@ -163,7 +163,7 @@ class DescriptiveMemorial(QgisAlgorithm):
         soma = 0
         for linha in limites.getFeatures():
             Lin_coord = linha.geometry().asMultiPolyline()[0]
-            ListaDescr += [[str2HTML(linha['descr_pnt_inicial']), str2HTML(linha['confrontante'])]]
+            ListaDescr += [[str2HTML(linha['start_pnt_descr']), str2HTML(linha['borderer'])]]
             cont = len(Lin_coord)
             ListaCont += [(soma, cont-1)]
             soma += cont-1
@@ -188,8 +188,8 @@ class DescriptiveMemorial(QgisAlgorithm):
         ordem_list = list(range(1,vertices.featureCount()+1))
         ordem_comp = []
         for feat in vertices.getFeatures():
-            ordem_comp += [feat['ordem']]
-            codigo_item = feat['codigo']
+            ordem_comp += [feat['sequence']]
+            codigo_item = feat['code']
             if not codigo_item or codigo_item in ['', ' ']:
                 raise QgsProcessingException(self.tr('The code attribute must be filled in for all features!', 'O atributo código deve ser preenchido para todas as feições!'))
         ordem_comp.sort()
@@ -197,10 +197,10 @@ class DescriptiveMemorial(QgisAlgorithm):
             raise QgsProcessingException(self.tr('The point sequence field must be filled in correctly!', 'O campo de sequência dos pontos deve preenchido corretamente!'))
         # elemento_confrontante
         for feat in limites.getFeatures():
-            att1 = feat['descr_pnt_inicial']
+            att1 = feat['start_pnt_descr']
             if not att1 or att1 in ['', ' ']:
                 raise QgsProcessingException(self.tr('The attribute of the starting point description must be filled in for all features!', 'O atributo de descrição do ponto inicial deve ser preenchido para todas as feições!'))
-            att2 = feat['confrontante']
+            att2 = feat['borderer']
             if not att2 or att2 in ['', ' ']:
                 raise QgsProcessingException(self.tr("The confrontant's name must be filled in for all features!", 'O nome do confrontante deve ser preenchido para todas as feições!'))
         # area_imovel
@@ -221,9 +221,9 @@ class DescriptiveMemorial(QgisAlgorithm):
         for feat in vertices.getFeatures():
             geom = feat.geometry()
             if geom.isMultipart():
-                pnts[feat['ordem']] = [coordinateTransformer.transform(geom.asMultiPoint()[0]), feat['tipo'], feat['codigo'] ]
+                pnts[feat['sequence']] = [coordinateTransformer.transform(geom.asMultiPoint()[0]), feat['type'], feat['code'] ]
             else:
-                pnts[feat['ordem']] = [coordinateTransformer.transform(geom.asPoint()), feat['tipo'], feat['codigo'] ]
+                pnts[feat['sequence']] = [coordinateTransformer.transform(geom.asPoint()), feat['type'], feat['code'] ]
 
         # Cálculo dos Azimutes e Distâncias
         tam = len(pnts)
@@ -351,15 +351,15 @@ class DescriptiveMemorial(QgisAlgorithm):
     </html>
     '''
         # Inserindo dados iniciais do levantamento
-        itens = {'[IMOVEL]': str2HTML(feat1['imóvel']),
-                '[PROPRIETARIO]': str2HTML(feat1['proprietário']),
-                '[UF]': feat1['UF'],
-                '[MATRICULAS]': str2HTML(feat1['matrícula']),
+        itens = {'[IMOVEL]': str2HTML(feat1['property']),
+                '[PROPRIETARIO]': str2HTML(feat1['owner']),
+                '[UF]': feat1['state'],
+                '[MATRICULAS]': str2HTML(feat1['transcript']),
                 '[AREA]': self.tr('{:,.2f}'.format(feat1['area']), '{:,.2f}'.format(feat1['area']).replace(',', 'X').replace('.', ',').replace('X', '.')),
                 '[SRC]': SRC,
-                '[REGISTRO]': str2HTML(feat1['cadastro']),
-                '[MUNICIPIO]': str2HTML(feat1['município']),
-                '[PERIMETRO]': self.tr('{:,.2f}'.format(feat1['perimetro']), '{:,.2f}'.format(feat1['perimetro']).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                '[REGISTRO]': str2HTML(feat1['registry']),
+                '[MUNICIPIO]': str2HTML(feat1['county']),
+                '[PERIMETRO]': self.tr('{:,.2f}'.format(feat1['perimeter']), '{:,.2f}'.format(feat1['perimeter']).replace(',', 'X').replace('.', ',').replace('X', '.')),
                     }
 
         for item in itens:
@@ -400,11 +400,11 @@ class DescriptiveMemorial(QgisAlgorithm):
                      '[GRS]': SRC.split(' /')[0],
                      '[FUSO]': str(FusoHemisf(centroideG)[0]),
                      '[HEMISFERIO]': FusoHemisf(centroideG)[1],
-                     '[RESP_TEC]': str2HTML(feat1['Resp_Tecnico'].upper()),
-                     '[CREA]': str2HTML(feat1['CREA']),
-                     '[LOCAL]': str2HTML((feat1['município']).title() +' - ' + (feat1['UF']).upper()),
-                     '[DATA]': self.tr((feat1['data_levantamento'].toPyDate()).strftime("%b %d, %Y"),
-                                       (feat1['data_levantamento'].toPyDate()).strftime("%d de {} de %Y").format(meses[feat1['data_levantamento'].month()]))
+                     '[RESP_TEC]': str2HTML(feat1['tech_manager'].upper()),
+                     '[CREA]': str2HTML(feat1['prof_id']),
+                     '[LOCAL]': str2HTML((feat1['county']).title() +' - ' + (feat1['state']).upper()),
+                     '[DATA]': self.tr((feat1['survey_date'].toPyDate()).strftime("%b %d, %Y"),
+                                       (feat1['survey_date'].toPyDate()).strftime("%d de {} de %Y").format(meses[feat1['survey_date'].month()]))
                     }
 
         for item in itens:

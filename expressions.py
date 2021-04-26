@@ -42,7 +42,7 @@ import unicodedata
 import re
 # https://qgis.org/pyqgis/3.2/core/Expression/QgsExpression.html
 
-LOC = QgsApplication.locale()
+LOC = QgsApplication.locale()[:2]
 def translate(string):
     return QCoreApplication.translate('Processing', string)
 def tr(*string):

@@ -46,7 +46,7 @@ class AreaPerimterReport(QgsProcessingAlgorithm):
     AREAIMOVEL = 'AREAIMOVEL'
     HTML = 'HTML'
 
-    LOC = QgsApplication.locale()
+    LOC = QgsApplication.locale()[:2]
 
     def translate(self, string):
         return QCoreApplication.translate('Processing', string)
@@ -167,8 +167,8 @@ class AreaPerimterReport(QgsProcessingAlgorithm):
         ordem_list = list(range(1,vertices.featureCount()+1))
         ordem_comp = []
         for feat in vertices.getFeatures():
-            ordem_comp += [feat['ordem']]
-            codigo_item = feat['codigo']
+            ordem_comp += [feat['sequence']]
+            codigo_item = feat['code']
             if not codigo_item or codigo_item in ['', ' ']:
                 raise QgsProcessingException(self.tr('The code attribute must be filled in for all features!', 'O atributo código deve ser preenchido para todas as feições!'))
         ordem_comp.sort()
@@ -250,10 +250,10 @@ SIRGAS2000<br>
 '''
 
         # Inserindo dados iniciais do levantamento
-        itens = {'[IMOVEL]': str2HTML(feat1['imóvel']),
-                    '[UF]': feat1['UF'],
+        itens = {'[IMOVEL]': str2HTML(feat1['property']),
+                    '[UF]': feat1['state'],
                     '[UTM]': (SRC.split('/')[-1]).replace('zone', 'fuso'),
-                    '[MUNICIPIO]': str2HTML(feat1['município']),
+                    '[MUNICIPIO]': str2HTML(feat1['county']),
                     }
         for item in itens:
                 INICIO = INICIO.replace(item, itens[item])
@@ -261,7 +261,7 @@ SIRGAS2000<br>
         # Inserindo dados finais do levantamento
         itens = {   '[AREA]': self.tr('{:,.2f}'.format(feat1['area']), '{:,.2f}'.format(feat1['area']).replace(',', 'X').replace('.', ',').replace('X', '.')),
                     '[AREA_HA]': self.tr('{:,.2f}'.format(feat1['area']/1e4), '{:,.2f}'.format(feat1['area']/1e4).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                    '[PERIMETRO]': self.tr('{:,.2f}'.format(feat1['perimetro']), '{:,.2f}'.format(feat1['perimetro']).replace(',', 'X').replace('.', ',').replace('X', '.'))
+                    '[PERIMETRO]': self.tr('{:,.2f}'.format(feat1['perimeter']), '{:,.2f}'.format(feat1['perimeter']).replace(',', 'X').replace('.', ',').replace('X', '.'))
                     }
         for item in itens:
                 FIM = FIM.replace(item, itens[item])
@@ -271,7 +271,7 @@ SIRGAS2000<br>
         pnts_UTM = {}
         for feat in vertices.getFeatures():
             pnt = feat.geometry().asMultiPoint()[0]
-            pnts_UTM[feat['ordem']] = [coordinateTransformer.transform(pnt), feat['codigo'], pnt]
+            pnts_UTM[feat['sequence']] = [coordinateTransformer.transform(pnt), feat['code'], pnt]
 
         # Cálculo dos Azimutes e Distâncias
         tam = len(pnts_UTM)

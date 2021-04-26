@@ -36,7 +36,7 @@ class Estimate3dCoord(QgsProcessingAlgorithm):
     HTML = 'HTML'
     OPEN = 'OPEN'
 
-    LOC = QgsApplication.locale()
+    LOC = QgsApplication.locale()[:2]
 
     def translate(self, string):
         return QCoreApplication.translate('Processing', string)

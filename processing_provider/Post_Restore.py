@@ -35,7 +35,7 @@ from qgis.PyQt.QtGui import QIcon
 
 class Restore(QgsProcessingAlgorithm):
 
-    LOC = QgsApplication.locale()
+    LOC = QgsApplication.locale()[:2]
 
     def translate(self, string):
         return QCoreApplication.translate('Processing', string)
