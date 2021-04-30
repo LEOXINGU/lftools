@@ -37,7 +37,7 @@ from lftools.geocapt.cartography import (map_sistem,
 from lftools.geocapt.topogeo import (dd2dms as DD2DMS,
                                      dms2dd as DMS2DD,
                                      azimute, str2HTML)
-from numpy import array
+from numpy import array, pi, sqrt
 import unicodedata
 import re
 # https://qgis.org/pyqgis/3.2/core/Expression/QgsExpression.html
@@ -293,7 +293,10 @@ def deedtable(layer_name, ini, fim, titulo, fontsize, feature, parent):
     </html>
     '''
     # Camada de Pontos
-    layer = QgsProject.instance().mapLayersByName(layer_name)[0]
+    if len(QgsProject.instance().mapLayersByName(layer_name)) == 1:
+        layer = QgsProject.instance().mapLayersByName(layer_name)[0]
+    else:
+        layer = QgsProject.instance().mapLayer(layer_name)
     SRC = layer.crs()
     pnts_UTM = {}
     # Transformacao de Coordenadas Geograficas para Projetadas no sistema UTM
@@ -303,7 +306,7 @@ def deedtable(layer_name, ini, fim, titulo, fontsize, feature, parent):
     coordinateTransformer.setSourceCrs(SRC)
     for feat in layer.getFeatures():
         pnt = feat.geometry().asMultiPoint()[0]
-        pnts_UTM[feat['ordem']] = [coordinateTransformer.transform(pnt), feat['tipo'], feat['codigo'], MeridianConvergence(pnt, crsDest) ]
+        pnts_UTM[feat['ordem']] = [coordinateTransformer.transform(pnt), feat['tipo'], feat['codigo'], MeridianConvergence(pnt.x(), pnt.y(), crsDest) ]
     # Calculo dos Azimutes e Distancias
     tam = len(pnts_UTM)
     Az_lista, Az_Geo_lista, Dist = [], [], []
