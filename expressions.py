@@ -305,7 +305,7 @@ def deedtable(layer_name, ini, fim, titulo, fontsize, feature, parent):
     coordinateTransformer.setDestinationCrs(crsDest)
     coordinateTransformer.setSourceCrs(SRC)
     for feat in layer.getFeatures():
-        pnt = feat.geometry().asMultiPoint()[0]
+        pnt = feat.geometry().asPoint()
         pnts_UTM[feat['ordem']] = [coordinateTransformer.transform(pnt), feat['tipo'], feat['codigo'], MeridianConvergence(pnt.x(), pnt.y(), crsDest) ]
     # Calculo dos Azimutes e Distancias
     tam = len(pnts_UTM)

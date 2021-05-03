@@ -270,7 +270,7 @@ SIRGAS2000<br>
 
         pnts_UTM = {}
         for feat in vertices.getFeatures():
-            pnt = feat.geometry().asMultiPoint()[0]
+            pnt = feat.geometry().asPoint()
             pnts_UTM[feat['sequence']] = [coordinateTransformer.transform(pnt), feat['code'], pnt]
 
         # Cálculo dos Azimutes e Distâncias

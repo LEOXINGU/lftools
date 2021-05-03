@@ -239,7 +239,7 @@ class DescriptiveTable(QgsProcessingAlgorithm):
 
         pnts_UTM = {}
         for feat in vertices.getFeatures():
-            pnt = feat.geometry().asMultiPoint()[0]
+            pnt = feat.geometry().asPoint()
             pnts_UTM[feat['sequence']] = [coordinateTransformer.transform(pnt), feat['tipo'], feat['codigo'], MeridianConvergence(pnt.x(), pnt.y(), crsDest) ]
 
         # Calculo dos Azimutes e Distancias
