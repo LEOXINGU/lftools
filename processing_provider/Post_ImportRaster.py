@@ -100,7 +100,7 @@ class ImportRaster(QgsProcessingAlgorithm):
     NAMECOL = 'NAMECOL'
     TILING = 'TILING'
     OVERVIEW = 'OVERVIEW'
-    versions = ['9.6', '10', '11', '12', '13']
+    versions = ['9.5', '9.6', '10', '11', '12', '13']
 
     def initAlgorithm(self, config=None):
         # INPUT
@@ -163,7 +163,7 @@ class ImportRaster(QgsProcessingAlgorithm):
                 self.VERSION,
                 self.tr('PostgreSQL version', 'Versão do PostgreSQL'),
 				options = self.versions,
-                defaultValue= 1
+                defaultValue= 2
             )
         )
 
@@ -309,12 +309,18 @@ class ImportRaster(QgsProcessingAlgorithm):
 
         # Procurando arquivo psql
         win64 = 'C:/Program Files (x86)/PostgreSQL/'+version+'/bin'
+        win64d = 'D:/Program Files (x86)/PostgreSQL/'+version+'/bin'
         win32 = 'C:/Program Files/PostgreSQL/'+version+'/bin'
+        win32d = 'D:/Program Files/PostgreSQL/'+version+'/bin'
         mac = '/Library/PostgreSQL/'+version+'/bin/'
         if os.path.isdir(win64):
             os.chdir(win64)
+        elif os.path.isdir(win64d):
+            os.chdir(win64d)
         elif os.path.isdir(win32):
             os.chdir(win32)
+        elif os.path.isdir(win32d):
+            os.chdir(win32d)
         elif os.path.isdir(mac):
             os.chdir(mac)
         else:

@@ -247,7 +247,7 @@ class InventoryRaster(QgsProcessingAlgorithm):
         feedback.pushInfo(self.tr('Creating raster files...', 'Criando inventário de arquivos raster...'))
         for current, file_path in enumerate(lista):
             image = gdal.Open(file_path) # https://gdal.org/python/
-            prj=image.GetProjection() # wkt
+            prj = image.GetProjection() # wkt
             ulx, xres, xskew, uly, yskew, yres  = image.GetGeoTransform()
             GDT = image.GetRasterBand(1).DataType
             n_bands = image.RasterCount

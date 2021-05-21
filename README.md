@@ -104,6 +104,9 @@
         <li><a href="#rescale-to-8-bit">Rescale to 8 bit</a></li>
       </ul>
       <ul>
+        <li><a href="#save-as-jpeg">Save as JPEG</a></li>
+      </ul>
+      <ul>
         <li><a href="#supervised-classification">Supervised classification</a></li>
       </ul>
       </li><li>
@@ -285,6 +288,9 @@
       </ul>
       <ul>
         <li><a href="#remover-banda-alfa">Remover banda alfa</a></li>
+      </ul>
+      <ul>
+        <li><a href="#salvar-como-jpeg">Salvar como JPEG</a></li>
       </ul>
       </li><li>
       <a href="#reambulação">Reambulação</a>
@@ -657,6 +663,18 @@ Rescales the values of the raster pixels with radiometric resolution of 16 bits 
   <tbody>
     <tr>
       <td><img src="images/tutorial/raster_histogram.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Save as JPEG
+Exports any 8 bit RGB or RGBA raster layer as a JPEG file. Ideal for reducing the size of the output file. It performs a lossy JPEG compression that, in general, the loss of quality goes unnoticed visually.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/raster_jpeg_tfw.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1327,6 +1345,18 @@ Esta ferramenta remove a 4ª banda (banda alfa), transferindo a informação de 
   <tbody>
     <tr>
       <td><img src="images/tutorial/raster_remove_alpha.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Salvar como JPEG
+Exporta qualquer camada raster RGB ou RGBA de 8 bits como um arquivo JPEG. Ideal para reduzir o tamanho do arquivo de saída. Realiza a compressão JPEG com uma pequena perda de qualidade que, em geral, passa despercebida visualmente.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/raster_jpeg_tfw.jpg"></td>
     </tr>
   </tbody>
 </table>

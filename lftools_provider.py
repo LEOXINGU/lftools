@@ -58,6 +58,7 @@ from lftools.processing_provider.Rast_mosaicRaster import MosaicRaster
 from lftools.processing_provider.Rast_removeAlphaBand import RemoveAlphaBand
 from lftools.processing_provider.Rast_rescaleTo8bits import RescaleTo8bits
 from lftools.processing_provider.Rast_supervisedClassification import SupervisedClassification
+from lftools.processing_provider.Rast_saveAsJPEG import SaveAsJPEG
 from lftools.processing_provider.Reamb_ImportPhotos import ImportPhotos
 from lftools.processing_provider.Vect_DirectionalMerge import DirectionalMerge
 from lftools.processing_provider.Vect_ExtendLines import ExtendLines
@@ -135,6 +136,7 @@ class LFToolsProvider(QgsProcessingProvider):
         self.addAlgorithm(RenameDB())
         self.addAlgorithm(ImportRaster())
         self.addAlgorithm(ChangeEnconding())
+        self.addAlgorithm(SaveAsJPEG())
 
     def id(self):
         return 'lftools'
