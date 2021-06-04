@@ -81,7 +81,7 @@ def dd2dms(dd, n_digits):
 
 
 def dms2dd(txt):
-    txt = txt.replace(' ','').replace(',','.')
+    txt = txt.replace(' ','').replace('\t','').replace(',','.')
     newtxt =''
     for letter in txt:
         if not letter.isnumeric() and letter != '.' and letter != '-':

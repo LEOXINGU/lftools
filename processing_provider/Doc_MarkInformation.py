@@ -86,7 +86,7 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/document.png'))
 
     txt_en = 'This tool generates report(s) with the informations about a geodetic landmarks automatically from the "reference_point_p" layer.'
-    txt_pt = 'Esta ferramenta gera monografia(s) de marcos geodésicos de forma automática a partir da camada "pto_ref_geod_topo_p".'
+    txt_pt = 'Esta ferramenta gera monografia(s) de marcos geodésicos de forma automática a partir da camada "reference_point_p".'
     figure = 'images/tutorial/doc_mark.jpg'
 
     def shortHelpString(self):
