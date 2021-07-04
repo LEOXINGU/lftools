@@ -37,7 +37,7 @@ from lftools.geocapt.cartography import (map_sistem,
 from lftools.geocapt.topogeo import (dd2dms as DD2DMS,
                                      dms2dd as DMS2DD,
                                      azimute, str2HTML)
-from numpy import array, pi, sqrt
+from numpy import array, pi, sqrt, median
 import unicodedata
 import re
 # https://qgis.org/pyqgis/3.2/core/Expression/QgsExpression.html
@@ -60,11 +60,12 @@ def fieldstat(layer_name, field_name, type, feature, parent):
     ''' Returns the Aggregate function of a layer's field.
         <h2>Example usage:</h2>
         <ul>
-          <li>fieldstat('layer_name', 'field_name', 'sum') ->Sum of values</li>
-          <li>fieldstat('layer_name', 'field_name', 'min') ->Min of values</li>
-          <li>fieldstat('layer_name', 'field_name', 'max') ->Max of values</li>
-          <li>fieldstat('layer_name', 'field_name', 'mean') ->Mean of values</li>
-          <li>fieldstat('layer_name', 'field_name', 'std') ->Standard Deviation of values</li>
+          <li>fieldstat('layer_name', 'field_name', 'sum') ->Sum of the values</li>
+          <li>fieldstat('layer_name', 'field_name', 'min') ->Min of the values</li>
+          <li>fieldstat('layer_name', 'field_name', 'max') ->Max of the values</li>
+          <li>fieldstat('layer_name', 'field_name', 'mean') ->Mean of the values</li>
+          <li>fieldstat('layer_name', 'field_name', 'std') ->Standard Deviation of the values</li>
+          <li>fieldstat('layer_name', 'field_name', 'median') ->Median of the values</li>
         </ul>'''
     lista = []
 
@@ -87,6 +88,8 @@ def fieldstat(layer_name, field_name, type, feature, parent):
         return  float((array(lista)).mean())
     elif type == 'std':
         return  float((array(lista)).std())
+    elif type == 'median':
+        return  float(median(array(lista)))
     else:
         return None
 
