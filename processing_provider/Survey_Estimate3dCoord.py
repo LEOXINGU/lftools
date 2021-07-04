@@ -78,12 +78,19 @@ class Estimate3dCoord(QgsProcessingAlgorithm):
 
     def shortHelpString(self):
         social_BW = Imgs().social_BW
+        nota_en = '''Notes: Data collected in the discipline of <i>Geodetic Surveys</i> in the Graduate Program at UFPE, in field work coordinated by <b>Prof. Dr. Andrea de Seixas</b>.
+For more information on the methodology used, please read the article at the link below:'''
+        nota_pt = '''Notas: Dados coletados na disciplina de <i>Levantamentos Geodésicos</i> no programa de Pós-Graduação da UFPE, em trabalho de campo coordenado pela <b>Profa. Dra. Andrea de Seixas</b>.
+Para mais informações sobre a metodologia utilizada, por favor leia o artigo no link abaixo:'''
         footer = '''<div align="center">
                       <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), self.figure) +'''">
                       </div>
                       <div align="right">
+                      <div>''' + self.tr(nota_en, nota_pt) + '''
+                      </div>
                       <p align="right">
-                      <b>'''+self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
+                      <b><a href="https://www.researchgate.net/publication/352817150_OPTIMIZED_DETERMINATION_OF_3D_COORDINATES_IN_THE_SURVEY_OF_INACCESSIBLE_POINTS_OF_BUILDINGS_-_EXAMPLE_OF_APPLICATION_IMPLEMENTED_IN_FREE_SOFTWARE_Determinacao_otimizada_de_coordenadas_3D_no_levantamen" target="_blank">'''+self.tr('FRANCA, L.; DE SEIXAS, A.; GAMA, L.; MORAES, J. Optimized determination of 3D coordinates in the survey of  inaccessible  points  of  buildings - example  of  application implemented  in  free  software.  Bulletin  of Geodetic  Sciences.  27(2): e2021017, 2021. ') + '''</b>
+                                    ''' +'</a><br><br><b>'+ self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
                       </p>'''+ social_BW + '''</div>
                     </div>'''
         return self.tr(self.txt_en, self.txt_pt) + footer
