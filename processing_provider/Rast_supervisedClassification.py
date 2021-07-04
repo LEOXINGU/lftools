@@ -110,6 +110,7 @@ class SupervisedClassification(QgsProcessingAlgorithm):
     RasterIN ='RasterIN'
     RasterOUT = 'RasterOUT'
     CLASSES = 'CLASSES'
+    FIELD = 'FIELD'
     METHOD = 'METHOD'
     SIZE = 'SIZE'
     OPEN = 'OPEN'
@@ -127,8 +128,17 @@ class SupervisedClassification(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.CLASSES,
-                self.tr('Polygon layer'),
+                self.tr('Sample Polygons', 'Polígonos de Amostra'),
                 [QgsProcessing.TypeVectorPolygon]
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterField(
+                self.FIELD,
+                self.tr('Class Field', 'Campo da Classe'),
+                parentLayerParameterName=self.CLASSES,
+                type=QgsProcessingParameterField.Numeric
             )
         )
 
@@ -195,6 +205,13 @@ class SupervisedClassification(QgsProcessingAlgorithm):
         if layer is None:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.CLASSES))
 
+        campo = self.parameterAsFields(
+            parameters,
+            self.FIELD,
+            context
+        )
+        if campo is None:
+            raise QgsProcessingException(self.invalidSourceError(parameters, self.FIELD))
 
         metodo = self.parameterAsEnum(
             parameters,
@@ -226,15 +243,16 @@ class SupervisedClassification(QgsProcessingAlgorithm):
         prj=image.GetProjection()
         geotransform = image.GetGeoTransform()
         num_bands = image.RasterCount
+        if num_bands < 2:
+            raise QgsProcessingException(self.tr('The raster layer must have more than 1 band!', 'A camada raster deve ter mais de 1 banda!'))
         bandas = []
         for k in range(num_bands):
             bandas += [image.GetRasterBand(k+1).ReadAsArray()]
         Pixel_Nulo = image.GetRasterBand(1).GetNoDataValue()
         if Pixel_Nulo == None:
             Pixel_Nulo = 0
-        n_bands = image.RasterCount # Número de bandas
-        cols = image.RasterXSize # Number of columns
-        rows = image.RasterYSize # Number of rows
+        cols = image.RasterXSize
+        rows = image.RasterYSize
         # Origem e resolucao da imagem
         ulx, xres, xskew, uly, yskew, yres  = image.GetGeoTransform()
         origem = (ulx, uly)
@@ -248,7 +266,7 @@ class SupervisedClassification(QgsProcessingAlgorithm):
         # Amostra de Raster por poligono
         dic = {}
         for feat in layer.getFeatures():
-            code = feat['tipo']
+            code = feat[campo[0]]
             if code not in dic:
                 bands_dic = {}
                 for k in range(n_bands):
@@ -376,7 +394,6 @@ class SupervisedClassification(QgsProcessingAlgorithm):
                     classe = None
                     for code in dic:
                         m = dic[code]['media']
-                        MVC_inv = dic[code]['MVC_inv']
                         dist = (px - m).T*(px - m)
                         if dist[0][0] < min_dist:
                             min_dist = dist[0][0]
