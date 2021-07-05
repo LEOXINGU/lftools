@@ -242,11 +242,11 @@ class SupervisedClassification(QgsProcessingAlgorithm):
         image = gdal.Open(RasterIN)
         prj=image.GetProjection()
         geotransform = image.GetGeoTransform()
-        num_bands = image.RasterCount
-        if num_bands < 2:
+        n_bands = image.RasterCount
+        if n_bands < 2:
             raise QgsProcessingException(self.tr('The raster layer must have more than 1 band!', 'A camada raster deve ter mais de 1 banda!'))
         bandas = []
-        for k in range(num_bands):
+        for k in range(n_bands):
             bandas += [image.GetRasterBand(k+1).ReadAsArray()]
         Pixel_Nulo = image.GetRasterBand(1).GetNoDataValue()
         if Pixel_Nulo == None:

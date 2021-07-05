@@ -277,8 +277,8 @@ class Extent2UTMGrid(QgsProcessingAlgorithm):
         d_lon = deltas[:, escalas.index(escala)][0]
         d_lat = deltas[:, escalas.index(escala)][1]
 
-        LON = arange(lon_min + 1e-10, lon_max + 1e-10 + d_lon, d_lon)
-        LAT = arange(lat_min + 1e-10, lat_max+ 1e-10 + d_lat, d_lat)
+        LON = arange(lon_min + 1e-10 - d_lon, lon_max + 1e-10 + d_lon, d_lon)
+        LAT = arange(lat_min + 1e-10 - d_lat, lat_max+ 1e-10 + d_lat, d_lat)
 
         Percent = 100.0/(len(LON)*len(LAT))
         current = 0
@@ -325,7 +325,7 @@ class Extent2UTMGrid(QgsProcessingAlgorithm):
                             feat['mi'] = dicionario[inom100k[:-1]]
 
                 if tam_carta:
-                    zone, hemisf = FusoHemisf(lon, lat)
+                    zone, hemisf = FusoHemisf(QgsPointXY(lon, lat))
                     feat[self.tr('height', 'altura')] = float(ChartSize(geom, zone, hemisf, escala)[0])
                     feat[self.tr('width', 'largura')] = float(ChartSize(geom, zone, hemisf, escala)[1])
 
@@ -333,7 +333,7 @@ class Extent2UTMGrid(QgsProcessingAlgorithm):
                     feat[self.tr('MC', 'CM')] = float(MeridianConvergence(centroide.x(), centroide.y(), crs))
 
                 if zone_hemisf:
-                    zone, hemisf = FusoHemisf(lon, lat)
+                    zone, hemisf = FusoHemisf(QgsPointXY(lon, lat))
                     feat[self.tr('zone_hemisphere', 'fuso_hemisfério')] = str(zone)+hemisf
 
                 # Coordinate Transformations (if needed)

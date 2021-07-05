@@ -117,6 +117,7 @@ class MeasureLayers(QgsProcessingAlgorithm):
             )
         )
 
+
     def processAlgorithm(self, parameters, context, feedback):
 
         units_dist = self.parameterAsEnum(
@@ -154,6 +155,7 @@ class MeasureLayers(QgsProcessingAlgorithm):
         total = 100.0 / num_camadas if num_camadas else 0
 
         layers = QgsProject.instance().mapLayers()
+
         for current, layer in enumerate(layers.values()):
             if feedback.isCanceled():
                 break

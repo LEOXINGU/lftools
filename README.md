@@ -71,6 +71,9 @@
       </li><li>
       <a href="#raster">Raster</a>
       <ul>
+        <li><a href="#binary-thresholding">Binary Thresholding</a></li>
+      </ul>
+      <ul>
         <li><a href="#create-holes-in-raster">Create holes in raster</a></li>
       </ul>
       <ul>
@@ -276,6 +279,9 @@
       </ul>
       <ul>
         <li><a href="#inventário-de-dados-raster">Inventário de dados raster</a></li>
+      </ul>
+      <ul>
+        <li><a href="#limiarização-binária">Limiarização Binária</a></li>
       </ul>
       <ul>
         <li><a href="#mosaicar-raster">Mosaicar raster</a></li>
@@ -535,6 +541,18 @@ This tool allows you to restore a database content by importing all the backup i
 
 ## Raster
 
+
+### Binary Thresholding
+Creates a binarized raster by dividing the input raster into two distinct classes from statistical data (lower and upper threshold) of area samples.</br>A class matches the values within the range of thresholds, where the value 1 (true) is returned. The other class corresponds to values outside the range, returning the value 0 (false).
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/raster_thresholding.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 ### Create holes in raster
 Creates holes in Raster by defining "no data" pixels (transparent) from the Polygon Layer.
@@ -1031,7 +1049,7 @@ Esta ferramenta gera a Tabela Descriva de Vértices e Lados, também conhecida c
 </div>
 
 ### Monografia de marco geodésico
-Esta ferramenta gera monografia(s) de marcos geodésicos de forma automática a partir da camada "pto_ref_geod_topo_p".
+Esta ferramenta gera monografia(s) de marcos geodésicos de forma automática a partir da camada "reference_point_p".
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
@@ -1297,6 +1315,18 @@ Cria uma camada vetorial com o inventário de arquivos raster de uma pasta. O ti
   <tbody>
     <tr>
       <td><img src="images/tutorial/raster_inventory.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Limiarização Binária
+Cria um raster binarizado, dividindo o raster de entrada em duas classes distintas a partir de dados estatísticos (limiar inferior e superior) de amostras de áreas.</br>Uma classe irá corresponder aos valores compreendidos dentro do intervalo dos limiares, sendo retornado o valor 1 (verdadeiro). Já a outra classe correpondem aos valores fora do intervalo, sendo retornado o valor 0 (falso).
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/raster_thresholding.jpg"></td>
     </tr>
   </tbody>
 </table>
