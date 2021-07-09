@@ -91,12 +91,19 @@ Default: coordenadas de origem para Recife-PE, Brasil.'''
 
     def shortHelpString(self):
         social_BW = Imgs().social_BW
+        nota_en = '''Note: Example data obtained from Mendonça et al. (2010).
+Reference:'''
+        nota_pt = '''Nota: Dados de exemplo obtidos de Mendonça et al. (2010).
+Referência:'''
         footer = '''<div align="center">
                       <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), self.figure) +'''">
                       </div>
                       <div align="right">
+                      <div>''' + self.tr(nota_en, nota_pt) + '''
+                      </div>
                       <p align="right">
-                      <b>'''+self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
+                      <b><a href="https://www.ufpe.br/documents/988417/989713/ajustamento+mmq+jaime+-+final.pdf/30ce7242-0857-448c-af14-fa196fa2112b" target="_blank">'''+self.tr('Mendonça, F. J. B., GARNÉS, S. D. A., Pereira, C. M., Neto, J. B., & Melo, W. D. A. (2010). Análise do ajustamento por mínimos quadrados de uma trilateração topográfica com injunções nos planos UTM e Topocêntrico. III Simpósio Brasileiro de Ciências Geodésicas e Tecnologias da Geoinformação, 001-009.') + '''</b>
+                                    ''' +'</a><br><b>'+ self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
                       </p>'''+ social_BW + '''</div>
                     </div>'''
         return self.tr(self.txt_en, self.txt_pt) + footer

@@ -77,12 +77,16 @@ class ClosedPolygonal(QgsProcessingAlgorithm):
 
     def shortHelpString(self):
         social_BW = Imgs().social_BW
+        nota_en = '''Note: Sample data obtained from class notes of the Geodetic Survey discipline at UFPE.
+'''
+        nota_pt = '''Nota: Dados de exemplo obtidos das notas de aula da disciplina de Levantamento Geodésicos na UFPE.
+'''
         footer = '''<div align="center">
                       <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), self.figure) +'''">
                       </div>
                       <div align="right">
-                      <p align="right">
-                      <b>'''+self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
+                      <div>''' + self.tr(nota_en, nota_pt) + '''
+                      ''' +'</a><br><b>'+ self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
                       </p>'''+ social_BW + '''</div>
                     </div>'''
         return self.tr(self.txt_en, self.txt_pt) + footer

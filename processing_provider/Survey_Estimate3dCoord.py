@@ -90,7 +90,7 @@ Para mais informações sobre a metodologia utilizada, por favor leia o artigo n
                       </div>
                       <p align="right">
                       <b><a href="https://www.researchgate.net/publication/352817150_OPTIMIZED_DETERMINATION_OF_3D_COORDINATES_IN_THE_SURVEY_OF_INACCESSIBLE_POINTS_OF_BUILDINGS_-_EXAMPLE_OF_APPLICATION_IMPLEMENTED_IN_FREE_SOFTWARE_Determinacao_otimizada_de_coordenadas_3D_no_levantamen" target="_blank">'''+self.tr('FRANCA, L.; DE SEIXAS, A.; GAMA, L.; MORAES, J. Optimized determination of 3D coordinates in the survey of  inaccessible  points  of  buildings - example  of  application implemented  in  free  software.  Bulletin  of Geodetic  Sciences.  27(2): e2021017, 2021. ') + '''</b>
-                                    ''' +'</a><br><br><b>'+ self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
+                                    ''' +'</a><br><b>'+ self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
                       </p>'''+ social_BW + '''</div>
                     </div>'''
         return self.tr(self.txt_en, self.txt_pt) + footer

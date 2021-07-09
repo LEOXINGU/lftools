@@ -99,12 +99,19 @@ Uma classe irá corresponder aos valores compreendidos dentro do intervalo dos l
 
     def shortHelpString(self):
         social_BW = Imgs().social_BW
+        nota_en = '''Note: Binary thresholding is one of the easiest and fastest ways to classify an image from an index such as NDVI. This algorithm can be used to identify areas with vegetation cover using an index such as the NDVI (França et al., 2017).
+Reference:'''
+        nota_pt = '''Nota: A binarização é uma das formas mais fáceis e rápidas para classificar uma imagem a partir de um índice como o NDVI. Este algoritmo pode ser utilizado para identificar áreas com cobertura vegetal a partir de um índice como o NDVI (França et al., 2017).
+Referência:'''
         footer = '''<div align="center">
                       <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), self.figure) +'''">
                       </div>
                       <div align="right">
+                      <div>''' + self.tr(nota_en, nota_pt) + '''
+                      </div>
                       <p align="right">
-                      <b>'''+self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
+                      <b><a href="https://www.researchgate.net/publication/320020755_Mapping_of_the_spatial-temporal_change_for_vegetation_canopy_in_rough_relief_areas" target="_blank">'''+self.tr('FRANÇA, L. L. S.; SILVA, L. F. C. F.; SILVA, W. B. Mapping of the spatial-temporal change for vegetation canopy in rough relief areas. R. bras. Geom., Curitiba, v. 5, n. 3, p. 343-360, jul/set. 2017.') + '''</b>
+                                    ''' +'</a><br><b>'+ self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
                       </p>'''+ social_BW + '''</div>
                     </div>'''
         return self.tr(self.txt_en, self.txt_pt) + footer
@@ -144,7 +151,7 @@ Uma classe irá corresponder aos valores compreendidos dentro do intervalo dos l
                 self.METHOD,
                 self.tr('Calculation of thresholds', 'Cálculo dos limiares'),
 				options = opcoes,
-                defaultValue= 0
+                defaultValue= 3
             )
         )
 
@@ -152,7 +159,7 @@ Uma classe irá corresponder aos valores compreendidos dentro do intervalo dos l
         self.addParameter(
             QgsProcessingParameterFileDestination(
                 self.RasterOUT,
-                self.tr('Thresholded raster', 'Imagem limiarizada'),
+                self.tr('Binarized raster', 'Imagem binarizada'),
                 fileFilter = '.tif'
             )
         )
@@ -160,7 +167,7 @@ Uma classe irá corresponder aos valores compreendidos dentro do intervalo dos l
         self.addParameter(
             QgsProcessingParameterBoolean(
                 self.OPEN,
-                self.tr('Load thresholded image', 'Carregar imagem limiarizada'),
+                self.tr('Load binarized image', 'Carregar imagem binarizada'),
                 defaultValue= True
             )
         )
@@ -320,6 +327,6 @@ Uma classe irá corresponder aos valores compreendidos dentro do intervalo dos l
     CARREGAR = True
     def postProcessAlgorithm(self, context, feedback):
         if self.CARREGAR:
-            rlayer = QgsRasterLayer(self.CAMINHO, self.tr('Thresholded raster', 'Imagem limiarizada'))
+            rlayer = QgsRasterLayer(self.CAMINHO, self.tr('Binarized raster', 'Imagem binarizada'))
             QgsProject.instance().addMapLayer(rlayer)
         return {}
