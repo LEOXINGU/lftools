@@ -140,7 +140,6 @@ Referência:'''
             )
         )
 
-
         opcoes = [self.tr('Min / Max'),
                   self.tr('Quantile (2% - 98%)', 'Quantil (2% - 98%)'),
                   self.tr('Mean ± 2*stdDev', 'Média ± 2*desvPad'),
