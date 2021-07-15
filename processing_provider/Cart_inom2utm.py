@@ -19,7 +19,7 @@ from PyQt5.QtCore import QCoreApplication, QVariant
 from qgis.core import *
 from numpy import array
 from lftools.geocapt.imgs import Imgs
-from lftools.geocapt.cartography import reprojectPoints, mi2inom
+from lftools.geocapt.cartography import reprojectPoints, mi2inom, inom2mi
 import os
 from qgis.PyQt.QtGui import QIcon
 
@@ -256,12 +256,24 @@ class Inom2utmGrid(QgsProcessingAlgorithm):
             att = [inom, mi, escala]
         else:
             inom = nome
-            mi = None
-            for MI, val in dicionario.items():
-                if val == inom:
-                    mi = MI
+            lista = inom.split('-')
+            inom100k = ''
+            if len(lista) >= 5:
+                for t in range(5):
+                    inom100k += lista[t] + '-'
+                inom100k = inom100k[:-1]
+                if inom100k in inom2mi:
+                    mi = inom2mi[inom100k]
+                    for k in range(5,len(lista)):
+                        mi += '-' + lista[k]
+                else:
+                    mi = None
+            else:
+                mi = None
+
             att = [inom, mi, escala]
-        feedback.pushInfo('INOM: {} e MI: {}'.format(inom, mi))
+        feedback.pushInfo('INOM: {}'.format(inom))
+        feedback.pushInfo('MI: {}'.format(mi))
         feat.setGeometry(geom)
         feat.setAttributes(att)
         sink.addFeature(feat, QgsFeatureSink.FastInsert)
