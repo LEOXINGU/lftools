@@ -44,6 +44,7 @@ import shutil
 from lftools.geocapt.imgs import Imgs
 import os
 from qgis.PyQt.QtGui import QIcon
+import exifread
 
 class ImportPhotos(QgsProcessingAlgorithm):
 
@@ -108,7 +109,7 @@ class ImportPhotos(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFile(
                 self.FOLDER,
-                self.tr('Folder with JPEG photos', 'Pasta com fotos JPEG'),
+                self.tr('Folder with geotagged photos', 'Pasta de fotos com Geotag'),
                 behavior=QgsProcessingParameterFile.Folder,
                 defaultValue=None
             )
@@ -256,7 +257,35 @@ class ImportPhotos(QgsProcessingAlgorithm):
                     feature.setAttributes([arquivo, lon, lat, altitude, Az, date_time, os.path.join(pasta, arquivo)])
                     sink.addFeature(feature, QgsFeatureSink.FastInsert)
                 else:
-                    print()
+                    feedback.pushInfo(self.tr('The file "{}" has no geotag!'.format(arquivo), 'A imagem "{}" não possui geotag!'.format(arquivo)))
+                    if copy_ngeo:
+                        shutil.copy2(os.path.join(pasta, arquivo), os.path.join(fotos_nao_geo, arquivo))
+            elif (arquivo).lower().endswith(('.tif')):
+                f = open(os.path.join(pasta,arquivo), 'rb')
+                tags = exifread.process_file(f)
+
+                lon, lat = 0, 0
+                Az = None
+                date_time = None
+                altitude = None
+
+                if 'GPS GPSLatitudeRef' in tags:
+                    lat_ref = str(tags['GPS GPSLatitudeRef'])
+                    lat = eval(str(tags['GPS GPSLatitude']))
+                    lat = (-1 if lat_ref.upper() == 'S' else 1)*(lat[0] + lat[1]/60 + lat[2]/3600)
+                    lon_ref = str(tags['GPS GPSLongitudeRef'])
+                    lon = eval(str(tags['GPS GPSLongitude']))
+                    lon = (-1 if lon_ref.upper() == 'W' else 1)*(lon[0] + lon[1]/60 + lon[2]/3600)
+                    alt_ref = str(tags['GPS GPSAltitudeRef'])
+                    altitude = eval(str(tags['GPS GPSAltitude']))
+                    date_time = data_hora(str(tags['EXIF DateTimeOriginal'])) # 'EXIF DateTimeDigitized', 'Image DateTime'
+
+                    if lon != 0:
+                        feature = QgsFeature(fields)
+                        feature.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(lon, lat)))
+                        feature.setAttributes([arquivo, lon, lat, altitude, Az, date_time, os.path.join(pasta, arquivo)])
+                        sink.addFeature(feature, QgsFeatureSink.FastInsert)
+                else:
                     feedback.pushInfo(self.tr('The file "{}" has no geotag!'.format(arquivo), 'A imagem "{}" não possui geotag!'.format(arquivo)))
                     if copy_ngeo:
                         shutil.copy2(os.path.join(pasta, arquivo), os.path.join(fotos_nao_geo, arquivo))
