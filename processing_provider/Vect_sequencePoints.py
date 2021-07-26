@@ -34,7 +34,7 @@ from qgis.PyQt.QtGui import QIcon
 
 class SequencePoints(QgsProcessingAlgorithm):
     POINTS = 'POINTS'
-    POLYGONS = 'POLYGONS'
+    POLYGON = 'POLYGON'
     FIELD = 'FIELD'
     SAVE = 'SAVE'
     LOC = QgsApplication.locale()[:2]
@@ -113,7 +113,7 @@ class SequencePoints(QgsProcessingAlgorithm):
 
         self.addParameter(
             QgsProcessingParameterVectorLayer(
-                self.POLYGONS,
+                self.POLYGON,
                 self.tr('Polygon', 'Polígono'),
                 [QgsProcessing.TypeVectorPolygon]
             )
@@ -137,42 +137,61 @@ class SequencePoints(QgsProcessingAlgorithm):
         if pontos is None:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.POINTS))
 
-        poligonos = self.parameterAsVectorLayer(
+        poligono = self.parameterAsVectorLayer(
             parameters,
-            self.POLYGONS,
+            self.POLYGON,
             context
         )
-        if poligonos is None:
-            raise QgsProcessingException(self.invalidSourceError(parameters, self.POLYGONS))
+        if poligono is None:
+            raise QgsProcessingException(self.invalidSourceError(parameters, self.POLYGON))
 
         campo = self.parameterAsFields(
             parameters,
             self.FIELD,
             context
         )
-        if poligonos is None:
+        if campo is None:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.FIELD))
 
         columnIndex = pontos.fields().indexFromName(campo[0])
 
-        pontos.startEditing() # coloca no modo edição
-        total = 100.0 / poligonos.featureCount() if poligonos.featureCount() else 0
+        # As duas camadas devem ter o mesmo SRC
+        if poligono.crs() != pontos.crs():
+            raise QgsProcessingException(self.tr('Both layers must have the same CRS!', 'As duas camadas devem ter o mesmo SRC!'))
 
-        for current, pol in enumerate(poligonos.getFeatures()):
-            cont = 0
-            geom = pol.geometry()
-            if geom.isMultipart():
-                coords = geom.asMultiPolygon()[0][0]
-            else:
-                coords = geom.asPolygon()[0]
-            for vertice in coords[:-1]:
-                vertice_geom = QgsGeometry.fromPointXY(vertice)
-                for pnt in pontos.getFeatures():
-                    pnt_geom = pnt.geometry()
-                    if vertice_geom.intersects(pnt_geom):
-                        cont += 1
-                        pontos.changeAttributeValue(pnt.id(), columnIndex, cont)
-            feedback.setProgress(int(current * total))
+        # Camada de polígonos deve ter apenas 1 polígono
+        if poligono.featureCount() != 1:
+            raise QgsProcessingException(self.tr('Polygon layer must have only 1 feature!', 'A camada do tipo polígono deve ter apenas 1 feição!'))
+
+        for feat in poligono.getFeatures():
+            pol = feat.geometry()
+
+        if pol.isMultipart():
+            coords = pol.asMultiPolygon()[0][0]
+        else:
+            coords = pol.asPolygon()[0]
+
+        # Número de vértices do ponlígono deve ser igual ao número de pontos+1
+        if (len(coords)-1) != pontos.featureCount():
+            raise QgsProcessingException(self.tr('The number of points must equal the number of vertices of the polygon!', 'O número de pontos deve ser igual ao número de vértices do polígono!'))
+
+
+        pontos.startEditing() # coloca no modo edição
+        total = 100.0 / (len(coords)-1)
+
+        def norma1(p1, p2):
+            return abs(p1.x() - p2.x()) + abs(p1.y() - p2.y())
+
+        for cont, vertice in enumerate(coords[:-1]):
+            dist1 = 1e9
+            pnt_id = None
+            for feat in pontos.getFeatures():
+                pnt = feat.geometry().asPoint()
+                if norma1(vertice, pnt) < dist1:
+                    dist1 = norma1(vertice, pnt)
+                    pnt_id = feat.id()
+            pontos.changeAttributeValue(pnt_id, columnIndex, cont+1)
+            feedback.setProgress(int((cont+1) * total))
 
         salvar = self.parameterAsBool(
             parameters,

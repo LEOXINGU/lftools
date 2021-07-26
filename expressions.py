@@ -246,7 +246,7 @@ def deedtable(layer_name, ini, fim, titulo, fontsize, feature, parent):
     <p>Note: The table title must be inserted as string.</p>
     <h2>Exemple:</h2>
     <ul>
-      <li>deedtable('layer_name', start, end, 'title','fontsize') = HTML</li>
+      <li>deedtable('layer_name', start, end, 'title',fontsize) = HTML</li>
       <li>deedtable('Limit Point', 1, 20, 'Area X',10) = HTML</li>
     </ul>
     """

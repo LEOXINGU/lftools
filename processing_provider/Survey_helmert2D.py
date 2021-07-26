@@ -291,6 +291,7 @@ Esta transformação envolve: Escala, Rotação e Translação.
   <meta content="text/html; charset=ISO-8859-1"
  http-equiv="content-type">
   <title>Helmert 2D</title>
+  <link rel = "icon" href = "https://github.com/LEOXINGU/lftools/blob/main/images/lftoos.png?raw=true" type = "image/x-icon">
 </head>
 <body
  style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 204);"

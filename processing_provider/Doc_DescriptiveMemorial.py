@@ -100,8 +100,9 @@ class DescriptiveMemorial(QgisAlgorithm):
                                          'Esta ferramenta funciona adequadamente com os dados na modelagem "topogeo".') + '''
                       </div>
                       <p align="right">
-                      <b><a href="https://www.researchgate.net/publication/346925730_PROPOSICAO_METODOLOGICA_COM_EMPREGO_DE_SOFTWARE_LIVRE_PARA_A_ELABORACAO_DE_DOCUMENTOS_DE_LEVANTAMENTO_TOPOGRAFICO_DE_IMOVEIS_DA_UNIAO_Methodological_proposition_with_the_use_of_free_software_for_the_p" target="_blank">'''+self.tr('Click here for more informations.',
-                                    'Clique aqui para saber mais sobre essa modelagem.') +'</a><br><br>'+ self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
+                      <b><a href="'''+ self.tr('https://www.researchgate.net/publication/346925730_PROPOSICAO_METODOLOGICA_COM_EMPREGO_DE_SOFTWARE_LIVRE_PARA_A_ELABORACAO_DE_DOCUMENTOS_DE_LEVANTAMENTO_TOPOGRAFICO_DE_IMOVEIS_DA_UNIAO_Methodological_proposition_with_the_use_of_free_software_for_the_p',
+                      'https://geoone.com.br/ebook_gratis/') + '''" target="_blank">'''+ self.tr('Click here for understanding this data model.',
+                                    'Clique aqui para entender esse modelo de dados') +'</a><br><br>'+ self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
                       </p>'''+ social_BW + '''</div>
                     </div>'''
         return self.tr(self.txt_en, self.txt_pt) + footer
@@ -242,6 +243,7 @@ class DescriptiveMemorial(QgisAlgorithm):
       <meta content="text/html; charset=ISO-8859-1"
      http-equiv="content-type">
       <title>'''+ self.tr('Descriptive memorial', 'Memorial descritivo') + '''</title>
+      <link rel = "icon" href = "https://github.com/LEOXINGU/lftools/blob/main/images/lftoos.png?raw=true" type = "image/x-icon">
     </head>
     <body>
     <div style="text-align: center;"><span style="font-weight: bold;"><br>
@@ -356,7 +358,7 @@ class DescriptiveMemorial(QgisAlgorithm):
                 '[UF]': feat1['state'],
                 '[MATRICULAS]': str2HTML(feat1['transcript']),
                 '[AREA]': self.tr('{:,.2f}'.format(feat1['area']), '{:,.2f}'.format(feat1['area']).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                '[SRC]': SRC,
+                '[SRC]': self.tr(SRC, SRC.replace('zone', 'fuso')),
                 '[REGISTRO]': str2HTML(feat1['registry']),
                 '[MUNICIPIO]': str2HTML(feat1['county']),
                 '[PERIMETRO]': self.tr('{:,.2f}'.format(feat1['perimeter']), '{:,.2f}'.format(feat1['perimeter']).replace(',', 'X').replace('.', ',').replace('X', '.')),

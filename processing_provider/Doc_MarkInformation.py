@@ -99,8 +99,9 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
                                          'Esta ferramenta funciona adequadamente com os dados na modelagem "topogeo".') + '''
                       </div>
                       <p align="right">
-                      <b><a href="https://www.researchgate.net/publication/346925730_PROPOSICAO_METODOLOGICA_COM_EMPREGO_DE_SOFTWARE_LIVRE_PARA_A_ELABORACAO_DE_DOCUMENTOS_DE_LEVANTAMENTO_TOPOGRAFICO_DE_IMOVEIS_DA_UNIAO_Methodological_proposition_with_the_use_of_free_software_for_the_p" target="_blank">'''+self.tr('Click here for more informations.',
-                                    'Clique aqui para saber mais sobre essa modelagem.') +'</a><br><br>'+ self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
+                      <b><a href="'''+ self.tr('https://www.researchgate.net/publication/346925730_PROPOSICAO_METODOLOGICA_COM_EMPREGO_DE_SOFTWARE_LIVRE_PARA_A_ELABORACAO_DE_DOCUMENTOS_DE_LEVANTAMENTO_TOPOGRAFICO_DE_IMOVEIS_DA_UNIAO_Methodological_proposition_with_the_use_of_free_software_for_the_p',
+                      'https://geoone.com.br/ebook_gratis/') + '''" target="_blank">'''+ self.tr('Click here for understanding this data model.',
+                                    'Clique aqui para entender esse modelo de dados') +'</a><br><br>'+ self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
                       </p>'''+ social_BW + '''</div>
                     </div>'''
         return self.tr(self.txt_en, self.txt_pt) + footer
@@ -192,6 +193,7 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
 <head>
   <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
   <title>'''+ self.tr('Monograph of Geodetic Landmark',str2HTML('Monografia de Marco Geodésico')) + '''</title>
+  <link rel = "icon" href = "https://github.com/LEOXINGU/lftools/blob/main/images/lftoos.png?raw=true" type = "image/x-icon">
 </head>
 <body>
 <div style="text-align: center;"><span style="font-weight: bold;">
@@ -253,9 +255,7 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
     <tr>
       <td>'''+ self.tr('Orthometric Altitude',str2HTML('Altitude Ortométrica')) + ''' (H)</td>
       <td>[H] m</td>
-      <td></td>
-      <td></td>
-      <td></td>
+      <td style="text-align: center;" colspan="3" rowspan="1"><span style="font-weight: bold;">[SRC]</td>
     </tr>
     <tr>
       <td colspan="5" rowspan="1"></td>
@@ -340,25 +340,25 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
                 '[NI]':  str2HTML(ponto['property']),
                 '[MUN]': str2HTML(ponto['county']),
                 '[UF]':  str2HTML(ponto['state']),
-                '[LON]': str2HTML(dd2dms(pnt.x(),4)),
-                '[LAT]': str2HTML(dd2dms(pnt.y(),4)),
-                '[h]': '{:,.3f}'.format(ponto['ellip_height']).replace(',', 'X').replace('.', ',').replace('X', '.'),
-                '[H]': '{:,.3f}'.format(ponto['ortho_height']).replace(',', 'X').replace('.', ',').replace('X', '.'),
-                '[E]': '{:,.3f}'.format(pnt_UTM.x()).replace(',', 'X').replace('.', ',').replace('X', '.'),
-                '[N]': '{:,.3f}'.format(pnt_UTM.y()).replace(',', 'X').replace('.', ',').replace('X', '.'),
+                '[LON]': self.tr(str2HTML(dd2dms(pnt.x(),5)), str2HTML(dd2dms(pnt.x(),5)).replace('.',',')),
+                '[LAT]': self.tr(str2HTML(dd2dms(pnt.y(),5)), str2HTML(dd2dms(pnt.y(),5)).replace('.',',')),
+                '[h]': self.tr('{:,.3f}'.format(ponto['ellip_height']), '{:,.3f}'.format(ponto['ellip_height']).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                '[H]': self.tr('{:,.3f}'.format(ponto['ortho_height']), '{:,.3f}'.format(ponto['ortho_height']).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                '[E]': self.tr('{:,.3f}'.format(pnt_UTM.x()), '{:,.3f}'.format(pnt_UTM.x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                '[N]': self.tr('{:,.3f}'.format(pnt_UTM.y()), '{:,.3f}'.format(pnt_UTM.y()).replace(',', 'X').replace('.', ',').replace('X', '.')),
                 '[MC]':  str(CentralMeridian(pnt)),
-                '[sigma_x]': '{:,.3f}'.format(ponto['sigma_x']).replace(',', 'X').replace('.', ',').replace('X', '.'),
-                '[sigma_y]': '{:,.3f}'.format(ponto['sigma_y']).replace(',', 'X').replace('.', ',').replace('X', '.'),
-                '[sigma_h]': '{:,.3f}'.format(ponto['sigma_h']).replace(',', 'X').replace('.', ',').replace('X', '.'),
+                '[sigma_x]': self.tr('{:,.3f}'.format(ponto['sigma_x']), '{:,.3f}'.format(ponto['sigma_x']).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                '[sigma_y]': self.tr('{:,.3f}'.format(ponto['sigma_y']), '{:,.3f}'.format(ponto['sigma_y']).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                '[sigma_h]': self.tr('{:,.3f}'.format(ponto['sigma_h']), '{:,.3f}'.format(ponto['sigma_h']).replace(',', 'X').replace('.', ',').replace('X', '.')),
                 '[EQP]':  str2HTML(ponto['equipment']),
                 '[MET]':  str2HTML(metodo[ponto['survey_method']]),
                 '[BASE]':  str2HTML(ponto['survey_ref_base']),
                 '[SOFT]':  str2HTML(ponto['software']),
-                '[LEV_DT]': str2HTML(((ponto['survey_date']).toPyDate()).strftime("%d/%m/%Y")),
+                '[LEV_DT]': self.tr(str2HTML(((ponto['survey_date']).toPyDate()).isoformat()), str2HTML(((ponto['survey_date']).toPyDate()).strftime("%d/%m/%Y"))),
                 '[LEV_RESP]': str2HTML(ponto['survey_resp']),
-                '[PROC_DT]': str2HTML(((ponto['processing_date']).toPyDate()).strftime("%d/%m/%Y")),
+                '[PROC_DT]': self.tr(str2HTML(((ponto['processing_date']).toPyDate()).isoformat()), str2HTML(((ponto['processing_date']).toPyDate()).strftime("%d/%m/%Y"))),
                 '[PROC_RESP]': str2HTML(ponto['processing_resp']),
-                '[MON_DT]': str2HTML(((ponto['report_date']).toPyDate()).strftime("%d/%m/%Y")),
+                '[MON_DT]': self.tr(str2HTML(((ponto['report_date']).toPyDate()).isoformat()), str2HTML(((ponto['report_date']).toPyDate()).strftime("%d/%m/%Y"))),
                 '[MON_RESP]': str2HTML(ponto['report_resp']),
                 '[REP_TEC]':  str2HTML(ponto['tech_manager']),
                 '[CREA]': str2HTML(ponto['profession']),
@@ -367,7 +367,8 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
                 '[FOTO_MARCO]': img2html_resized(ponto['mark_photo']) if ponto['mark_photo'] else '',
                 '[FOTO_PAN]': img2html_resized(ponto['pan_photo']) if ponto['pan_photo'] else '',
                 '[IMAGEM_AER]': img2html_resized(ponto['aerial_image']) if ponto['aerial_image'] else '',
-                '[OBS]': str2HTML(ponto['observation'])
+                '[OBS]': str2HTML(ponto['observation']),
+                '[SRC]': self.tr(SRC, SRC.replace('zone', 'fuso'))
                     }
         for item in itens:
                 TEXTO = TEXTO.replace(item, itens[item])
