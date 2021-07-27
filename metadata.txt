@@ -21,7 +21,7 @@ repository=https://github.com/LEOXINGU/lftools
 hasProcessingProvider=yes
 # Uncomment the following line and add your changelog:
 # changelog=
-	1.3.3 - exifread module eliminated
+	1.3.3 - exifread module replaced by PIL.TiffTags to work in linux
 	1.3.2 - Geotag for TIFF image included
 	1.3.1 - Bug fix of the supervised classification tool
 	1.3.0 - New tool for Raster Binary Thresholding
