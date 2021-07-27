@@ -38,13 +38,16 @@ from qgis.core import (QgsApplication,
                        QgsProcessingAlgorithm,
                        QgsProcessingParameterFeatureSource,
                        QgsProcessingParameterFeatureSink)
-import PIL.Image, PIL.ExifTags
+
 import datetime
 import shutil
 from lftools.geocapt.imgs import Imgs
 import os
 from qgis.PyQt.QtGui import QIcon
-import exifread
+from PIL import Image, TiffTags, ExifTags
+from PIL.TiffImagePlugin import ImageFileDirectory_v2
+from PIL.TiffTags import TAGS
+ImageFileDirectory_v2._load_dispatch[13] = ImageFileDirectory_v2._load_dispatch[TiffTags.LONG]
 
 class ImportPhotos(QgsProcessingAlgorithm):
 
@@ -228,12 +231,12 @@ class ImportPhotos(QgsProcessingAlgorithm):
         Percent = 100.0/tam if tam!=0 else 0
         for index, arquivo in enumerate(lista):
             if (arquivo).lower().endswith(('.jpg', '.jpeg')):
-                img = PIL.Image.open(os.path.join(pasta,arquivo))
+                img = Image.open(os.path.join(pasta,arquivo))
                 if img._getexif():
                     exif = {
-                        PIL.ExifTags.TAGS[k]: v
+                        ExifTags.TAGS[k]: v
                         for k, v in img._getexif().items()
-                        if k in PIL.ExifTags.TAGS
+                        if k in ExifTags.TAGS
                     }
                 else:
                     exif = {}
@@ -260,25 +263,36 @@ class ImportPhotos(QgsProcessingAlgorithm):
                     feedback.pushInfo(self.tr('The file "{}" has no geotag!'.format(arquivo), 'A imagem "{}" não possui geotag!'.format(arquivo)))
                     if copy_ngeo:
                         shutil.copy2(os.path.join(pasta, arquivo), os.path.join(fotos_nao_geo, arquivo))
+
             elif (arquivo).lower().endswith(('.tif')):
-                f = open(os.path.join(pasta,arquivo), 'rb')
-                tags = exifread.process_file(f)
+                img = Image.open(os.path.join(pasta,arquivo))
+                meta_dict = {TAGS[key] : img.tag[key] for key in img.tag_v2}
+                gps_offset = img.tag_v2.get(0x8825)
+                tags = {}
+                if gps_offset:
+                	ifh = b"II\x2A\x00\x08\x00\x00\x00" if img.tag_v2._endian == "<" else "MM\x00\x2A\x00\x00\x00\x08"
+                	info = ImageFileDirectory_v2(ifh)
+                	img.fp.seek(gps_offset)
+                	info.load(img.fp)
+                	gps_keys = ['GPSVersionID','GPSLatitudeRef','GPSLatitude','GPSLongitudeRef','GPSLongitude','GPSAltitudeRef','GPSAltitude','GPSTimeStamp','GPSSatellites','GPSStatus','GPSMeasureMode','GPSDOP','GPSSpeedRef','GPSSpeed','GPSTrackRef','GPSTrack','GPSImgDirectionRef','GPSImgDirection','GPSMapDatum','GPSDestLatitudeRef','GPSDestLatitude','GPSDestLongitudeRef','GPSDestLongitude','GPSDestBearingRef','GPSDestBearing','GPSDestDistanceRef','GPSDestDistance','GPSProcessingMethod','GPSAreaInformation','GPSDateStamp','GPSDifferential']
+                	for k, v in info.items():
+                		tags[gps_keys[k]] = str(v)
 
                 lon, lat = 0, 0
                 Az = None
                 date_time = None
                 altitude = None
 
-                if 'GPS GPSLatitudeRef' in tags:
-                    lat_ref = str(tags['GPS GPSLatitudeRef'])
-                    lat = eval(str(tags['GPS GPSLatitude']))
+                if 'GPSLatitudeRef' in tags:
+                    lat_ref = str(tags['GPSLatitudeRef'])
+                    lat = eval(str(tags['GPSLatitude']))
                     lat = (-1 if lat_ref.upper() == 'S' else 1)*(lat[0] + lat[1]/60 + lat[2]/3600)
-                    lon_ref = str(tags['GPS GPSLongitudeRef'])
-                    lon = eval(str(tags['GPS GPSLongitude']))
+                    lon_ref = str(tags['GPSLongitudeRef'])
+                    lon = eval(str(tags['GPSLongitude']))
                     lon = (-1 if lon_ref.upper() == 'W' else 1)*(lon[0] + lon[1]/60 + lon[2]/3600)
-                    alt_ref = str(tags['GPS GPSAltitudeRef'])
-                    altitude = eval(str(tags['GPS GPSAltitude']))
-                    date_time = data_hora(str(tags['EXIF DateTimeOriginal'])) # 'EXIF DateTimeDigitized', 'Image DateTime'
+                    alt_ref = str(tags['GPSAltitudeRef'])
+                    altitude = eval(str(tags['GPSAltitude']))
+                    date_time = data_hora(meta_dict['DateTime'][0])
 
                     if lon != 0:
                         feature = QgsFeature(fields)
