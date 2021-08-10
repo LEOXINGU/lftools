@@ -163,7 +163,11 @@ class DescriptiveMemorial(QgisAlgorithm):
         ListaCont = []
         soma = 0
         for linha in limites.getFeatures():
-            Lin_coord = linha.geometry().asMultiPolyline()[0]
+            geom = linha.geometry()
+            if geom.isMultipart():
+                Lin_coord = geom.asMultiPolyline()[0]
+            else:
+                Lin_coord = geom.asPolyline()
             ListaDescr += [[str2HTML(linha['start_pnt_descr']), str2HTML(linha['borderer'])]]
             cont = len(Lin_coord)
             ListaCont += [(soma, cont-1)]
