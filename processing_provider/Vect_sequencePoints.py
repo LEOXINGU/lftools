@@ -22,6 +22,7 @@ from qgis.core import (QgsApplication,
                        QgsGeometry,
                        QgsProcessing,
                        QgsProcessingParameterField,
+                       QgsProcessingParameterEnum,
                        QgsProcessingParameterBoolean,
                        QgsFeatureSink,
                        QgsProcessingException,
@@ -36,6 +37,7 @@ class SequencePoints(QgsProcessingAlgorithm):
     POINTS = 'POINTS'
     POLYGON = 'POLYGON'
     FIELD = 'FIELD'
+    FIRST = 'FIRST'
     SAVE = 'SAVE'
     LOC = QgsApplication.locale()[:2]
 
@@ -119,6 +121,22 @@ class SequencePoints(QgsProcessingAlgorithm):
             )
         )
 
+        opcoes = [self.tr('Polygon sequence','Sequência do polígono'),
+				  self.tr('Northmost','Mais ao Norte'),
+				  self.tr('Southernmost','Mais ao Sul'),
+				  self.tr('Eastmost','Mais ao Leste'),
+				  self.tr('Westmost','Mais ao Oeste')
+               ]
+
+        self.addParameter(
+            QgsProcessingParameterEnum(
+                self.FIRST,
+                self.tr('First point', 'Primeiro Ponto'),
+				options = opcoes,
+                defaultValue= 0
+            )
+        )
+
         self.addParameter(
             QgsProcessingParameterBoolean(
                 self.SAVE,
@@ -155,6 +173,12 @@ class SequencePoints(QgsProcessingAlgorithm):
 
         columnIndex = pontos.fields().indexFromName(campo[0])
 
+        primeiro = self.parameterAsEnum(
+            parameters,
+            self.FIRST,
+            context
+        )
+
         # As duas camadas devem ter o mesmo SRC
         if poligono.crs() != pontos.crs():
             raise QgsProcessingException(self.tr('Both layers must have the same CRS!', 'As duas camadas devem ter o mesmo SRC!'))
@@ -170,19 +194,60 @@ class SequencePoints(QgsProcessingAlgorithm):
             coords = pol.asMultiPolygon()[0][0]
         else:
             coords = pol.asPolygon()[0]
+        coords = coords[:-1]
 
-        # Número de vértices do ponlígono deve ser igual ao número de pontos+1
-        if (len(coords)-1) != pontos.featureCount():
+        if primeiro == 1: #Mais ao norte
+            ind = None
+            ymax = -1e10
+            for k, pnt in enumerate(coords):
+                print(k, round(pnt.y(),2))
+                if pnt.y() > ymax:
+                    ymax = pnt.y()
+                    ind = k
+            coords = coords[ind :] + coords[0 : ind]
+
+        elif primeiro == 2: #Mais ao sul
+            ind = None
+            ymin = 1e10
+            for k, pnt in enumerate(coords):
+                print(k, round(pnt.y(),2))
+                if pnt.y() < ymin:
+                    ymin = pnt.y()
+                    ind = k
+            coords = coords[ind :] + coords[0 : ind]
+
+        elif primeiro == 3: #Mais ao Leste
+            ind = None
+            xmax = -1e10
+            for k, pnt in enumerate(coords):
+                print(k, round(pnt.x(),2))
+                if pnt.x() > xmax:
+                    xmax = pnt.x()
+                    ind = k
+            coords = coords[ind :] + coords[0 : ind]
+
+        elif primeiro == 4: #Mais ao Oeste
+            ind = None
+            xmin = 1e10
+            for k, pnt in enumerate(coords):
+                print(k, round(pnt.x(),2))
+                if pnt.x() < xmin:
+                    xmin = pnt.x()
+                    ind = k
+            coords = coords[ind :] + coords[0 : ind]
+
+        # Número de vértices do ponlígono deve ser igual ao número de pontos
+        if (len(coords)) != pontos.featureCount():
             raise QgsProcessingException(self.tr('The number of points must equal the number of vertices of the polygon!', 'O número de pontos deve ser igual ao número de vértices do polígono!'))
 
 
         pontos.startEditing() # coloca no modo edição
-        total = 100.0 / (len(coords)-1)
+        total = 100.0 / (len(coords))
 
         def norma1(p1, p2):
             return abs(p1.x() - p2.x()) + abs(p1.y() - p2.y())
 
-        for cont, vertice in enumerate(coords[:-1]):
+        for cont, vertice in enumerate(coords):
             dist1 = 1e9
             pnt_id = None
             for feat in pontos.getFeatures():
