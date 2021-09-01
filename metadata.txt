@@ -32,7 +32,7 @@ hasProcessingProvider=yes
 	1.0.1 - Improvement in tools' translation and description
 	1.0   - Initial version
 # Tags are comma separated with spaces allowed
-tags=cartography, surveying, topography, raster, vector, postgis, processing, reambulation, geotag, expressions, document, memorial, deed, description, statistics, ellipses, brazil
+tags=cartography, surveying, topography, raster, vector, postgis, processing, reambulation, geotag, expressions, document, memorial, description, statistics, ellipses, lftools, brazil
 
 homepage=https://github.com/LEOXINGU/lftools
 category=cartography

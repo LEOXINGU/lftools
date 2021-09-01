@@ -122,7 +122,7 @@ class CompressJPEG(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterRasterLayer(
                 self.RasterIN,
-                self.tr('Input Raster with Alpha Band', 'Raster com Banda Alfa'),
+                self.tr('RGB Raster', 'Raster RGB'),
                 [QgsProcessing.TypeRaster]
             )
         )
