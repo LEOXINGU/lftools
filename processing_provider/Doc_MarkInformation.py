@@ -26,6 +26,7 @@ from qgis.core import (QgsProcessing,
                        QgsFeatureSink,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
+                       QgsProcessingParameterFile,
                        QgsProcessingParameterString,
                        QgsFeatureRequest,
                        QgsExpression,
@@ -39,7 +40,7 @@ from qgis.core import (QgsProcessing,
 
 import os
 from lftools.geocapt.imgs import *
-from lftools.geocapt.cartography import CentralMeridian
+from lftools.geocapt.cartography import CentralMeridian, FusoHemisf
 from lftools.geocapt.topogeo import dd2dms, str2HTML
 from qgis.PyQt.QtGui import QIcon
 
@@ -48,6 +49,8 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
     PONTOREF = 'PONTOREF'
     CODIGO = 'CODIGO'
     HTML = 'HTML'
+    LOGO = 'LOGO'
+    SLOGAN = 'SLOGAN'
 
     LOC = QgsApplication.locale()[:2]
 
@@ -124,6 +127,27 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
             )
         )
 
+        self.addParameter(
+            QgsProcessingParameterFile(
+                self.LOGO,
+                self.tr('Logo (JPEG)', 'Logomarca (JPEG)'),
+                behavior=QgsProcessingParameterFile.File,
+                defaultValue=None,
+                fileFilter = 'Image (*.jpeg *.jpg)',
+                optional = True
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterString(
+                self.SLOGAN,
+                self.tr('Slogan'),
+                defaultValue = self.tr(str2HTML('CARTOGRAPHY & SURVEYING'), str2HTML('CARTOGRAFIA & AGRIMENSURA')),
+                optional = True,
+                multiLine = True
+            )
+        )
+
         # 'OUTPUTS'
         self.addParameter(
             QgsProcessingParameterFileDestination(
@@ -149,6 +173,25 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
         if codigo is None:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.CODIGO))
 
+        logo = self.parameterAsFile(
+            parameters,
+            self.LOGO,
+            context
+        )
+        if logo:
+            LOGO = 'jpg;base64,'+img2html_resized(logo, lado=150)
+        else:
+            LOGO = 'png;base64,'+lftools_logo
+
+        SLOGAN = self.parameterAsString(
+            parameters,
+            self.SLOGAN,
+            context
+        )
+        if not SLOGAN:
+            SLOGAN = ''
+        else:
+            SLOGAN = SLOGAN.replace('\n', '<br>')
 
         # Pegando o SRC do Projeto
         SRC = QgsProject.instance().crs().description()
@@ -158,6 +201,14 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
             raise QgsProcessingException(self.tr('The Project CRS must be projected!', 'O SRC do Projeto deve ser Projetado!'))
 
         feedback.pushInfo(self.tr('Project CRS is {}.', 'SRC do Projeto é {}.').format(SRC))
+
+        # Verificar se a projeção UTM do Projeto está correta
+        for feat in vertice.getFeatures():
+                geom = feat.geometry()
+                break
+        fuso, hemisf = FusoHemisf(geom.asMultiPoint()[0] if geom.isMultipart() else geom.asPoint())
+        if SRC.split(' ')[-1] != str(fuso)+hemisf :
+            raise QgsProcessingException(self.tr('Warning: Make sure your projection is correct!'.upper(), 'Aviso: Verifique se sua projeção está correta!'.upper()))
 
         # Transformar Coordenadas de Geográficas para o sistema UTM
         coordinateTransformer = QgsCoordinateTransform()
@@ -197,8 +248,8 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
 </head>
 <body>
 <div style="text-align: center;"><span style="font-weight: bold;">
-<img src="data:image/png;base64,'''+ lftools_logo + '''">
-<br>'''+ self.tr(str2HTML('CARTOGRAPHY & SURVEYING'), str2HTML('CARTOGRAFIA & AGRIMENSURA')) + '''</span><br style="font-weight: bold;">
+<img height="80" src="data:image/'''+ LOGO + '''">
+<br>'''+ SLOGAN + '''</span><br style="font-weight: bold;">
 <br></div>
 <div style="text-align: center;">
 <table style="text-align: left; width: 100%;" border="1" cellpadding="1" cellspacing="0">

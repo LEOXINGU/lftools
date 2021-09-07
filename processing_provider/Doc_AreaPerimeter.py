@@ -27,6 +27,8 @@ from qgis.core import (QgsProcessing,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
                        QgsProcessingParameterFeatureSource,
+                       QgsProcessingParameterFile,
+                       QgsProcessingParameterString,
                        QgsProcessingParameterFeatureSink,
                        QgsProcessingParameterFileDestination,
                        QgsApplication,
@@ -35,7 +37,8 @@ from qgis.core import (QgsProcessing,
                        QgsCoordinateReferenceSystem)
 from math import atan, pi, sqrt, floor
 import math
-from lftools.geocapt.imgs import Imgs, lftools_logo
+from lftools.geocapt.imgs import *
+from lftools.geocapt.cartography import FusoHemisf
 from lftools.geocapt.topogeo import str2HTML, dd2dms, azimute
 import os
 from qgis.PyQt.QtGui import QIcon
@@ -45,6 +48,8 @@ class AreaPerimterReport(QgsProcessingAlgorithm):
     PONTOLIMITE = 'PONTOLIMITE'
     AREAIMOVEL = 'AREAIMOVEL'
     HTML = 'HTML'
+    LOGO = 'LOGO'
+    SLOGAN = 'SLOGAN'
 
     LOC = QgsApplication.locale()[:2]
 
@@ -121,6 +126,28 @@ class AreaPerimterReport(QgsProcessingAlgorithm):
                 types=[QgsProcessing.TypeVectorPolygon]
             )
         )
+
+        self.addParameter(
+            QgsProcessingParameterFile(
+                self.LOGO,
+                self.tr('Logo (JPEG)', 'Logomarca (JPEG)'),
+                behavior=QgsProcessingParameterFile.File,
+                defaultValue=None,
+                fileFilter = 'Image (*.jpeg *.jpg)',
+                optional = True
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterString(
+                self.SLOGAN,
+                self.tr('Slogan'),
+                defaultValue = self.tr(str2HTML('CARTOGRAPHY & SURVEYING'), str2HTML('CARTOGRAFIA & AGRIMENSURA')),
+                optional = True,
+                multiLine = True
+            )
+        )
+
         # 'OUTPUTS'
         self.addParameter(
             QgsProcessingParameterFileDestination(
@@ -145,6 +172,26 @@ class AreaPerimterReport(QgsProcessingAlgorithm):
         if area is None:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.AREAIMOVEL))
 
+        logo = self.parameterAsFile(
+            parameters,
+            self.LOGO,
+            context
+        )
+        if logo:
+            LOGO = 'jpg;base64,'+img2html_resized(logo, lado=150)
+        else:
+            LOGO = 'png;base64,'+lftools_logo
+
+        SLOGAN = self.parameterAsString(
+            parameters,
+            self.SLOGAN,
+            context
+        )
+        if not SLOGAN:
+            SLOGAN = ''
+        else:
+            SLOGAN = SLOGAN.replace('\n', '<br>')
+
         # Pegando o SRC do Projeto
         SRC = QgsProject.instance().crs().description()
 
@@ -162,6 +209,13 @@ class AreaPerimterReport(QgsProcessingAlgorithm):
         for feat in area.getFeatures():
                 feat1 = feat
                 break
+        geom = feat1.geometry()
+        centroideG = geom.centroid().asPoint()
+
+        # Verificar se a projeção UTM do Projeto está correta
+        fuso, hemisf = FusoHemisf(centroideG)
+        if SRC.split(' ')[-1] != str(fuso)+hemisf :
+            raise QgsProcessingException(self.tr('Warning: Make sure your projection is correct!'.upper(), 'Aviso: Verifique se sua projeção está correta!'.upper()))
 
         # Validando dados de entrada
         # ponto_limite
@@ -194,8 +248,8 @@ class AreaPerimterReport(QgsProcessingAlgorithm):
 </head>
 <body>
 <div style="text-align: center;"><span style="font-weight: bold;"><br>
-<img src="data:image/png;base64,'''+ lftools_logo + '''">
-<br>'''+ self.tr(str2HTML('CARTOGRAPHY & SURVEYING'), str2HTML('CARTOGRAFIA & AGRIMENSURA')) + '''</span><br style="font-weight: bold;">
+<img height="80" src="data:image/'''+ LOGO + '''">
+<br>'''+ SLOGAN + '''</span><br style="font-weight: bold;">
 <br></div>
 <div style="text-align: center;"><big><big><span
  style="font-weight: bold;">'''+ self.tr('Analytical Calculation of Area, Azimuths, Sides, Flat and Geodetic Coordinates',
