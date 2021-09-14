@@ -210,7 +210,7 @@ class DescriptiveMemorial(QgisAlgorithm):
             context
         )
         if logo:
-            LOGO = 'jpg;base64,'+img2html_resized(logo, lado=150)
+            LOGO = 'jpg;base64,'+img2html_resized(logo, lado=380)
         else:
             LOGO = 'png;base64,'+lftools_logo
 
@@ -377,7 +377,7 @@ class DescriptiveMemorial(QgisAlgorithm):
     <body>
     <div style="text-align: center;"><span style="font-weight: bold;"><br>
     <img height="80" src="data:image/'''+ LOGO + '''">
-    <br>'''+ SLOGAN + '''</span><br style="font-weight: bold;">
+    <br>'''+ str2HTML(SLOGAN) + '''</span><br style="font-weight: bold;">
     <br></div>
     <p class="western"
      style="margin-bottom: 0.0001pt; text-align: center;"

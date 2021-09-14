@@ -178,7 +178,7 @@ class AreaPerimterReport(QgsProcessingAlgorithm):
             context
         )
         if logo:
-            LOGO = 'jpg;base64,'+img2html_resized(logo, lado=150)
+            LOGO = 'jpg;base64,'+img2html_resized(logo, lado=380)
         else:
             LOGO = 'png;base64,'+lftools_logo
 
@@ -249,7 +249,7 @@ class AreaPerimterReport(QgsProcessingAlgorithm):
 <body>
 <div style="text-align: center;"><span style="font-weight: bold;"><br>
 <img height="80" src="data:image/'''+ LOGO + '''">
-<br>'''+ SLOGAN + '''</span><br style="font-weight: bold;">
+<br>'''+ str2HTML(SLOGAN) + '''</span><br style="font-weight: bold;">
 <br></div>
 <div style="text-align: center;"><big><big><span
  style="font-weight: bold;">'''+ self.tr('Analytical Calculation of Area, Azimuths, Sides, Flat and Geodetic Coordinates',

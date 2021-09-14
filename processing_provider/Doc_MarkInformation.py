@@ -179,7 +179,7 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
             context
         )
         if logo:
-            LOGO = 'jpg;base64,'+img2html_resized(logo, lado=150)
+            LOGO = 'jpg;base64,'+img2html_resized(logo, lado=380)
         else:
             LOGO = 'png;base64,'+lftools_logo
 
@@ -249,7 +249,7 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
 <body>
 <div style="text-align: center;"><span style="font-weight: bold;">
 <img height="80" src="data:image/'''+ LOGO + '''">
-<br>'''+ SLOGAN + '''</span><br style="font-weight: bold;">
+<br>'''+ str2HTML(SLOGAN) + '''</span><br style="font-weight: bold;">
 <br></div>
 <div style="text-align: center;">
 <table style="text-align: left; width: 100%;" border="1" cellpadding="1" cellspacing="0">
