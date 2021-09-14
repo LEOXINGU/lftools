@@ -136,7 +136,7 @@ class LoadRasterByLocation(QgsProcessingAlgorithm):
             QgsProcessingParameterString(
                 self.FORMAT,
                 self.tr('Format', 'Formato'),
-                defaultValue = '.tif'
+                defaultValue = 'GeoTIFF (*.tif)'
             )
         )
 

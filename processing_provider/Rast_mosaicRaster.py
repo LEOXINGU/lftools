@@ -209,7 +209,7 @@ class MosaicRaster(QgsProcessingAlgorithm):
             QgsProcessingParameterFileDestination(
                 self.MOSAIC,
                 self.tr('Mosaic', 'Mosaico'),
-                fileFilter = '.tif'
+                fileFilter = 'GeoTIFF (*.tif)'
             )
         )
 

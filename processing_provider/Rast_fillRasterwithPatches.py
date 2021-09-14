@@ -134,7 +134,7 @@ class FillRasterwithPatches(QgsProcessingAlgorithm):
             QgsProcessingParameterFileDestination(
                 self.RasterOUT,
                 self.tr('Patched Image', 'Imagem Remendada'),
-                fileFilter = '.tif'
+                fileFilter = 'GeoTIFF (*.tif)'
             )
         )
 

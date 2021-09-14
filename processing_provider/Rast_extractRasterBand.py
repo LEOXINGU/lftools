@@ -132,7 +132,7 @@ class ExtractRasterBand(QgsProcessingAlgorithm):
             QgsProcessingParameterFileDestination(
                 self.OUTPUT,
                 self.tr('Selected band', 'Banda selecionada'),
-                fileFilter = '.tif'
+                fileFilter = 'GeoTIFF (*.tif)'
             )
         )
 

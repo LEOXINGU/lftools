@@ -147,7 +147,7 @@ class SaveAsJPEG(QgsProcessingAlgorithm):
             QgsProcessingParameterFileDestination(
                 self.RasterOUT,
                 self.tr('JPEG image', 'Imagem no formato JPEG'),
-                fileFilter = '.jpeg'
+                fileFilter = 'Image (*.jpeg)'
             )
         )
 

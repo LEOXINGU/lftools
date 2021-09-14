@@ -169,7 +169,7 @@ class RescaleTo8bits(QgsProcessingAlgorithm):
             QgsProcessingParameterFileDestination(
                 self.RasterOUT,
                 self.tr('8 bit rescaled raster', 'Raster reescalonado para 8 bits'),
-                fileFilter = '.tif'
+                fileFilter = 'GeoTIFF (*.tif)'
             )
         )
 

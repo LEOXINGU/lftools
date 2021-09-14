@@ -174,7 +174,7 @@ class SupervisedClassification(QgsProcessingAlgorithm):
             QgsProcessingParameterFileDestination(
                 self.RasterOUT,
                 self.tr('Classified Image', 'Imagem Classificada'),
-                fileFilter = '.tif'
+                fileFilter = 'GeoTIFF (*.tif)'
             )
         )
 

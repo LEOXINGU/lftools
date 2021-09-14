@@ -166,7 +166,7 @@ class CompressJPEG(QgsProcessingAlgorithm):
             QgsProcessingParameterFileDestination(
                 self.RasterOUT,
                 self.tr('Compressed Raster', 'Raster com Compressão JPEG'),
-                fileFilter = '.tif'
+                fileFilter = 'GeoTIFF (*.tif)'
             )
         )
 

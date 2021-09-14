@@ -165,7 +165,7 @@ class DefineNullCell(QgsProcessingAlgorithm):
             QgsProcessingParameterFileDestination(
                 self.RasterOUT,
                 self.tr('Raster with null cells defined', 'Raster com pixels nulos definidos'),
-                fileFilter = '.tif'
+                fileFilter = 'GeoTIFF (*.tif)'
             )
         )
 

@@ -93,7 +93,7 @@ class CreateHolesInRaster(QgsProcessingAlgorithm):
     txt_en = 'Creates holes in Raster by defining "no data" pixels (transparent) from the Polygon Layer.'
     txt_pt = 'Cria buracos em Raster definindo pixels nulos (transparentes) a partir de Camada de Polígonos.'
     figure = 'images/tutorial/raster_create_holes.jpg'
-    
+
     def shortHelpString(self):
         social_BW = Imgs().social_BW
         footer = '''<div align="center">
@@ -134,7 +134,7 @@ class CreateHolesInRaster(QgsProcessingAlgorithm):
             QgsProcessingParameterFileDestination(
                 self.RasterOUT,
                 self.tr('Bumpy Raster', 'Raster Esburacado'),
-                fileFilter = '.tif'
+                fileFilter = 'GeoTIFF (*.tif)'
             )
         )
 

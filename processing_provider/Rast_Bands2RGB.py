@@ -141,7 +141,7 @@ class Bands2RGB(QgsProcessingAlgorithm):
             QgsProcessingParameterFileDestination(
                 self.RGB,
                 self.tr('RGB Composite', 'Composição RGB'),
-                fileFilter = '.tif'
+                fileFilter = 'GeoTIFF (*.tif)'
             )
         )
 

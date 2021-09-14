@@ -145,7 +145,7 @@ class RemoveAlphaBand(QgsProcessingAlgorithm):
             QgsProcessingParameterFileDestination(
                 self.RasterOUT,
                 self.tr('Raster with alpha band removed', 'Raster com banda alfa removida'),
-                fileFilter = '.tif'
+                fileFilter = 'GeoTIFF (*.tif)'
             )
         )
 

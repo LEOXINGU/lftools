@@ -159,7 +159,7 @@ Referência:'''
             QgsProcessingParameterFileDestination(
                 self.RasterOUT,
                 self.tr('Binarized raster', 'Imagem binarizada'),
-                fileFilter = '.tif'
+                fileFilter = 'GeoTIFF (*.tif)'
             )
         )
 
