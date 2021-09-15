@@ -138,7 +138,7 @@ Para mais informações sobre a metodologia utilizada, por favor leia o artigo n
             QgsProcessingParameterFileDestination(
                 self.OUTPUT,
                 self.tr('Adjusted 3D Coordinates', 'Coordenadas 3D Ajustadas'),
-                fileFilter = 'CSV (*.csv')'
+                fileFilter = 'CSV (*.csv)'
             )
         )
 
