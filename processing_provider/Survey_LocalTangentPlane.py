@@ -196,7 +196,7 @@ Referência:'''
         self.addParameter(
             QgsProcessingParameterFeatureSink(
                 self.OUTPUT,
-                self.tr('Transformed Coordinates', 'Coordenadas Transformas')
+                self.tr('Transformed Coordinates', 'Coordenadas Transformadas')
             )
         )
 
