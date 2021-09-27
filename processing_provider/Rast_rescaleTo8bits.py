@@ -221,6 +221,7 @@ class RescaleTo8bits(QgsProcessingAlgorithm):
         prj=image.GetProjection()
         geotransform  = image.GetGeoTransform()
         GDT = image.GetRasterBand(1).DataType
+        Pixel_Nulo = image.GetRasterBand(1).GetNoDataValue()
         n_bands = image.RasterCount
         cols = image.RasterXSize
         rows = image.RasterYSize
@@ -236,7 +237,9 @@ class RescaleTo8bits(QgsProcessingAlgorithm):
         for k in range(n_bands):
             band = image.GetRasterBand(k+1).ReadAsArray()
             bands += [band]
-            # Rescale
+            # Remove null pixels of the statistics
+            if Pixel_Nulo:
+                band = band[band != Pixel_Nulo]
             # Max e Min
             if tipo == 0:
                 max += [band.max()]
@@ -260,9 +263,15 @@ class RescaleTo8bits(QgsProcessingAlgorithm):
             if porBanda:
                 Max = max[k]
                 Min = min[k]
-            transf = ((256-eps-min8)*(band.astype('float')-Min)/(Max-Min)+min8-0.5+eps).round()
+            if nullPixel:
+                transf = (255*(band.astype('float')- Min)/(Max-Min) + 0.5).round()
+            else:
+                transf = (256*(band.astype('float')- Min)/(Max-Min) - 0.5).round()
             if tipo in [1,2]:
-                transf = ((transf>0)*(transf<=255))*transf + 255*(transf>255) +1*(transf<1)
+                transf = ((transf>0)*(transf<=255))*transf + 255*(transf>255)
+                if nullPixel:
+                    transf = transf*(band != Pixel_Nulo)
+
             transf = transf.astype('uint8')
             outband = Driver.GetRasterBand(k+1)
             feedback.pushInfo(self.tr('Writing Band {}...'.format(k+1), 'Escrevendo Banda {}...'.format(k+1)))
