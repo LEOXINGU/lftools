@@ -172,10 +172,17 @@ class ImportPhotos(QgsProcessingAlgorithm):
                     sinal_lon = -1
                 elif ref_lon == 'E':
                     sinal_lon = 1
-                grausLat,grausLon = exif['GPSInfo'][2][0][0], exif['GPSInfo'][4][0][0]
-                minLat, minLon = exif['GPSInfo'][2][1][0], exif['GPSInfo'][4][1][0]
-                segLat = exif['GPSInfo'][2][2][0]/float(exif['GPSInfo'][2][2][1])
-                segLon = exif['GPSInfo'][4][2][0]/float(exif['GPSInfo'][4][2][1])
+
+                try:
+                    grausLat,grausLon = exif['GPSInfo'][2][0][0], exif['GPSInfo'][4][0][0]
+                    minLat, minLon = exif['GPSInfo'][2][1][0], exif['GPSInfo'][4][1][0]
+                    segLat = exif['GPSInfo'][2][2][0]/float(exif['GPSInfo'][2][2][1])
+                    segLon = exif['GPSInfo'][4][2][0]/float(exif['GPSInfo'][4][2][1])
+                except:
+                    grausLat,grausLon = exif['GPSInfo'][2][0], exif['GPSInfo'][4][0]
+                    minLat, minLon = exif['GPSInfo'][2][1], exif['GPSInfo'][4][1]
+                    segLat = exif['GPSInfo'][2][2]
+                    segLon = exif['GPSInfo'][4][2]
                 if sinal_lat!=0 and sinal_lon!=0:
                     lat = sinal_lat*(float(grausLat)+minLat/60.0+segLat/3600.0)
                     lon = sinal_lon*(float(grausLon)+minLon/60.0+segLon/3600.0)
@@ -249,7 +256,10 @@ class ImportPhotos(QgsProcessingAlgorithm):
                     if 17 in exif['GPSInfo']:
                         Az = azimute(exif)
                     if 6 in exif['GPSInfo']:
-                        altitude = float(exif['GPSInfo'][6][0])/exif['GPSInfo'][6][1]
+                        try:
+                            altitude = float(exif['GPSInfo'][6][0])/exif['GPSInfo'][6][1]
+                        except:
+                            altitude = float(exif['GPSInfo'][6])
                 if 'DateTimeOriginal' in exif:
                     date_time = data_hora(exif['DateTimeOriginal'])
                 elif 'DateTime' in exif:
