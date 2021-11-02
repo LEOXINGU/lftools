@@ -130,10 +130,10 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
 
         itens  = {
                      'ord' : QVariant.Int,
-                     self.tr('ang_inner_dd','ang_int_graus') : QVariant.Double,
-                     self.tr('ang_inner','ang_int') : QVariant.String,
-                     self.tr('ang_outer_dd','ang_ext_graus') : QVariant.Double,
-                     self.tr('ang_outer','ang_ext') : QVariant.String,
+                     self.tr('ang_inner_dd','ang_int_dec') : QVariant.Double,
+                     self.tr('ang_inner_dms','ang_int_gms') : QVariant.String,
+                     self.tr('ang_outer_dd','ang_ext_dec') : QVariant.Double,
+                     self.tr('ang_outer_dms','ang_ext_gms') : QVariant.String,
                      }
         for item in itens:
             Fields.append(QgsField(item, itens[item]))
@@ -181,10 +181,10 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
             for ponto in pntsDic:
                 fet.setGeometry(QgsGeometry.fromPointXY(pntsDic[ponto]['pnt']))
                 fet.setAttributes([ponto,
-                                        pntsDic[ponto]['alfa_int'],
-                                        dd2dms(pntsDic[ponto]['alfa_int']),
-                                        pntsDic[ponto]['alfa_ext'],
-                                        dd2dms(pntsDic[ponto]['alfa_ext']),
+                                    float(pntsDic[ponto]['alfa_int']),
+                                    dd2dms(pntsDic[ponto]['alfa_int'],1),
+                                    float(pntsDic[ponto]['alfa_ext']),
+                                    dd2dms(pntsDic[ponto]['alfa_ext'],1)
                                         ])
                 sink.addFeature(fet, QgsFeatureSink.FastInsert)
 

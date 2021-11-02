@@ -98,7 +98,7 @@ class DirectionalMerge(QgsProcessingAlgorithm):
     def initAlgorithm(self, config=None):
 
         self.addParameter(
-            QgsProcessingParameterVectorLayer(
+            QgsProcessingParameterFeatureSource(
                 self.LINES,
                 self.tr('Line Layer', 'Camada de Linhas'),
                 [QgsProcessing.TypeVectorLine]
@@ -137,7 +137,7 @@ class DirectionalMerge(QgsProcessingAlgorithm):
 
     def processAlgorithm(self, parameters, context, feedback):
 
-        linhas = self.parameterAsVectorLayer(
+        linhas = self.parameterAsSource(
             parameters,
             self.LINES,
             context

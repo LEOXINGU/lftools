@@ -95,7 +95,7 @@ class Backup(QgsProcessingAlgorithm):
     USER = 'USER'
     PORT = 'PORT'
     VERSION = 'VERSION'
-    versions = ['9.5', '9.6', '10', '11', '12', '13']
+    versions = ['9.5', '9.6', '10', '11', '12', '13', '14']
 
     def initAlgorithm(self, config=None):
         # INPUT

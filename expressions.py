@@ -205,6 +205,25 @@ def projectCRS(output_type, feature, parent):
     else:
         return b.description()
 
+@qgsfunction(args='auto', group='LF Tools')
+def layerCRS(layer_name, output_type, feature, parent):
+    """
+    Return the descriptive name  or the EPSG code of a layer's CRS.
+    <h2>Example usage:</h2>
+    <ul>
+      <li>LayerCRS('EPSG') -> EPSG:4326</li>
+      <li>LayerCRS('') -> SIRGAS 2000 / UTM 23 S</li>
+    </ul>
+    """
+    if len(QgsProject.instance().mapLayersByName(layer_name)) == 1:
+        layer = QgsProject.instance().mapLayersByName(layer_name)[0]
+    else:
+        layer = QgsProject.instance().mapLayer(layer_name)
+    b = layer.crs()
+    if output_type == 'EPSG':
+        return b.authid()
+    else:
+        return b.description()
 
 @qgsfunction(args='auto', group='LF Tools')
 def zonehemisf(lon, lat, feature, parent):

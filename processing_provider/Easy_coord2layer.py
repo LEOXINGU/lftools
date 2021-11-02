@@ -29,7 +29,6 @@ class CoordinatesToLayer(QgsProcessingAlgorithm):
     X = 'X'
     Y = 'Y'
     Z = 'Z'
-    BOOL = 'BOOL'
     CRS = 'CRS'
     LAYER = 'LAYER'
     LOC = QgsApplication.locale()[:2]
@@ -113,12 +112,6 @@ class CoordinatesToLayer(QgsProcessingAlgorithm):
         )
 
         self.addParameter(
-            QgsProcessingParameterBoolean(
-                self.BOOL,
-                self.tr('Create PointZ', 'Criar PointZ'),
-                defaultValue=False))
-
-        self.addParameter(
             QgsProcessingParameterField(
                 self.Z,
                 self.tr('Z Coordinate', 'Coordenada Z'),
@@ -169,18 +162,13 @@ class CoordinatesToLayer(QgsProcessingAlgorithm):
         X_id = table.fields().indexFromName(X_field[0])
         Y_id = table.fields().indexFromName(Y_field[0])
 
-        CreateZ = self.parameterAsBool(
+
+        Z_field = self.parameterAsFields(
             parameters,
-            self.BOOL,
+            self.Z,
             context
         )
-
-        if CreateZ:
-            Z_field = self.parameterAsFields(
-                parameters,
-                self.Z,
-                context
-            )
+        if Z_field:
             Z_id = table.fields().indexFromName(Z_field[0])
 
         CRS = self.parameterAsCrs(
@@ -208,7 +196,7 @@ class CoordinatesToLayer(QgsProcessingAlgorithm):
             att = feat.attributes()
             X = att[X_id]
             Y = att[Y_id]
-            if CreateZ:
+            if Z_field:
                 Z = att[Z_id]
                 geom = QgsGeometry(QgsPoint(float(X), float(Y), float(Z)))
             else:

@@ -41,9 +41,9 @@ from PyQt5.QtCore import QCoreApplication
 from .lftools_provider import LFToolsProvider
 from .expressions import *
 
-exprs = (coord2inom, fieldstat, dd2dms, projectCRS,
-         dms2dd, scalefactor, zonehemisf, deedtable,
-         inom2mi, meridianconv, removespetialchar)
+exprs = (coord2inom, fieldstat, dd2dms, projectCRS, layerCRS,
+         dms2dd, scalefactor, zonehemisf, deedtable, inom2mi,
+         meridianconv, removespetialchar)
 
 cmd_folder = os.path.split(inspect.getfile(inspect.currentframe()))[0]
 

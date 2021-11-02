@@ -47,11 +47,9 @@ from qgis.core import (QgsProcessing,
                        QgsCoordinateReferenceSystem)
 
 from osgeo import osr, gdal_array, gdal #https://gdal.org/python/
-from math import floor, ceil
-import numpy as np
 from lftools.geocapt.imgs import Imgs
-import os
 from qgis.PyQt.QtGui import QIcon
+import os
 
 class CompressJPEG(QgsProcessingAlgorithm):
 
