@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-removeAlphaBand.py
+Drone_removeAlphaBand.py
 ***************************************************************************
 *                                                                         *
 *   This program is free software; you can redistribute it and/or modify  *
@@ -80,16 +80,16 @@ class RemoveAlphaBand(QgsProcessingAlgorithm):
         return self.tr('Remove alpha band', 'Remover banda alfa')
 
     def group(self):
-        return self.tr('Raster')
+        return self.tr('Drones')
 
     def groupId(self):
-        return 'raster'
+        return 'drones'
 
     def tags(self):
         return self.tr('alpha,band,remove,reduce,bands,compact,compress').split(',')
 
     def icon(self):
-        return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/raster.png'))
+        return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/drone.png'))
 
     txt_en = 'This tool removes the 4th band (apha band), transfering the transparency information as "NoData" to pixels of the RGB output.'
     txt_pt = 'Esta ferramenta remove a 4ª banda (banda alfa), transferindo a informação de transparência como "Sem Valor" para os pixels da imagem RGB de saída.'

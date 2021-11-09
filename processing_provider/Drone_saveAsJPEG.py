@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-saveAsJPEG.py
+Drone_saveAsJPEG.py
 ***************************************************************************
 *                                                                         *
 *   This program is free software; you can redistribute it and/or modify  *
@@ -82,16 +82,16 @@ class SaveAsJPEG(QgsProcessingAlgorithm):
         return self.tr('Save as JPEG', 'Salvar como JPEG')
 
     def group(self):
-        return self.tr('Raster')
+        return self.tr('Drones')
 
     def groupId(self):
-        return 'raster'
+        return 'drones'
 
     def tags(self):
         return self.tr('RGB,bands,jpeg,jpg,compact,compress,jpw,world').split(',')
 
     def icon(self):
-        return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/raster.png'))
+        return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/drone.png'))
 
     txt_en = 'Exports any 8 bit RGB or RGBA raster layer as a JPEG file. Ideal for reducing the size of the output file. It performs a lossy JPEG compression that, in general, the loss of quality goes unnoticed visually.'
     txt_pt = 'Exporta qualquer camada raster RGB ou RGBA de 8 bits como um arquivo JPEG. Ideal para reduzir o tamanho do arquivo de saída. Realiza a compressão JPEG com uma pequena perda de qualidade que, em geral, passa despercebida visualmente.'
@@ -121,7 +121,7 @@ class SaveAsJPEG(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterRasterLayer(
                 self.RasterIN,
-                self.tr('Input Raster (3 or 4 bands - 8bit)', 'Raster de entrada (3 ou 4 bandas - 8bits'),
+                self.tr('Input Raster (3 or 4 bands - 8bit)', 'Raster de entrada (3 ou 4 bandas - 8bits)'),
                 [QgsProcessing.TypeRaster]
             )
         )
