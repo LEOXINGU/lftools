@@ -38,7 +38,7 @@ from lftools.processing_provider.Cart_coord2utm import Coord2UTMGrid
 from lftools.processing_provider.Cart_extent2utm import Extent2UTMGrid
 from lftools.processing_provider.Survey_closedPolygonal import ClosedPolygonal
 from lftools.processing_provider.Survey_Estimate3dCoord import Estimate3dCoord
-from lftools.processing_provider.Survey_helmert2D import Helmert2D
+from lftools.processing_provider.Survey_coordTransf2D import CoordTransf2D
 from lftools.processing_provider.Survey_LocalTangentPlane import LocalTangentPlane
 from lftools.processing_provider.Survey_traverseAdjustment import TraverseAdjustment
 from lftools.processing_provider.Survey_azimuthDistance import AzimuthDistance
@@ -55,10 +55,10 @@ from lftools.processing_provider.Rast_fillRasterwithPatches import FillRasterwit
 from lftools.processing_provider.Rast_inventoryRaster import InventoryRaster
 from lftools.processing_provider.Rast_loadRasterByLocation import LoadRasterByLocation
 from lftools.processing_provider.Rast_mosaicRaster import MosaicRaster
-from lftools.processing_provider.Rast_removeAlphaBand import RemoveAlphaBand
+from lftools.processing_provider.Drone_removeAlphaBand import RemoveAlphaBand
 from lftools.processing_provider.Rast_rescaleTo8bits import RescaleTo8bits
 from lftools.processing_provider.Rast_supervisedClassification import SupervisedClassification
-from lftools.processing_provider.Rast_saveAsJPEG import SaveAsJPEG
+from lftools.processing_provider.Drone_saveAsJPEG import SaveAsJPEG
 from lftools.processing_provider.Rast_binaryThresholding import BinaryThresholding
 from lftools.processing_provider.Reamb_ImportPhotos import ImportPhotos
 from lftools.processing_provider.Vect_DirectionalMerge import DirectionalMerge
@@ -77,6 +77,16 @@ from lftools.processing_provider.Post_DeleteDB import DeleteDB
 from lftools.processing_provider.Post_RenameDB import RenameDB
 from lftools.processing_provider.Post_ImportRaster import ImportRaster
 from lftools.processing_provider.Post_ChangeEnconding import ChangeEnconding
+from lftools.processing_provider.Drone_overviewsJPEG import OverviewsJPEG
+from lftools.processing_provider.Drone_GeorrefAdjust import GeorrefAdjust
+from lftools.processing_provider.Rast_getPointValue import GetPointValue
+from lftools.processing_provider.Drone_photosByBlocks import PhotosByBlocks
+from lftools.processing_provider.Drone_copySelectedPhotos import CopySelectedPhotos
+from lftools.processing_provider.Drone_copySelectedPhotos import CopySelectedPhotos
+from lftools.processing_provider.Drone_joinFolders import JoinFolders
+from lftools.processing_provider.Drone_createGCPfile import CreateGCPfile
+from lftools.processing_provider.Drone_verticalAdjustment import VerticalAdjustment
+
 
 class LFToolsProvider(QgsProcessingProvider):
 
@@ -100,7 +110,7 @@ class LFToolsProvider(QgsProcessingProvider):
         self.addAlgorithm(Extent2UTMGrid())
         self.addAlgorithm(ClosedPolygonal())
         self.addAlgorithm(Estimate3dCoord())
-        self.addAlgorithm(Helmert2D())
+        self.addAlgorithm(CoordTransf2D())
         self.addAlgorithm(LocalTangentPlane())
         self.addAlgorithm(TraverseAdjustment())
         self.addAlgorithm(ConfidenceEllipse())
@@ -139,6 +149,14 @@ class LFToolsProvider(QgsProcessingProvider):
         self.addAlgorithm(ChangeEnconding())
         self.addAlgorithm(SaveAsJPEG())
         self.addAlgorithm(BinaryThresholding())
+        self.addAlgorithm(OverviewsJPEG())
+        self.addAlgorithm(GeorrefAdjust())
+        self.addAlgorithm(GetPointValue())
+        self.addAlgorithm(PhotosByBlocks())
+        self.addAlgorithm(CopySelectedPhotos())
+        self.addAlgorithm(JoinFolders())
+        self.addAlgorithm(CreateGCPfile())
+        self.addAlgorithm(VerticalAdjustment())
 
     def id(self):
         return 'lftools'

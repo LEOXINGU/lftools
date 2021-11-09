@@ -49,6 +49,7 @@ from qgis.core import (QgsProcessing,
 
 from osgeo import osr, gdal_array, gdal #https://gdal.org/python/
 from lftools.geocapt.imgs import Imgs
+from lftools.geocapt.cartography import reprojectPoints
 import os
 import numpy as np
 from qgis.PyQt.QtGui import QIcon
@@ -218,7 +219,7 @@ class LoadRasterByLocation(QgsProcessingAlgorithm):
             coordinateTransformer = QgsCoordinateTransform()
             coordinateTransformer.setDestinationCrs(crs)
             coordinateTransformer.setSourceCrs(CRS)
-            geom_transf = self.reprojectPoints(geom, coordinateTransformer)
+            geom_transf = reprojectPoints(geom, coordinateTransformer)
 
             for feat in source.getFeatures():
                 if geom_transf.intersects(feat.geometry()):
@@ -241,62 +242,3 @@ class LoadRasterByLocation(QgsProcessingAlgorithm):
             rlayer = QgsRasterLayer(file_path, layer_name)
             QgsProject.instance().addMapLayer(rlayer)
         return {}
-
-    def reprojectPoints(self, geom, xform):
-        if geom.type() == 0: #Point
-            if geom.isMultipart():
-                pnts = geom.asMultiPoint()
-                newPnts = []
-                for pnt in pnts:
-                    newPnts += [xform.transform(pnt)]
-                newGeom = QgsGeometry.fromMultiPointXY(newPnts)
-                return newGeom
-            else:
-                pnt = geom.asPoint()
-                newPnt = xform.transform(pnt)
-                newGeom = QgsGeometry.fromPointXY(newPnt)
-                return newGeom
-        elif geom.type() == 1: #Line
-            if geom.isMultipart():
-                linhas = geom.asMultiPolyline()
-                newLines = []
-                for linha in linhas:
-                    newLine =[]
-                    for pnt in linha:
-                        newLine += [xform.transform(pnt)]
-                    newLines += [newLine]
-                newGeom = QgsGeometry.fromMultiPolylineXY(newLines)
-                return newGeom
-            else:
-                linha = geom.asPolyline()
-                newLine =[]
-                for pnt in linha:
-                    newLine += [xform.transform(pnt)]
-                newGeom = QgsGeometry.fromPolylineXY(newLine)
-                return newGeom
-        elif geom.type() == 2: #Polygon
-            if geom.isMultipart():
-                poligonos = geom.asMultiPolygon()
-                newPolygons = []
-                for pol in poligonos:
-                    newPol = []
-                    for anel in pol:
-                        newAnel = []
-                        for pnt in anel:
-                            newAnel += [xform.transform(pnt)]
-                        newPol += [newAnel]
-                    newPolygons += [newPol]
-                newGeom = QgsGeometry.fromMultiPolygonXY(newPolygons)
-                return newGeom
-            else:
-                pol = geom.asPolygon()
-                newPol = []
-                for anel in pol:
-                    newAnel = []
-                    for pnt in anel:
-                        newAnel += [xform.transform(pnt)]
-                    newPol += [newAnel]
-                newGeom = QgsGeometry.fromPolygonXY(newPol)
-                return newGeom
-        else:
-            return None

@@ -12,7 +12,7 @@
 """
 __author__ = 'Leandro França'
 __date__ = '2021-03-01'
-__copyright__ = '(C) 2019, Leandro França'
+__copyright__ = '(C) 2021, Leandro França'
 
 from numpy import sign, array, arange
 from numpy.linalg import norm

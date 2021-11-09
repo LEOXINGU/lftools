@@ -106,6 +106,7 @@ class ImportPhotos(QgsProcessingAlgorithm):
     FOLDER = 'FOLDER'
     NONGEO = 'NONGEO'
     OUTPUT = 'OUTPUT'
+    SUBFOLDER = 'SUBFOLDER'
 
     def initAlgorithm(self, config=None):
 
@@ -115,6 +116,14 @@ class ImportPhotos(QgsProcessingAlgorithm):
                 self.tr('Folder with geotagged photos', 'Pasta de fotos com Geotag'),
                 behavior=QgsProcessingParameterFile.Folder,
                 defaultValue=None
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterBoolean(
+                self.SUBFOLDER,
+                self.tr('Check subfolders', 'Verificar sub-pastas'),
+                defaultValue = False
             )
         )
 
@@ -146,13 +155,30 @@ class ImportPhotos(QgsProcessingAlgorithm):
         if not pasta:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.FOLDER))
 
+        subpasta = self.parameterAsBool(
+            parameters,
+            self.SUBFOLDER,
+            context
+        )
+
         fotos_nao_geo = self.parameterAsFile(
             parameters,
             self.NONGEO,
             context
         )
 
-        lista = os.listdir(pasta)
+        feedback.pushInfo(self.tr('Checking files in the folder...', 'Checando arquivos na pasta...'))
+        lista = []
+        if subpasta:
+            for root, dirs, files in os.walk(pasta, topdown=True):
+                for name in files:
+                    if (name).lower().endswith(('.jpg', '.jpeg', '.tif', '.tiff')):
+                        lista += [os.path.join(root, name)]
+        else:
+            for item in os.listdir(pasta):
+                if (item).lower().endswith(('.jpg', '.jpeg', '.tif', '.tiff')):
+                    lista += [os.path.join(pasta, item)]
+
         tam = len(lista)
         copy_ngeo = False
         if os.path.isdir(fotos_nao_geo):
@@ -236,9 +262,10 @@ class ImportPhotos(QgsProcessingAlgorithm):
             raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT))
 
         Percent = 100.0/tam if tam!=0 else 0
-        for index, arquivo in enumerate(lista):
-            if (arquivo).lower().endswith(('.jpg', '.jpeg')):
-                img = Image.open(os.path.join(pasta,arquivo))
+        for index, filepath in enumerate(lista):
+            if (filepath).lower().endswith(('.jpg', '.jpeg')):
+                caminho, arquivo = os.path.split(filepath)
+                img = Image.open(os.path.join(caminho,arquivo))
                 if img._getexif():
                     exif = {
                         ExifTags.TAGS[k]: v
@@ -267,15 +294,16 @@ class ImportPhotos(QgsProcessingAlgorithm):
                 if lon != 0:
                     feature = QgsFeature(fields)
                     feature.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(lon, lat)))
-                    feature.setAttributes([arquivo, lon, lat, altitude, Az, date_time, os.path.join(pasta, arquivo)])
+                    feature.setAttributes([arquivo, lon, lat, altitude, Az, date_time, os.path.join(caminho, arquivo)])
                     sink.addFeature(feature, QgsFeatureSink.FastInsert)
                 else:
                     feedback.pushInfo(self.tr('The file "{}" has no geotag!'.format(arquivo), 'A imagem "{}" não possui geotag!'.format(arquivo)))
                     if copy_ngeo:
                         shutil.copy2(os.path.join(pasta, arquivo), os.path.join(fotos_nao_geo, arquivo))
 
-            elif (arquivo).lower().endswith(('.tif')):
-                img = Image.open(os.path.join(pasta,arquivo))
+            elif (filepath).lower().endswith(('.tif', '.tiff')):
+                caminho, arquivo = os.path.split(filepath)
+                img = Image.open(os.path.join(caminho,arquivo))
                 meta_dict = {TAGS[key] : img.tag[key] for key in img.tag_v2}
                 gps_offset = img.tag_v2.get(0x8825)
                 tags = {}
@@ -307,7 +335,7 @@ class ImportPhotos(QgsProcessingAlgorithm):
                     if lon != 0:
                         feature = QgsFeature(fields)
                         feature.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(lon, lat)))
-                        feature.setAttributes([arquivo, lon, lat, altitude, Az, date_time, os.path.join(pasta, arquivo)])
+                        feature.setAttributes([arquivo, lon, lat, altitude, Az, date_time, os.path.join(caminho, arquivo)])
                         sink.addFeature(feature, QgsFeatureSink.FastInsert)
                 else:
                     feedback.pushInfo(self.tr('The file "{}" has no geotag!'.format(arquivo), 'A imagem "{}" não possui geotag!'.format(arquivo)))

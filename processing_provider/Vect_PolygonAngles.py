@@ -88,7 +88,7 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.POLYGONS,
-                self.tr('Polygon layer'),
+                self.tr('Polygon layer', 'Camada de Polígonos'),
                 [QgsProcessing.TypeVectorPolygon]
             )
         )
@@ -97,7 +97,7 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSink(
                 self.ANGLES,
-                self.tr('Points with angles')
+                self.tr('Points with angles', 'Pontos com ângulos')
             )
         )
 
@@ -144,7 +144,7 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
             context,
             Fields,
             GeomType,
-            source.sourceCrs()
+            CRS
         )
         if sink is None:
             raise QgsProcessingException(self.invalidSinkError(parameters, self.ANGLES))

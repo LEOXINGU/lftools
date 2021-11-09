@@ -54,6 +54,7 @@ import numpy as np
 from pyproj.crs import CRS
 from math import floor, ceil
 from lftools.geocapt.imgs import Imgs
+from lftools.geocapt.dip import Interpolar
 import os
 from qgis.PyQt.QtGui import QIcon
 
@@ -221,67 +222,6 @@ class MosaicRaster(QgsProcessingAlgorithm):
             )
         )
 
-    # Função de Interpolação
-    def Interpolar(self, X, Y, BAND, origem, resol_X, resol_Y, metodo, nulo):
-        if metodo == 'nearest':
-            linha = int(round((origem[1]-Y)/resol_Y - 0.5))
-            coluna = int(round((X - origem[0])/resol_X - 0.5))
-            if BAND[linha][coluna] != nulo:
-                return float(BAND[linha][coluna])
-            else:
-                return nulo
-        elif metodo == 'bilinear':
-            nlin = len(BAND)
-            ncol = len(BAND[0])
-            I = (origem[1]-Y)/resol_Y - 0.5
-            J = (X - origem[0])/resol_X - 0.5
-            di = I - floor(I)
-            dj = J - floor(J)
-            if I<0:
-                I=0
-            if I>nlin-1:
-                I=nlin-1
-            if J<0:
-                J=0
-            if J>ncol-1:
-                J=ncol-1
-            if (BAND[int(floor(I)):int(ceil(I))+1, int(floor(J)):int(ceil(J))+1] == nulo).sum() == 0:
-                Z = (1-di)*(1-dj)*BAND[int(floor(I))][int(floor(J))] + (1-dj)*di*BAND[int(ceil(I))][int(floor(J))] + (1-di)*dj*BAND[int(floor(I))][int(ceil(J))] + di*dj*BAND[int(ceil(I))][int(ceil(J))]
-                return float(Z)
-            else:
-                return nulo
-        elif metodo == 'bicubic':
-            nlin = len(BAND)
-            ncol = len(BAND[0])
-            I = (origem[1]-Y)/resol_Y - 0.5
-            J = (X - origem[0])/resol_X - 0.5
-            di = I - floor(I)
-            dj = J - floor(J)
-            I=int(floor(I))
-            J=int(floor(J))
-            if I<2:
-                I=2
-            if I>nlin-3:
-                I=nlin-3
-            if J<2:
-                J=2
-            if J>ncol-3:
-                J=ncol-3
-            if (BAND[I-1:I+3, J-1:J+3] == nulo).sum() == 0:
-                MatrInv = np.mat([[-1/6, 0.5, -0.5, 1/6], [ 0.5, -1., 0.5, 0.], [-1/3, -0.5,  1., -1/6], [ 0., 1., 0., 0.]]) # resultado da inversa: (np.mat([[-1, 1, -1, 1], [0, 0, 0, 1], [1, 1, 1, 1], [8, 4, 2, 1]])).I #
-                MAT  = np.mat([ [BAND[I-1, J-1],  BAND[I-1, J], BAND[I-1, J+1], BAND[I-2, J+2]],
-                                [BAND[I, J-1],    BAND[I, J],   BAND[I, J+1],   BAND[I, J+2]],
-                                [BAND[I+1, J-1],  BAND[I+1, J], BAND[I+1, J+1], BAND[I+1, J+2]],
-                                [BAND[I+2, J-1],  BAND[I+2, J], BAND[I+2, J+1], BAND[I+2, J+2]]])
-                coef = MatrInv*MAT.transpose()
-                # Horizontal
-                pi = coef[0,:]*pow(dj,3)+coef[1,:]*pow(dj,2)+coef[2,:]*dj+coef[3,:]
-                # Vertical
-                coef2 = MatrInv*pi.transpose()
-                pj = coef2[0]*pow(di,3)+coef2[1]*pow(di,2)+coef2[2]*di+coef2[3]
-                return float(pj)
-            else:
-                return nulo
 
     def processAlgorithm(self, parameters, context, feedback):
 
@@ -473,7 +413,7 @@ class MosaicRaster(QgsProcessingAlgorithm):
                 xres = (x_max-x_min)/n_col
                 yres = -(y_max-y_min)/n_lin
 
-        feedback.pushInfo(self.tr('Resolution: ', 'Resolução: ') + str(n_lin) +'x' + str(n_col))
+        feedback.pushInfo(self.tr('Size: ', 'Tamanho: ') + str(n_lin) +'x' + str(n_col))
         # Geotransform do Mosaico
         ulx = x_min
         uly = y_max
@@ -662,13 +602,13 @@ class MosaicRaster(QgsProcessingAlgorithm):
                         lin,col = px
                         X = origem[0] + resol_X*(col + 0.5)
                         Y = origem[1] - resol_Y*(lin + 0.5)
-                        Interpolado = self.Interpolar(X, Y,
-                                                 imgs[img]['band'],
-                                                 imgs[img]['origem'],
-                                                 imgs[img]['xres'],
-                                                 imgs[img]['yres'],
-                                                 reamostragem,
-                                                 valor_nulo)
+                        Interpolado = Interpolar(X, Y,
+                                                imgs[img]['band'],
+                                                imgs[img]['origem'],
+                                                imgs[img]['xres'],
+                                                imgs[img]['yres'],
+                                                reamostragem,
+                                                valor_nulo)
                         if Interpolado != valor_nulo:
                             banda[lin][col] = round(Interpolado) if inteiro else Interpolado
 
@@ -684,7 +624,7 @@ class MosaicRaster(QgsProcessingAlgorithm):
                         Y = origem[1] - resol_Y*(lin + 0.5)
                         interp_values = []
                         for img in imgs:
-                            Interpolado = self.Interpolar(X, Y,
+                            Interpolado = Interpolar(X, Y,
                                                      imgs[img]['band'],
                                                      imgs[img]['origem'],
                                                      imgs[img]['xres'],
