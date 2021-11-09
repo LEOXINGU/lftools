@@ -38,6 +38,35 @@
         <li><a href="#synthetic-deed-description">Synthetic deed description</a></li>
       </ul>
       </li><li>
+      <a href="#drones">Drones</a>
+      <ul>
+        <li><a href="#copy-selected-files">Copy selected files</a></li>
+      </ul>
+      <ul>
+        <li><a href="#generate-gcp-file-from-layer">Generate GCP file from layer</a></li>
+      </ul>
+      <ul>
+        <li><a href="#georeferencing-adjustment">Georeferencing Adjustment</a></li>
+      </ul>
+      <ul>
+        <li><a href="#join-folders">Join folders</a></li>
+      </ul>
+      <ul>
+        <li><a href="#overviews-with-jpeg-compression">Overviews with JPEG compression</a></li>
+      </ul>
+      <ul>
+        <li><a href="#photos-by-blocks">Photos by blocks</a></li>
+      </ul>
+      <ul>
+        <li><a href="#remove-alpha-band">Remove alpha band</a></li>
+      </ul>
+      <ul>
+        <li><a href="#save-as-jpeg">Save as JPEG</a></li>
+      </ul>
+      <ul>
+        <li><a href="#vertical-adjustment">Vertical adjustment</a></li>
+      </ul>
+      </li><li>
       <a href="#easy">Easy</a>
       <ul>
         <li><a href="#measure-layers">Measure layers</a></li>
@@ -80,6 +109,9 @@
         <li><a href="#define-null-cells">Define null cells</a></li>
       </ul>
       <ul>
+        <li><a href="#estimate-point-value-from-raster">Estimate point value from Raster</a></li>
+      </ul>
+      <ul>
         <li><a href="#extract-raster-band">Extract raster band</a></li>
       </ul>
       <ul>
@@ -101,13 +133,7 @@
         <li><a href="#raster-data-inventory">Raster data inventory</a></li>
       </ul>
       <ul>
-        <li><a href="#remove-alpha-band">Remove alpha band</a></li>
-      </ul>
-      <ul>
         <li><a href="#rescale-to-8-bit">Rescale to 8 bit</a></li>
-      </ul>
-      <ul>
-        <li><a href="#save-as-jpeg">Save as JPEG</a></li>
       </ul>
       <ul>
         <li><a href="#supervised-classification">Supervised classification</a></li>
@@ -128,13 +154,13 @@
       </li><li>
       <a href="#survey">Survey</a>
       <ul>
-        <li><a href="#2d-conformal-transformation">2D conformal transformation</a></li>
-      </ul>
-      <ul>
         <li><a href="#azimuth-and-distance">Azimuth and distance</a></li>
       </ul>
       <ul>
         <li><a href="#closed-polygonal">Closed polygonal</a></li>
+      </ul>
+      <ul>
+        <li><a href="#coordinate-transformation-2d">Coordinate transformation 2D</a></li>
       </ul>
       <ul>
         <li><a href="#estimate-3d-coordinates">Estimate 3D coordinates</a></li>
@@ -185,7 +211,7 @@
         <li><a href="#poligonal-fechada">Poligonal fechada</a></li>
       </ul>
       <ul>
-        <li><a href="#transformação-conforme-2d">Transformação conforme 2D</a></li>
+        <li><a href="#transformação-de-coordenadas-2d">Transformação de coordenadas 2D</a></li>
       </ul>
       <ul>
         <li><a href="#transformação-para-sgl">Transformação para SGL</a></li>
@@ -214,6 +240,35 @@
       </ul>
       <ul>
         <li><a href="#planilha-de-área-e-perímetro">Planilha de área e perímetro</a></li>
+      </ul>
+      </li><li>
+      <a href="#drones">Drones</a>
+      <ul>
+        <li><a href="#ajuste-vertical">Ajuste Vertical</a></li>
+      </ul>
+      <ul>
+        <li><a href="#ajuste-do-georreferenciamento">Ajuste do Georreferenciamento</a></li>
+      </ul>
+      <ul>
+        <li><a href="#copiar-arquivos-selecionados">Copiar arquivos selecionados</a></li>
+      </ul>
+      <ul>
+        <li><a href="#fotos-por-blocos">Fotos por blocos</a></li>
+      </ul>
+      <ul>
+        <li><a href="#gerar-arquivo-de-gcp-a-partir-de-camada">Gerar arquivo de GCP a partir de camada</a></li>
+      </ul>
+      <ul>
+        <li><a href="#juntar-pastas">Juntar pastas</a></li>
+      </ul>
+      <ul>
+        <li><a href="#pirâmides-com-compressão-jpeg">Pirâmides com Compressão JPEG</a></li>
+      </ul>
+      <ul>
+        <li><a href="#remover-banda-alfa">Remover banda alfa</a></li>
+      </ul>
+      <ul>
+        <li><a href="#salvar-como-jpeg">Salvar como JPEG</a></li>
       </ul>
       </li><li>
       <a href="#estatística-espacial">Estatística Espacial</a>
@@ -275,6 +330,9 @@
         <li><a href="#esburacar-raster">Esburacar raster</a></li>
       </ul>
       <ul>
+        <li><a href="#estimar-valor-de-ponto-a-partir-de-raster">Estimar valor de ponto a partir de Raster</a></li>
+      </ul>
+      <ul>
         <li><a href="#extrair-banda-de-raster">Extrair banda de raster</a></li>
       </ul>
       <ul>
@@ -291,12 +349,6 @@
       </ul>
       <ul>
         <li><a href="#remendar-vazios-de-raster">Remendar vazios de raster</a></li>
-      </ul>
-      <ul>
-        <li><a href="#remover-banda-alfa">Remover banda alfa</a></li>
-      </ul>
-      <ul>
-        <li><a href="#salvar-como-jpeg">Salvar como JPEG</a></li>
       </ul>
       </li><li>
       <a href="#reambulação">Reambulação</a>
@@ -414,6 +466,119 @@ This tool generates the Vertices and Sides Descriptive Table, also known as Synt
   <tbody>
     <tr>
       <td><img src="images/tutorial/doc_descriptive_table.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+## Drones
+
+
+### Copy selected files
+This tool makes it possible to copy or move files to a new folder from a point layer with file paths.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/drone_copySelectedFiles.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Generate GCP file from layer
+Generate text file with Ground Control Points (GCP) from a point layer.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/drone_createGCP.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Georeferencing Adjustment
+This tool performs the georeferencing adjustment of any raster image using Ground Control Points.</br>     The following types of coordinate transformation can be used:</br>◼️ <b>Translation Transformation</b>: 1 vector without adjustment / 2 or + vectors with adjustment.</br>◼️ <b>Conformal Transformation (2D Helmert)</b>: 2 vectors without adjustment / 3 or + vectors with adjustment.</br>◼️ <b>Affine Transformation</b>: 3 vectors without adjustment / 4 or + vectors with adjustment.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/drone_georref_adjust.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Join folders
+This tool has the objective of joining the files from two folders in another new folder, with the possibility of <b>renaming</b> the files.</br>    It is a very useful procedure for joining multiple drone images with repeated names into a single folder.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/drone_joinFolders.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Overviews with JPEG compression
+This tool aims to create an Overviews file (.ovr). This algorithm has the advantage of applying a JPEG compression at each level, greatly reducing the generated file size.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/raster_overviews.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Photos by blocks
+This tool separates drone photographs into new folders to be processed by blocks, from a layer of polygons (blocks) and from layers of geotagged photographs.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/drone_photosByBlocks.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Remove alpha band
+This tool removes the 4th band (apha band), transfering the transparency information as "NoData" to pixels of the RGB output.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/raster_remove_alpha.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Save as JPEG
+Exports any 8 bit RGB or RGBA raster layer as a JPEG file. Ideal for reducing the size of the output file. It performs a lossy JPEG compression that, in general, the loss of quality goes unnoticed visually.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/raster_jpeg_tfw.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Vertical adjustment
+This tool performs the vertical adjustment of Digital Elevation Models (DEM) from Ground Control Points (GCP).
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/drone_verticalAdjustment.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -578,6 +743,18 @@ Cells of a raster with values outside the interval (minimum and maximum) are def
 </table>
 </div>
 
+### Estimate point value from Raster
+This tool estimates the value of the points from Raster, making the proper interpolation of the nearest pixels (cells).
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/raster_getpointvalue.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
 ### Extract raster band
 Extracts a difined band of a raster (for multiband rasters).
 <div align="center">
@@ -662,18 +839,6 @@ Creates a vector layer with the inventory of raster files in a folder. The geome
 </table>
 </div>
 
-### Remove alpha band
-This tool removes the 4th band (apha band), transfering the transparency information as "NoData" to pixels of the RGB output.
-<div align="center">
-<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
-  <tbody>
-    <tr>
-      <td><img src="images/tutorial/raster_remove_alpha.jpg"></td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
 ### Rescale to 8 bit
 Rescales the values of the raster pixels with radiometric resolution of 16 bits (or even 8 bits or float) to exactly the range of 0 to 255, creating a new raster with 8 bits (byte) of radiometric resolution.
 <div align="center">
@@ -681,18 +846,6 @@ Rescales the values of the raster pixels with radiometric resolution of 16 bits 
   <tbody>
     <tr>
       <td><img src="images/tutorial/raster_histogram.jpg"></td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-### Save as JPEG
-Exports any 8 bit RGB or RGBA raster layer as a JPEG file. Ideal for reducing the size of the output file. It performs a lossy JPEG compression that, in general, the loss of quality goes unnoticed visually.
-<div align="center">
-<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
-  <tbody>
-    <tr>
-      <td><img src="images/tutorial/raster_jpeg_tfw.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -761,18 +914,6 @@ Generate gaussian (normal) random points in 2D space with a given mean position 
 ## Survey
 
 
-### 2D conformal transformation
-Two-dimensional conformal coordinate transformation, also known as the four-parameter similarity transformation or Helmert 2D, has the characteristic that true shape is retained after transformation.</br>It is typically used in surveying when converting separate surveys into a common reference coordinate system.</br>This transformation involves: Scaling, Rotation and Translations.</br>
-<div align="center">
-<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
-  <tbody>
-    <tr>
-      <td><img src="images/tutorial/survey_helmert2D.jpg"></td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
 ### Azimuth and distance
 Calculation of points or line from a set of azimuths and distances.
 <div align="center">
@@ -792,6 +933,18 @@ Calculates the adjusted coordinates from angles and horizontal distances of a Cl
   <tbody>
     <tr>
       <td><img src="images/tutorial/survey_closed_polygonal.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Coordinate transformation 2D
+This tool performs the following types of coordinate transformation:</br>◼️ <b>Translation Transformation</b>: 1 vector without adjustment / 2 or + vectors with adjustment.</br>◼️ <b>Conformal Transformation (2D Helmert)</b>: 2 vectors without adjustment / 3 or + vectors with adjustment.</br>◼️ <b>Affine Transformation</b>: 3 vectors without adjustment / 4 or + vectors with adjustment.</br>With this tool it is possible to perform correctly the georeferencing of vector files in QGIS.</br>
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/survey_helmert2D.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -954,8 +1107,8 @@ Cálculo das coordenadas ajustadas a partir de medições de ângulos e distânc
 </table>
 </div>
 
-### Transformação conforme 2D
-A transformação Conforme, também conhecida como transformação de similaridade de quatro parâmetros ou Helmert 2D, tem a característica de manter a forma (configuração) verdadeira da feição após a transformação.</br>É normalmente utilizada para o correto georreferenciamento de levantamentos topográficos com coordenadas arbitrárias.</br>Esta transformação envolve: Escala, Rotação e Translação.</br>
+### Transformação de coordenadas 2D
+Esta ferramenta realiza os seguintes tipos de transformação de coordenadas:</br>◼️	<b>Transformação de Translação</b>: 1 vetor sem ajustamento / 2 ou + vetores com ajustamento.</br>◼️	<b>Transformação Conforme (Helmert 2D)</b>: 2 vetores sem ajustamento / 3 ou + vetores com ajustamento.</br>◼️	<b>Transformação Afim</b>: 3 vetores sem ajustamento / 4 ou + vetores com ajustamento.</br>Com esta ferramenta é possível realizar o correto georreferenciamento de arquivos vetoriais no QGIS.</br>
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
@@ -1067,6 +1220,119 @@ Esta gera o Relatório de Cálculo Analítico de Área, Azimutes, Lados, Coorden
   <tbody>
     <tr>
       <td><img src="images/tutorial/doc_analytical_results.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+## Drones
+
+
+### Ajuste Vertical
+Esta ferramenta realiza o ajuste vertical de Modelos Digitais de Elevação (MDE) a partir de Pontos de Controle no Terreno (GCP).
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/drone_verticalAdjustment.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Ajuste do Georreferenciamento
+Esta ferramenta realiza o ajuste do georreferenciamento de qualquer imagem raster utilizando Pontos de Controle no Terreno.</br>    Os seguintes tipos de transformação de coordenadas podem ser utilizados:</br>◼️	<b>Transformação de Translação</b>: 1 vetor sem ajustamento / 2 ou + vetores com ajustamento.</br>◼️	<b>Transformação Conforme (Helmert 2D)</b>: 2 vetores sem ajustamento / 3 ou + vetores com ajustamento.</br>◼️	<b>Transformação Afim</b>: 3 vetores sem ajustamento / 4 ou + vetores com ajustamento.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/drone_georref_adjust.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Copiar arquivos selecionados
+Esta ferramenta possibilita copiar ou mover arquivos para uma nova pasta a partir de uma camada de pontos com os caminhos dos arquivos.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/drone_copySelectedFiles.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Fotos por blocos
+Esta ferramenta separa fotografias de drones em novas pastas para serem processadas por blocos, a partir de uma camada de polígonos (blocos) e da camadas de fotografias com geotag.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/drone_photosByBlocks.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Gerar arquivo de GCP a partir de camada
+Gera arquivo texto com Pontos de Controle no Terreno (GCP) a partir de uma camada de pontos.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/drone_createGCP.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Juntar pastas
+Esta ferramenta tem o objetivo de juntar os arquivos de duas pastas em uma outra nova pasta, com a possibilidade de <b>renomear</b> os arquivos.</br>É um procedimento muito útil para juntar várias imagens de drone com nomes repetidos em uma única pasta.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/drone_joinFolders.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Pirâmides com Compressão JPEG
+Esta ferramenta tem como objetivo criar um arquivo .ovr, correspondente às Overviews (ou pirâmides, em português). Este algoritmo tem a vantagem de aplicar uma compressão JPEG em cada nível, reduzindo bastante o tamanho do arquivo gerado.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/raster_overviews.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Remover banda alfa
+Esta ferramenta remove a 4ª banda (banda alfa), transferindo a informação de transparência como "Sem Valor" para os pixels da imagem RGB de saída.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/raster_remove_alpha.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Salvar como JPEG
+Exporta qualquer camada raster RGB ou RGBA de 8 bits como um arquivo JPEG. Ideal para reduzir o tamanho do arquivo de saída. Realiza a compressão JPEG com uma pequena perda de qualidade que, em geral, passa despercebida visualmente.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/raster_jpeg_tfw.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1296,6 +1562,18 @@ Cria buracos em Raster definindo pixels nulos (transparentes) a partir de Camada
 </table>
 </div>
 
+### Estimar valor de ponto a partir de Raster
+Esta ferramenta estima o valor dos pontos a partir de Raster, fazendo a devida interpolação dos pixels (células) mais próximos.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/raster_getpointvalue.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
 ### Extrair banda de raster
 Extrai uma das bandas de um arquivo raster (para imagens multi-bandas/multi-canal).
 <div align="center">
@@ -1363,30 +1641,6 @@ Preenche vazios de Raster (pixels nulos) com dados obtidos de outras camadas ras
   <tbody>
     <tr>
       <td><img src="images/tutorial/raster_fill_holes.jpg"></td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-### Remover banda alfa
-Esta ferramenta remove a 4ª banda (banda alfa), transferindo a informação de transparência como "Sem Valor" para os pixels da imagem RGB de saída.
-<div align="center">
-<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
-  <tbody>
-    <tr>
-      <td><img src="images/tutorial/raster_remove_alpha.jpg"></td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-### Salvar como JPEG
-Exporta qualquer camada raster RGB ou RGBA de 8 bits como um arquivo JPEG. Ideal para reduzir o tamanho do arquivo de saída. Realiza a compressão JPEG com uma pequena perda de qualidade que, em geral, passa despercebida visualmente.
-<div align="center">
-<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
-  <tbody>
-    <tr>
-      <td><img src="images/tutorial/raster_jpeg_tfw.jpg"></td>
     </tr>
   </tbody>
 </table>
