@@ -142,7 +142,7 @@ class GeorrefAdjust(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.VECTORS,
-                self.tr('Vectors Lines (two points)', 'Linhas de vetores (dois pontos)'),
+                self.tr('Vectors Lines (two vertices)', 'Linhas de vetores (dois vértices)'),
                 [QgsProcessing.TypeVectorLine]
             )
         )

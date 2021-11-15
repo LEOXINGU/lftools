@@ -14,6 +14,8 @@ __author__ = 'Leandro França'
 __date__ = '2021-11-04'
 __copyright__ = '(C) 2021, Leandro França'
 
+from qgis.core import *
+from qgis.gui import *
 from lftools.geocapt.topogeo import str2HTML
 from lftools.geocapt.imgs import Imgs
 from qgis.core import *
@@ -23,17 +25,15 @@ from numpy.linalg import norm, det, inv, solve
 
 # Tradução
 LOC = QgsApplication.locale()[:2]
-def translate(string):
-    return QCoreApplication.translate('Processing', string)
 def tr(*string):
     # Traduzir para o portugês: arg[0] - english (translate), arg[1] - português
     if LOC == 'pt':
         if len(string) == 2:
             return string[1]
         else:
-            return translate(string[0])
+            return string[0]
     else:
-        return translate(string[0])
+        return string[0]
 
 # Validação dos Pontos Homólogos
 def ValidacaoVetores(vetores, metodo):

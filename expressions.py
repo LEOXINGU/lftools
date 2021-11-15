@@ -43,17 +43,15 @@ import re
 # https://qgis.org/pyqgis/3.2/core/Expression/QgsExpression.html
 
 LOC = QgsApplication.locale()[:2]
-def translate(string):
-    return QCoreApplication.translate('Processing', string)
 def tr(*string):
     # Traduzir para o portugês: arg[0] - english (translate), arg[1] - português
     if LOC == 'pt':
         if len(string) == 2:
             return string[1]
         else:
-            return translate(string[0])
+            return string[0]
     else:
-        return translate(string[0])
+        return string[0]
 
 @qgsfunction(args='auto', group='LF Tools')
 def fieldstat(layer_name, field_name, type, feature, parent):
