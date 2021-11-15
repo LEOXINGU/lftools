@@ -231,7 +231,7 @@ class DefineNullCell(QgsProcessingAlgorithm):
             for k in range(n_bands):
                 band = image.GetRasterBand(k+1).ReadAsArray()
                 # Defining null pixels
-                band = ((band>=MIN)*(band<=MAX))*band + ((band<MIN)*(band>MAX))*Pixel_Nulo
+                band = ((band>=MIN)*(band<=MAX))*band + (band<MIN)*(float(Pixel_Nulo)) + (band>MAX)*(float(Pixel_Nulo))
                 outband = Driver.GetRasterBand(k+1)
                 feedback.pushInfo(self.tr('Writing Band {}...'.format(k+1), 'Escrevendo Banda {}...'.format(k+1)))
                 outband.WriteArray(band) # write band to the raster
