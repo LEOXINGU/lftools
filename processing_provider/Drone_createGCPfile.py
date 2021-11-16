@@ -23,6 +23,7 @@ from qgis.core import (QgsApplication,
                        QgsProcessingParameterField,
                        QgsProcessingParameterString,
                        QgsProcessingParameterEnum,
+                       QgsProcessingParameterNumber,
                        QgsProcessingParameterBoolean,
                        QgsProcessingParameterFileDestination,
                        QgsFeatureSink,
@@ -91,6 +92,7 @@ class CreateGCPfile(QgsProcessingAlgorithm):
     POINTS = 'POINTS'
     NAME = 'NAME'
     FILE = 'FILE'
+    DECIMAL = 'DECIMAL'
 
     def initAlgorithm(self, config=None):
         self.addParameter(
@@ -109,6 +111,15 @@ class CreateGCPfile(QgsProcessingAlgorithm):
                 type=QgsProcessingParameterField.String
             )
         )
+
+        self.addParameter(
+            QgsProcessingParameterNumber(
+                self.DECIMAL,
+                self.tr('Decimal places', 'Casas decimais'),
+                type =0,
+                defaultValue = 3
+                )
+            )
 
         self.addParameter(
             QgsProcessingParameterFileDestination(
@@ -137,6 +148,16 @@ class CreateGCPfile(QgsProcessingAlgorithm):
             raise QgsProcessingException(self.invalidSourceError(parameters, self.NAME))
 
         columnIndex = pontos.fields().indexFromName(campo[0])
+
+        decimal = self.parameterAsInt(
+            parameters,
+            self.DECIMAL,
+            context
+        )
+        if decimal is None or decimal<1:
+            raise QgsProcessingException(self.invalidSourceError(parameters, self.DECIMAL))
+
+        format_num = '{:.Xf}'.replace('X', str(decimal))
 
         filepath = self.parameterAsFile(
             parameters,
@@ -177,7 +198,7 @@ A coordena Z será definida com 0 (zero)!'''))
                 X, Y, Z = pnt.x(), pnt.y(), 0
             else:
                 X, Y, Z = geom.constGet().x(), geom.constGet().y(), geom.constGet().z()
-            arq.write(nome + '\t' + '{:.3f}'.format(X) + '\t' + '{:.3f}'.format(Y) + '\t' + '{:.3f}'.format(Z) + '\n')
+            arq.write(nome + '\t' + format_num.format(X) + '\t' + format_num.format(Y) + '\t' + format_num.format(Z) + '\n')
             if feedback.isCanceled():
                 break
 

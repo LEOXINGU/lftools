@@ -30,6 +30,7 @@ from qgis.core import (QgsProcessing,
                        QgsProcessingParameterEnum,
                        QgsProcessingParameterFile,
                        QgsProcessingParameterString,
+                       QgsProcessingParameterNumber,
                        QgsProcessingException,
                        QgsProcessingParameterFileDestination,
                        QgsApplication)
@@ -55,6 +56,7 @@ class DescriptiveMemorial(QgisAlgorithm):
     COORD = 'COORD'
     LOGO = 'LOGO'
     SLOGAN = 'SLOGAN'
+    DECIMAL = 'DECIMAL'
     LOC = QgsApplication.locale()[:2]
 
 
@@ -177,6 +179,15 @@ class DescriptiveMemorial(QgisAlgorithm):
             )
         )
 
+        self.addParameter(
+            QgsProcessingParameterNumber(
+                self.DECIMAL,
+                self.tr('Decimal places', 'Casas decimais'),
+                type =0,
+                defaultValue = 2
+                )
+            )
+
         # 'OUTPUTS'
         self.addParameter(
             QgsProcessingParameterFileDestination(
@@ -223,6 +234,16 @@ class DescriptiveMemorial(QgisAlgorithm):
             SLOGAN = ''
         else:
             SLOGAN = SLOGAN.replace('\n', '<br>')
+
+        decimal = self.parameterAsInt(
+            parameters,
+            self.DECIMAL,
+            context
+        )
+        if decimal is None or decimal<1:
+            raise QgsProcessingException(self.invalidSourceError(parameters, self.DECIMAL))
+
+        format_num = '{:,.Xf}'.replace('X', str(decimal))
 
         meses = {1: 'janeiro', 2:'fevereiro', 3: 'março', 4:'abril', 5:'maio', 6:'junho', 7:'julho', 8:'agosto', 9:'setembro', 10:'outubro', 11:'novembro', 12:'dezembro'}
 
@@ -332,12 +353,12 @@ class DescriptiveMemorial(QgisAlgorithm):
 
         def CoordN (x, y, z):
             if coord in (0,1,2,3):
-                Xn = self.tr('{:,.2f}'.format(x), '{:,.2f}'.format(x).replace(',', 'X').replace('.', ',').replace('X', '.'))
-                Yn = self.tr('{:,.2f}'.format(y), '{:,.2f}'.format(y).replace(',', 'X').replace('.', ',').replace('X', '.'))
+                Xn = self.tr(format_num.format(x), format_num.format(x).replace(',', 'X').replace('.', ',').replace('X', '.'))
+                Yn = self.tr(format_num.format(y), format_num.format(y).replace(',', 'X').replace('.', ',').replace('X', '.'))
             if coord in (4,5,6,7):
                 Xn = str2HTML(self.tr(dd2dms(x,4), dd2dms(x,4).replace('.', ','))).replace('-','') + 'W' if x < 0 else 'E'
                 Yn = str2HTML(self.tr(dd2dms(y,4), dd2dms(y,4).replace('.', ','))).replace('-','') + 'S' if y < 0 else 'N'
-            Zn = self.tr('{:,.2f}'.format(z), '{:,.2f}'.format(z).replace(',', 'X').replace('.', ',').replace('X', '.'))
+            Zn = self.tr(format_num.format(z), format_num.format(z).replace(',', 'X').replace('.', ',').replace('X', '.'))
 
             if coord == 0:
                 txt = '''<b>N [Yn]m </b>''' + self.tr('and','e') +''' <b>E [Xn]m</b>'''
@@ -486,11 +507,11 @@ class DescriptiveMemorial(QgisAlgorithm):
                 '[PROPRIETARIO]': str2HTML(feat1['owner']),
                 '[UF]': feat1['state'],
                 '[MATRICULAS]': str2HTML(feat1['transcript']),
-                '[AREA]': self.tr('{:,.2f}'.format(feat1['area']), '{:,.2f}'.format(feat1['area']).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                '[AREA]': self.tr(format_num.format(feat1['area']), format_num.format(feat1['area']).replace(',', 'X').replace('.', ',').replace('X', '.')),
                 '[SRC]': self.tr(SRC, SRC.replace('zone', 'fuso')),
                 '[REGISTRO]': str2HTML(feat1['registry']),
                 '[MUNICIPIO]': str2HTML(feat1['county']),
-                '[PERIMETRO]': self.tr('{:,.2f}'.format(feat1['perimeter']), '{:,.2f}'.format(feat1['perimeter']).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                '[PERIMETRO]': self.tr(format_num.format(feat1['perimeter']), format_num.format(feat1['perimeter']).replace(',', 'X').replace('.', ',').replace('X', '.')),
                     }
 
         for item in itens:
@@ -502,7 +523,7 @@ class DescriptiveMemorial(QgisAlgorithm):
             itens =    {'[Vn]': pnts[t[0]+1][2],
                         '[Coordn]': CoordN(pnts[t[0]+1][0].x(), pnts[t[0]+1][0].y(), pnts[t[0]+1][3][2]) if coord in (0,1,2,3) else CoordN(pnts[t[0]+1][3][0], pnts[t[0]+1][3][1], pnts[t[0]+1][3][2]),
                         '[Az_n]': str2HTML(self.tr(dd2dms(Az_lista[t[0]],1), dd2dms(Az_lista[t[0]],1).replace('.', ','))),
-                        '[Dist_n]': self.tr('{:,.2f}'.format(Dist[t[0]]), '{:,.2f}'.format(Dist[t[0]]).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                        '[Dist_n]': self.tr(format_num.format(Dist[t[0]]), format_num.format(Dist[t[0]]).replace(',', 'X').replace('.', ',').replace('X', '.')),
                         '[Descr_k]': ListaDescr[w][0],
                         '[Confront_k]': ListaDescr[w][1]
                         }
@@ -515,7 +536,7 @@ class DescriptiveMemorial(QgisAlgorithm):
                 itens = {'[Vn]': pnts[k+1][2],
                         '[Coordn]': CoordN(pnts[k+1][0].x(), pnts[k+1][0].y(), pnts[k+1][3][2]) if coord in (0,1,2,3) else CoordN(pnts[k+1][3][0], pnts[k+1][3][1], pnts[k+1][3][2]),
                         '[Az_n]': str2HTML(self.tr(dd2dms(Az_lista[k],1), dd2dms(Az_lista[k],1).replace('.', ','))),
-                        '[Dist_n]': self.tr('{:,.2f}'.format(Dist[k]), '{:,.2f}'.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'))
+                        '[Dist_n]': self.tr(format_num.format(Dist[k]), format_num.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'))
                         }
                 for item in itens:
                     linha1 = linha1.replace(item, itens[item])

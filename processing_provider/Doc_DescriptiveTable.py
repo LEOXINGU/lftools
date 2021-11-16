@@ -28,6 +28,7 @@ from qgis.core import (QgsProcessing,
                        QgsProcessingAlgorithm,
                        QgsProcessingParameterNumber,
                        QgsProcessingParameterString,
+                       QgsProcessingParameterNumber,
                        QgsFeatureRequest,
                        QgsExpression,
                        QgsProcessingParameterFeatureSource,
@@ -110,6 +111,7 @@ class DescriptiveTable(QgsProcessingAlgorithm):
     FIM = 'FIM'
     TITULO = 'TITULO'
     FONTSIZE = 'FONTSIZE'
+    DECIMAL = 'DECIMAL'
 
     def initAlgorithm(self, config=None):
 
@@ -154,6 +156,15 @@ class DescriptiveTable(QgsProcessingAlgorithm):
                 self.tr('Font size', 'Tamanho da fonte'),
                 type =0,
                 defaultValue = 12
+                )
+            )
+
+        self.addParameter(
+            QgsProcessingParameterNumber(
+                self.DECIMAL,
+                self.tr('Decimal places', 'Casas decimais'),
+                type =0,
+                defaultValue = 2
                 )
             )
 
@@ -210,6 +221,16 @@ class DescriptiveTable(QgsProcessingAlgorithm):
         )
         if fontsize is None or ini<1:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.FONTSIZE))
+
+        decimal = self.parameterAsInt(
+            parameters,
+            self.DECIMAL,
+            context
+        )
+        if decimal is None or decimal<1:
+            raise QgsProcessingException(self.invalidSourceError(parameters, self.DECIMAL))
+
+        format_num = '{:,.Xf}'.replace('X', str(decimal))
 
         # Pegando o SRC do Projeto
         SRC = QgsProject.instance().crs().description()
@@ -308,12 +329,12 @@ class DescriptiveTable(QgsProcessingAlgorithm):
         for k in range(ini-1,fim):
             linha0 = linha
             itens = {'Vn': pnts_UTM[k+1][2],
-                        'En': self.tr('{:,.2f}'.format(pnts_UTM[k+1][0].x()), '{:,.2f}'.format(pnts_UTM[k+1][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                        'Nn': self.tr('{:,.2f}'.format(pnts_UTM[k+1][0].y()), '{:,.2f}'.format(pnts_UTM[k+1][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                        'En': self.tr(format_num.format(pnts_UTM[k+1][0].x()), format_num.format(pnts_UTM[k+1][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                        'Nn': self.tr(format_num.format(pnts_UTM[k+1][0].y()), format_num.format(pnts_UTM[k+1][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.')),
                         'Ln': pnts_UTM[k+1][2] + '/' + pnts_UTM[1 if k+2 > tam else k+2][2],
                         'Az_n': self.tr(dd2dms(Az_lista[k],1), dd2dms(Az_lista[k],1).replace('.', ',')),
                         'AzG_n':  self.tr(dd2dms(Az_Geo_lista[k],1), dd2dms(Az_Geo_lista[k],1).replace('.', ',')),
-                        'Dn': self.tr('{:,.2f}'.format(Dist[k]), '{:,.2f}'.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'))
+                        'Dn': self.tr(format_num.format(Dist[k]), format_num.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'))
                         }
             for item in itens:
                 linha0 = linha0.replace(item, itens[item])

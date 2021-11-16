@@ -29,6 +29,7 @@ from qgis.core import (QgsProcessing,
                        QgsProcessingParameterFeatureSource,
                        QgsProcessingParameterFile,
                        QgsProcessingParameterString,
+                       QgsProcessingParameterNumber,
                        QgsProcessingParameterFeatureSink,
                        QgsProcessingParameterFileDestination,
                        QgsApplication,
@@ -50,6 +51,7 @@ class AreaPerimterReport(QgsProcessingAlgorithm):
     HTML = 'HTML'
     LOGO = 'LOGO'
     SLOGAN = 'SLOGAN'
+    DECIMAL = 'DECIMAL'
 
     LOC = QgsApplication.locale()[:2]
 
@@ -148,6 +150,15 @@ class AreaPerimterReport(QgsProcessingAlgorithm):
             )
         )
 
+        self.addParameter(
+            QgsProcessingParameterNumber(
+                self.DECIMAL,
+                self.tr('Decimal places', 'Casas decimais'),
+                type =0,
+                defaultValue = 2
+                )
+            )
+
         # 'OUTPUTS'
         self.addParameter(
             QgsProcessingParameterFileDestination(
@@ -191,6 +202,16 @@ class AreaPerimterReport(QgsProcessingAlgorithm):
             SLOGAN = ''
         else:
             SLOGAN = SLOGAN.replace('\n', '<br>')
+
+        decimal = self.parameterAsInt(
+            parameters,
+            self.DECIMAL,
+            context
+        )
+        if decimal is None or decimal<1:
+            raise QgsProcessingException(self.invalidSourceError(parameters, self.DECIMAL))
+
+        format_num = '{:,.Xf}'.replace('X', str(decimal))
 
         # Pegando o SRC do Projeto
         SRC = QgsProject.instance().crs().description()
@@ -315,9 +336,9 @@ SIRGAS2000<br>
                 INICIO = INICIO.replace(item, itens[item])
 
         # Inserindo dados finais do levantamento
-        itens = {   '[AREA]': self.tr('{:,.2f}'.format(feat1['area']), '{:,.2f}'.format(feat1['area']).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                    '[AREA_HA]': self.tr('{:,.2f}'.format(feat1['area']/1e4), '{:,.2f}'.format(feat1['area']/1e4).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                    '[PERIMETRO]': self.tr('{:,.2f}'.format(feat1['perimeter']), '{:,.2f}'.format(feat1['perimeter']).replace(',', 'X').replace('.', ',').replace('X', '.'))
+        itens = {   '[AREA]': self.tr(format_num.format(feat1['area']), format_num.format(feat1['area']).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                    '[AREA_HA]': self.tr(format_num.format(feat1['area']/1e4), format_num.format(feat1['area']/1e4).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                    '[PERIMETRO]': self.tr(format_num.format(feat1['perimeter']), format_num.format(feat1['perimeter']).replace(',', 'X').replace('.', ',').replace('X', '.'))
                     }
         for item in itens:
                 FIM = FIM.replace(item, itens[item])
@@ -343,10 +364,10 @@ SIRGAS2000<br>
             itens = {
                   '[EST1]': pnts_UTM[k+1][1],
                   '[EST2]': pnts_UTM[1 if k+2 > tam else k+2][1],
-                  '[E]': self.tr('{:,.2f}'.format(pnts_UTM[k+1][0].x()), '{:,.2f}'.format(pnts_UTM[k+1][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                  '[N]': self.tr('{:,.2f}'.format(pnts_UTM[k+1][0].y()), '{:,.2f}'.format(pnts_UTM[k+1][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                  '[E]': self.tr(format_num.format(pnts_UTM[k+1][0].x()), format_num.format(pnts_UTM[k+1][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                  '[N]': self.tr(format_num.format(pnts_UTM[k+1][0].y()), format_num.format(pnts_UTM[k+1][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.')),
                   '[AZ]': str2HTML(self.tr(dd2dms(Az_lista[k],1), dd2dms(Az_lista[k],1).replace('.', ','))),
-                  '[D]': '{:,.2f}'.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'),
+                  '[D]': format_num.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'),
                   '[LON]': str2HTML(self.tr(dd2dms(pnts_UTM[k+1][2].x(),4), dd2dms(pnts_UTM[k+1][2].x(),4).replace('.', ','))),
                   '[LAT]': str2HTML(self.tr(dd2dms(pnts_UTM[k+1][2].y(),4), dd2dms(pnts_UTM[k+1][2].y(),4).replace('.', ','))),
                         }
