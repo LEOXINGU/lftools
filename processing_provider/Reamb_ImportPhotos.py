@@ -34,6 +34,7 @@ from qgis.core import (QgsApplication,
                        QgsProcessingParameterEnum,
                        QgsProcessingParameterNumber,
                        QgsFeatureSink,
+                       QgsProcessingUtils,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
                        QgsProcessingParameterFeatureSource,
@@ -347,5 +348,15 @@ class ImportPhotos(QgsProcessingAlgorithm):
 
         feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
         feedback.pushInfo(self.tr('Leandro Franca - Cartographic Engineer', 'Leandro França - Eng Cart'))
-
+        self.SAIDA = dest_id
         return {self.OUTPUT: dest_id}
+
+    def postProcessAlgorithm(self, context, feedback):
+        layer = QgsProcessingUtils.mapLayerFromString(self.SAIDA, context)
+        layer.setMapTipTemplate('''<img src="file:///[%''' + self.tr('path','caminho') + '''%]" width="450">''')
+        layer.triggerRepaint()
+        # Carregar QML
+        # path='./path/to/style.qml'
+        # output.loadNamedStyle(path)
+        # output.triggerRepaint()
+        return {self.OUTPUT: self.SAIDA}
