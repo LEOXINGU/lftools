@@ -419,7 +419,7 @@ align="center"><b><span style="">''' + tr('Transformation Parameters:',str2HTML(
 <div style="text-align: center;"><b><span style=""
 >''' + tr('Adjustment&rsquo;s Reference Variance',str2HTML('Variância a posteriori')) + '''</span></b><span style=""
 > <span style="">&nbsp;</span>=
-</span><span style="">''' + str(round(sigma2[0,0],4)) + '''</span></div>
+</span><span style="">''' + str(round(sigma2[0,0] if not min_pnts_homo else 0, 4)) + '''</span></div>
 <br>
 <div style="text-align: center;"><b><span style=""
 >''' + tr('Root Mean Square Error (RMSE)',str2HTML('Raiz do Erro Médio Quadrático (REMQ)')) + '''</span></b><span style=""
