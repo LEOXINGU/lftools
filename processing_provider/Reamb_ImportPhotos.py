@@ -281,13 +281,14 @@ class ImportPhotos(QgsProcessingAlgorithm):
                 altitude = None
                 if 'GPSInfo' in exif:
                     lat, lon = coordenadas(exif)
-                    if 17 in exif['GPSInfo']:
-                        Az = azimute(exif)
-                    if 6 in exif['GPSInfo']:
-                        try:
-                            altitude = float(exif['GPSInfo'][6][0])/exif['GPSInfo'][6][1]
-                        except:
-                            altitude = float(exif['GPSInfo'][6])
+                    if lat != 0:
+                        if 17 in exif['GPSInfo']:
+                            Az = azimute(exif)
+                        if 6 in exif['GPSInfo']:
+                            try:
+                                altitude = float(exif['GPSInfo'][6][0])/exif['GPSInfo'][6][1]
+                            except:
+                                altitude = float(exif['GPSInfo'][6])
                 if 'DateTimeOriginal' in exif:
                     date_time = data_hora(exif['DateTimeOriginal'])
                 elif 'DateTime' in exif:
