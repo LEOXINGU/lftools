@@ -184,10 +184,8 @@ class OverviewsJPEG(QgsProcessingAlgorithm):
         gdal.SetConfigOption('INTERLEAVE_OVERVIEW', 'PIXEL')
 
         # Criando as Overviews
-        raster.BuildOverviews(tipo, levels)
-
         feedback.pushInfo(self.tr('Creating the Overviews...', 'Criando as Overviews...'))
-        outds=gdal.Translate(RGB_Output, RasterIN, options=topts)
+        raster.BuildOverviews(tipo, levels)
 
         feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
         feedback.pushInfo(self.tr('Leandro Franca - Cartographic Engineer', 'Leandro França - Eng Cart'))
