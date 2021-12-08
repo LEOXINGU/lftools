@@ -188,7 +188,7 @@ class PhotosByBlocks(QgsProcessingAlgorithm):
         block_count, cont = 1, 1
         for pol in poligono.getFeatures():
             geom_pol = pol.geometry()
-            destino = os.path.join(pasta, prefixo + '_' + str(block_count))
+            destino = os.path.join(pasta, prefixo + str(block_count))
             os.mkdir(destino)
             for pnt in pontos.getFeatures():
                 geom_pnt = pnt.geometry()
