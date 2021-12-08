@@ -184,7 +184,7 @@ class CoordinatesToLayer(QgsProcessingAlgorithm):
             self.LAYER,
             context,
             Fields,
-            QgsWkbTypes.Point,
+            QgsWkbTypes.PointZ if Z_field else QgsWkbTypes.Point,
             CRS
         )
         if sink is None:
