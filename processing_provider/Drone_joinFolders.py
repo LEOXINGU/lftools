@@ -192,7 +192,7 @@ class JoinFolders(QgsProcessingAlgorithm):
         cont = 1
         for arq in lista1:
             shutil.copy(os.path.join(pasta_A, arq),
-                        os.path.join(pasta_destino, prefixo + "{:04d}".format(cont) + arq.split('.')[-1]) if renomear else os.path.join(pasta_destino, arq))
+                        os.path.join(pasta_destino, prefixo + "{:04d}.".format(cont) + arq.split('.')[-1]) if renomear else os.path.join(pasta_destino, arq))
             if feedback.isCanceled():
                 break
             feedback.setProgress(int((cont) * total))
@@ -200,7 +200,7 @@ class JoinFolders(QgsProcessingAlgorithm):
 
         for arq in lista2:
             shutil.copy(os.path.join(pasta_B, arq),
-                        os.path.join(pasta_destino, prefixo + "{:04d}".format(cont) + arq.split('.')[-1]) if renomear else os.path.join(pasta_destino, arq))
+                        os.path.join(pasta_destino, prefixo + "{:04d}.".format(cont) + arq.split('.')[-1]) if renomear else os.path.join(pasta_destino, arq))
             if feedback.isCanceled():
                 break
             feedback.setProgress(int((cont) * total))
