@@ -144,6 +144,14 @@
         <li><a href="#photos-with-geotag">Photos with geotag</a></li>
       </ul>
       </li><li>
+      <a href="#relief">Relief</a>
+      <ul>
+        <li><a href="#dem-filter">DEM filter</a></li>
+      </ul>
+      <ul>
+        <li><a href="#generate-spot-elevations">Generate Spot Elevations</a></li>
+      </ul>
+      </li><li>
       <a href="#spatial-statistics">Spatial Statistics</a>
       <ul>
         <li><a href="#confidence-ellipses">Confidence ellipses</a></li>
@@ -354,6 +362,14 @@
       <a href="#reambulação">Reambulação</a>
       <ul>
         <li><a href="#fotos-com-geotag">Fotos com geotag</a></li>
+      </ul>
+      </li><li>
+      <a href="#relevo">Relevo</a>
+      <ul>
+        <li><a href="#filtro-de-mde">Filtro de MDE</a></li>
+      </ul>
+      <ul>
+        <li><a href="#gerar-pontos-cotados">Gerar Pontos Cotados</a></li>
       </ul>
       </li><li>
       <a href="#vetor">Vetor</a>
@@ -875,6 +891,35 @@ Imports photos with geotag to a Point Layer.
   <tbody>
     <tr>
       <td><img src="images/tutorial/reamb_geotag.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+## Relief
+
+
+### DEM filter
+This tool applies the filtering technique in the Raster pixel by pixel, based on the gray level values of neighboring pixels.</br>The filtering process is done using matrices called masks (or kernel), which are applied to the image.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/relief_demfilter.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Generate Spot Elevations
+This tool generates a layer of points with <b>Spot Elevations</b> from a <b>Digital Terrain Model</b> and a vector layer of <b>contour lines</b>.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/relief_spot_elevation.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1658,6 +1703,35 @@ Importa fotos com geotag para uma camada de pontos.
   <tbody>
     <tr>
       <td><img src="images/tutorial/reamb_geotag.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+## Relevo
+
+
+### Filtro de MDE
+Esta ferramenta aplica a técnica de filtragem no Raster pixel a pixel, baseando-se nos valores dos níveis de cinza dos pixels vizinhos.</br>O processo de filtragem é feito utilizando matrizes denominadas máscaras (ou kernel), as quais são aplicadas sobre a imagem.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/relief_demfilter.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Gerar Pontos Cotados
+Esta ferramenta gera uma camada de <b>pontos cotados</b> gerados a partir de um raster correspondente ao <b>Modelo Digital do Terreno</b> e uma camada vetorial do tipo linha correspondente às <b>curvas de nível</b>.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/relief_spot_elevation.jpg"></td>
     </tr>
   </tbody>
 </table>
