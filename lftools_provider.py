@@ -86,6 +86,8 @@ from lftools.processing_provider.Drone_copySelectedPhotos import CopySelectedPho
 from lftools.processing_provider.Drone_joinFolders import JoinFolders
 from lftools.processing_provider.Drone_createGCPfile import CreateGCPfile
 from lftools.processing_provider.Drone_verticalAdjustment import VerticalAdjustment
+from lftools.processing_provider.Relief_DEMfilter import DEMfilter
+from lftools.processing_provider.Relief_SpotElevation import SpotElevation
 
 
 class LFToolsProvider(QgsProcessingProvider):
@@ -157,6 +159,8 @@ class LFToolsProvider(QgsProcessingProvider):
         self.addAlgorithm(JoinFolders())
         self.addAlgorithm(CreateGCPfile())
         self.addAlgorithm(VerticalAdjustment())
+        self.addAlgorithm(DEMfilter())
+        self.addAlgorithm(SpotElevation())
 
     def id(self):
         return 'lftools'
