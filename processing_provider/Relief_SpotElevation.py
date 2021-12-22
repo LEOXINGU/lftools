@@ -228,13 +228,16 @@ class SpotElevation(QgsProcessingAlgorithm):
         for feature in curvas.getFeatures():
             geom = feature.geometry()
             if geom.isMultipart():
-                coord = geom.asMultiPolyline()
+                coord = geom.asMultiPolyline()[0]
             else:
                 coord = geom.asPolyline()
-            if len(coord)>7 and coord[0] == coord[-1]:
+            if len(coord)>4 and coord[0] == coord[-1]:
                 poligonos += [coord]
                 pontos += [coord[0]]
                 cotas += [feature[campo_id]]
+            if feedback.isCanceled():
+                raise QgsProcessingException(self.tr('The process was finished!', 'Processo finalizado!'))
+                break
 
         # Verificando qual Curva esta dentro de outra
         lista = []
