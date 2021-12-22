@@ -128,7 +128,7 @@ class OverviewsJPEG(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterEnum(
                 self.TYPE_GEN,
-                self.tr('Scale', 'Escala'),
+                self.tr('Resampling method', 'Método de reamostragem'),
 				options = self.generalization,
                 defaultValue= 1
             )
