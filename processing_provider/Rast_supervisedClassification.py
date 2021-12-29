@@ -272,7 +272,11 @@ class SupervisedClassification(QgsProcessingAlgorithm):
                 for k in range(n_bands):
                     bands_dic[k+1] = []
                 dic[code] = {'valores': bands_dic}
-            poly = feat.geometry().asPolygon()[0]
+            geom = feat.geometry()
+            if geom.isMultipart():
+                poly = geom.asMultiPolygon()[0][0]
+            else:
+                poly = geom.asPolygon()[0]
             caminho = []
             lin_min = 1e8
             col_min = 1e8
