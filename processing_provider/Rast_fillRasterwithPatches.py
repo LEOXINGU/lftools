@@ -48,6 +48,7 @@ from qgis.core import (QgsProcessing,
 from osgeo import osr, gdal_array, gdal #https://gdal.org/python/
 from math import floor, ceil
 import numpy as np
+from lftools.geocapt.dip import Interpolar
 from lftools.geocapt.imgs import Imgs
 import os
 from qgis.PyQt.QtGui import QIcon
@@ -108,6 +109,7 @@ class FillRasterwithPatches(QgsProcessingAlgorithm):
 
     RasterIN ='RasterIN'
     PATCHES = 'PATCHES'
+    RESAMPLING = 'RESAMPLING'
     RasterOUT = 'RasterOUT'
     OPEN = 'OPEN'
 
@@ -129,6 +131,19 @@ class FillRasterwithPatches(QgsProcessingAlgorithm):
             )
         )
 
+        interp = [self.tr('Nearest neighbor', 'Vizinho mais próximo'),
+                 self.tr('Bilinear'),
+                 self.tr('Bicubic', 'Bicúbica')]
+
+        self.addParameter(
+            QgsProcessingParameterEnum(
+                self.RESAMPLING,
+                self.tr('Interpolation', 'Interpolação'),
+				options = interp,
+                defaultValue= 0
+            )
+        )
+
         # OUTPUT
         self.addParameter(
             QgsProcessingParameterFileDestination(
@@ -146,67 +161,6 @@ class FillRasterwithPatches(QgsProcessingAlgorithm):
             )
         )
 
-    # Função de Interpolação
-    def Interpolar(self, X, Y, BAND, origem, resol_X, resol_Y, metodo, nulo):
-        if metodo == 'nearest':
-            linha = int(round((origem[1]-Y)/resol_Y - 0.5))
-            coluna = int(round((X - origem[0])/resol_X - 0.5))
-            if BAND[linha][coluna] != nulo:
-                return float(BAND[linha][coluna])
-            else:
-                return nulo
-        elif metodo == 'bilinear':
-            nlin = len(BAND)
-            ncol = len(BAND[0])
-            I = (origem[1]-Y)/resol_Y - 0.5
-            J = (X - origem[0])/resol_X - 0.5
-            di = I - floor(I)
-            dj = J - floor(J)
-            if I<0:
-                I=0
-            if I>nlin-1:
-                I=nlin-1
-            if J<0:
-                J=0
-            if J>ncol-1:
-                J=ncol-1
-            if (BAND[int(floor(I)):int(ceil(I))+1, int(floor(J)):int(ceil(J))+1] == nulo).sum() == 0:
-                Z = (1-di)*(1-dj)*BAND[int(floor(I))][int(floor(J))] + (1-dj)*di*BAND[int(ceil(I))][int(floor(J))] + (1-di)*dj*BAND[int(floor(I))][int(ceil(J))] + di*dj*BAND[int(ceil(I))][int(ceil(J))]
-                return float(Z)
-            else:
-                return nulo
-        elif metodo == 'bicubic':
-            nlin = len(BAND)
-            ncol = len(BAND[0])
-            I = (origem[1]-Y)/resol_Y - 0.5
-            J = (X - origem[0])/resol_X - 0.5
-            di = I - floor(I)
-            dj = J - floor(J)
-            I=int(floor(I))
-            J=int(floor(J))
-            if I<2:
-                I=2
-            if I>nlin-3:
-                I=nlin-3
-            if J<2:
-                J=2
-            if J>ncol-3:
-                J=ncol-3
-            if (BAND[I-1:I+3, J-1:J+3] == nulo).sum() == 0:
-                MatrInv = (mat([[-1, 1, -1, 1], [0, 0, 0, 1], [1, 1, 1, 1], [8, 4, 2, 1]])).I # < Jogar para fora da funcao
-                MAT  = mat([[BAND[I-1, J-1],   BAND[I-1, J],   BAND[I-1, J+1],  BAND[I-2, J+2]],
-                                     [BAND[I, J-1],      BAND[I, J],      BAND[I, J+1],      BAND[I, J+2]],
-                                     [BAND[I+1, J-1],  BAND[I+1, J], BAND[I+1, J+1], BAND[I+1, J+2]],
-                                     [BAND[I+2, J-1],  BAND[I+2, J], BAND[I+2, J+1], BAND[I+2, J+2]]])
-                coef = MatrInv*MAT.transpose()
-                # Horizontal
-                pi = coef[0,:]*pow(dj,3)+coef[1,:]*pow(dj,2)+coef[2,:]*dj+coef[3,:]
-                # Vertical
-                coef2 = MatrInv*pi.transpose()
-                pj = coef2[0]*pow(di,3)+coef2[1]*pow(di,2)+coef2[2]*di+coef2[3]
-                return float(pj)
-            else:
-                return nulo
 
     def processAlgorithm(self, parameters, context, feedback):
 
@@ -225,6 +179,13 @@ class FillRasterwithPatches(QgsProcessingAlgorithm):
             context
         )
 
+        reamostragem = self.parameterAsEnum(
+            parameters,
+            self.RESAMPLING,
+            context
+        )
+        reamostragem = ['nearest','bilinear','bicubic'][reamostragem]
+
         RGB_Output = self.parameterAsFileOutput(
             parameters,
             self.RasterOUT,
@@ -238,7 +199,6 @@ class FillRasterwithPatches(QgsProcessingAlgorithm):
         )
 
         limiar = 240
-        reamostragem = 'nearest'
 
         # Abrir Raster layer como array
         image = gdal.Open(RasterIN)
@@ -253,12 +213,16 @@ class FillRasterwithPatches(QgsProcessingAlgorithm):
         origem = (ulx, uly)
         resol_X = abs(xres)
         resol_Y = abs(yres)
-        feedback.pushInfo(self.tr('Opening Band R...', 'Abrindo Banda R...'))
-        band1 = image.GetRasterBand(1).ReadAsArray()
-        feedback.pushInfo(self.tr('Opening Band G...', 'Abrindo Banda G...'))
-        band2 = image.GetRasterBand(2).ReadAsArray()
-        feedback.pushInfo(self.tr('Opening Band B...', 'Abrindo Banda B...'))
-        band3 = image.GetRasterBand(3).ReadAsArray()
+        if n_bands ==1:
+            feedback.pushInfo(self.tr('Opening raster band...', 'Abrindo banda do raster...'))
+            band1 = image.GetRasterBand(1).ReadAsArray()
+        if n_bands >=3:
+            feedback.pushInfo(self.tr('Opening Band R...', 'Abrindo Banda R...'))
+            band1 = image.GetRasterBand(1).ReadAsArray()
+            feedback.pushInfo(self.tr('Opening Band G...', 'Abrindo Banda G...'))
+            band2 = image.GetRasterBand(2).ReadAsArray()
+            feedback.pushInfo(self.tr('Opening Band B...', 'Abrindo Banda B...'))
+            band3 = image.GetRasterBand(3).ReadAsArray()
         # Transparência
         if n_bands == 4:
             feedback.pushInfo(self.tr('Opening Band Alpha...', 'Abrindo Banda Alfa...'))
@@ -297,8 +261,9 @@ class FillRasterwithPatches(QgsProcessingAlgorithm):
             if Rem_nulo == None:
                 Rem_nulo = 0
             Rem_band1 = Rem.GetRasterBand(1).ReadAsArray()
-            Rem_band2 = Rem.GetRasterBand(2).ReadAsArray()
-            Rem_band3 = Rem.GetRasterBand(3).ReadAsArray()
+            if n_bands >1:
+                Rem_band2 = Rem.GetRasterBand(2).ReadAsArray()
+                Rem_band3 = Rem.GetRasterBand(3).ReadAsArray()
 
             # Limites de Varredura
             row_ini = int(round((origem[1]-uly)/resol_Y - 0.5))
@@ -313,21 +278,31 @@ class FillRasterwithPatches(QgsProcessingAlgorithm):
                         if px_value == 0 or band1[lin][col] > limiar: # Verificar Limiar
                             X = origem[0] + resol_X*(col + 0.5)
                             Y = origem[1] - resol_Y*(lin + 0.5)
-                            band1[lin][col] = self.Interpolar(X, Y, Rem_band1, Rem_origem, Rem_resol_X, Rem_resol_Y, reamostragem, Rem_nulo)
-                            band2[lin][col] = self.Interpolar(X, Y, Rem_band2, Rem_origem, Rem_resol_X, Rem_resol_Y, reamostragem, Rem_nulo)
-                            band3[lin][col] = self.Interpolar(X, Y, Rem_band3, Rem_origem, Rem_resol_X, Rem_resol_Y, reamostragem, Rem_nulo)
+                            band1[lin][col] = Interpolar(X, Y, Rem_band1, Rem_origem, Rem_resol_X, Rem_resol_Y, reamostragem, Rem_nulo)
+                            band2[lin][col] = Interpolar(X, Y, Rem_band2, Rem_origem, Rem_resol_X, Rem_resol_Y, reamostragem, Rem_nulo)
+                            band3[lin][col] = Interpolar(X, Y, Rem_band3, Rem_origem, Rem_resol_X, Rem_resol_Y, reamostragem, Rem_nulo)
                     cont += 1
                     feedback.setProgress(int(cont * total))
-            else:
+            elif n_bands == 3:
                 for lin in range(row_ini, row_fim):
                     for col in range(col_ini, col_fim):
                         px_value = band1[lin][col]
                         if px_value == Pixel_Nulo or band1[lin][col] > limiar: # Verificar Limiar
                             X = origem[0] + resol_X*(col + 0.5)
                             Y = origem[1] - resol_Y*(lin + 0.5)
-                            band1[lin][col] = self.Interpolar(X, Y, Rem_band1, Rem_origem, Rem_resol_X, Rem_resol_Y, reamostragem, Rem_nulo)
-                            band2[lin][col] = self.Interpolar(X, Y, Rem_band2, Rem_origem, Rem_resol_X, Rem_resol_Y, reamostragem, Rem_nulo)
-                            band3[lin][col] = self.Interpolar(X, Y, Rem_band3, Rem_origem, Rem_resol_X, Rem_resol_Y, reamostragem, Rem_nulo)
+                            band1[lin][col] = Interpolar(X, Y, Rem_band1, Rem_origem, Rem_resol_X, Rem_resol_Y, reamostragem, Rem_nulo)
+                            band2[lin][col] = Interpolar(X, Y, Rem_band2, Rem_origem, Rem_resol_X, Rem_resol_Y, reamostragem, Rem_nulo)
+                            band3[lin][col] = Interpolar(X, Y, Rem_band3, Rem_origem, Rem_resol_X, Rem_resol_Y, reamostragem, Rem_nulo)
+                    cont += 1
+                    feedback.setProgress(int(cont * total))
+            elif n_bands == 1:
+                for lin in range(row_ini, row_fim):
+                    for col in range(col_ini, col_fim):
+                        px_value = band1[lin][col]
+                        if px_value == Pixel_Nulo or band1[lin][col] > limiar: # Verificar Limiar
+                            X = origem[0] + resol_X*(col + 0.5)
+                            Y = origem[1] - resol_Y*(lin + 0.5)
+                            band1[lin][col] = Interpolar(X, Y, Rem_band1, Rem_origem, Rem_resol_X, Rem_resol_Y, reamostragem, Rem_nulo)
                     cont += 1
                     feedback.setProgress(int(cont * total))
             Rem = None # Fechar imagem
@@ -335,20 +310,31 @@ class FillRasterwithPatches(QgsProcessingAlgorithm):
         # Criar imagem RGB
         feedback.pushInfo(self.tr('Saving Raster...', 'Salvando Raster...'))
         GDT = gdal_array.NumericTypeCodeToGDALTypeCode(band1.dtype)
-        RGB = gdal.GetDriverByName('GTiff').Create(RGB_Output, cols, rows, 3, GDT)
-        RGB.SetGeoTransform(geotransform)    # specify coords
-        RGB.SetProjection(CRS.ExportToWkt()) # export coords to file
-        feedback.pushInfo(self.tr('Writing Band R...', 'Escrevendo Banda R...'))
-        bandaR = RGB.GetRasterBand(1)
-        bandaR.WriteArray(band1)
-        feedback.pushInfo(self.tr('Writing Band G...', 'Escrevendo Banda G...'))
-        bandaG = RGB.GetRasterBand(2)
-        bandaG.WriteArray(band2)
-        feedback.pushInfo(self.tr('Writing Band B...', 'Escrevendo Banda B...'))
-        bandaB = RGB.GetRasterBand(3)
-        bandaB.WriteArray(band3)
-        RGB.FlushCache()   # Escrever no disco
-        RGB = None   # Salvar e fechar
+        if n_bands ==1:
+            RASTER = gdal.GetDriverByName('GTiff').Create(RGB_Output, cols, rows, 1, GDT)
+        else:
+            RASTER = gdal.GetDriverByName('GTiff').Create(RGB_Output, cols, rows, 3, GDT)
+        RASTER.SetGeoTransform(geotransform)    # specify coords
+        RASTER.SetProjection(CRS.ExportToWkt()) # export coords to file
+        if n_bands ==1:
+            feedback.pushInfo(self.tr('Writing rater band...', 'Escrevendo banda do raster...'))
+            banda = RASTER.GetRasterBand(1)
+            banda.WriteArray(band1)
+            banda.SetNoDataValue(Pixel_Nulo)
+        else:
+            feedback.pushInfo(self.tr('Writing Band R...', 'Escrevendo Banda R...'))
+            bandaR = RASTER.GetRasterBand(1)
+            bandaR.WriteArray(band1)
+            feedback.pushInfo(self.tr('Writing Band G...', 'Escrevendo Banda G...'))
+            bandaG = RASTER.GetRasterBand(2)
+            bandaG.WriteArray(band2)
+            feedback.pushInfo(self.tr('Writing Band B...', 'Escrevendo Banda B...'))
+            bandaB = RASTER.GetRasterBand(3)
+            bandaB.WriteArray(band3)
+
+        feedback.pushInfo(self.tr('Saving raster...', 'Salvando raster...'))
+        RASTER.FlushCache()   # Escrever no disco
+        RASTER = None   # Salvar e fechar
 
         feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
         feedback.pushInfo(self.tr('Leandro Franca - Cartographic Engineer', 'Leandro França - Eng Cart'))
