@@ -234,7 +234,11 @@ Referência:'''
         feedback.pushInfo(self.tr('Taking raster samples by polygon...', 'Pegando amostras do raster por polígono...'))
         valores = []
         for feat in layer.getFeatures():
-            poly = feat.geometry().asPolygon()[0]
+            geom = feat.geometry()
+            if geom.isMultipart():
+                poly = geom.asMultiPolygon()[0][0]
+            else:
+                poly = geom.asPolygon()[0]
             caminho = []
             lin_min = 1e8
             col_min = 1e8
