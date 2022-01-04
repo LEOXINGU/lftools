@@ -508,6 +508,7 @@ class MosaicRaster(QgsProcessingAlgorithm):
         # Gerar lista com os valores classificados
         Percent = 100.0/(len(classes))
         current = 0
+        cont_px = 0
         for classe in classes:
             feedback.pushInfo((self.tr('Classifying class {}...', 'Classificando classe {}...')).format(str(classe)))
             geom = classes[classe]['geom']
@@ -538,17 +539,18 @@ class MosaicRaster(QgsProcessingAlgorithm):
             col_ini = int(round((ulx - origem[0])/resol_X - 0.5))-1
             col_fim = int(round((lrx - origem[0])/resol_X - 0.5))+1
             lin, col = np.meshgrid(np.arange(row_ini, row_fim),np.arange(col_ini, col_fim))
-            LIN = lin.flatten()[:,np.newaxis] + 0.5 # centro do pixel
-            COL = col.flatten()[:,np.newaxis] + 0.5
-            pixels_center = np.hstack((LIN, COL))
+            LIN = lin.flatten()[:,np.newaxis]
+            COL = col.flatten()[:,np.newaxis]
+            pixels_center = np.hstack((LIN + 0.5, COL + 0.5)) # centro do pixel
             # Verificando pixels dentro de poligono
             flags = p.contains_points(pixels_center)
-            pixels_x = LIN.flatten()*flags
-            pixels_y = COL.flatten()*flags
-            pixels_x = (pixels_x[pixels_x>0] - 0.5).astype('int')[:,np.newaxis]
-            pixels_y = (pixels_y[pixels_y>0] - 0.5).astype('int')[:,np.newaxis]
+            pixels_x = (LIN+1).flatten()*flags # soma e subtrair 1 para evitar zero
+            pixels_y = (COL+1).flatten()*flags
+            pixels_x = (pixels_x[pixels_x>0]-1)[:,np.newaxis]
+            pixels_y = (pixels_y[pixels_y>0]-1)[:,np.newaxis]
             pixels = np.hstack((pixels_x, pixels_y))
             classes[classe]['pixels'] = pixels
+            cont_px += len(pixels)
             current += 1
             feedback.setProgress(int(current * Percent))
 
@@ -559,7 +561,7 @@ class MosaicRaster(QgsProcessingAlgorithm):
 
 
         # Mosaicar por banda
-        Percent = 100.0/(n_lin*n_col*n_bands)
+        Percent = 100.0/(cont_px*n_bands)
         current = 0
 
         for k in range(n_bands):
