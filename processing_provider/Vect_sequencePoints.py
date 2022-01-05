@@ -199,43 +199,36 @@ class SequencePoints(QgsProcessingAlgorithm):
             ind = None
             ymax = -1e10
             for k, pnt in enumerate(coords):
-                print(k, round(pnt.y(),2))
                 if pnt.y() > ymax:
                     ymax = pnt.y()
                     ind = k
-            coords = coords[ind :] + coords[0 : ind]
 
         elif primeiro == 2: #Mais ao sul
             ind = None
             ymin = 1e10
             for k, pnt in enumerate(coords):
-                print(k, round(pnt.y(),2))
                 if pnt.y() < ymin:
                     ymin = pnt.y()
                     ind = k
-            coords = coords[ind :] + coords[0 : ind]
 
         elif primeiro == 3: #Mais ao Leste
             ind = None
             xmax = -1e10
             for k, pnt in enumerate(coords):
-                print(k, round(pnt.x(),2))
                 if pnt.x() > xmax:
                     xmax = pnt.x()
                     ind = k
-            coords = coords[ind :] + coords[0 : ind]
 
         elif primeiro == 4: #Mais ao Oeste
             ind = None
             xmin = 1e10
             for k, pnt in enumerate(coords):
-                print(k, round(pnt.x(),2))
                 if pnt.x() < xmin:
                     xmin = pnt.x()
                     ind = k
-            coords = coords[ind :] + coords[0 : ind]
+        coords = coords[ind :] + coords[0 : ind]
 
-        # Número de vértices do ponlígono deve ser igual ao número de pontos
+        # Número de vértices do polígono deve ser igual ao número de pontos
         if (len(coords)) != pontos.featureCount():
             raise QgsProcessingException(self.tr('The number of points must equal the number of vertices of the polygon!', 'O número de pontos deve ser igual ao número de vértices do polígono!'))
 
@@ -243,16 +236,16 @@ class SequencePoints(QgsProcessingAlgorithm):
         pontos.startEditing() # coloca no modo edição
         total = 100.0 / (len(coords))
 
-        def norma1(p1, p2):
-            return abs(p1.x() - p2.x()) + abs(p1.y() - p2.y())
+        def norma2(p1, p2):
+            return (p1.x() - p2.x())**2 + (p1.y() - p2.y())**2
 
         for cont, vertice in enumerate(coords):
             dist1 = 1e9
             pnt_id = None
             for feat in pontos.getFeatures():
                 pnt = feat.geometry().asPoint()
-                if norma1(vertice, pnt) < dist1:
-                    dist1 = norma1(vertice, pnt)
+                if norma2(vertice, pnt) < dist1:
+                    dist1 = norma2(vertice, pnt)
                     pnt_id = feat.id()
             pontos.changeAttributeValue(pnt_id, columnIndex, cont+1)
             feedback.setProgress(int((cont+1) * total))
