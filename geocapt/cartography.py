@@ -92,6 +92,17 @@ def SRC_Projeto(output_type):
         return b.description()
 
 
+def areaGauss(coord):
+    soma = 0
+    tam = len(coord)
+    for k in range(tam):
+        P1 = coord[ -1 if k==0 else k-1]
+        P2 = coord[k]
+        P3 = coord[ 0 if k==(tam-1) else (k+1)]
+        soma += P2.x()*(P1.y() - P3.y())
+    return soma/2
+
+
 def ChartSize(geom, zone, hemisf, escala):
     # Transformar Coordenadas de Geográficas para o sistema UTM
     coordinateTransformer = QgsCoordinateTransform()
