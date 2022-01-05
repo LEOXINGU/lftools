@@ -22,6 +22,7 @@ import math
 from numpy import floor
 from lftools.geocapt.imgs import Imgs
 from lftools.geocapt.topogeo import azimute, dd2dms
+from lftools.geocapt.cartography import areaGauss
 import os
 from qgis.PyQt.QtGui import QIcon
 
@@ -102,16 +103,6 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
         )
 
 
-    def areaGauss(self, coord):
-        soma = 0
-        tam = len(coord)
-        for k in range(tam):
-            P1 = coord[ -1 if k==0 else k-1]
-            P2 = coord[k]
-            P3 = coord[ 0 if k==(tam-1) else (k+1)]
-            soma += P2.x()*(P1.y() - P3.y())
-        return soma/2
-
     def processAlgorithm(self, parameters, context, feedback):
         # INPUT
         source = self.parameterAsSource(
@@ -157,7 +148,7 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
                 coord = geom.asMultiPolygon[0][0] # Primeiro polígono e primeiro anel
             else:
                 coord = geom.asPolygon()[0] # Primeiro anel
-            AreaGauss = self.areaGauss(coord[:-1])
+            AreaGauss = areaGauss(coord[:-1])
             tam = len(coord[:-1])
             cont = 0
             pntsDic = {}
