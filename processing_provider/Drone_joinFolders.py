@@ -72,9 +72,9 @@ class JoinFolders(QgsProcessingAlgorithm):
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/drone.png'))
 
-    txt_en = '''This tool has the objective of joining the files from two folders in another new folder, with the possibility of <b>renaming</b> the files.
+    txt_en = '''This tool has the objective of joining the files from several folders in another new folder, with the possibility of <b>renaming</b> the files.
     It is a very useful procedure for joining multiple drone images with repeated names into a single folder.'''
-    txt_pt = '''Esta ferramenta tem o objetivo de juntar os arquivos de duas pastas em uma outra nova pasta, com a possibilidade de <b>renomear</b> os arquivos.
+    txt_pt = '''Esta ferramenta tem o objetivo de juntar os arquivos de várias pastas em uma outra nova pasta, com a possibilidade de <b>renomear</b> os arquivos.
 É um procedimento muito útil para juntar várias imagens de drone com nomes repetidos em uma única pasta.'''
     figure = 'images/tutorial/drone_joinFolders.jpg'
 
@@ -90,8 +90,7 @@ class JoinFolders(QgsProcessingAlgorithm):
                     </div>'''
         return self.tr(self.txt_en, self.txt_pt) + footer
 
-    FOLDER_A = 'FOLDER_A'
-    FOLDER_B = 'FOLDER_B'
+    FOLDERS = 'FOLDERS'
     RENAME = 'RENAME'
     PREFIX = 'PREFIX'
     OUT_FOLDER = 'OUT_FOLDER'
@@ -100,17 +99,8 @@ class JoinFolders(QgsProcessingAlgorithm):
         #inputs
         self.addParameter(
             QgsProcessingParameterFile(
-                self.FOLDER_A,
-                self.tr('Folder 1', 'Pasta 1'),
-                behavior=QgsProcessingParameterFile.Folder,
-                defaultValue=None
-            )
-        )
-
-        self.addParameter(
-            QgsProcessingParameterFile(
-                self.FOLDER_B,
-                self.tr('Folder 2', 'Pasta 2'),
+                self.FOLDERS,
+                self.tr('Folders with files', 'Pastas com arquivos'),
                 behavior=QgsProcessingParameterFile.Folder,
                 defaultValue=None
             )
@@ -144,21 +134,13 @@ class JoinFolders(QgsProcessingAlgorithm):
 
     def processAlgorithm(self, parameters, context, feedback):
 
-        pasta_A = self.parameterAsFile(
+        caminho_geral = self.parameterAsFile(
             parameters,
-            self.FOLDER_A,
+            self.FOLDERS,
             context
         )
-        if not pasta_A:
-            raise QgsProcessingException(self.invalidSourceError(parameters, self.FOLDER_A))
-
-        pasta_B = self.parameterAsFile(
-            parameters,
-            self.FOLDER_B,
-            context
-        )
-        if not pasta_B:
-            raise QgsProcessingException(self.invalidSourceError(parameters, self.FOLDER_B))
+        if not caminho_geral:
+            raise QgsProcessingException(self.invalidSourceError(parameters, self.FOLDERS))
 
         renomear = self.parameterAsBool(
             parameters,
@@ -172,39 +154,48 @@ class JoinFolders(QgsProcessingAlgorithm):
             context
         )
 
-        pasta_destino = self.parameterAsFile(
+        destino = self.parameterAsFile(
             parameters,
             self.OUT_FOLDER,
             context
         )
-        if not pasta_destino:
+        if not destino:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.OUT_FOLDER))
 
 
         # Listando arquivos
-        lista1 = os.listdir(pasta_A)
-        lista2 = os.listdir(pasta_B)
+        itens = os.listdir(caminho_geral)
 
-        if len(lista1) == 0 or len(lista2) == 0:
-            raise QgsProcessingException(self.tr('At least one of the folders is empty!', 'Pelo menos uma das pastas está vazia!'))
+        # contagem de arquivos
+        pastas = []
+        cont_files = 0
+        for item in itens:
+            caminho = os.path.join(caminho_geral,item)
+            if not os.path.isfile(caminho):
+                pastas += [item]
+                arquivos = os.listdir(caminho)
+                for arq in arquivos:
+                    filepath = os.path.join(caminho,arq)
+                    if os.path.isfile(filepath):
+                        cont_files += 1
 
-        total = 100.0 / (len(lista1)+len(lista2))
-        cont = 1
-        for arq in lista1:
-            shutil.copy(os.path.join(pasta_A, arq),
-                        os.path.join(pasta_destino, prefixo + "{:04d}.".format(cont) + arq.split('.')[-1]) if renomear else os.path.join(pasta_destino, arq))
-            if feedback.isCanceled():
-                break
-            feedback.setProgress(int((cont) * total))
-            cont += 1
+        feedback.pushInfo(self.tr('Number of files to be copied: {}'.format(cont_files), 'Total de arquivos a serem copiados: {}'.format(cont_files)))
+        total = 100.0 / cont_files if cont_files else 0
+        cont = 0
 
-        for arq in lista2:
-            shutil.copy(os.path.join(pasta_B, arq),
-                        os.path.join(pasta_destino, prefixo + "{:04d}.".format(cont) + arq.split('.')[-1]) if renomear else os.path.join(pasta_destino, arq))
-            if feedback.isCanceled():
-                break
-            feedback.setProgress(int((cont) * total))
-            cont += 1
+        # copiando os arquivos
+        for pasta in pastas:
+            caminho = os.path.join(caminho_geral,pasta)
+            if os.path.join(caminho, '') != os.path.join(destino, ''):
+                lista = os.listdir(caminho)
+                for arq in lista:
+                    if os.path.isfile(os.path.join(caminho, arq)):
+                        shutil.copy(os.path.join(caminho, arq),
+                                    os.path.join(destino, prefixo + "{:04d}.".format(cont) + arq.split('.')[-1]) if renomear else os.path.join(destino, arq))
+                    if feedback.isCanceled():
+                        break
+                    cont += 1
+                    feedback.setProgress(int((cont) * total))
 
         feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
         feedback.pushInfo(self.tr('Leandro Franca - Cartographic Engineer', 'Leandro França - Eng Cart'))
