@@ -89,6 +89,7 @@ from lftools.processing_provider.Drone_verticalAdjustment import VerticalAdjustm
 from lftools.processing_provider.Relief_DEMfilter import DEMfilter
 from lftools.processing_provider.Relief_SpotElevation import SpotElevation
 from lftools.processing_provider.Vect_PolygonOrientation import PolygonOrientation
+from lftools.processing_provider.Easy_getAttributeByLocation import GetAttributeByLocation
 
 
 class LFToolsProvider(QgsProcessingProvider):
@@ -163,6 +164,7 @@ class LFToolsProvider(QgsProcessingProvider):
         self.addAlgorithm(DEMfilter())
         self.addAlgorithm(SpotElevation())
         self.addAlgorithm(PolygonOrientation())
+        self.addAlgorithm(GetAttributeByLocation())
 
     def id(self):
         return 'lftools'
