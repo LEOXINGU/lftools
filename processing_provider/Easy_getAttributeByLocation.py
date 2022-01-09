@@ -71,6 +71,7 @@ Os campos de origem e de destino devem ser indicadas para preenchimento dos atri
     SOURCE_FIELD = 'SOURCE_FIELD'
     DEST = 'DEST'
     DEST_FIELD = 'DEST_FIELD'
+    TOPOLOGY = 'TOPOLOGY'
     SAVE = 'SAVE'
 
     def shortHelpString(self):
@@ -119,6 +120,19 @@ Os campos de origem e de destino devem ser indicadas para preenchimento dos atri
             )
         )
 
+        tipos = [self.tr('from target feature','da feição alvo'),
+                 self.tr('from origin feature','da feição de origem'),
+               ]
+
+        self.addParameter(
+            QgsProcessingParameterEnum(
+                self.TOPOLOGY,
+                self.tr('Intersection with the centroid (Topology)', 'Interseção com o centróide (Topologia)'),
+				options = tipos,
+                defaultValue= 0
+            )
+        )
+
         self.addParameter(
             QgsProcessingParameterBoolean(
                 self.SAVE,
@@ -145,8 +159,6 @@ Os campos de origem e de destino devem ser indicadas para preenchimento dos atri
         if campo_lote is None:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.SOURCE_FIELD))
 
-        columnIndex = lotes.fields().indexFromName(campo_lote[0])
-
         edif = self.parameterAsVectorLayer(
             parameters,
             self.DEST,
@@ -163,8 +175,15 @@ Os campos de origem e de destino devem ser indicadas para preenchimento dos atri
         if campo_edif is None:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.DEST_FIELD))
 
-        att = campo_edif[0]
+        columnIndex = edif.fields().indexFromName(campo_edif[0])
+        att = campo_lote[0]
         edif.startEditing()
+
+        topologia = self.parameterAsEnum(
+            parameters,
+            self.TOPOLOGY,
+            context
+        )
 
         feedback.pushInfo(self.tr('Source field: {}'.format(campo_lote[0]), 'Campo de origem: {}'.format(campo_lote[0])))
         feedback.pushInfo(self.tr('Destination field: {}'.format(campo_edif[0]), 'Campo de destino: {}\n'.format(campo_edif[0])))
@@ -172,17 +191,28 @@ Os campos de origem e de destino devem ser indicadas para preenchimento dos atri
         produto = edif.featureCount()*lotes.featureCount()
         total = 100.0 /produto if produto else 0
         cont = 0
-        for feat1 in edif.getFeatures():
-            geom = feat1.geometry()
-            centroide = geom.centroid()
-            for feat2 in lotes.getFeatures():
-                if centroide.intersects(feat2.geometry()):
-                    valor = feat2[att]
-                    edif.changeAttributeValue(feat1.id(), columnIndex, valor)
-                cont += 1
-                if feedback.isCanceled():
-                    break
-                feedback.setProgress(int(cont * total))
+        if topologia == 0:
+            for feat1 in edif.getFeatures():
+                centroide = feat1.geometry().centroid()
+                for feat2 in lotes.getFeatures():
+                    if centroide.intersects(feat2.geometry()):
+                        valor = feat2[att]
+                        edif.changeAttributeValue(feat1.id(), columnIndex, valor)
+                    cont += 1
+                    if feedback.isCanceled():
+                        break
+                    feedback.setProgress(int(cont * total))
+        elif topologia == 1:
+            for feat1 in lotes.getFeatures():
+                centroide = feat1.geometry().centroid()
+                valor = feat1[att]
+                for feat2 in edif.getFeatures():
+                    if centroide.intersects(feat2.geometry()):
+                        edif.changeAttributeValue(feat2.id(), columnIndex, valor)
+                    cont += 1
+                    if feedback.isCanceled():
+                        break
+                    feedback.setProgress(int(cont * total))
 
         salvar = self.parameterAsBool(
             parameters,
