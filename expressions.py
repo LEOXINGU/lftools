@@ -355,3 +355,97 @@ def deedtable(layer_name, ini, fim, titulo, fontsize, feature, parent):
         LINHAS += linha0
     resultado = texto.replace('[LINHAS]', LINHAS).replace('[TITULO]', str2HTML(titulo.upper())).replace('[FONTSIZE]', str(fontsize))
     return resultado
+
+
+@qgsfunction(args='auto', group='LF Tools')
+def deedtable2(prefixo, titulo, decimal, fontsize, feature, parent):
+    """
+    Generates the Vertices and Sides Descriptive Table, also known as Synthetic Deed Description, based on vertices of a polygon.
+    <p>Notes: Only for polygon layer in a projected CRS.</p>
+    <h2>Exemple:</h2>
+    <ul>
+      <li>deedtable2('preffix', 'title', precision, fontsize) = HTML</li>
+      <li>deedtable2('V-', ' - Area X', 3, 12) = HTML</li>
+    </ul>
+    """
+    geom = feature.geometry()
+    if geom.isMultipart():
+        coords = geom.asMultiPolygon()[0][0]
+    else:
+        coords = geom.asPolygon()[0]
+
+    format_num = '{:,.Xf}'.replace('X', str(decimal))
+    
+    pnts_UTM = {}
+    for k, coord in enumerate(coords[:-1]):
+        pnts_UTM[k+1] = [coord, prefixo, prefixo + '{:02}'.format(k+1) ]
+
+    # Calculo dos Azimutes e Distancias
+    tam = len(pnts_UTM)
+    Az_lista, Dist = [], []
+    for k in range(tam):
+        pntA = pnts_UTM[k+1][0]
+        pntB = pnts_UTM[1 if k+2 > tam else k+2][0]
+        Az_lista += [(180/pi)*azimute(pntA, pntB)[0]]
+        Dist += [sqrt((pntA.x() - pntB.x())**2 + (pntA.y() - pntB.y())**2)]
+
+        linha = '''<tr>
+          <td>Vn</td>
+          <td>En</td>
+          <td>Nn</td>
+          <td>Ln</td>
+          <td>Az_n</td>
+          <td>Dn</td>
+        </tr>
+        '''
+
+        texto = '''<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+        <html>
+        <head>
+          <title>''' + tr('Synthetic deed description', str2HTML('Memorial Sintético')) + '''</title>
+          <link rel = "icon" href = "https://github.com/LEOXINGU/lftools/blob/main/images/lftoos.png?raw=true" type = "image/x-icon">
+        </head>
+        <body>
+        <table
+        style="text-align: center; width: 100%; font-size: [FONTSIZE]px; font-family: Arial;"
+        border="1" cellpadding="0" cellspacing="0">
+        <tbody>
+        <tr>
+          <td colspan="6" rowspan="1">''' + tr('Synthetic deed description'.upper(), str2HTML('Memorial Sintético'.upper())) + '''[TITULO]</td>
+        </tr>
+        <tr>
+          <td colspan="1" rowspan="2">''' + tr('VERTEX', str2HTML('VÉRTICE')) + '''</td>
+          <td colspan="2" rowspan="1">''' + tr('COORDINATE', str2HTML('COORDENADA')) + '''</td>
+          <td colspan="1" rowspan="2">''' + tr('SIDE', str2HTML('LADO')) + '''</td>
+          <td colspan="1" rowspan="2">''' + tr('AZIMUTH', str2HTML('AZIMUTE')) + '''</td>
+          <td colspan="1" rowspan="2">''' + tr('DISTANCE', str2HTML('DISTÂNCIA')) + '''
+        (m)</td>
+        </tr>
+        <tr>
+          <td>E</td>
+          <td>N</td>
+        </tr>
+        [LINHAS]
+        </tbody>
+        </table>
+        <br>
+        </body>
+        </html>
+        '''
+
+    LINHAS = ''
+    for k in range(tam):
+        linha0 = linha
+        itens = {'Vn': pnts_UTM[k+1][2],
+                    'En': tr(format_num.format(pnts_UTM[k+1][0].x()), format_num.format(pnts_UTM[k+1][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                    'Nn': tr(format_num.format(pnts_UTM[k+1][0].y()), format_num.format(pnts_UTM[k+1][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                    'Ln': pnts_UTM[k+1][2] + '/' + pnts_UTM[1 if k+2 > tam else k+2][2],
+                    'Az_n': tr(DD2DMS(Az_lista[k],1), DD2DMS(Az_lista[k],1).replace('.', ',')),
+                    'Dn': tr(format_num.format(Dist[k]), format_num.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'))
+                    }
+        for item in itens:
+            linha0 = linha0.replace(item, itens[item])
+        LINHAS += linha0
+    resultado = texto.replace('[LINHAS]', LINHAS).replace('[TITULO]', str2HTML(titulo.upper())).replace('[FONTSIZE]', str(fontsize))
+
+    return resultado
