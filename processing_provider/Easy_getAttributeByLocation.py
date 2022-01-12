@@ -198,6 +198,7 @@ Os campos de origem e de destino devem ser indicadas para preenchimento dos atri
                     if centroide.intersects(feat2.geometry()):
                         valor = feat2[att]
                         edif.changeAttributeValue(feat1.id(), columnIndex, valor)
+                        break
                     cont += 1
                     if feedback.isCanceled():
                         break
@@ -209,6 +210,7 @@ Os campos de origem e de destino devem ser indicadas para preenchimento dos atri
                 for feat2 in edif.getFeatures():
                     if centroide.intersects(feat2.geometry()):
                         edif.changeAttributeValue(feat2.id(), columnIndex, valor)
+                        break
                     cont += 1
                     if feedback.isCanceled():
                         break
