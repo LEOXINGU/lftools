@@ -245,12 +245,12 @@ class DescriptiveTable(QgsProcessingAlgorithm):
         ordem_comp = []
         for feat in vertices.getFeatures():
             ordem_comp += [feat['sequence']]
-            codigo_item = feat['codigo']
+            codigo_item = feat['code']
             if not codigo_item or codigo_item in ['', ' ']:
                 raise QgsProcessingException(self.tr('The code attribute must be filled in for all features!', 'O atributo código deve ser preenchido para todas as feições!'))
         ordem_comp.sort()
         if ordem_list != ordem_comp:
-            raise QgsProcessingException(self.tr('The point sequence field must be filled in correctly!', 'O campo de sequência dos pontos deve preenchido corretamente!'))
+            raise QgsProcessingException(self.tr('The point sequence field must be filled in correctly!', 'O campo de sequência dos pontos deve ser preenchido corretamente!'))
 
 
         # Transformacao de Coordenadas Geograficas para Projetadas no sistema UTM
