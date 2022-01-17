@@ -369,25 +369,26 @@ def deedtable2(prefixo, titulo, decimal, fontsize, feature, parent):
     </ul>
     """
     geom = feature.geometry()
-    if geom.isMultipart():
-        coords = geom.asMultiPolygon()[0][0]
-    else:
-        coords = geom.asPolygon()[0]
+    if geom.type() == 2 and geom:
+        if geom.isMultipart():
+            coords = geom.asMultiPolygon()[0][0]
+        else:
+            coords = geom.asPolygon()[0]
 
-    format_num = '{:,.Xf}'.replace('X', str(decimal))
-    
-    pnts_UTM = {}
-    for k, coord in enumerate(coords[:-1]):
-        pnts_UTM[k+1] = [coord, prefixo, prefixo + '{:02}'.format(k+1) ]
+        format_num = '{:,.Xf}'.replace('X', str(decimal))
 
-    # Calculo dos Azimutes e Distancias
-    tam = len(pnts_UTM)
-    Az_lista, Dist = [], []
-    for k in range(tam):
-        pntA = pnts_UTM[k+1][0]
-        pntB = pnts_UTM[1 if k+2 > tam else k+2][0]
-        Az_lista += [(180/pi)*azimute(pntA, pntB)[0]]
-        Dist += [sqrt((pntA.x() - pntB.x())**2 + (pntA.y() - pntB.y())**2)]
+        pnts_UTM = {}
+        for k, coord in enumerate(coords[:-1]):
+            pnts_UTM[k+1] = [coord, prefixo, prefixo + '{:02}'.format(k+1) ]
+
+        # Calculo dos Azimutes e Distancias
+        tam = len(pnts_UTM)
+        Az_lista, Dist = [], []
+        for k in range(tam):
+            pntA = pnts_UTM[k+1][0]
+            pntB = pnts_UTM[1 if k+2 > tam else k+2][0]
+            Az_lista += [(180/pi)*azimute(pntA, pntB)[0]]
+            Dist += [sqrt((pntA.x() - pntB.x())**2 + (pntA.y() - pntB.y())**2)]
 
         linha = '''<tr>
           <td>Vn</td>
@@ -433,19 +434,21 @@ def deedtable2(prefixo, titulo, decimal, fontsize, feature, parent):
         </html>
         '''
 
-    LINHAS = ''
-    for k in range(tam):
-        linha0 = linha
-        itens = {'Vn': pnts_UTM[k+1][2],
-                    'En': tr(format_num.format(pnts_UTM[k+1][0].x()), format_num.format(pnts_UTM[k+1][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                    'Nn': tr(format_num.format(pnts_UTM[k+1][0].y()), format_num.format(pnts_UTM[k+1][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                    'Ln': pnts_UTM[k+1][2] + '/' + pnts_UTM[1 if k+2 > tam else k+2][2],
-                    'Az_n': tr(DD2DMS(Az_lista[k],1), DD2DMS(Az_lista[k],1).replace('.', ',')),
-                    'Dn': tr(format_num.format(Dist[k]), format_num.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'))
-                    }
-        for item in itens:
-            linha0 = linha0.replace(item, itens[item])
-        LINHAS += linha0
-    resultado = texto.replace('[LINHAS]', LINHAS).replace('[TITULO]', str2HTML(titulo.upper())).replace('[FONTSIZE]', str(fontsize))
+        LINHAS = ''
+        for k in range(tam):
+            linha0 = linha
+            itens = {'Vn': pnts_UTM[k+1][2],
+                        'En': tr(format_num.format(pnts_UTM[k+1][0].x()), format_num.format(pnts_UTM[k+1][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                        'Nn': tr(format_num.format(pnts_UTM[k+1][0].y()), format_num.format(pnts_UTM[k+1][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                        'Ln': pnts_UTM[k+1][2] + '/' + pnts_UTM[1 if k+2 > tam else k+2][2],
+                        'Az_n': tr(DD2DMS(Az_lista[k],1), DD2DMS(Az_lista[k],1).replace('.', ',')),
+                        'Dn': tr(format_num.format(Dist[k]), format_num.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'))
+                        }
+            for item in itens:
+                linha0 = linha0.replace(item, itens[item])
+            LINHAS += linha0
+        resultado = texto.replace('[LINHAS]', LINHAS).replace('[TITULO]', str2HTML(titulo.upper())).replace('[FONTSIZE]', str(fontsize))
 
-    return resultado
+        return resultado
+    else:
+        return tr('Verify geometry', 'Verificar geometria')
