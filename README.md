@@ -69,6 +69,9 @@
       </li><li>
       <a href="#easy">Easy</a>
       <ul>
+        <li><a href="#get-attribute-by-location">Get attribute by location</a></li>
+      </ul>
+      <ul>
         <li><a href="#measure-layers">Measure layers</a></li>
       </ul>
       <ul>
@@ -191,6 +194,9 @@
         <li><a href="#merge-lines-in-direction">Merge lines in direction</a></li>
       </ul>
       <ul>
+        <li><a href="#orient-polygons">Orient polygons</a></li>
+      </ul>
+      <ul>
         <li><a href="#reverse-vertex-order">Reverse vertex order</a></li>
       </ul>
       <ul>
@@ -292,6 +298,9 @@
         <li><a href="#medir-camadas">Medir camadas</a></li>
       </ul>
       <ul>
+        <li><a href="#pegar-atributo-pela-localização">Pegar atributo pela localização</a></li>
+      </ul>
+      <ul>
         <li><a href="#planilha-para-camada-de-pontos">Planilha para camada de pontos</a></li>
       </ul>
       </li><li>
@@ -384,6 +393,9 @@
       </ul>
       <ul>
         <li><a href="#mesclar-linhas-na-direção">Mesclar linhas na direção</a></li>
+      </ul>
+      <ul>
+        <li><a href="#orientar-polígonos">Orientar polígonos</a></li>
       </ul>
       <ul>
         <li><a href="#sequenciar-pontos">Sequenciar pontos</a></li>
@@ -529,7 +541,7 @@ This tool performs the georeferencing adjustment of any raster image using Groun
 </div>
 
 ### Join folders
-This tool has the objective of joining the files from two folders in another new folder, with the possibility of <b>renaming</b> the files.</br>    It is a very useful procedure for joining multiple drone images with repeated names into a single folder.
+This tool has the objective of joining the files from several folders in another new folder, with the possibility of <b>renaming</b> the files.</br>    It is a very useful procedure for joining multiple drone images with repeated names into a single folder.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
@@ -604,6 +616,18 @@ This tool performs the vertical adjustment of Digital Elevation Models (DEM) fro
 
 ## Easy
 
+
+### Get attribute by location
+This algorithm fills in the attributes of a specific field from another layer, in such a way that the feature's centroid intercepts the corresponding feature from the other layer.</br>The source and destination fields must be indicated to fill in the attributes.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/easy_get_attributes.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 ### Measure layers
 This tool calculates the line feature's lengths and polygon feature's perimeter and area in virtual fields for all vector layers.
@@ -1072,6 +1096,18 @@ This algorithm merges lines that touch at their starting or ending points and ha
 </table>
 </div>
 
+### Orient polygons
+This tool orients the geometry of polygon-like features clockwise or counterclockwise, defining the first vertex as the north, south, east, or west.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/vect_orient_polygon.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
 ### Reverse vertex order
 Inverts vertex order for polygons and lines.
 <div align="center">
@@ -1336,7 +1372,7 @@ Gera arquivo texto com Pontos de Controle no Terreno (GCP) a partir de uma camad
 </div>
 
 ### Juntar pastas
-Esta ferramenta tem o objetivo de juntar os arquivos de duas pastas em uma outra nova pasta, com a possibilidade de <b>renomear</b> os arquivos.</br>É um procedimento muito útil para juntar várias imagens de drone com nomes repetidos em uma única pasta.
+Esta ferramenta tem o objetivo de juntar os arquivos de várias pastas em uma outra nova pasta, com a possibilidade de <b>renomear</b> os arquivos.</br>É um procedimento muito útil para juntar várias imagens de drone com nomes repetidos em uma única pasta.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
@@ -1424,6 +1460,18 @@ Esta ferramenta calcula em campos virtuais os comprimentos de feições do tipo 
   <tbody>
     <tr>
       <td><img src="images/tutorial/easy_measure_layer.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Pegar atributo pela localização
+Este algoritmo preenche os atributos de um campo específico a partir de outra camada, tal que o centróide da feição intercepte a feição correspondente da outra camada.</br>Os campos de origem e de destino devem ser indicadas para preenchimento dos atributos.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/easy_get_attributes.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1785,6 +1833,18 @@ Este algoritmo mescla linhas que se tocam nos seus pontos inicial ou final e tem
   <tbody>
     <tr>
       <td><img src="images/tutorial/vect_directional_merge.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Orientar polígonos
+Esta ferramenta orienta a geometria de feições do tipo polígono no sentido horário ou antihorário, definindo o primeiro vértice mais ao norte, sul, leste ou oeste.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/vect_orient_polygon.jpg"></td>
     </tr>
   </tbody>
 </table>
