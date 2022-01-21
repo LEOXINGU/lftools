@@ -90,6 +90,7 @@ from lftools.processing_provider.Relief_DEMfilter import DEMfilter
 from lftools.processing_provider.Relief_SpotElevation import SpotElevation
 from lftools.processing_provider.Vect_PolygonOrientation import PolygonOrientation
 from lftools.processing_provider.Easy_getAttributeByLocation import GetAttributeByLocation
+from lftools.processing_provider.Rast_bandArithmetic import BandArithmetic
 
 
 class LFToolsProvider(QgsProcessingProvider):
@@ -165,6 +166,7 @@ class LFToolsProvider(QgsProcessingProvider):
         self.addAlgorithm(SpotElevation())
         self.addAlgorithm(PolygonOrientation())
         self.addAlgorithm(GetAttributeByLocation())
+        self.addAlgorithm(BandArithmetic())
 
     def id(self):
         return 'lftools'
