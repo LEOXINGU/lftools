@@ -198,6 +198,77 @@ def reprojectPoints(geom, xform):
         return None
 
 
+def geom2PointList(geom):
+    if geom.type() == 0: #Point
+        if geom.isMultipart():
+            tam = len(geom.asMultiPoint())
+            const1 = geom.constGet()
+            newPnts = []
+            for k in range(tam):
+                newPnts += [const1.childGeometry(k)]
+            return newPnts
+        else:
+            return geom.constGet()
+    elif geom.type() == 1: #Line
+        if geom.isMultipart():
+            linhas = geom.asMultiPolyline()
+            tam1 = len(linhas)
+            const1 = geom.constGet()
+            newLines = []
+            for k in range(tam1):
+                linha = linhas[k]
+                tam2 = len(linha)
+                const2 = const1.childGeometry(k)
+                newLine =[]
+                for m in range(tam2):
+                    newLine += [const2.childPoint(m)]
+                newLines += [newLine]
+            return newLines
+        else:
+            linha = geom.asPolyline()
+            newLine =[]
+            tam1 = len(linhas)
+            const1 = geom.constGet()
+            for k in range(tam1):
+                newLine += [const1.childPoint(k)]
+            return newLine
+    elif geom.type() == 2: #Polygon
+        if geom.isMultipart():
+            poligonos = geom.asMultiPolygon()
+            tam1 = len(poligonos)
+            const1 = geom.constGet()
+            newPolygons = []
+            for k in range(tam1):
+                aneis = poligonos[k]
+                tam2 = len(aneis)
+                const2 = const1.childGeometry(k)
+                newPol = []
+                for m in range(tam2):
+                    anel = aneis[m]
+                    tam3 = len(anel)
+                    const3 = const2.childGeometry(m)
+                    newAnel = []
+                    for n in range(tam3):
+                        newAnel += [const3.childPoint(n)]
+                    newPol += [newAnel]
+                newPolygons += [newPol]
+            return newPolygons
+        else:
+            aneis = geom.asPolygon()
+            tam1 = len(aneis)
+            const1 = geom.constGet()
+            newPol = []
+            for k in range(tam1):
+                anel = aneis[k]
+                tam2 = len(anel)
+                const2 = const1.childGeometry(k)
+                newAnel = []
+                for m in range(tam2):
+                    newAnel += [const2.childPoint(m)]
+                newPol += [newAnel]
+            return newPol
+
+
 def map_sistem(lon, lat, ScaleD=1e6):
     # Escala 1:1.000.000
     nome = ''
