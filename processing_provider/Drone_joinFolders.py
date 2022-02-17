@@ -190,11 +190,11 @@ class JoinFolders(QgsProcessingAlgorithm):
                 lista = os.listdir(caminho)
                 for arq in lista:
                     if os.path.isfile(os.path.join(caminho, arq)):
+                        cont += 1
                         shutil.copy(os.path.join(caminho, arq),
                                     os.path.join(destino, prefixo + "{:04d}.".format(cont) + arq.split('.')[-1]) if renomear else os.path.join(destino, arq))
                     if feedback.isCanceled():
                         break
-                    cont += 1
                     feedback.setProgress(int((cont) * total))
 
         feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
