@@ -283,6 +283,8 @@ class FillRasterwithPatches(QgsProcessingAlgorithm):
                             band3[lin][col] = Interpolar(X, Y, Rem_band3, Rem_origem, Rem_resol_X, Rem_resol_Y, reamostragem, Rem_nulo)
                     cont += 1
                     feedback.setProgress(int(cont * total))
+                    if feedback.isCanceled():
+                        break
             elif n_bands == 3:
                 for lin in range(row_ini, row_fim):
                     for col in range(col_ini, col_fim):
@@ -295,6 +297,8 @@ class FillRasterwithPatches(QgsProcessingAlgorithm):
                             band3[lin][col] = Interpolar(X, Y, Rem_band3, Rem_origem, Rem_resol_X, Rem_resol_Y, reamostragem, Rem_nulo)
                     cont += 1
                     feedback.setProgress(int(cont * total))
+                    if feedback.isCanceled():
+                        break
             elif n_bands == 1:
                 for lin in range(row_ini, row_fim):
                     for col in range(col_ini, col_fim):
@@ -305,6 +309,8 @@ class FillRasterwithPatches(QgsProcessingAlgorithm):
                             band1[lin][col] = Interpolar(X, Y, Rem_band1, Rem_origem, Rem_resol_X, Rem_resol_Y, reamostragem, Rem_nulo)
                     cont += 1
                     feedback.setProgress(int(cont * total))
+                    if feedback.isCanceled():
+                        break
             Rem = None # Fechar imagem
 
         # Criar imagem RGB
