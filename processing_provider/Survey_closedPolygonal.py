@@ -266,7 +266,7 @@ class ClosedPolygonal(QgsProcessingAlgorithm):
   <meta content="text/html; charset=ISO-8859-1"
  http-equiv="content-type">
   <title>'''+self.tr('Closed Traverse', 'Poligonal Fechada')+'''</title>
-  <link rel = "icon" href = "https://github.com/LEOXINGU/lftools/blob/main/images/lftoos.png?raw=true" type = "image/x-icon">
+  <link rel = "icon" href = "https://github.com/LEOXINGU/lftools/blob/main/images/lftools.png?raw=true" type = "image/x-icon">
 </head>
 <body
  style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 204);"

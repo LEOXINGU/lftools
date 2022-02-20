@@ -370,7 +370,7 @@ style=""> [x]<o:p></o:p></span></p>
 <meta content="text/html; charset=ISO-8859-1"
 http-equiv="content-type">
 <title>'''+ tr('Coordinate Transformation',str2HTML('Transformação de Coordenadas')) + '''</title>
-<link rel = "icon" href = "https://github.com/LEOXINGU/lftools/blob/main/images/lftoos.png?raw=true" type = "image/x-icon">
+<link rel = "icon" href = "https://github.com/LEOXINGU/lftools/blob/main/images/lftools.png?raw=true" type = "image/x-icon">
 </head>
 <body
 style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 204);"
@@ -639,7 +639,7 @@ style=""> [x]<o:p></o:p></span></p>
 <meta content="text/html; charset=ISO-8859-1"
 http-equiv="content-type">
 <title>'''+ tr('Vertical Adjustment',str2HTML('Ajuste Vertical')) + '''</title>
-<link rel = "icon" href = "https://github.com/LEOXINGU/lftools/blob/main/images/lftoos.png?raw=true" type = "image/x-icon">
+<link rel = "icon" href = "https://github.com/LEOXINGU/lftools/blob/main/images/lftools.png?raw=true" type = "image/x-icon">
 </head>
 <body
 style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 204);"

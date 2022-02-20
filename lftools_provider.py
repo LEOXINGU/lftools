@@ -175,7 +175,7 @@ class LFToolsProvider(QgsProcessingProvider):
         return self.tr('LF Tools')
 
     def icon(self):
-        return QIcon(os.path.dirname(__file__) + '/images/lftoos.png')
+        return QIcon(os.path.dirname(__file__) + '/images/lftools.png')
 
     def longName(self):
         """

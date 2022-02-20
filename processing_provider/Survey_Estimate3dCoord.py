@@ -294,7 +294,7 @@ Para mais informações sobre a metodologia utilizada, por favor leia o artigo n
 
   <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
   <title>''' + self.tr('Estimate 3D Coordinates', str2HTML('Estimação de Coordenadas 3D')) + '''</title>
-  <link rel = "icon" href = "https://github.com/LEOXINGU/lftools/blob/main/images/lftoos.png?raw=true" type = "image/x-icon">
+  <link rel = "icon" href = "https://github.com/LEOXINGU/lftools/blob/main/images/lftools.png?raw=true" type = "image/x-icon">
 </head>
 <body style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 204);" alink="#000099" link="#000099" vlink="#990099">
 <p class="MsoNormal" style="text-align: center;" align="center"><b><span style="font-size: 12pt; line-height: 107%;">''' + self.tr('ESTIMATE 3D COORDINATES', 'ESTIMA&Ccedil;&Atilde;O DE COORDENADAS 3D') + '''<o:p></o:p></span></b></p>

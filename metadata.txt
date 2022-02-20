@@ -43,7 +43,7 @@ tags=cartography, surveying, topography, raster, vector, postgis, processing, re
 
 homepage=https://github.com/LEOXINGU/lftools
 category=cartography
-icon=images/lftoos_logo.png
+icon=images/lftools_logo.png
 # experimental flag
 experimental=False
 

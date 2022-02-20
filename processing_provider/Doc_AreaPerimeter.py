@@ -265,7 +265,7 @@ class AreaPerimterReport(QgsProcessingAlgorithm):
   <meta content="text/html; charset=ISO-8859-1"
  http-equiv="content-type">
   <title>'''+ self.tr('Area and Perimeter Calculation', str2HTML('Cálculo de Área e Perímetro')) + '''</title>
-  <link rel = "icon" href = "https://github.com/LEOXINGU/lftools/blob/main/images/lftoos.png?raw=true" type = "image/x-icon">
+  <link rel = "icon" href = "https://github.com/LEOXINGU/lftools/blob/main/images/lftools.png?raw=true" type = "image/x-icon">
 </head>
 <body>
 <div style="text-align: center;"><span style="font-weight: bold;"><br>

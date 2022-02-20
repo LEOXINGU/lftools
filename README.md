@@ -1,6 +1,6 @@
 <!-- PROJECT LOGO -->
 <p align="center">
-    <img src="images/lftoos_logo.png" alt="Logo" width="90" height="75">
+    <img src="images/lftools_logo.png" alt="Logo" width="90" height="75">
   <h3 align="center">LF Tools</h3>
   <p align="center">
     <b><i>Tools for cartographic production, surveying, digital image processing and spatial analysis</i><b>
@@ -1861,5 +1861,3 @@ Este script preenche um determinado atributo das feições de uma camada de pont
   </tbody>
 </table>
 </div>
-
-

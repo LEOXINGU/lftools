@@ -291,7 +291,7 @@ class DescriptiveTable(QgsProcessingAlgorithm):
         <html>
         <head>
           <title>''' + self.tr('Synthetic deed description', str2HTML('Memorial Sintético')) + '''</title>
-          <link rel = "icon" href = "https://github.com/LEOXINGU/lftools/blob/main/images/lftoos.png?raw=true" type = "image/x-icon">
+          <link rel = "icon" href = "https://github.com/LEOXINGU/lftools/blob/main/images/lftools.png?raw=true" type = "image/x-icon">
         </head>
         <body>
         <table
