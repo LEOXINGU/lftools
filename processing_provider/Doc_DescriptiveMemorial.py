@@ -31,6 +31,7 @@ from qgis.core import (QgsProcessing,
                        QgsProcessingParameterFile,
                        QgsProcessingParameterString,
                        QgsProcessingParameterNumber,
+                       QgsProcessingParameterBoolean,
                        QgsProcessingException,
                        QgsProcessingParameterFileDestination,
                        QgsApplication)
@@ -57,6 +58,7 @@ class DescriptiveMemorial(QgisAlgorithm):
     LOGO = 'LOGO'
     SLOGAN = 'SLOGAN'
     DECIMAL = 'DECIMAL'
+    PROJECTION = 'PROJECTION'
     LOC = QgsApplication.locale()[:2]
 
 
@@ -188,6 +190,14 @@ class DescriptiveMemorial(QgisAlgorithm):
                 )
             )
 
+        self.addParameter(
+            QgsProcessingParameterBoolean(
+                self.PROJECTION,
+                self.tr('Verify map projection', 'Verificar projeção do mapa'),
+                defaultValue=True
+            )
+        )
+
         # 'OUTPUTS'
         self.addParameter(
             QgsProcessingParameterFileDestination(
@@ -245,6 +255,12 @@ class DescriptiveMemorial(QgisAlgorithm):
 
         format_num = '{:,.Xf}'.replace('X', str(decimal))
 
+        projecao = self.parameterAsBool(
+            parameters,
+            self.PROJECTION,
+            context
+        )
+
         meses = {1: 'janeiro', 2:'fevereiro', 3: 'março', 4:'abril', 5:'maio', 6:'junho', 7:'julho', 8:'agosto', 9:'setembro', 10:'outubro', 11:'novembro', 12:'dezembro'}
 
         # VALIDAÇÃO DOS DADOS DE ENTRADA!
@@ -295,9 +311,10 @@ class DescriptiveMemorial(QgisAlgorithm):
         centroideG = geom.centroid().asPoint()
 
         # Verificar se a projeção UTM do Projeto está correta
-        fuso, hemisf = FusoHemisf(centroideG)
-        if SRC.split(' ')[-1] != str(fuso)+hemisf :
-            raise QgsProcessingException(self.tr('Warning: Make sure your projection is correct!'.upper(), 'Aviso: Verifique se sua projeção está correta!'.upper()))
+        if projecao:
+            fuso, hemisf = FusoHemisf(centroideG)
+            if SRC.split(' ')[-1] != str(fuso)+hemisf :
+                raise QgsProcessingException(self.tr('Warning: Make sure your projection is correct!'.upper(), 'Aviso: Verifique se sua projeção está correta!'.upper()))
 
         # Validando dados de entrada
         # ponto_limite
