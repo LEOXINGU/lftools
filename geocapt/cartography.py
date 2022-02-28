@@ -16,6 +16,7 @@ __copyright__ = '(C) 2021, Leandro França'
 
 from numpy import sign, array, arange
 from numpy.linalg import norm
+import numpy as np
 from math import floor, modf
 import math
 from pyproj.crs import CRS
@@ -101,6 +102,16 @@ def areaGauss(coord):
         P3 = coord[ 0 if k==(tam-1) else (k+1)]
         soma += P2.x()*(P1.y() - P3.y())
     return soma/2
+
+def raioMedioGauss(lat, EPSG):
+    proj_crs = CRS.from_epsg(EPSG)
+    a=proj_crs.ellipsoid.semi_major_metre
+    f=1/proj_crs.ellipsoid.inverse_flattening
+    e2 = f*(2-f)
+    N = a/np.sqrt(1-e2*(np.sin(lat))**2) # Raio de curvatura 1º vertical
+    M = a*(1-e2)/(1-e2*(np.sin(lat))**2)**(3/2.) # Raio de curvatura meridiana
+    R = np.sqrt(M*N) # Raio médio de Gauss
+    return R
 
 
 def ChartSize(geom, zone, hemisf, escala):
