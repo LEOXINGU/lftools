@@ -33,11 +33,18 @@ from lftools.geocapt.cartography import (map_sistem,
                                          MeridianConvergence,
                                          SRC_Projeto,
                                          ScaleFactor,
+                                         geom2PointList,
+                                         reprojectPoints,
+                                         areaGauss,
                                          inom2mi as INOM2MI)
 from lftools.geocapt.topogeo import (dd2dms as DD2DMS,
                                      dms2dd as DMS2DD,
-                                     azimute, str2HTML)
+                                     azimute, str2HTML,
+                                     geod2geoc,
+                                     geoc2enu)
 from numpy import array, pi, sqrt, median
+import numpy as np
+from pyproj.crs import CRS
 import unicodedata
 import re
 # https://qgis.org/pyqgis/3.2/core/Expression/QgsExpression.html
@@ -242,7 +249,7 @@ def zonehemisf(lon, lat, feature, parent):
 @qgsfunction(args='auto', group='LF Tools')
 def removespetialchar (palavra, feature, parent):
     """
-    Substitui caracteres especiais.
+    Replaces special characters.
     <h2>Examplo:</h2>
     <ul>
       <li>removespetialchar('coração') -> coracao </li>
@@ -254,6 +261,73 @@ def removespetialchar (palavra, feature, parent):
     palavraSemAcento = u"".join([c for c in nfkd if not unicodedata.combining(c)])
     # Usa expressão regular para retornar a palavra apenas com números, letras e espaço
     return re.sub('[^a-zA-Z0-9 \\\]', '', palavraSemAcento)
+
+
+@qgsfunction(args='auto', group='LF Tools')
+def areaLTP (layer_name, feature, parent):
+    """
+    Calculates the area on the Local Tangent Plane (LTP), also known as Local Geodetic Coordinate System, which is a spatial reference system based on the tangent plane on the feature centroid defined by the local vertical direction.
+    <p>Note: PolygonZ or MultiPoligonZ is required.</p>
+    <h2>Examplo:</h2>
+    <ul>
+      <li>areaLTP('layer_name') -> 607503.4825 </li>
+    </ul>
+    """
+    if len(QgsProject.instance().mapLayersByName(layer_name)) == 1:
+        layer = QgsProject.instance().mapLayersByName(layer_name)[0]
+    else:
+        layer = QgsProject.instance().mapLayer(layer_name)
+
+    crsUTM = layer.crs()
+    crsGeo = QgsCoordinateReferenceSystem(crsUTM.geographicCrsAuthId())
+
+    coordinateTransformer = QgsCoordinateTransform()
+    coordinateTransformer.setDestinationCrs(crsGeo)
+    coordinateTransformer.setSourceCrs(crsUTM)
+
+    geom = feature.geometry()
+    geomGeo = reprojectPoints(geom, coordinateTransformer)
+    if geom.isMultipart():
+        coords = geom2PointList(geom)[0][0]
+        coordsGeo = geomGeo.asMultiPolygon()[0][0]
+    else:
+        coords = geom2PointList(geom)[0]
+        coordsGeo = geomGeo.asPolygon()[0]
+
+    centroide = geomGeo.centroid().asPoint()
+
+    try:
+        alt = []
+        for pnt in coords[:-1]:
+            alt += [pnt.z()]
+
+        h0 = np.array(alt).mean()
+        lon0 = centroide.x()
+        lat0 = centroide.y()
+
+        EPSG = int(crsGeo.authid().split(':')[-1]) # pegando o EPGS do SRC do QGIS
+        proj_crs = CRS.from_epsg(EPSG) # transformando para SRC do pyproj
+        a=proj_crs.ellipsoid.semi_major_metre
+        f_inv = proj_crs.ellipsoid.inverse_flattening
+        f=1/f_inv
+        # CENTRO DE ROTAÇÃO
+        Xo, Yo, Zo = geod2geoc(lon0, lat0, h0, a, f)
+
+        # CONVERSÃO DAS COORDENADAS
+        coordsSGL = []
+        for k, coord in enumerate(coordsGeo):
+            lon = coord.x()
+            lat = coord.y()
+            h = coords[k].z()
+            X, Y, Z = geod2geoc(lon, lat, h, a, f)
+            E, N, U = geoc2enu(X, Y, Z, lon0, lat0, Xo, Yo, Zo)
+            coordsSGL += [QgsPointXY(E, N)]
+
+        areaSGL = abs(areaGauss(coordsSGL))
+        return areaSGL
+
+    except:
+        return 0
 
 
 @qgsfunction(args='auto', group='LF Tools')
@@ -450,5 +524,269 @@ def deedtable2(prefixo, titulo, decimal, fontsize, feature, parent):
         resultado = texto.replace('[LINHAS]', LINHAS).replace('[TITULO]', str2HTML(titulo.upper())).replace('[FONTSIZE]', str(fontsize))
 
         return resultado
+    else:
+        return tr('Verify geometry', 'Verificar geometria')
+
+
+@qgsfunction(args='auto', group='LF Tools')
+def deedtable3(prefixo, titulo, decimal, fontsize, layer_name, tipo, azimuteDist, feature, parent):
+    """
+    Generates the Vertices and Sides Descriptive Table, also known as Synthetic Deed Description, based on vertices of a PolygonZ or MultiPoligonZ.
+    <p>Note 1: Layer with projected CRS is required.</p>
+    <p>Note 2: Table types: 'proj' - projected, 'geo' - geographic, 'both' - both coordinate systems.</p>
+    <p>Note 3: Define 1 or 0 for with or without azimuths and distances, respectivelly.</p>
+
+    <h2>Exemple:</h2>
+    <ul>
+      <li>deedtable3('preffix', 'title', precision, fontsize, layer_name, type, azimuth_dist) = HTML</li>
+      <li>deedtable3('V-', ' - Area X', 3, 12, 'layer_name', 'proj', 1) = HTML</li>
+      <li>deedtable3('V-', ' - Area X', 3, 12, 'layer_name', 'geo', 0) = HTML</li>
+      <li>deedtable3('V-', ' - Area X', 3, 12, 'layer_name', 'both', 1) = HTML</li>
+    </ul>
+    """
+    if len(QgsProject.instance().mapLayersByName(layer_name)) == 1:
+        layer = QgsProject.instance().mapLayersByName(layer_name)[0]
+    else:
+        layer = QgsProject.instance().mapLayer(layer_name)
+
+    crsUTM = layer.crs()
+    crsGeo = QgsCoordinateReferenceSystem(crsUTM.geographicCrsAuthId())
+
+    format_num = '{:,.Xf}'.replace('X', str(decimal))
+
+    coordinateTransformer = QgsCoordinateTransform()
+    coordinateTransformer.setDestinationCrs(crsGeo)
+    coordinateTransformer.setSourceCrs(crsUTM)
+
+    geom = feature.geometry()
+
+    if geom.type() == 2 and geom:
+        if geom.isMultipart():
+            coords = geom2PointList(geom)[0][0]
+        else:
+            coords = geom2PointList(geom)[0]
+
+        pnts_UTM = {}
+        for k, coord in enumerate(coords[:-1]):
+            pnts_UTM[k+1] = [coord, prefixo, prefixo + '{:02}'.format(k+1) ]
+            pnts_GEO = {}
+            for k, coord in enumerate(coords[:-1]):
+                pnt = coordinateTransformer.transform(QgsPointXY(coord.x(), coord.y()))
+                pnts_GEO[k+1] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), prefixo, prefixo + '{:02}'.format(k+1) ]
+        # Calculo dos Azimutes e Distancias
+        tam = len(pnts_UTM)
+        Az_lista, Dist = [], []
+        for k in range(tam):
+            pntA = pnts_UTM[k+1][0]
+            pntB = pnts_UTM[1 if k+2 > tam else k+2][0]
+            Az_lista += [(180/pi)*azimute(pntA, pntB)[0]]
+            Dist += [sqrt((pntA.x() - pntB.x())**2 + (pntA.y() - pntB.y())**2)]
+
+        texto = '''<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+        <html>
+        <head>
+          <title>''' + tr('Synthetic deed description', str2HTML('Memorial Sintético')) + '''</title>    </head>
+        <body>
+        <table
+        style="text-align: center; width: 100%; font-size: [FONTSIZE]px; font-family: Arial;"
+        border="1" cellpadding="0" cellspacing="0">
+        <tbody>
+        [CABECALHO]
+        [LINHAS]
+        </tbody>
+        </table>
+        <br>
+        </body>
+        </html>
+        '''
+
+        #Tipos de cabeçalhos
+
+        # UTM
+        if tipo == 'proj' and azimuteDist == 1:
+            linha = '''<tr>
+          <td>Vn</td>
+          <td>En</td>
+          <td>Nn</td>
+          <td>hn</td>
+          <td>Ln</td>
+          <td>Az_n</td>
+          <td>Dn</td>
+        </tr>
+        '''
+            cabec = '''<tr>
+              <td colspan="7" rowspan="1">''' + tr('Synthetic deed description'.upper(), str2HTML('Memorial Sintético'.upper())) + '''[TITULO]</td>
+            </tr>
+            <tr>
+              <td colspan="1" rowspan="2">''' + tr('VERTEX', str2HTML('VÉRTICE')) + '''</td>
+              <td colspan="3" rowspan="1">''' + tr('COORDINATE', str2HTML('COORDENADA')) + '''</td>
+              <td colspan="1" rowspan="2">''' + tr('SIDE', str2HTML('LADO')) + '''</td>
+              <td colspan="1" rowspan="2">''' + tr('AZIMUTH', str2HTML('AZIMUTE')) + '''</td>
+              <td colspan="1" rowspan="2">''' + tr('DISTANCE', str2HTML('DISTÂNCIA')) + '''
+            (m)</td>
+            </tr>
+            <tr>
+              <td>E</td>
+              <td>N</td>
+              <td>h</td>
+            </tr>'''
+
+        # UTM sem Az e d
+        if tipo == 'proj' and azimuteDist == 0:
+            linha = '''<tr>
+          <td>Vn</td>
+          <td>En</td>
+          <td>Nn</td>
+          <td>hn</td>
+        </tr>
+        '''
+
+            cabec = '''<tr>
+              <td colspan="4" rowspan="1">''' + tr('Synthetic deed description'.upper(), str2HTML('Memorial Sintético'.upper())) + '''[TITULO]</td>
+            </tr>
+            <tr>
+              <td colspan="1" rowspan="2">''' + tr('VERTEX', str2HTML('VÉRTICE')) + '''</td>
+              <td colspan="3" rowspan="1">''' + tr('COORDINATE', str2HTML('COORDENADA')) + '''</td>
+            </tr>
+            <tr>
+              <td>E</td>
+              <td>N</td>
+              <td>h</td>
+            </tr>'''
+
+        # GEO
+        if tipo == 'geo' and azimuteDist == 1:
+            linha = '''<tr>
+              <td>Vn</td>
+              <td>lonn</td>
+              <td>latn</td>
+              <td>hn</td>
+              <td>Ln</td>
+              <td>Az_n</td>
+              <td>Dn</td>
+            </tr>
+            '''
+            cabec = '''<tr>
+              <td colspan="7" rowspan="1">''' + tr('Synthetic deed description'.upper(), str2HTML('Memorial Sintético'.upper())) + '''[TITULO]</td>
+            </tr>
+            <tr>
+              <td colspan="1" rowspan="2">''' + tr('VERTEX', str2HTML('VÉRTICE')) + '''</td>
+              <td colspan="3" rowspan="1">''' + tr('COORDINATE', str2HTML('COORDENADA')) + '''</td>
+              <td colspan="1" rowspan="2">''' + tr('SIDE', str2HTML('LADO')) + '''</td>
+              <td colspan="1" rowspan="2">''' + tr('AZIMUTH', str2HTML('AZIMUTE')) + '''</td>
+              <td colspan="1" rowspan="2">''' + tr('DISTANCE', str2HTML('DISTÂNCIA')) + '''
+            (m)</td>
+            </tr>
+            <tr>
+              <td>longitude</td>
+              <td>latitude</td>
+              <td>h</td>
+            </tr>'''
+
+        # GEO sem Az e d
+        if tipo == 'geo' and azimuteDist == 0:
+            linha = '''<tr>
+              <td>Vn</td>
+              <td>lonn</td>
+              <td>latn</td>
+              <td>hn</td>
+            </tr>
+            '''
+
+            cabec = '''<tr>
+              <td colspan="4" rowspan="1">''' + tr('Synthetic deed description'.upper(), str2HTML('Memorial Sintético'.upper())) + '''[TITULO]</td>
+            </tr>
+            <tr>
+              <td colspan="1" rowspan="2">''' + tr('VERTEX', str2HTML('VÉRTICE')) + '''</td>
+              <td colspan="3" rowspan="1">''' + tr('COORDINATE', str2HTML('COORDENADA')) + '''</td>
+            (m)</td>
+            </tr>
+            <tr>
+              <td>longitude</td>
+              <td>latitude</td>
+              <td>h</td>
+            </tr>'''
+
+        # UTM e GEO
+        if tipo == 'both' and azimuteDist == 1:
+            linha = '''<tr>
+              <td>Vn</td>
+              <td>lonn</td>
+              <td>latn</td>
+              <td>En</td>
+              <td>Nn</td>
+              <td>hn</td>
+              <td>Ln</td>
+              <td>Az_n</td>
+              <td>Dn</td>
+            </tr>
+            '''
+
+            cabec = '''<tr>
+              <td colspan="9" rowspan="1">''' + tr('Synthetic deed description'.upper(), str2HTML('Memorial Sintético'.upper())) + '''[TITULO]</td>
+            </tr>
+            <tr>
+              <td colspan="1" rowspan="2">''' + tr('VERTEX', str2HTML('VÉRTICE')) + '''</td>
+              <td colspan="5" rowspan="1">''' + tr('COORDINATE', str2HTML('COORDENADA')) + '''</td>
+              <td colspan="1" rowspan="2">''' + tr('SIDE', str2HTML('LADO')) + '''</td>
+              <td colspan="1" rowspan="2">''' + tr('AZIMUTH', str2HTML('AZIMUTE')) + '''</td>
+              <td colspan="1" rowspan="2">''' + tr('DISTANCE', str2HTML('DISTÂNCIA')) + '''
+            (m)</td>
+            </tr>
+            <tr>
+              <td>longitude</td>
+              <td>latitude</td>
+              <td>E</td>
+              <td>N</td>
+              <td>h</td>
+            </tr>'''
+
+        # UTM e GEO sem Az e d
+        if tipo == 'both' and azimuteDist == 0:
+            linha = '''<tr>
+              <td>Vn</td>
+              <td>lonn</td>
+              <td>latn</td>
+              <td>En</td>
+              <td>Nn</td>
+              <td>hn</td>
+            </tr>
+            '''
+
+            cabec = '''<tr>
+              <td colspan="6" rowspan="1">''' + tr('Synthetic deed description'.upper(), str2HTML('Memorial Sintético'.upper())) + '''[TITULO]</td>
+            </tr>
+            <tr>
+              <td colspan="1" rowspan="2">''' + tr('VERTEX', str2HTML('VÉRTICE')) + '''</td>
+              <td colspan="5" rowspan="1">''' + tr('COORDINATE', str2HTML('COORDENADA')) + '''</td>
+            </tr>
+            <tr>
+              <td>longitude</td>
+              <td>latitude</td>
+              <td>E</td>
+              <td>N</td>
+              <td>h</td>
+            </tr>'''
+
+        LINHAS = ''
+        for k in range(tam):
+            linha0 = linha
+            itens = {'Vn': pnts_UTM[k+1][2],
+                        'En': tr(format_num.format(pnts_UTM[k+1][0].x()), format_num.format(pnts_UTM[k+1][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                        'Nn': tr(format_num.format(pnts_UTM[k+1][0].y()), format_num.format(pnts_UTM[k+1][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                        'hn': tr(format_num.format(pnts_UTM[k+1][0].z()), format_num.format(pnts_UTM[k+1][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                        'lonn': tr(DD2DMS(pnts_GEO[k+1][0].x(),decimal + 3), DD2DMS(pnts_GEO[k+1][0].x(),decimal + 3).replace('.', ',')),
+                        'latn': tr(DD2DMS(pnts_GEO[k+1][0].y(),decimal + 3), DD2DMS(pnts_GEO[k+1][0].y(),decimal + 3).replace('.', ',')),
+                        'Ln': pnts_UTM[k+1][2] + '/' + pnts_UTM[1 if k+2 > tam else k+2][2],
+                        'Az_n': tr(DD2DMS(Az_lista[k],1), DD2DMS(Az_lista[k],1).replace('.', ',')),
+                        'Dn': tr(format_num.format(Dist[k]), format_num.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'))
+                        }
+            for item in itens:
+                linha0 = linha0.replace(item, itens[item])
+            LINHAS += linha0
+        resultado = texto.replace('[CABECALHO]', cabec).replace('[LINHAS]', LINHAS).replace('[TITULO]', str2HTML(titulo.upper())).replace('[FONTSIZE]', str(fontsize))
+
+        return resultado
+
     else:
         return tr('Verify geometry', 'Verificar geometria')
