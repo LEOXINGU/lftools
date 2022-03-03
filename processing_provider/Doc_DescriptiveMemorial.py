@@ -33,6 +33,7 @@ from qgis.core import (QgsProcessing,
                        QgsProcessingParameterNumber,
                        QgsProcessingParameterBoolean,
                        QgsProcessingException,
+                       QgsWkbTypes,
                        QgsProcessingParameterFileDestination,
                        QgsApplication)
 from processing.algs.qgis.QgisAlgorithm import QgisAlgorithm
@@ -295,11 +296,7 @@ class DescriptiveMemorial(QgisAlgorithm):
         for feat in vertices.getFeatures():
                 geom = feat.geometry()
                 break
-        try:
-            t = str(geom.constGet().z())
-        except:
-            t = 'nan'
-        if t == 'nan':
+        if geom.wkbType() != QgsWkbTypes.PointZ:
             raise QgsProcessingException(self.tr('Limit Point layer must be "PointZ" type!', 'Camada pontos limites deve ser do tipo "PointZ"!'))
 
         # Dados do levantamento
