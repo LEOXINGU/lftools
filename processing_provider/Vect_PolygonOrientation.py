@@ -222,7 +222,8 @@ class PolygonOrientation(QgsProcessingAlgorithm):
                         xmin = pnt.x()
                         ind = k
 
-            coords = coords[ind :] + coords[0 : ind]
+            if primeiro != 0:
+                coords = coords[ind :] + coords[0 : ind]
 
             #rotacionar
             coords = coords +[coords[0]]
