@@ -342,43 +342,16 @@ def deedtable(layer_name, ini, fim, titulo, fontsize, feature, parent):
     </ul>
     """
     # Templates HTML
-    linha = '''<tr>
-      <td>Vn</td>
-      <td>En</td>
-      <td>Nn</td>
-      <td>Ln</td>
-      <td>Az_n</td>
-      <td>AzG_n</td>
-      <td>Dn</td>
-    </tr>
-    '''
     texto = '''<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
     <html>
     <head>
-      <title>''' + tr('Synthetic deed description', str2HTML('Memorial Sintético')) + '''</title>
-    </head>
+      <title>''' + tr('Synthetic deed description', str2HTML('Memorial Sintético')) + '''</title>    </head>
     <body>
     <table
     style="text-align: center; width: 100%; font-size: [FONTSIZE]px; font-family: Arial;"
     border="1" cellpadding="0" cellspacing="0">
     <tbody>
-    <tr>
-      <td colspan="7" rowspan="1">''' + tr('Synthetic deed description'.upper(), str2HTML('Memorial Sintético'.upper())) + '''[TITULO]</td>
-    </tr>
-    <tr>
-      <td colspan="1" rowspan="2">''' + tr('VERTEX', str2HTML('VÉRTICE')) + '''</td>
-      <td colspan="2" rowspan="1">''' + tr('COORDINATE', str2HTML('COORDENADA')) + '''</td>
-      <td colspan="1" rowspan="2">''' + tr('SIDE', str2HTML('LADO')) + '''</td>
-      <td colspan="2" rowspan="1">''' + tr('AZIMUTH', str2HTML('AZIMUTE')) + '''</td>
-      <td colspan="1" rowspan="2">''' + tr('DISTANCE', str2HTML('DISTÂNCIA')) + '''<br>
-    (m)</td>
-    </tr>
-    <tr>
-      <td>E</td>
-      <td>N</td>
-      <td>''' + tr('FLAT', str2HTML('PLANO')) + '''</td>
-      <td>''' + tr('TRUE', str2HTML('VERDADEIRO')) + '''</td>
-    </tr>
+    [CABECALHO]
     [LINHAS]
     </tbody>
     </table>
@@ -386,6 +359,36 @@ def deedtable(layer_name, ini, fim, titulo, fontsize, feature, parent):
     </body>
     </html>
     '''
+    linha = '''<tr>
+      <td>Vn</td>
+      <td>En</td>
+      <td>Nn</td>
+      <td>hn</td>
+      <td>Ln</td>
+      <td>Az_n</td>
+      <td>Dn</td>
+    </tr>
+    '''
+    cabec = '''<tr>
+      <td colspan="7" rowspan="1">''' + tr('Synthetic deed description'.upper(), str2HTML('Memorial Sintético'.upper())) + '''[TITULO]</td>
+    </tr>
+    <tr>
+      <td colspan="1" rowspan="2">''' + tr('VERTEX', str2HTML('VÉRTICE')) + '''</td>
+      <td colspan="3" rowspan="1">''' + tr('COORDINATE', str2HTML('COORDENADA')) + '''</td>
+      <td colspan="1" rowspan="2">''' + tr('SIDE', str2HTML('LADO')) + '''</td>
+      <td colspan="1" rowspan="2">''' + tr('AZIMUTH', str2HTML('AZIMUTE')) + '''</td>
+      <td colspan="1" rowspan="2">''' + tr('DISTANCE', str2HTML('DISTÂNCIA')) + '''
+    (m)</td>
+    </tr>
+    <tr>
+      <td>E</td>
+      <td>N</td>
+      <td>h</td>
+    </tr>'''
+
+    decimal = 2
+    format_num = '{:,.Xf}'.replace('X', str(decimal))
+
     # Camada de Pontos
     if len(QgsProject.instance().mapLayersByName(layer_name)) == 1:
         layer = QgsProject.instance().mapLayersByName(layer_name)[0]
@@ -393,6 +396,7 @@ def deedtable(layer_name, ini, fim, titulo, fontsize, feature, parent):
         layer = QgsProject.instance().mapLayer(layer_name)
     SRC = layer.crs()
     pnts_UTM = {}
+    pnts_GEO = {}
     # Transformacao de Coordenadas Geograficas para Projetadas no sistema UTM
     crsDest = QgsCoordinateReferenceSystem(SRC_Projeto('EPSG'))
     coordinateTransformer = QgsCoordinateTransform()
@@ -400,7 +404,10 @@ def deedtable(layer_name, ini, fim, titulo, fontsize, feature, parent):
     coordinateTransformer.setSourceCrs(SRC)
     for feat in layer.getFeatures():
         pnt = feat.geometry().asPoint()
+        coord = geom2PointList(feat.geometry())
         pnts_UTM[feat['ordem']] = [coordinateTransformer.transform(pnt), feat['tipo'], feat['codigo'], MeridianConvergence(pnt.x(), pnt.y(), crsDest) ]
+        pnts_GEO[feat['sequence']] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), feat['tipo'], feat['codigo'] ]
+
     # Calculo dos Azimutes e Distancias
     tam = len(pnts_UTM)
     Az_lista, Az_Geo_lista, Dist = [], [], []
@@ -408,27 +415,31 @@ def deedtable(layer_name, ini, fim, titulo, fontsize, feature, parent):
         pntA = pnts_UTM[k+1][0]
         pntB = pnts_UTM[1 if k+2 > tam else k+2][0]
         Az_lista += [(180/pi)*azimute(pntA, pntB)[0]]
-        MeridianConvergenceediana = pnts_UTM[k+1][3]
-        Az_Geo_lista += [(180/pi)*azimute(pntA, pntB)[0]+MeridianConvergenceediana]
+        ConvMerediana = pnts_UTM[k+1][3]
+        Az_Geo_lista += [(180/pi)*azimute(pntA, pntB)[0]+ConvMerediana]
         Dist += [sqrt((pntA.x() - pntB.x())**2 + (pntA.y() - pntB.y())**2)]
+
     LINHAS = ''
     if fim == -1 or fim > tam:
         fim = tam
     for k in range(ini-1,fim):
         linha0 = linha
         itens = {'Vn': pnts_UTM[k+1][2],
-                    'En': tr('{:,.2f}'.format(pnts_UTM[k+1][0].x()), '{:,.2f}'.format(pnts_UTM[k+1][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                    'Nn': tr('{:,.2f}'.format(pnts_UTM[k+1][0].y()), '{:,.2f}'.format(pnts_UTM[k+1][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                    'En':tr(format_num.format(pnts_UTM[k+1][0].x()), format_num.format(pnts_UTM[k+1][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                    'Nn':tr(format_num.format(pnts_UTM[k+1][0].y()), format_num.format(pnts_UTM[k+1][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                    'hn':tr(format_num.format(pnts_GEO[k+1][0].z()), format_num.format(pnts_GEO[k+1][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                    'lonn':tr(DD2DMS(pnts_GEO[k+1][0].x(),decimal + 3), DD2DMS(pnts_GEO[k+1][0].x(),decimal + 3).replace('.', ',')),
+                    'latn':tr(DD2DMS(pnts_GEO[k+1][0].y(),decimal + 3), DD2DMS(pnts_GEO[k+1][0].y(),decimal + 3).replace('.', ',')),
                     'Ln': pnts_UTM[k+1][2] + '/' + pnts_UTM[1 if k+2 > tam else k+2][2],
-                    'Az_n': tr(DD2DMS(Az_lista[k],1), DD2DMS(Az_lista[k],1).replace('.', ',')),
-                    'AzG_n':  tr(DD2DMS(Az_Geo_lista[k],1), DD2DMS(Az_Geo_lista[k],1).replace('.', ',')),
-                    'Dn': tr('{:,.2f}'.format(Dist[k]), '{:,.2f}'.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'))
+                    'Az_n':tr(DD2DMS(Az_lista[k],1), DD2DMS(Az_lista[k],1).replace('.', ',')),
+                    'Dn':tr(format_num.format(Dist[k]), format_num.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'))
                     }
         for item in itens:
             linha0 = linha0.replace(item, itens[item])
         LINHAS += linha0
-    resultado = texto.replace('[LINHAS]', LINHAS).replace('[TITULO]', str2HTML(titulo.upper())).replace('[FONTSIZE]', str(fontsize))
+    resultado = texto.replace('[CABECALHO]', cabec).replace('[LINHAS]', LINHAS).replace('[TITULO]', str2HTML(titulo.upper())).replace('[FONTSIZE]', str(fontsize))
     return resultado
+
 
 
 @qgsfunction(args='auto', group='LF Tools')
@@ -528,6 +539,7 @@ def deedtable2(prefixo, titulo, decimal, fontsize, feature, parent):
         return tr('Verify geometry', 'Verificar geometria')
 
 
+
 @qgsfunction(args='auto', group='LF Tools')
 def deedtable3(prefixo, titulo, decimal, fontsize, layer_name, tipo, azimuteDist, feature, parent):
     """
@@ -567,12 +579,11 @@ def deedtable3(prefixo, titulo, decimal, fontsize, layer_name, tipo, azimuteDist
             coords = geom2PointList(geom)[0]
 
         pnts_UTM = {}
+        pnts_GEO = {}
         for k, coord in enumerate(coords[:-1]):
-            pnts_UTM[k+1] = [coord, prefixo, prefixo + '{:02}'.format(k+1) ]
-            pnts_GEO = {}
-            for k, coord in enumerate(coords[:-1]):
-                pnt = coordinateTransformer.transform(QgsPointXY(coord.x(), coord.y()))
-                pnts_GEO[k+1] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), prefixo, prefixo + '{:02}'.format(k+1) ]
+            pnts_UTM[k+1] = [coord, prefixo, prefixo + '{:02}'.format(k+1)]
+            pnt = coordinateTransformer.transform(QgsPointXY(coord.x(), coord.y()))
+            pnts_GEO[k+1] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), prefixo, prefixo + '{:02}'.format(k+1) ]
         # Calculo dos Azimutes e Distancias
         tam = len(pnts_UTM)
         Az_lista, Dist = [], []
