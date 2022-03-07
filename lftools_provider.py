@@ -92,6 +92,7 @@ from lftools.processing_provider.Vect_PolygonOrientation import PolygonOrientati
 from lftools.processing_provider.Easy_getAttributeByLocation import GetAttributeByLocation
 from lftools.processing_provider.Rast_bandArithmetic import BandArithmetic
 from lftools.processing_provider.Gnss_NMEA2layer import NMEA2layer
+from lftools.processing_provider.Reamb_ResizePhotos import ResizePhotos
 
 
 class LFToolsProvider(QgsProcessingProvider):
@@ -169,6 +170,7 @@ class LFToolsProvider(QgsProcessingProvider):
         self.addAlgorithm(GetAttributeByLocation())
         self.addAlgorithm(BandArithmetic())
         self.addAlgorithm(NMEA2layer())
+        self.addAlgorithm(ResizePhotos())
 
     def id(self):
         return 'lftools'
