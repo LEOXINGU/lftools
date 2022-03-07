@@ -29,7 +29,9 @@ from qgis.core import (QgsProcessing,
                        QgsProcessingParameterNumber,
                        QgsProcessingParameterString,
                        QgsProcessingParameterNumber,
+                       QgsProcessingParameterEnum,
                        QgsFeatureRequest,
+                       QgsPoint,
                        QgsExpression,
                        QgsProcessingParameterFeatureSource,
                        QgsProcessingParameterFeatureSink,
@@ -42,7 +44,7 @@ from qgis.core import (QgsProcessing,
 import os
 from math import pi, sqrt
 from lftools.geocapt.imgs import Imgs
-from lftools.geocapt.cartography import MeridianConvergence, SRC_Projeto
+from lftools.geocapt.cartography import MeridianConvergence, SRC_Projeto, geom2PointList
 from lftools.geocapt.topogeo import azimute, dd2dms, str2HTML
 from qgis.PyQt.QtGui import QIcon
 
@@ -112,6 +114,7 @@ class DescriptiveTable(QgsProcessingAlgorithm):
     TITULO = 'TITULO'
     FONTSIZE = 'FONTSIZE'
     DECIMAL = 'DECIMAL'
+    MODEL = 'MODEL'
 
     def initAlgorithm(self, config=None):
 
@@ -167,6 +170,24 @@ class DescriptiveTable(QgsProcessingAlgorithm):
                 defaultValue = 2
                 )
             )
+
+        tipos = [self.tr('Planimetric (E,N)','Planimétrico'),
+				  self.tr('E, N, h, azimuth, distance', 'E, N, h, azimute, distância'),
+                  self.tr('E, N, h'),
+                  self.tr('Lon, Lat, h, azimuth, distance', 'Lon, Lat, h, azimute, distância'),
+                  self.tr('Lon, Lat, h'),
+                  self.tr('Lon, Lat, E, N, h, azimuth, distance', 'Lon, Lat, h, azimute, distância'),
+                  self.tr('Lon, Lat, E, N, h')
+               ]
+
+        self.addParameter(
+            QgsProcessingParameterEnum(
+                self.MODEL,
+                self.tr('Model', 'Modelo'),
+				options = tipos,
+                defaultValue= 0
+            )
+        )
 
         # 'OUTPUTS'
         self.addParameter(
@@ -232,6 +253,12 @@ class DescriptiveTable(QgsProcessingAlgorithm):
 
         format_num = '{:,.Xf}'.replace('X', str(decimal))
 
+        modelo = self.parameterAsEnum(
+            parameters,
+            self.MODEL,
+            context
+        )
+
         # Pegando o SRC do Projeto
         SRC = QgsProject.instance().crs().description()
         # Verificando o SRC
@@ -260,9 +287,12 @@ class DescriptiveTable(QgsProcessingAlgorithm):
         coordinateTransformer.setSourceCrs(vertices.sourceCrs())
 
         pnts_UTM = {}
+        pnts_GEO = {}
         for feat in vertices.getFeatures():
             pnt = feat.geometry().asPoint()
+            coord = geom2PointList(feat.geometry())
             pnts_UTM[feat['sequence']] = [coordinateTransformer.transform(pnt), feat['tipo'], feat['codigo'], MeridianConvergence(pnt.x(), pnt.y(), crsDest) ]
+            pnts_GEO[feat['sequence']] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), feat['tipo'], feat['codigo'] ]
 
         # Calculo dos Azimutes e Distancias
         tam = len(pnts_UTM)
@@ -276,70 +306,279 @@ class DescriptiveTable(QgsProcessingAlgorithm):
             Dist += [sqrt((pntA.x() - pntB.x())**2 + (pntA.y() - pntB.y())**2)]
 
         # Templates HTML
-        linha = '''<tr>
-          <td>Vn</td>
-          <td>En</td>
-          <td>Nn</td>
-          <td>Ln</td>
-          <td>Az_n</td>
-          <td>AzG_n</td>
-          <td>Dn</td>
-        </tr>
-        '''
+        if modelo == 0:
+            linha = '''<tr>
+              <td>Vn</td>
+              <td>En</td>
+              <td>Nn</td>
+              <td>Ln</td>
+              <td>Az_n</td>
+              <td>AzG_n</td>
+              <td>Dn</td>
+            </tr>
+            '''
 
-        texto = '''<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-        <html>
-        <head>
-          <title>''' + self.tr('Synthetic deed description', str2HTML('Memorial Sintético')) + '''</title>
-          <link rel = "icon" href = "https://github.com/LEOXINGU/lftools/blob/main/images/lftools.png?raw=true" type = "image/x-icon">
-        </head>
-        <body>
-        <table
-        style="text-align: center; width: 100%; font-size: [FONTSIZE]px; font-family: Arial;"
-        border="1" cellpadding="0" cellspacing="0">
-        <tbody>
-        <tr>
-          <td colspan="7" rowspan="1">''' + self.tr('Synthetic deed description'.upper(), str2HTML('Memorial Sintético'.upper())) + '''[TITULO]</td>
-        </tr>
-        <tr>
-          <td colspan="1" rowspan="2">''' + self.tr('VERTEX', str2HTML('VÉRTICE')) + '''</td>
-          <td colspan="2" rowspan="1">''' + self.tr('COORDINATE', str2HTML('COORDENADA')) + '''</td>
-          <td colspan="1" rowspan="2">''' + self.tr('SIDE', str2HTML('LADO')) + '''</td>
-          <td colspan="2" rowspan="1">''' + self.tr('AZIMUTH', str2HTML('AZIMUTE')) + '''</td>
-          <td colspan="1" rowspan="2">''' + self.tr('DISTANCE', str2HTML('DISTÂNCIA')) + '''<br>
-        (m)</td>
-        </tr>
-        <tr>
-          <td>E</td>
-          <td>N</td>
-          <td>''' + self.tr('FLAT', str2HTML('PLANO')) + '''</td>
-          <td>''' + self.tr('TRUE', str2HTML('VERDADEIRO')) + '''</td>
-        </tr>
-        [LINHAS]
-        </tbody>
-        </table>
-        <br>
-        </body>
-        </html>
-        '''
+            texto = '''<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+            <html>
+            <head>
+              <title>''' + self.tr('Synthetic deed description', str2HTML('Memorial Sintético')) + '''</title>
+              <link rel = "icon" href = "https://github.com/LEOXINGU/lftools/blob/main/images/lftools.png?raw=true" type = "image/x-icon">
+            </head>
+            <body>
+            <table
+            style="text-align: center; width: 100%; font-size: [FONTSIZE]px; font-family: Arial;"
+            border="1" cellpadding="0" cellspacing="0">
+            <tbody>
+            <tr>
+              <td colspan="7" rowspan="1">''' + self.tr('Synthetic deed description'.upper(), str2HTML('Memorial Sintético'.upper())) + '''[TITULO]</td>
+            </tr>
+            <tr>
+              <td colspan="1" rowspan="2">''' + self.tr('VERTEX', str2HTML('VÉRTICE')) + '''</td>
+              <td colspan="2" rowspan="1">''' + self.tr('COORDINATE', str2HTML('COORDENADA')) + '''</td>
+              <td colspan="1" rowspan="2">''' + self.tr('SIDE', str2HTML('LADO')) + '''</td>
+              <td colspan="2" rowspan="1">''' + self.tr('AZIMUTH', str2HTML('AZIMUTE')) + '''</td>
+              <td colspan="1" rowspan="2">''' + self.tr('DISTANCE', str2HTML('DISTÂNCIA')) + '''<br>
+            (m)</td>
+            </tr>
+            <tr>
+              <td>E</td>
+              <td>N</td>
+              <td>''' + self.tr('FLAT', str2HTML('PLANO')) + '''</td>
+              <td>''' + self.tr('TRUE', str2HTML('VERDADEIRO')) + '''</td>
+            </tr>
+            [LINHAS]
+            </tbody>
+            </table>
+            <br>
+            </body>
+            </html>
+            '''
 
-        LINHAS = ''
-        if fim == -1 or fim > tam:
-            fim = tam
-        for k in range(ini-1,fim):
-            linha0 = linha
-            itens = {'Vn': pnts_UTM[k+1][2],
-                        'En': self.tr(format_num.format(pnts_UTM[k+1][0].x()), format_num.format(pnts_UTM[k+1][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                        'Nn': self.tr(format_num.format(pnts_UTM[k+1][0].y()), format_num.format(pnts_UTM[k+1][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                        'Ln': pnts_UTM[k+1][2] + '/' + pnts_UTM[1 if k+2 > tam else k+2][2],
-                        'Az_n': self.tr(dd2dms(Az_lista[k],1), dd2dms(Az_lista[k],1).replace('.', ',')),
-                        'AzG_n':  self.tr(dd2dms(Az_Geo_lista[k],1), dd2dms(Az_Geo_lista[k],1).replace('.', ',')),
-                        'Dn': self.tr(format_num.format(Dist[k]), format_num.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'))
-                        }
-            for item in itens:
-                linha0 = linha0.replace(item, itens[item])
-            LINHAS += linha0
-        resultado = texto.replace('[LINHAS]', LINHAS).replace('[TITULO]', str2HTML(titulo.upper())).replace('[FONTSIZE]', str(fontsize))
+            LINHAS = ''
+            if fim == -1 or fim > tam:
+                fim = tam
+            for k in range(ini-1,fim):
+                linha0 = linha
+                itens = {'Vn': pnts_UTM[k+1][2],
+                            'En': self.tr(format_num.format(pnts_UTM[k+1][0].x()), format_num.format(pnts_UTM[k+1][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                            'Nn': self.tr(format_num.format(pnts_UTM[k+1][0].y()), format_num.format(pnts_UTM[k+1][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                            'Ln': pnts_UTM[k+1][2] + '/' + pnts_UTM[1 if k+2 > tam else k+2][2],
+                            'Az_n': self.tr(dd2dms(Az_lista[k],1), dd2dms(Az_lista[k],1).replace('.', ',')),
+                            'AzG_n':  self.tr(dd2dms(Az_Geo_lista[k],1), dd2dms(Az_Geo_lista[k],1).replace('.', ',')),
+                            'Dn': self.tr(format_num.format(Dist[k]), format_num.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'))
+                            }
+                for item in itens:
+                    linha0 = linha0.replace(item, itens[item])
+                LINHAS += linha0
+            resultado = texto.replace('[LINHAS]', LINHAS).replace('[TITULO]', str2HTML(titulo.upper())).replace('[FONTSIZE]', str(fontsize))
+
+        else:
+            texto = '''<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+            <html>
+            <head>
+              <title>''' + self.tr('Synthetic deed description', str2HTML('Memorial Sintético')) + '''</title>    </head>
+            <body>
+            <table
+            style="text-align: center; width: 100%; font-size: [FONTSIZE]px; font-family: Arial;"
+            border="1" cellpadding="0" cellspacing="0">
+            <tbody>
+            [CABECALHO]
+            [LINHAS]
+            </tbody>
+            </table>
+            <br>
+            </body>
+            </html>
+            '''
+
+            #Tipos de cabeçalhos
+
+            # UTM
+            if modelo == 1:
+                linha = '''<tr>
+              <td>Vn</td>
+              <td>En</td>
+              <td>Nn</td>
+              <td>hn</td>
+              <td>Ln</td>
+              <td>Az_n</td>
+              <td>Dn</td>
+            </tr>
+            '''
+                cabec = '''<tr>
+                  <td colspan="7" rowspan="1">''' + self.tr('Synthetic deed description'.upper(), str2HTML('Memorial Sintético'.upper())) + '''[TITULO]</td>
+                </tr>
+                <tr>
+                  <td colspan="1" rowspan="2">''' + self.tr('VERTEX', str2HTML('VÉRTICE')) + '''</td>
+                  <td colspan="3" rowspan="1">''' + self.tr('COORDINATE', str2HTML('COORDENADA')) + '''</td>
+                  <td colspan="1" rowspan="2">''' + self.tr('SIDE', str2HTML('LADO')) + '''</td>
+                  <td colspan="1" rowspan="2">''' + self.tr('AZIMUTH', str2HTML('AZIMUTE')) + '''</td>
+                  <td colspan="1" rowspan="2">''' + self.tr('DISTANCE', str2HTML('DISTÂNCIA')) + '''
+                (m)</td>
+                </tr>
+                <tr>
+                  <td>E</td>
+                  <td>N</td>
+                  <td>h</td>
+                </tr>'''
+
+            # UTM sem Az e d
+            if modelo == 2:
+                linha = '''<tr>
+              <td>Vn</td>
+              <td>En</td>
+              <td>Nn</td>
+              <td>hn</td>
+            </tr>
+            '''
+
+                cabec = '''<tr>
+                  <td colspan="4" rowspan="1">''' + self.tr('Synthetic deed description'.upper(), str2HTML('Memorial Sintético'.upper())) + '''[TITULO]</td>
+                </tr>
+                <tr>
+                  <td colspan="1" rowspan="2">''' + self.tr('VERTEX', str2HTML('VÉRTICE')) + '''</td>
+                  <td colspan="3" rowspan="1">''' + self.tr('COORDINATE', str2HTML('COORDENADA')) + '''</td>
+                </tr>
+                <tr>
+                  <td>E</td>
+                  <td>N</td>
+                  <td>h</td>
+                </tr>'''
+
+            # GEO
+            if modelo == 3:
+                linha = '''<tr>
+                  <td>Vn</td>
+                  <td>lonn</td>
+                  <td>latn</td>
+                  <td>hn</td>
+                  <td>Ln</td>
+                  <td>Az_n</td>
+                  <td>Dn</td>
+                </tr>
+                '''
+                cabec = '''<tr>
+                  <td colspan="7" rowspan="1">''' + self.tr('Synthetic deed description'.upper(), str2HTML('Memorial Sintético'.upper())) + '''[TITULO]</td>
+                </tr>
+                <tr>
+                  <td colspan="1" rowspan="2">''' + self.tr('VERTEX', str2HTML('VÉRTICE')) + '''</td>
+                  <td colspan="3" rowspan="1">''' + self.tr('COORDINATE', str2HTML('COORDENADA')) + '''</td>
+                  <td colspan="1" rowspan="2">''' + self.tr('SIDE', str2HTML('LADO')) + '''</td>
+                  <td colspan="1" rowspan="2">''' + self.tr('AZIMUTH', str2HTML('AZIMUTE')) + '''</td>
+                  <td colspan="1" rowspan="2">''' + self.tr('DISTANCE', str2HTML('DISTÂNCIA')) + '''
+                (m)</td>
+                </tr>
+                <tr>
+                  <td>longitude</td>
+                  <td>latitude</td>
+                  <td>h</td>
+                </tr>'''
+
+            # GEO sem Az e d
+            if modelo == 4:
+                linha = '''<tr>
+                  <td>Vn</td>
+                  <td>lonn</td>
+                  <td>latn</td>
+                  <td>hn</td>
+                </tr>
+                '''
+
+                cabec = '''<tr>
+                  <td colspan="4" rowspan="1">''' + self.tr('Synthetic deed description'.upper(), str2HTML('Memorial Sintético'.upper())) + '''[TITULO]</td>
+                </tr>
+                <tr>
+                  <td colspan="1" rowspan="2">''' + self.tr('VERTEX', str2HTML('VÉRTICE')) + '''</td>
+                  <td colspan="3" rowspan="1">''' + self.tr('COORDINATE', str2HTML('COORDENADA')) + '''</td>
+                (m)</td>
+                </tr>
+                <tr>
+                  <td>longitude</td>
+                  <td>latitude</td>
+                  <td>h</td>
+                </tr>'''
+
+            # UTM e GEO
+            if modelo == 5:
+                linha = '''<tr>
+                  <td>Vn</td>
+                  <td>lonn</td>
+                  <td>latn</td>
+                  <td>En</td>
+                  <td>Nn</td>
+                  <td>hn</td>
+                  <td>Ln</td>
+                  <td>Az_n</td>
+                  <td>Dn</td>
+                </tr>
+                '''
+
+                cabec = '''<tr>
+                  <td colspan="9" rowspan="1">''' + self.tr('Synthetic deed description'.upper(), str2HTML('Memorial Sintético'.upper())) + '''[TITULO]</td>
+                </tr>
+                <tr>
+                  <td colspan="1" rowspan="2">''' + self.tr('VERTEX', str2HTML('VÉRTICE')) + '''</td>
+                  <td colspan="5" rowspan="1">''' + self.tr('COORDINATE', str2HTML('COORDENADA')) + '''</td>
+                  <td colspan="1" rowspan="2">''' + self.tr('SIDE', str2HTML('LADO')) + '''</td>
+                  <td colspan="1" rowspan="2">''' + self.tr('AZIMUTH', str2HTML('AZIMUTE')) + '''</td>
+                  <td colspan="1" rowspan="2">''' + self.tr('DISTANCE', str2HTML('DISTÂNCIA')) + '''
+                (m)</td>
+                </tr>
+                <tr>
+                  <td>longitude</td>
+                  <td>latitude</td>
+                  <td>E</td>
+                  <td>N</td>
+                  <td>h</td>
+                </tr>'''
+
+            # UTM e GEO sem Az e d
+            if modelo == 6:
+                linha = '''<tr>
+                  <td>Vn</td>
+                  <td>lonn</td>
+                  <td>latn</td>
+                  <td>En</td>
+                  <td>Nn</td>
+                  <td>hn</td>
+                </tr>
+                '''
+
+                cabec = '''<tr>
+                  <td colspan="6" rowspan="1">''' + self.tr('Synthetic deed description'.upper(), str2HTML('Memorial Sintético'.upper())) + '''[TITULO]</td>
+                </tr>
+                <tr>
+                  <td colspan="1" rowspan="2">''' + self.tr('VERTEX', str2HTML('VÉRTICE')) + '''</td>
+                  <td colspan="5" rowspan="1">''' + self.tr('COORDINATE', str2HTML('COORDENADA')) + '''</td>
+                </tr>
+                <tr>
+                  <td>longitude</td>
+                  <td>latitude</td>
+                  <td>E</td>
+                  <td>N</td>
+                  <td>h</td>
+                </tr>'''
+
+            LINHAS = ''
+            if fim == -1 or fim > tam:
+                fim = tam
+            for k in range(ini-1,fim):
+                linha0 = linha
+                itens = {'Vn': pnts_UTM[k+1][2],
+                            'En': self.tr(format_num.format(pnts_UTM[k+1][0].x()), format_num.format(pnts_UTM[k+1][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                            'Nn': self.tr(format_num.format(pnts_UTM[k+1][0].y()), format_num.format(pnts_UTM[k+1][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                            'hn': self.tr(format_num.format(pnts_GEO[k+1][0].z()), format_num.format(pnts_GEO[k+1][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                            'lonn': self.tr(dd2dms(pnts_GEO[k+1][0].x(),decimal + 3), dd2dms(pnts_GEO[k+1][0].x(),decimal + 3).replace('.', ',')),
+                            'latn': self.tr(dd2dms(pnts_GEO[k+1][0].y(),decimal + 3), dd2dms(pnts_GEO[k+1][0].y(),decimal + 3).replace('.', ',')),
+                            'Ln': pnts_UTM[k+1][2] + '/' + pnts_UTM[1 if k+2 > tam else k+2][2],
+                            'Az_n': self.tr(dd2dms(Az_lista[k],1), dd2dms(Az_lista[k],1).replace('.', ',')),
+                            'Dn': self.tr(format_num.format(Dist[k]), format_num.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'))
+                            }
+                for item in itens:
+                    linha0 = linha0.replace(item, itens[item])
+                LINHAS += linha0
+            resultado = texto.replace('[CABECALHO]', cabec).replace('[LINHAS]', LINHAS).replace('[TITULO]', str2HTML(titulo.upper())).replace('[FONTSIZE]', str(fontsize))
+
 
         output = self.parameterAsFileOutput(parameters, self.HTML, context)
         arq = open(output, 'w')
