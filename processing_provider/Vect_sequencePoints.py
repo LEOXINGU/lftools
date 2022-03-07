@@ -226,7 +226,9 @@ class SequencePoints(QgsProcessingAlgorithm):
                 if pnt.x() < xmin:
                     xmin = pnt.x()
                     ind = k
-        coords = coords[ind :] + coords[0 : ind]
+
+        if primeiro != 0:
+            coords = coords[ind :] + coords[0 : ind]
 
         # Número de vértices do polígono deve ser igual ao número de pontos
         if (len(coords)) != pontos.featureCount():
