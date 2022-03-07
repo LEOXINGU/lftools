@@ -156,6 +156,7 @@ class RandomDist(QgsProcessingAlgorithm):
                 self.NPOINTS,
                 self.tr('Number of Points', 'Número de Pontos'),
                 type =0,
+                minValue = 2,
                 defaultValue = 100
                 )
             )
