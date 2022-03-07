@@ -226,8 +226,8 @@ Modos:
         if tipo == 0:
             itens  = {"lat": QVariant.Double,
                       "lon": QVariant.Double,
-                      "h": QVariant.Double,
-                      "H": QVariant.Double,
+                      "h_ellip": QVariant.Double,
+                      "H_orto": QVariant.Double,
                       "N": QVariant.Double,
                       "datetime": QVariant.String,
                       "HDOP": QVariant.Double,
@@ -239,8 +239,8 @@ Modos:
         else:
             itens  = {"lat": QVariant.Double,
                       "lon": QVariant.Double,
-                      "h": QVariant.Double,
-                      "H": QVariant.Double,
+                      "h_ellip": QVariant.Double,
+                      "H_orto": QVariant.Double,
                       "N": QVariant.Double,
                       "start_datetime": QVariant.String,
                       "end_datetime": QVariant.String,
