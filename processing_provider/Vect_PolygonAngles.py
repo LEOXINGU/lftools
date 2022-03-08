@@ -114,7 +114,6 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
             raise QgsProcessingException(self.invalidSourceError(parameters, self.POLYGONS))
 
         # OUTPUT
-        # Camada de Saída
         GeomType = QgsWkbTypes.Point
         Fields = QgsFields()
         CRS = source.sourceCrs()
