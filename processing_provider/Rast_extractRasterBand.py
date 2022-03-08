@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-extractRasterBand.py
+Rast_extractRasterBand.py
 ***************************************************************************
 *                                                                         *
 *   This program is free software; you can redistribute it and/or modify  *
