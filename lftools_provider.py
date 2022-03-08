@@ -93,6 +93,7 @@ from lftools.processing_provider.Easy_getAttributeByLocation import GetAttribute
 from lftools.processing_provider.Rast_bandArithmetic import BandArithmetic
 from lftools.processing_provider.Gnss_NMEA2layer import NMEA2layer
 from lftools.processing_provider.Reamb_ResizePhotos import ResizePhotos
+from lftools.processing_provider.Rast_rgb2hsv import RGB2HSV
 
 
 class LFToolsProvider(QgsProcessingProvider):
@@ -171,6 +172,8 @@ class LFToolsProvider(QgsProcessingProvider):
         self.addAlgorithm(BandArithmetic())
         self.addAlgorithm(NMEA2layer())
         self.addAlgorithm(ResizePhotos())
+        self.addAlgorithm(RGB2HSV())
+
 
     def id(self):
         return 'lftools'
