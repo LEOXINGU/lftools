@@ -50,6 +50,7 @@ from osgeo import osr, gdal_array, gdal #https://gdal.org/python/
 from matplotlib import path
 import numpy as np
 from lftools.geocapt.imgs import Imgs
+from lftools.geocapt.dip import Interpolar
 import os
 from qgis.PyQt.QtGui import QIcon
 
@@ -136,7 +137,7 @@ Referência:'''
             QgsProcessingParameterFeatureSource(
                 self.SAMPLES,
                 self.tr('Sample Polygons', 'Polígonos de Amostra'),
-                [QgsProcessing.TypeVectorPolygon]
+                [QgsProcessing.TypeVectorPolygon, QgsProcessing.TypeVectorPoint]
             )
         )
 
@@ -233,54 +234,63 @@ Referência:'''
         # Amostra de Raster por poligono
         feedback.pushInfo(self.tr('Taking raster samples by polygon...', 'Pegando amostras do raster por polígono...'))
         valores = []
-        for feat in layer.getFeatures():
-            geom = feat.geometry()
-            if geom.isMultipart():
-                poly = geom.asMultiPolygon()[0][0]
-            else:
-                poly = geom.asPolygon()[0]
-            caminho = []
-            lin_min = 1e8
-            col_min = 1e8
-            lin_max = -1e8
-            col_max = -1e8
-            for ponto in poly:
-                linha = (origem[1]-ponto.y())/resol_Y
-                if linha > lin_max:
-                    lin_max = linha
-                if linha < lin_min:
-                    lin_min = linha
-                coluna = (ponto.x() - origem[0])/resol_X
-                if coluna > col_max:
-                    col_max = coluna
-                if coluna < col_min:
-                    col_min = coluna
-                caminho += [(linha, coluna)]
-            p = path.Path(caminho)
-            lin_min = int(np.floor(lin_min))
-            lin_max = int(np.floor(lin_max))
-            col_min = int(np.floor(col_min))
-            col_max = int(np.floor(col_max))
-            nx, ny = (lin_max-lin_min+1, col_max-col_min+1)
-            lin = np.linspace(lin_min, lin_max, nx)
-            col = np.linspace(col_min, col_max, ny)
-            COL, LIN = np.meshgrid(col, lin)
-            recorte = np.zeros((int(nx), int(ny)), dtype=bool)
-            for x in range(int(nx)):
-                for y in range(int(ny)):
-                    pixel = (LIN[x][y]+0.5, COL[x][y]+0.5) # 0.5 eh o centro do pixel
-                    contem = p.contains_points([pixel])
-                    recorte[x][y] = contem[0]
-            # Amostras dentro do polígono
-            recorte_img = banda[lin_min:lin_max+1, col_min:col_max+1]
-            if np.shape(recorte)!=np.shape(recorte_img):
-                # chegou no fim do recorte
-                recorte = recorte[0:np.shape(recorte_img)[0], 0:np.shape(recorte_img)[1]]
-            tam = np.shape(recorte_img)
-            for x in range(tam[0]):
-                for y in range(tam[1]):
-                    if recorte[x][y]:
-                        valores += [float(recorte_img[x][y])]
+        try: #poligono if layer.wkbType() == QgsWkbTypes.PolygonGeometry:
+            for feat in layer.getFeatures():
+                geom = feat.geometry()
+                if geom.isMultipart():
+                    poly = geom.asMultiPolygon()[0][0]
+                else:
+                    poly = geom.asPolygon()[0]
+                caminho = []
+                lin_min = 1e8
+                col_min = 1e8
+                lin_max = -1e8
+                col_max = -1e8
+                for ponto in poly:
+                    linha = (origem[1]-ponto.y())/resol_Y
+                    if linha > lin_max:
+                        lin_max = linha
+                    if linha < lin_min:
+                        lin_min = linha
+                    coluna = (ponto.x() - origem[0])/resol_X
+                    if coluna > col_max:
+                        col_max = coluna
+                    if coluna < col_min:
+                        col_min = coluna
+                    caminho += [(linha, coluna)]
+                p = path.Path(caminho)
+                lin_min = int(np.floor(lin_min))
+                lin_max = int(np.floor(lin_max))
+                col_min = int(np.floor(col_min))
+                col_max = int(np.floor(col_max))
+                nx, ny = (lin_max-lin_min+1, col_max-col_min+1)
+                lin = np.linspace(lin_min, lin_max, nx)
+                col = np.linspace(col_min, col_max, ny)
+                COL, LIN = np.meshgrid(col, lin)
+                recorte = np.zeros((int(nx), int(ny)), dtype=bool)
+                for x in range(int(nx)):
+                    for y in range(int(ny)):
+                        pixel = (LIN[x][y]+0.5, COL[x][y]+0.5) # 0.5 eh o centro do pixel
+                        contem = p.contains_points([pixel])
+                        recorte[x][y] = contem[0]
+                # Amostras dentro do polígono
+                recorte_img = banda[lin_min:lin_max+1, col_min:col_max+1]
+                if np.shape(recorte)!=np.shape(recorte_img):
+                    # chegou no fim do recorte
+                    recorte = recorte[0:np.shape(recorte_img)[0], 0:np.shape(recorte_img)[1]]
+                tam = np.shape(recorte_img)
+                for x in range(tam[0]):
+                    for y in range(tam[1]):
+                        if recorte[x][y]:
+                            valores += [float(recorte_img[x][y])]
+        except: #ponto elif layer.wkbType() == QgsWkbTypes.PointGeometry:
+            for feat in layer.getFeatures():
+                geom = feat.geometry()
+                if geom.isMultipart():
+                    ponto = geom.asMultiPoint()[0]
+                else:
+                    ponto = geom.asPoint()
+                valores += [Interpolar(ponto.x(), ponto.y(), banda, origem, resol_X, resol_Y, metodo = 'nearest', nulo = 0)]
 
         # Estatísticas dos Valores
         valores = np.array(valores)
