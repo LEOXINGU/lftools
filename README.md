@@ -13,6 +13,14 @@
   <summary>Set of Tools</summary>
   <ol>
     <li>
+      <a href="#cadastre">Cadastre</a>
+      <ul>
+        <li><a href="#front-lot-lines">Front Lot Lines</a></li>
+      </ul>
+      <ul>
+        <li><a href="#geographic-numbering">Geographic Numbering</a></li>
+      </ul>
+      </li><li>
       <a href="#cartography">Cartography</a>
       <ul>
         <li><a href="#coordinates-to-utm-grid">Coordinates to UTM grid</a></li>
@@ -78,6 +86,11 @@
         <li><a href="#table-to-point-layer">Table to point layer</a></li>
       </ul>
       </li><li>
+      <a href="#gnss">GNSS</a>
+      <ul>
+        <li><a href="#nmea-to-layer">NMEA to layer</a></li>
+      </ul>
+      </li><li>
       <a href="#postgis">PostGIS</a>
       <ul>
         <li><a href="#backup-database">Backup database</a></li>
@@ -102,6 +115,9 @@
       </ul>
       </li><li>
       <a href="#raster">Raster</a>
+      <ul>
+        <li><a href="#band-arithmetic">Band Arithmetic</a></li>
+      </ul>
       <ul>
         <li><a href="#binary-thresholding">Binary Thresholding</a></li>
       </ul>
@@ -133,6 +149,9 @@
         <li><a href="#rgb-composite">RGB composite</a></li>
       </ul>
       <ul>
+        <li><a href="#rgb-to-hsv">RGB to HSV</a></li>
+      </ul>
+      <ul>
         <li><a href="#raster-data-inventory">Raster data inventory</a></li>
       </ul>
       <ul>
@@ -145,6 +164,9 @@
       <a href="#reambulation">Reambulation</a>
       <ul>
         <li><a href="#photos-with-geotag">Photos with geotag</a></li>
+      </ul>
+      <ul>
+        <li><a href="#resize-photos">Resize photos</a></li>
       </ul>
       </li><li>
       <a href="#relief">Relief</a>
@@ -231,6 +253,14 @@
         <li><a href="#transformação-para-sgl">Transformação para SGL</a></li>
       </ul>
       </li><li>
+      <a href="#cadastro">Cadastro</a>
+      <ul>
+        <li><a href="#linhas-de-testada">Linhas de Testada</a></li>
+      </ul>
+      <ul>
+        <li><a href="#numerar-geograficamente">Numerar geograficamente</a></li>
+      </ul>
+      </li><li>
       <a href="#cartografia">Cartografia</a>
       <ul>
         <li><a href="#coordenadas-para-moldura-utm">Coordenadas para moldura UTM</a></li>
@@ -293,6 +323,11 @@
         <li><a href="#pontos-aleatórios-gaussiano">Pontos aleatórios gaussiano</a></li>
       </ul>
       </li><li>
+      <a href="#gnss">GNSS</a>
+      <ul>
+        <li><a href="#nmea-para-camada">NMEA para camada</a></li>
+      </ul>
+      </li><li>
       <a href="#mão-na-roda">Mão na Roda</a>
       <ul>
         <li><a href="#medir-camadas">Medir camadas</a></li>
@@ -329,6 +364,9 @@
       </li><li>
       <a href="#raster">Raster</a>
       <ul>
+        <li><a href="#aritmética-de-bandas">Aritmética de bandas</a></li>
+      </ul>
+      <ul>
         <li><a href="#carregar-raster-pela-localização">Carregar raster pela localização</a></li>
       </ul>
       <ul>
@@ -362,6 +400,9 @@
         <li><a href="#mosaicar-raster">Mosaicar raster</a></li>
       </ul>
       <ul>
+        <li><a href="#rgb-para-hsv">RGB para HSV</a></li>
+      </ul>
+      <ul>
         <li><a href="#reescalonar-para-8-bits">Reescalonar para 8 bits</a></li>
       </ul>
       <ul>
@@ -371,6 +412,9 @@
       <a href="#reambulação">Reambulação</a>
       <ul>
         <li><a href="#fotos-com-geotag">Fotos com geotag</a></li>
+      </ul>
+      <ul>
+        <li><a href="#redimensionar-fotos">Redimensionar fotos</a></li>
       </ul>
       </li><li>
       <a href="#relevo">Relevo</a>
@@ -404,6 +448,35 @@
   </ol>
 </details>
 
+
+
+
+## Cadastre
+
+
+### Front Lot Lines
+Generates front lot lines from a polygon layer of parcels.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/cadastre_frontlotline.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Geographic Numbering
+This tool fills in a numeric attribute following a geographic criterion, for example: from north to south and west to east.</br>Note: This algorithm uses the feature centroid to sort geographically.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/cadastre_geonumbering.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 
 
@@ -655,6 +728,23 @@ Generates a <b>point layer</b> from a coordinate table, whether it comes from a 
 
 
 
+## GNSS
+
+
+### NMEA to layer
+Loads a NMEA file (protocol 0183) from GNSS receivers as a point layer.</br>Modes:</br>◼️ Kinematic - generates all tracked points with their accuracies (PDOP, HDOP and VDOP) and number of satellites.</br>◼️ Static - calculates the mean and standard deviation of the observed points, for all points or only for fixed solution points (best result).
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/gnss_nmea.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
 ## PostGIS
 
 
@@ -746,6 +836,18 @@ This tool allows you to restore a database content by importing all the backup i
 
 ## Raster
 
+
+### Band Arithmetic
+Performs an arithmetic operation on the bands of a raster. The predefined formula is used to calculate the Green Leaf Index (GLI) for a RGB raster. However you can enter your own formula.</br>Examples:</br>NDVI with RGN raster: ( b3 - b1) / (b3 + b1)</br>NDWI with RGN raster: ( b3 - b2) / (b3 + b2)</br>GLI with RGB raster: (2*b2 - b1 - b3) / (2*b2 + b1 + b3)</br>Obs.:</br>The operators supported are:  + , - , * , /
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/raster_bandArithmetic.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 ### Binary Thresholding
 Creates a binarized raster by dividing the input raster into two distinct classes from statistical data (lower and upper threshold) of area samples.</br>A class matches the values within the range of thresholds, where the value 1 (true) is returned. The other class corresponds to values outside the range, returning the value 0 (false).
@@ -867,6 +969,18 @@ Combine three image bands into one picture by display each band as either Red, G
 </table>
 </div>
 
+### RGB to HSV
+Converts the red, green, and blue values of an RGB image to Hue (H), Saturation (S), and Value (V) images.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/raster_rgb2hsv.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
 ### Raster data inventory
 Creates a vector layer with the inventory of raster files in a folder. The geometry type of the features of this layer can be Polygon (bounding box) or Point (centroid).
 <div align="center">
@@ -915,6 +1029,18 @@ Imports photos with geotag to a Point Layer.
   <tbody>
     <tr>
       <td><img src="images/tutorial/reamb_geotag.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Resize photos
+The largest width or height value of the original image is resized to the user-defined value. The short side is scaled proportionately.</br>    Note: The metadata is preserved.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/reamb_resize_photo.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1214,6 +1340,35 @@ Este algoritmo transforma coordenadas entre os seguintes sistemas de referência
 
 
 
+## Cadastro
+
+
+### Linhas de Testada
+Gera as linhas de testada das parcelas a partir dos polígonos dos lotes.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/cadastre_frontlotline.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Numerar geograficamente
+Esta ferramenta preenche um atributo numérico seguindo um critério geográfico, por exemplo de norte para sul e oeste para leste.</br>Obs.: Este algoritmo utiliza o centroide da feição para ordenar geograficamente.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/cadastre_geonumbering.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
 ## Cartografia
 
 
@@ -1450,6 +1605,23 @@ Gera pontos aleatórios no espaço 2D a partir de um ponto central (X0, Y0), des
 
 
 
+## GNSS
+
+
+### NMEA para camada
+Carrega um arquivo NMEA de rastreio GNSS (protocolo 0183) como uma camada do tipo ponto.</br>Modos:</br>◼️ Cinemático - gera todos os pontos rastreados com suas precisões (PDOP, HDOP e VDOP) e número de satélites.</br>◼️ Estático - calcula a média e desvio-padrão dos pontos observados, para todos os pontos ou somente para os pontos de solução fixa (melhor resultado).
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/gnss_nmea.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
 ## Mão na Roda
 
 
@@ -1583,6 +1755,18 @@ Esta ferramenta realiza a troca do tipo de codificação de um arquivo <b>.sql</
 ## Raster
 
 
+### Aritmética de bandas
+Executa uma operação aritmética entre as bandas de um raster. A fórmula predefinida é usado para calcular o Green Leaf Index (GLI) para um raster RGB. No entanto, você pode inserir sua própria fórmula.</br>Exemplos:</br>NDVI com raster RGN: ( b3 - b1) / (b3 + b1)</br>NDWI com raster RGN: ( b3 - b2) / (b3 + b2)</br>GLI com raster RGB: (2*b2 - b1 - b3) / (2*b2 + b1 + b3)</br>Obs.:</br>Os operadores suportados são: + , - , * , /
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/raster_bandArithmetic.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
 ### Carregar raster pela localização
 Carrega um conjunto de arquivos raster que interseptam as geometrias de uma camada vetorial de entrada.
 <div align="center">
@@ -1715,6 +1899,18 @@ Cria um mosaico: uma combinação ou mesclagem de duas ou mais imagens.
 </table>
 </div>
 
+### RGB para HSV
+Converte os valores de vermelho, verde e azul de uma imagem RGB em imagens Matiz (H), Saturação (S) e Valor (V).
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/raster_rgb2hsv.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
 ### Reescalonar para 8 bits
 Reescalona os valores dos pixels de raster com resolução radiométrica de 16 bits (ou até mesmo 8 bits ou float) para exatamente o intervalo de 0 a 255, criando um novo raster com 8 bits (byte) de resolução radiométrica.
 <div align="center">
@@ -1751,6 +1947,18 @@ Importa fotos com geotag para uma camada de pontos.
   <tbody>
     <tr>
       <td><img src="images/tutorial/reamb_geotag.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Redimensionar fotos
+O maior valor de largura ou altura da imagem original é redimensionado para o valor definido pelo usuário. O lado menor é redimensionado proporcionalmente.</br>    Obs.: Os metadados são preservados.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/reamb_resize_photo.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1861,3 +2069,5 @@ Este script preenche um determinado atributo das feições de uma camada de pont
   </tbody>
 </table>
 </div>
+
+
