@@ -193,31 +193,34 @@ Modos:
         PDOP, HDOP, VDOP = -1, -1, -1
 
         for line in arq.readlines():
-            if line[3:6] == 'GSA': # GPS DOP and active satellites
-                partes = line.split(',')
-                PDOP = float(partes[-4])
-                HDOP = float(partes[-3])
-                VDOP = float(partes[-2])
-            if line[3:6] == 'GGA': # global position system fix data
-                partes = line.split(',')
-                hora = int(partes[1][0:2])
-                min = int(partes[1][2:4])
-                seg = float(partes[1][4:10])
-                lat = (-1 if partes[3] == 'S' else 1)*( float(partes[2][0:2]) + float(partes[2][2:-1])/60)
-                lon = (-1 if partes[5] == 'W' else 1)*( float(partes[4][0:3]) + float(partes[4][3:-1])/60)
-                quality = int(partes[6])
-                num_sat = int(partes[7])
-                HDOP = float(partes[8])
-                H = float(partes[9]) - aa
-                N = float(partes[11])
-                h = N + H
-                lista += [[lat, lon, h, H, N, HDOP, VDOP, PDOP, hora, min, seg, quality, num_sat]]
+            try:
+                if line[3:6] == 'GSA': # GPS DOP and active satellites
+                    partes = line.split(',')
+                    PDOP = float(partes[-4])
+                    HDOP = float(partes[-3])
+                    VDOP = float(partes[-2])
+                if line[3:6] == 'GGA': # global position system fix data
+                    partes = line.split(',')
+                    hora = int(partes[1][0:2])
+                    min = int(partes[1][2:4])
+                    seg = float(partes[1][4:10])
+                    lat = (-1 if partes[3] == 'S' else 1)*( float(partes[2][0:2]) + float(partes[2][2:-1])/60)
+                    lon = (-1 if partes[5] == 'W' else 1)*( float(partes[4][0:3]) + float(partes[4][3:-1])/60)
+                    quality = int(partes[6])
+                    num_sat = int(partes[7])
+                    HDOP = float(partes[8])
+                    H = float(partes[9]) - aa
+                    N = float(partes[11])
+                    h = N + H
+                    lista += [[lat, lon, h, H, N, HDOP, VDOP, PDOP, hora, min, seg, quality, num_sat]]
 
-            if line[3:6] == 'ZDA': # Time & Date – UTC, Day, Month, Year and Local Time Zone
-                partes = line.split(',')
-                dia = int(partes[2])
-                mes = int(partes[3])
-                ano = int(partes[4])
+                if line[3:6] == 'ZDA': # Time & Date – UTC, Day, Month, Year and Local Time Zone
+                    partes = line.split(',')
+                    dia = int(partes[2])
+                    mes = int(partes[3])
+                    ano = int(partes[4])
+            except:
+                pass
 
         arq.close()
 
@@ -267,6 +270,8 @@ Modos:
 
         elif tipo == 1:
             valores = valores[valores[:,-2]==4] # eliminando observações de baixa qualidade
+            if len(valores) == 0:
+                raise QgsProcessingException(self.tr('There is no observation with RTK correction.', 'Não existe observação com correção RTK.'))
             # calculo de valores médios
             lat = valores[:,0].mean()
             s_lat = valores[:,0].std()
