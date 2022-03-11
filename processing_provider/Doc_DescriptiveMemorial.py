@@ -33,14 +33,13 @@ from qgis.core import (QgsProcessing,
                        QgsProcessingParameterNumber,
                        QgsProcessingParameterBoolean,
                        QgsProcessingException,
-                       QgsWkbTypes,
                        QgsProcessingParameterFileDestination,
                        QgsApplication)
 from processing.algs.qgis.QgisAlgorithm import QgisAlgorithm
 from math import atan, pi, sqrt, floor
 import math
 from lftools.geocapt.imgs import *
-from lftools.geocapt.cartography import FusoHemisf
+from lftools.geocapt.cartography import FusoHemisf, geom2PointList
 from lftools.geocapt.topogeo import str2HTML, dd2dms, azimute
 import os
 from qgis.PyQt.QtGui import QIcon
@@ -296,7 +295,8 @@ class DescriptiveMemorial(QgisAlgorithm):
         for feat in vertices.getFeatures():
                 geom = feat.geometry()
                 break
-        if geom.wkbType() != QgsWkbTypes.PointZ:
+
+        if str(geom2PointList(geom).z()) == 'nan': #PointZ
             raise QgsProcessingException(self.tr('Limit Point layer must be "PointZ" type!', 'Camada pontos limites deve ser do tipo "PointZ"!'))
 
         # Dados do levantamento
