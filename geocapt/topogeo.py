@@ -63,14 +63,20 @@ def dd2dms(dd, n_digits):
     if dd != 0:
         graus = int(floor(abs(dd)))
         resto = round(abs(dd) - graus, 10)
+        minutos = int(floor(60*resto))
+        resto = round(resto*60 - minutos, 10)
+        segundos = resto*60
+        if round(segundos,n_digits) == 60:
+            minutos += 1
+            segundos = 0
+        if minutos == 60:
+            graus += 1
+            minutos = 0
         if dd < 0:
             texto = '-' + str(graus) + '°'
         else:
             texto = str(graus) + '°'
-        minutos = int(floor(60*resto))
-        resto = round(resto*60 - minutos, 10)
         texto = texto + '{:02d}'.format(minutos) + "'"
-        segundos = resto*60
         if n_digits < 1:
             texto = texto + '{:02d}'.format(int(segundos)) + '"'
         else:
@@ -110,8 +116,7 @@ def str2HTML(texto):
 
 
 def String2NumberList (txt):
-    while ' ' in txt:
-        txt = txt.replace(' ', '')
+    txt = txt.replace(' ', '').replace('\t','').replace('\n','')
     Splited = txt.split(',')
     lista = []
     for item in Splited:
@@ -120,15 +125,13 @@ def String2NumberList (txt):
 
 
 def String2StringList(txt):
-    while ' ' in txt:
-        txt = txt.replace(' ', '')
+    txt = txt.replace(' ', '').replace('\t','').replace('\n','')
     Splited = txt.split(',')
     return Splited
 
 
 def String2CoordList (txt):
-        while ' ' in txt:
-            txt = txt.replace(' ', '')
+        txt = txt.replace(' ', '').replace('\t','').replace('\n','')
         Splited = txt.split(';')
         lista = []
         for Coords in Splited:
