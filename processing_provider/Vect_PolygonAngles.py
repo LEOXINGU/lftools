@@ -62,7 +62,7 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
         return 'vector'
 
     def tags(self):
-        return self.tr('angle,outer,inner,polygon,measure,topography,azimuth').split(',')
+        return self.tr('angle,angulo,medida,abertura,outer,inner,polygon,measure,topography,azimuth').split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/vetor.png'))
