@@ -87,7 +87,7 @@ Default values for origin coordinates can be applied to Recife / Brazil.'''
 - Geocêntrico ou ECEF <b>(X, Y, Z)</b>;
 - Topocêntrico <b>(E, N, U)</b>.
 Default: coordenadas de origem para Recife-PE, Brasil.'''
-    figure = 'images/tutorial/survey_SGL_coord.jpg'
+    figure = 'images/tutorial/survey_LTP.jpg'
 
     def shortHelpString(self):
         social_BW = Imgs().social_BW
