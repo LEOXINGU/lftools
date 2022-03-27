@@ -177,7 +177,7 @@ def geoc2enu(X, Y, Z, lon0, lat0, Xo, Yo, Zo):
 
     M = matrix(
     [
-    [  -sin(lon),                     cos(lon),                 0       ],
+    [  -sin(lon),                     cos(lon),                 0 ],
     [  -sin(lat)*cos(lon),   -sin(lat)*sin(lon),          cos(lat)],
     [   cos(lat)*cos(lon),    cos(lat)*sin(lon),          sin(lat)]
     ]
