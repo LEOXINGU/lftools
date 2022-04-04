@@ -191,11 +191,11 @@ class ResizePhotos(QgsProcessingAlgorithm):
             altura = img.size[1]
             largura = img.size[0]
             if largura > altura:
-                new_height = lado
-                new_width =int(lado/float(altura)*largura)
-            else:
+                new_height = int(lado/float(largura)*altura)
                 new_width = lado
-                new_height =int(lado/float(largura)*altura)
+            else:
+                new_width = int(lado/float(altura)*largura)
+                new_height = lado
             img = img.resize((new_width, new_height))
             if 'exif' in img.info:
                 img.save(os.path.join(pasta_out, arquivo), exif=exif)
