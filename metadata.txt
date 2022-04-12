@@ -43,7 +43,7 @@ hasProcessingProvider=yes
 # Tags are comma separated with spaces allowed
 tags=cartography, surveying, topography, raster, vector, postgis, cadastre, processing, reambulation, geotag, expressions, document, memorial, description, drones, GNSS, NMEA, ellipses, lftools, brazil
 
-homepage=https://github.com/LEOXINGU/lftools
+homepage=https://github.com/LEOXINGU/lftools/wiki/LF-Tools-for-QGIS
 category=cartography
 icon=images/lftools_logo.png
 # experimental flag
