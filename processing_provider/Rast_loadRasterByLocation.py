@@ -93,7 +93,7 @@ class LoadRasterByLocation(QgsProcessingAlgorithm):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/raster.png'))
 
     txt_en = 'Loads a set of raster files that intersect the geometries of an input vector layer.'
-    txt_pt = 'Carrega um conjunto de arquivos raster que interseptam as geometrias de uma camada vetorial de entrada.'
+    txt_pt = 'Carrega um conjunto de arquivos raster que interceptam as geometrias de uma camada vetorial de entrada.'
     figure = 'images/tutorial/raster_loadByLocation.jpg'
 
     def shortHelpString(self):
