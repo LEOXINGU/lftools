@@ -113,12 +113,10 @@ class MosaicRaster(QgsProcessingAlgorithm):
         return self.tr(self.txt_en, self.txt_pt) + footer
 
     RASTERLIST ='RASTERLIST'
-    CHANGERESOLUTION = 'CHANGERESOLUTION'
     RESOLUTION = 'RESOLUTION'
     OVERLAP = 'OVERLAP'
     NULLVALUE = 'NULLVALUE'
     RESAMPLING = 'RESAMPLING'
-    CLIP = 'CLIP'
     FRAME = 'FRAME'
     MOSAIC = 'MOSAIC'
     OPEN = 'OPEN'
@@ -134,19 +132,12 @@ class MosaicRaster(QgsProcessingAlgorithm):
         )
 
         self.addParameter(
-            QgsProcessingParameterBoolean(
-                self.CHANGERESOLUTION,
-                self.tr('Change resolution', 'Alterar resolução'),
-                defaultValue = False
-            )
-        )
-
-        self.addParameter(
             QgsProcessingParameterNumber(
                 self.RESOLUTION,
                 self.tr('New Resolution (meters)', 'Nova resolução espacial (metros)'),
                 type =1, #Double = 1 and Integer = 0
-                defaultValue = 100,
+                defaultValue = None,
+                minValue = 0.01,
                 optional = True
             )
         )
@@ -189,17 +180,9 @@ class MosaicRaster(QgsProcessingAlgorithm):
         )
 
         self.addParameter(
-            QgsProcessingParameterBoolean(
-                self.CLIP,
-                self.tr('Clip by frame', 'Cortar pela moldura'),
-                defaultValue = False
-            )
-        )
-
-        self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.FRAME,
-                self.tr('Frame', 'Moldura'),
+                self.tr('Clip by frame', 'Cortar pela moldura'),
                 [QgsProcessing.TypeVectorPolygon],
                 optional = True
             )
@@ -247,12 +230,6 @@ class MosaicRaster(QgsProcessingAlgorithm):
             context
         )
 
-        muda_res = self.parameterAsBool(
-            parameters,
-            self.CHANGERESOLUTION,
-            context
-        )
-
         resolucao = self.parameterAsDouble(
             parameters,
             self.RESOLUTION,
@@ -265,20 +242,12 @@ class MosaicRaster(QgsProcessingAlgorithm):
             context
         )
 
-        moldura = self.parameterAsDouble(
+
+        vlayer = self.parameterAsVectorLayer(
             parameters,
-            self.CLIP,
+            self.FRAME,
             context
         )
-
-        if moldura:
-            vlayer = self.parameterAsVectorLayer(
-                parameters,
-                self.FRAME,
-                context
-            )
-            if vlayer is None:
-                raise QgsProcessingException(self.invalidSourceError(parameters, self.FRAME))
 
         # output
 
@@ -355,7 +324,7 @@ class MosaicRaster(QgsProcessingAlgorithm):
         if valor_nulo == -1:
             valor_nulo = nulos[0] if nulos[0] is not None else 0
 
-        if moldura: # Pegar extensão X e Y da moldura
+        if vlayer: # Pegar extensão X e Y da moldura
             # SRC da moldura deve ser o mesmo dos raster
             if vlayer.sourceCrs() != QgsCoordinateReferenceSystem(prj):
                 raise QgsProcessingException(self.tr("The frame's CRS must be iqual to the rasters' CRS!", 'O SRC da moldura deve ser igual ao SRC dos rasters!'))
@@ -392,8 +361,8 @@ class MosaicRaster(QgsProcessingAlgorithm):
             resolucao = np.degrees(theta) # Radianos para graus
 
         # Definir n_col, n_lin e resolucao
-        if moldura:
-            if muda_res:
+        if vlayer:
+            if resolucao:
                 n_lin = round((y_max-y_min)/abs(resolucao))
                 n_col = round((x_max-x_min)/abs(resolucao))
             else:
@@ -402,7 +371,7 @@ class MosaicRaster(QgsProcessingAlgorithm):
             xres = (x_max-x_min)/n_col
             yres = -(y_max-y_min)/n_lin
         else:
-            if muda_res:
+            if resolucao:
                 n_lin = round((y_max-y_min)/abs(resolucao))
                 n_col = round((x_max-x_min)/abs(resolucao))
                 xres = resolucao
@@ -512,7 +481,7 @@ class MosaicRaster(QgsProcessingAlgorithm):
         for classe in classes:
             feedback.pushInfo((self.tr('Classifying class {}...', 'Classificando classe {}...')).format(str(classe)))
             geom = classes[classe]['geom']
-            if moldura:
+            if vlayer:
                 geom = geom.intersection(moldura_geom)
             if geom.type() == 2:
                 if geom.isMultipart():
