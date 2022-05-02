@@ -333,7 +333,7 @@ class VerticalAdjustment(QgsProcessingAlgorithm):
         ## Validar dados de entrada
         # Verificar se o Raster e os Vetores tem o mesmo SRC
         if checkCRS:
-            if not SRC == CRS:
+            if not SRC.description() == CRS.description():
                 raise QgsProcessingException(self.tr('The raster layer and the GCP layer must have the same CRS!', 'A camada raster e a camada vetorial de GCP devem ter o mesmo SRC!'))
 
         feedback.pushInfo(self.tr('Size: ', 'Tamanho: ') + str(rows) +'x' + str(cols))

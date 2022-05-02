@@ -246,7 +246,7 @@ class GetPointValue(QgsProcessingAlgorithm):
         yres = abs(yres)
 
         # Verificar SRC
-        if not SRC == CRS:
+        if not SRC.description() == CRS.description():
             raise QgsProcessingException(self.tr('The raster layer and the homologous point vector layer must have the same CRS!', 'A camada raster e a camada vetorial de pontos homólogos devem ter o mesmo SRC!'))
 
         # Calcular valor interpolado para cada ponto

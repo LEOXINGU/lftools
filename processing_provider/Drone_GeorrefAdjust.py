@@ -333,7 +333,7 @@ class GeorrefAdjust(QgsProcessingAlgorithm):
         ## Validar dados de entrada
         # Verificar se o Raster e os Vetores tem o mesmo SRC
         if checkCRS:
-            if not SRC == CRS:
+            if not SRC.description() == CRS.description():
                 raise QgsProcessingException(self.tr('The raster layer and the homologous point vector layer must have the same CRS!', 'A camada raster e a camada vetorial de pontos homólogos devem ter o mesmo SRC!'))
 
 

@@ -218,7 +218,7 @@ class SpotElevation(QgsProcessingAlgorithm):
         image=None # Close image
 
         # Verificar se o Raster e os Vetores tem o mesmo SRC
-        if not SRC == CRS:
+        if not SRC.description() == CRS.description():
             raise QgsProcessingException(self.tr('The input raster and vector layers must have the same CRS!', 'As camadas raster e vetorial de entrada devem ter o mesmo SRC!'))
 
         # Verificar todas as feicoes e armazenar aquelas que sao anel linear
