@@ -92,6 +92,8 @@ def dms2dd(txt):
     if (txt[-1]).upper() in ('W','O','S'):
         if txt[0] != '-':
             txt = '-' + txt[:-1]
+        else:
+            txt = txt[:-1]
     elif (txt[-1]).upper() in ('E','L','N'):
         txt = txt[:-1]
     for letter in txt:
