@@ -263,7 +263,32 @@ class DescriptiveMemorial(QgisAlgorithm):
 
         meses = {1: 'janeiro', 2:'fevereiro', 3: 'março', 4:'abril', 5:'maio', 6:'junho', 7:'julho', 8:'agosto', 9:'setembro', 10:'outubro', 11:'novembro', 12:'dezembro'}
 
-        # VALIDAÇÃO DOS DADOS DE ENTRADA!
+        # Validando dados de entrada
+        # ponto_limite
+        ordem_list = list(range(1,vertices.featureCount()+1))
+        ordem_comp = []
+        for feat in vertices.getFeatures():
+            try:
+                ordem_comp += [feat['sequence']]
+                codigo_item = feat['code']
+            except:
+                raise QgsProcessingException(self.tr('Check that your layer "limit_point_p" has the correct field names for the TopoGeo model! More information: https://bit.ly/3FDNQGC', 'Verifique se sua camada "Ponto Limite" está com os nomes dos campos corretos para o modelo TopoGeo! Mais informações: https://geoone.com.br/ebook_gratis/'))
+            if not codigo_item or codigo_item in ['', ' ']:
+                raise QgsProcessingException(self.tr('The code attribute must be filled in for all features!', 'O atributo código deve ser preenchido para todas as feições!'))
+        ordem_comp.sort()
+        if ordem_list != ordem_comp:
+            raise QgsProcessingException(self.tr('The point sequence field must be filled in correctly!', 'O campo de sequência dos pontos deve preenchido corretamente!'))
+        # elemento_confrontante
+        for feat in limites.getFeatures():
+            try:
+                att1 = feat['start_pnt_descr']
+                att2 = feat['borderer']
+            except:
+                raise QgsProcessingException(self.tr('Check that your layer "boundary_element_l" has the correct field names for the TopoGeo model! More information: https://bit.ly/3FDNQGC', 'Verifique se sua camada "Elemento confrontante" está com os nomes dos campos corretos para o modelo TopoGeo! Mais informações: https://geoone.com.br/ebook_gratis/'))
+            if not att1 or att1 in ['', ' ']:
+                raise QgsProcessingException(self.tr('The attribute of the starting point description must be filled in for all features!', 'O atributo de descrição do ponto inicial deve ser preenchido para todas as feições!'))
+            if not att2 or att2 in ['', ' ']:
+                raise QgsProcessingException(self.tr("The confrontant's name must be filled in for all features!", 'O nome do confrontante deve ser preenchido para todas as feições!'))
 
         # Pegando informações dos confrontantes (limites)
         ListaDescr = []
@@ -282,6 +307,7 @@ class DescriptiveMemorial(QgisAlgorithm):
 
         # Pegando o SRC do Projeto
         SRC = QgsProject.instance().crs().description()
+
         # Verificando o SRC
         if QgsProject.instance().crs().isGeographic():
             raise QgsProcessingException(self.tr('The Project CRS must be projected!', 'O SRC do Projeto deve ser Projetado!'))
@@ -313,27 +339,7 @@ class DescriptiveMemorial(QgisAlgorithm):
             if SRC.split(' ')[-1] != str(fuso)+hemisf :
                 raise QgsProcessingException(self.tr('Warning: Make sure your projection is correct!'.upper(), 'Aviso: Verifique se sua projeção está correta!'.upper()))
 
-        # Validando dados de entrada
-        # ponto_limite
-        ordem_list = list(range(1,vertices.featureCount()+1))
-        ordem_comp = []
-        for feat in vertices.getFeatures():
-            ordem_comp += [feat['sequence']]
-            codigo_item = feat['code']
-            if not codigo_item or codigo_item in ['', ' ']:
-                raise QgsProcessingException(self.tr('The code attribute must be filled in for all features!', 'O atributo código deve ser preenchido para todas as feições!'))
-        ordem_comp.sort()
-        if ordem_list != ordem_comp:
-            raise QgsProcessingException(self.tr('The point sequence field must be filled in correctly!', 'O campo de sequência dos pontos deve preenchido corretamente!'))
-        # elemento_confrontante
-        for feat in limites.getFeatures():
-            att1 = feat['start_pnt_descr']
-            if not att1 or att1 in ['', ' ']:
-                raise QgsProcessingException(self.tr('The attribute of the starting point description must be filled in for all features!', 'O atributo de descrição do ponto inicial deve ser preenchido para todas as feições!'))
-            att2 = feat['borderer']
-            if not att2 or att2 in ['', ' ']:
-                raise QgsProcessingException(self.tr("The confrontant's name must be filled in for all features!", 'O nome do confrontante deve ser preenchido para todas as feições!'))
-        # area_imovel
+        # Área do imóvel
         Fields = area.fields()
         fieldnames = [field.name() for field in Fields]
         for fieldname in fieldnames:
@@ -517,17 +523,19 @@ class DescriptiveMemorial(QgisAlgorithm):
     </html>
     '''
         # Inserindo dados iniciais do levantamento
-        itens = {'[IMOVEL]': str2HTML(feat1['property']),
-                '[PROPRIETARIO]': str2HTML(feat1['owner']),
-                '[UF]': feat1['state'],
-                '[MATRICULAS]': str2HTML(feat1['transcript']),
-                '[AREA]': self.tr(format_num.format(feat1['area']), format_num.format(feat1['area']).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                '[SRC]': self.tr(SRC, SRC.replace('zone', 'fuso')),
-                '[REGISTRO]': str2HTML(feat1['registry']),
-                '[MUNICIPIO]': str2HTML(feat1['county']),
-                '[PERIMETRO]': self.tr(format_num.format(feat1['perimeter']), format_num.format(feat1['perimeter']).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                    }
-
+        try:
+            itens = {'[IMOVEL]': str2HTML(feat1['property']),
+                    '[PROPRIETARIO]': str2HTML(feat1['owner']),
+                    '[UF]': feat1['state'],
+                    '[MATRICULAS]': str2HTML(feat1['transcript']),
+                    '[AREA]': self.tr(format_num.format(feat1['area']), format_num.format(feat1['area']).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                    '[SRC]': self.tr(SRC, SRC.replace('zone', 'fuso')),
+                    '[REGISTRO]': str2HTML(feat1['registry']),
+                    '[MUNICIPIO]': str2HTML(feat1['county']),
+                    '[PERIMETRO]': self.tr(format_num.format(feat1['perimeter']), format_num.format(feat1['perimeter']).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                        }
+        except:
+            raise QgsProcessingException(self.tr('Check that your layer "property_area_a" has the correct field names for the TopoGeo model! More information: https://bit.ly/3FDNQGC', 'Verifique se sua camada "Área do imóvel" está com os nomes dos campos corretos para o modelo TopoGeo! Mais informações: https://geoone.com.br/ebook_gratis/'))
         for item in itens:
                 texto_inicial = texto_inicial.replace(item, itens[item])
 
