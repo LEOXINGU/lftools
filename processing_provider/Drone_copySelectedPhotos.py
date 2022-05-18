@@ -127,7 +127,7 @@ class CopySelectedPhotos(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFile(
                 self.FOLDER,
-                self.tr('Folder with raster files', 'Pasta com arquivos raster'),
+                self.tr('Destination folder for photos', 'Pasta de destino para fotografias'),
                 behavior=QgsProcessingParameterFile.Folder,
                 defaultValue=None
             )
