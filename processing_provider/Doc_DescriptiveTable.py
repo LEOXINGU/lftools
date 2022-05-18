@@ -271,13 +271,16 @@ class DescriptiveTable(QgsProcessingAlgorithm):
         ordem_list = list(range(1,vertices.featureCount()+1))
         ordem_comp = []
         for feat in vertices.getFeatures():
-            ordem_comp += [feat['sequence']]
-            codigo_item = feat['code']
+            try:
+                ordem_comp += [feat['sequence']]
+                codigo_item = feat['code']
+            except:
+                raise QgsProcessingException(self.tr('Check that your layer "limit_point_p" has the correct field names for the TopoGeo model! More information: https://bit.ly/3FDNQGC', 'Verifique se sua camada "Ponto Limite" está com os nomes dos campos corretos para o modelo TopoGeo! Mais informações: https://geoone.com.br/ebook_gratis/'))
             if not codigo_item or codigo_item in ['', ' ']:
                 raise QgsProcessingException(self.tr('The code attribute must be filled in for all features!', 'O atributo código deve ser preenchido para todas as feições!'))
         ordem_comp.sort()
         if ordem_list != ordem_comp:
-            raise QgsProcessingException(self.tr('The point sequence field must be filled in correctly!', 'O campo de sequência dos pontos deve ser preenchido corretamente!'))
+            raise QgsProcessingException(self.tr('The point sequence field must be filled in correctly!', 'O campo de sequência dos pontos deve preenchido corretamente!'))
 
 
         # Transformacao de Coordenadas Geograficas para Projetadas no sistema UTM
