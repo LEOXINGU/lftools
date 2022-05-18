@@ -256,17 +256,22 @@ class AreaPerimterReport(QgsProcessingAlgorithm):
                 raise QgsProcessingException(self.tr('Warning: Make sure your projection is correct!'.upper(), 'Aviso: Verifique se sua projeção está correta!'.upper()))
 
         # Validando dados de entrada
+
         # ponto_limite
         ordem_list = list(range(1,vertices.featureCount()+1))
         ordem_comp = []
         for feat in vertices.getFeatures():
-            ordem_comp += [feat['sequence']]
-            codigo_item = feat['code']
+            try:
+                ordem_comp += [feat['sequence']]
+                codigo_item = feat['code']
+            except:
+                raise QgsProcessingException(self.tr('Check that your layer "limit_point_p" has the correct field names for the TopoGeo model! More information: https://bit.ly/3FDNQGC', 'Verifique se sua camada "Ponto Limite" está com os nomes dos campos corretos para o modelo TopoGeo! Mais informações: https://geoone.com.br/ebook_gratis/'))
             if not codigo_item or codigo_item in ['', ' ']:
                 raise QgsProcessingException(self.tr('The code attribute must be filled in for all features!', 'O atributo código deve ser preenchido para todas as feições!'))
         ordem_comp.sort()
         if ordem_list != ordem_comp:
             raise QgsProcessingException(self.tr('The point sequence field must be filled in correctly!', 'O campo de sequência dos pontos deve preenchido corretamente!'))
+
         # area_imovel
         Fields = area.fields()
         fieldnames = [field.name() for field in Fields]
@@ -344,21 +349,24 @@ SIRGAS2000<br>
 '''
 
         # Inserindo dados iniciais do levantamento
-        itens = {'[IMOVEL]': str2HTML(feat1['property']),
-                    '[UF]': feat1['state'],
-                    '[UTM]': (SRC.split('/')[-1]).replace('zone', 'fuso'),
-                    '[MUNICIPIO]': str2HTML(feat1['county']),
-                    }
-        for item in itens:
-                INICIO = INICIO.replace(item, itens[item])
+        try:
+            itens = {'[IMOVEL]': str2HTML(feat1['property']),
+                        '[UF]': feat1['state'],
+                        '[UTM]': (SRC.split('/')[-1]).replace('zone', 'fuso'),
+                        '[MUNICIPIO]': str2HTML(feat1['county']),
+                        }
+            for item in itens:
+                    INICIO = INICIO.replace(item, itens[item])
 
-        # Inserindo dados finais do levantamento
-        itens = {   '[AREA]': self.tr(format_num.format(feat1['area']), format_num.format(feat1['area']).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                    '[AREA_HA]': self.tr(format_num.format(feat1['area']/1e4), format_num.format(feat1['area']/1e4).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                    '[PERIMETRO]': self.tr(format_num.format(feat1['perimeter']), format_num.format(feat1['perimeter']).replace(',', 'X').replace('.', ',').replace('X', '.'))
-                    }
-        for item in itens:
-                FIM = FIM.replace(item, itens[item])
+            # Inserindo dados finais do levantamento
+            itens = {   '[AREA]': self.tr(format_num.format(feat1['area']), format_num.format(feat1['area']).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                        '[AREA_HA]': self.tr(format_num.format(feat1['area']/1e4), format_num.format(feat1['area']/1e4).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                        '[PERIMETRO]': self.tr(format_num.format(feat1['perimeter']), format_num.format(feat1['perimeter']).replace(',', 'X').replace('.', ',').replace('X', '.'))
+                        }
+            for item in itens:
+                    FIM = FIM.replace(item, itens[item])
+        except:
+            raise QgsProcessingException(self.tr('Check that your layer "property_area_a" has the correct field names for the TopoGeo model! More information: https://bit.ly/3FDNQGC', 'Verifique se sua camada "Área do imóvel" está com os nomes dos campos corretos para o modelo TopoGeo! Mais informações: https://geoone.com.br/ebook_gratis/'))
 
         LINHAS = INICIO
 
