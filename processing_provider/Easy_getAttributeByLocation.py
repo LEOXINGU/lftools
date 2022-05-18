@@ -19,6 +19,7 @@ from PyQt5.QtCore import QCoreApplication, QVariant
 from qgis.core import *
 import processing
 from lftools.geocapt.imgs import Imgs
+from lftools.geocapt.cartography import reprojectPoints
 import os
 from qgis.PyQt.QtGui import QIcon
 
@@ -188,12 +189,27 @@ Os campos de origem e de destino devem ser indicadas para preenchimento dos atri
         feedback.pushInfo(self.tr('Source field: {}'.format(campo_lote[0]), 'Campo de origem: {}'.format(campo_lote[0])))
         feedback.pushInfo(self.tr('Destination field: {}'.format(campo_edif[0]), 'Campo de destino: {}\n'.format(campo_edif[0])))
 
+        # Verificando SRC das camadas
+        mesmoSRC = True
+        if lotes.crs() != edif.crs():
+            mesmoSRC = False
+            if topologia == 0:
+                coordinateTransformer = QgsCoordinateTransform()
+                coordinateTransformer.setDestinationCrs(lotes.crs())
+                coordinateTransformer.setSourceCrs(edif.crs())
+            else:
+                coordinateTransformer = QgsCoordinateTransform()
+                coordinateTransformer.setDestinationCrs(edif.crs())
+                coordinateTransformer.setSourceCrs(lotes.crs())
+
         produto = edif.featureCount()*lotes.featureCount()
         total = 100.0 /produto if produto else 0
         cont = 0
         if topologia == 0:
             for feat1 in edif.getFeatures():
                 centroide = feat1.geometry().centroid()
+                if not mesmoSRC:
+                    centroide = reprojectPoints(centroide, coordinateTransformer)
                 for feat2 in lotes.getFeatures():
                     if centroide.intersects(feat2.geometry()):
                         valor = feat2[att]
@@ -206,6 +222,8 @@ Os campos de origem e de destino devem ser indicadas para preenchimento dos atri
         elif topologia == 1:
             for feat1 in lotes.getFeatures():
                 centroide = feat1.geometry().centroid()
+                if not mesmoSRC:
+                    centroide = reprojectPoints(centroide, coordinateTransformer)
                 valor = feat1[att]
                 for feat2 in edif.getFeatures():
                     if centroide.intersects(feat2.geometry()):
