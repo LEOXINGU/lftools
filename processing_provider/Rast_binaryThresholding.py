@@ -51,6 +51,7 @@ from matplotlib import path
 import numpy as np
 from lftools.geocapt.imgs import Imgs
 from lftools.geocapt.dip import Interpolar
+from lftools.geocapt.cartography import reprojectPoints
 import os
 from qgis.PyQt.QtGui import QIcon
 
@@ -92,9 +93,9 @@ class BinaryThresholding(QgsProcessingAlgorithm):
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/raster.png'))
 
-    txt_en = '''Creates a binarized raster by dividing the input raster into two distinct classes from statistical data (lower and upper threshold) of area samples.
+    txt_en = '''Creates a binarized raster, dividing the input raster into two distinct classes from statistical data (lower and upper threshold) from area or point samples. Optionally, minimum and maximum threshold values can also be set.
 A class matches the values within the range of thresholds, where the value 1 (true) is returned. The other class corresponds to values outside the range, returning the value 0 (false).'''
-    txt_pt = '''Cria um raster binarizado, dividindo o raster de entrada em duas classes distintas a partir de dados estatísticos (limiar inferior e superior) de amostras de áreas.
+    txt_pt = '''Cria um raster binarizado, dividindo o raster de entrada em duas classes distintas a partir de dados estatísticos (limiar inferior e superior) de amostras de áreas ou pontuais. Opcionalmente, os valores de limiar mínimo e máximo também podem ser definidos.
 Uma classe irá corresponder aos valores compreendidos dentro do intervalo dos limiares, sendo retornado o valor 1 (verdadeiro). Já a outra classe correpondem aos valores fora do intervalo, sendo retornado o valor 0 (falso).'''
     figure = 'images/tutorial/raster_thresholding.jpg'
 
@@ -121,6 +122,7 @@ Referência:'''
     RasterOUT = 'RasterOUT'
     SAMPLES = 'SAMPLES'
     METHOD = 'METHOD'
+    VALUES = 'VALUES'
     OPEN = 'OPEN'
 
     def initAlgorithm(self, config=None):
@@ -137,7 +139,8 @@ Referência:'''
             QgsProcessingParameterFeatureSource(
                 self.SAMPLES,
                 self.tr('Sample Polygons', 'Polígonos de Amostra'),
-                [QgsProcessing.TypeVectorPolygon, QgsProcessing.TypeVectorPoint]
+                [QgsProcessing.TypeVectorPolygon, QgsProcessing.TypeVectorPoint],
+                optional = True
             )
         )
 
@@ -152,6 +155,14 @@ Referência:'''
                 self.tr('Calculation of thresholds', 'Cálculo dos limiares'),
 				options = opcoes,
                 defaultValue= 3
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterString(
+                self.VALUES,
+                self.tr('Threshold values (minimum and maximum) separated by comma', 'Valores de limiares (mínimo e máximo) separadados por vírgula'),
+                optional = True
             )
         )
 
@@ -183,13 +194,36 @@ Referência:'''
             raise QgsProcessingException(self.invalidSourceError(parameters, self.RasterIN))
         RasterIN = RasterIN.dataProvider().dataSourceUri()
 
+        minmax = self.parameterAsString(
+            parameters,
+            self.VALUES,
+            context
+        )
+
         layer = self.parameterAsSource(
             parameters,
             self.SAMPLES,
             context
         )
-        if layer is None:
+
+        if layer is None and not minmax:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.SAMPLES))
+
+        if not layer:
+            try:
+                minmax = minmax.replace(' ','')
+                a, b = minmax.split(',')
+                a, b = float(a), float(b)
+                if a < b:
+                    lim_min = a
+                    lim_max = b
+                elif a > b:
+                    lim_min = b
+                    lim_max = a
+                else:
+                    raise QgsProcessingException(self.tr('The maximum and minimum thresholds cannot be the same!', 'O limiares máximo e mínimo não podem ser iguais!'))
+            except:
+                raise QgsProcessingException(self.tr('Check that the minimum and maximum threshold values are correct!', 'Verifique se os valores de limiares mínimo e máximo estão corretos!'))
 
         metodo = self.parameterAsEnum(
             parameters,
@@ -215,10 +249,13 @@ Referência:'''
         image = gdal.Open(RasterIN)
         prj=image.GetProjection()
         geotransform = image.GetGeoTransform()
+        SRC_rater = QgsCoordinateReferenceSystem(prj)
         num_bands = image.RasterCount
         if num_bands != 1:
             raise QgsProcessingException(self.tr('The raster layer must have only 1 band!', 'A camada raster deve ter apenas 1 banda!'))
         banda = image.GetRasterBand(1).ReadAsArray()
+        Pixel_Nulo = image.GetRasterBand(1).GetNoDataValue()
+        Pixel_Nulo = Pixel_Nulo if Pixel_Nulo else 0
         cols = image.RasterXSize
         rows = image.RasterYSize
         # Origem e resolucao da imagem
@@ -231,88 +268,101 @@ Referência:'''
         bbox = [ulx, lrx, lry, uly]
         image=None # Fechar imagem
 
-        # Amostra de Raster por poligono
-        feedback.pushInfo(self.tr('Taking raster samples by polygon...', 'Pegando amostras do raster por polígono...'))
-        valores = []
-        try: #poligono if layer.wkbType() == QgsWkbTypes.PolygonGeometry:
-            for feat in layer.getFeatures():
-                geom = feat.geometry()
-                if geom.isMultipart():
-                    poly = geom.asMultiPolygon()[0][0]
-                else:
-                    poly = geom.asPolygon()[0]
-                caminho = []
-                lin_min = 1e8
-                col_min = 1e8
-                lin_max = -1e8
-                col_max = -1e8
-                for ponto in poly:
-                    linha = (origem[1]-ponto.y())/resol_Y
-                    if linha > lin_max:
-                        lin_max = linha
-                    if linha < lin_min:
-                        lin_min = linha
-                    coluna = (ponto.x() - origem[0])/resol_X
-                    if coluna > col_max:
-                        col_max = coluna
-                    if coluna < col_min:
-                        col_min = coluna
-                    caminho += [(linha, coluna)]
-                p = path.Path(caminho)
-                lin_min = int(np.floor(lin_min))
-                lin_max = int(np.floor(lin_max))
-                col_min = int(np.floor(col_min))
-                col_max = int(np.floor(col_max))
-                nx, ny = (lin_max-lin_min+1, col_max-col_min+1)
-                lin = np.linspace(lin_min, lin_max, nx)
-                col = np.linspace(col_min, col_max, ny)
-                COL, LIN = np.meshgrid(col, lin)
-                recorte = np.zeros((int(nx), int(ny)), dtype=bool)
-                for x in range(int(nx)):
-                    for y in range(int(ny)):
-                        pixel = (LIN[x][y]+0.5, COL[x][y]+0.5) # 0.5 eh o centro do pixel
-                        contem = p.contains_points([pixel])
-                        recorte[x][y] = contem[0]
-                # Amostras dentro do polígono
-                recorte_img = banda[lin_min:lin_max+1, col_min:col_max+1]
-                if np.shape(recorte)!=np.shape(recorte_img):
-                    # chegou no fim do recorte
-                    recorte = recorte[0:np.shape(recorte_img)[0], 0:np.shape(recorte_img)[1]]
-                tam = np.shape(recorte_img)
-                for x in range(tam[0]):
-                    for y in range(tam[1]):
-                        if recorte[x][y]:
-                            valores += [float(recorte_img[x][y])]
-        except: #ponto elif layer.wkbType() == QgsWkbTypes.PointGeometry:
-            for feat in layer.getFeatures():
-                geom = feat.geometry()
-                if geom.isMultipart():
-                    ponto = geom.asMultiPoint()[0]
-                else:
-                    ponto = geom.asPoint()
-                valores += [Interpolar(ponto.x(), ponto.y(), banda, origem, resol_X, resol_Y, metodo = 'nearest', nulo = 0)]
 
-        # Estatísticas dos Valores
-        valores = np.array(valores)
-        media = np.mean(valores)
-        desvioPad = np.std(valores)
+        if not minmax:
+            # Amostra de Raster por poligono
+            feedback.pushInfo(self.tr('Taking raster samples by polygon...', 'Pegando amostras do raster por polígono...'))
+            valores = []
 
-        if metodo == 0:
-            lim_min = np.min(valores)
-            lim_max = np.max(valores)
-        elif metodo == 1:
-            lim_min = np.quantile(valores,0.02)
-            lim_max = np.quantile(valores,0.98)
-        elif metodo == 2:
-            lim_min = media - 2*desvioPad
-            lim_max = media + 2*desvioPad
-        elif metodo == 3:
-            lim_min = media - 3*desvioPad
-            lim_max = media + 3*desvioPad
+            # Verificando SRC das camadas
+            mesmoSRC = True
+            if SRC_rater != layer.sourceCrs():
+                mesmoSRC = False
+                coordinateTransformer = QgsCoordinateTransform()
+                coordinateTransformer.setDestinationCrs(SRC_rater)
+                coordinateTransformer.setSourceCrs(layer.sourceCrs())
 
-        feedback.pushInfo(self.tr('Total pixels in samples: {}'.format(len(valores)), 'Total de pixels nas amostras: {}'.format(len(valores))))
-        feedback.pushInfo(self.tr('Average of sample: {}'.format(media), 'Média das amostras: {}'.format(media)))
-        feedback.pushInfo(self.tr('Standard deviation of samples: {}'.format(desvioPad), 'Desvio-padrão das amostras: {}'.format(desvioPad)))
+            try: #poligono if layer.wkbType() == QgsWkbTypes.PolygonGeometry:
+                for feat in layer.getFeatures():
+                    geom = feat.geometry() if mesmoSRC else reprojectPoints(feat.geometry(), coordinateTransformer)
+                    if geom.isMultipart():
+                        poly = geom.asMultiPolygon()[0][0]
+                    else:
+                        poly = geom.asPolygon()[0]
+                    caminho = []
+                    lin_min = 1e8
+                    col_min = 1e8
+                    lin_max = -1e8
+                    col_max = -1e8
+                    for ponto in poly:
+                        linha = (origem[1]-ponto.y())/resol_Y
+                        if linha > lin_max:
+                            lin_max = linha
+                        if linha < lin_min:
+                            lin_min = linha
+                        coluna = (ponto.x() - origem[0])/resol_X
+                        if coluna > col_max:
+                            col_max = coluna
+                        if coluna < col_min:
+                            col_min = coluna
+                        caminho += [(linha, coluna)]
+                    p = path.Path(caminho)
+                    lin_min = int(np.floor(lin_min))
+                    lin_max = int(np.floor(lin_max))
+                    col_min = int(np.floor(col_min))
+                    col_max = int(np.floor(col_max))
+                    nx, ny = (lin_max-lin_min+1, col_max-col_min+1)
+                    lin = np.linspace(lin_min, lin_max, nx)
+                    col = np.linspace(col_min, col_max, ny)
+                    COL, LIN = np.meshgrid(col, lin)
+                    recorte = np.zeros((int(nx), int(ny)), dtype=bool)
+                    for x in range(int(nx)):
+                        for y in range(int(ny)):
+                            pixel = (LIN[x][y]+0.5, COL[x][y]+0.5) # 0.5 eh o centro do pixel
+                            contem = p.contains_points([pixel])
+                            recorte[x][y] = contem[0]
+                    # Amostras dentro do polígono
+                    recorte_img = banda[lin_min:lin_max+1, col_min:col_max+1]
+                    if np.shape(recorte)!=np.shape(recorte_img):
+                        # chegou no fim do recorte
+                        recorte = recorte[0:np.shape(recorte_img)[0], 0:np.shape(recorte_img)[1]]
+                    tam = np.shape(recorte_img)
+                    for x in range(tam[0]):
+                        for y in range(tam[1]):
+                            if recorte[x][y]:
+                                valores += [float(recorte_img[x][y])]
+            except: #ponto elif layer.wkbType() == QgsWkbTypes.PointGeometry:
+                for feat in layer.getFeatures():
+                    geom = feat.geometry() if mesmoSRC else reprojectPoints(feat.geometry(), coordinateTransformer)
+                    if geom.isMultipart():
+                        ponto = geom.asMultiPoint()[0]
+                    else:
+                        ponto = geom.asPoint()
+                    valorPixel = Interpolar(ponto.x(), ponto.y(), banda, origem, resol_X, resol_Y, metodo = 'nearest', nulo = Pixel_Nulo)
+                    valores += [valorPixel]
+
+            # Estatísticas dos Valores
+            valores = np.array(valores)
+            media = np.mean(valores)
+            desvioPad = np.std(valores)
+
+            if metodo == 0:
+                lim_min = np.min(valores)
+                lim_max = np.max(valores)
+            elif metodo == 1:
+                lim_min = np.quantile(valores,0.02)
+                lim_max = np.quantile(valores,0.98)
+            elif metodo == 2:
+                lim_min = media - 2*desvioPad
+                lim_max = media + 2*desvioPad
+            elif metodo == 3:
+                lim_min = media - 3*desvioPad
+                lim_max = media + 3*desvioPad
+
+            feedback.pushInfo(self.tr('Total pixels in samples: {}'.format(len(valores)), 'Total de pixels nas amostras: {}'.format(len(valores))))
+            feedback.pushInfo(self.tr('Average of sample: {}'.format(media), 'Média das amostras: {}'.format(media)))
+            feedback.pushInfo(self.tr('Standard deviation of samples: {}'.format(desvioPad), 'Desvio-padrão das amostras: {}'.format(desvioPad)))
+
         feedback.pushInfo(self.tr('Lower threshold: {}'.format(lim_min), 'Limiar inferior: {}'.format(lim_min)))
         feedback.pushInfo(self.tr('Upper threshold: {}'.format(lim_max), 'Limiar superior: {}'.format(lim_max)))
 
