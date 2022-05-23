@@ -24,6 +24,7 @@ from qgis.core import (QgsProcessing,
                        QgsFeature,
                        QgsPointXY,
                        QgsGeometry,
+                       QgsProject,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
                        QgsProcessingParameterString,
@@ -263,6 +264,15 @@ class SupervisedClassification(QgsProcessingAlgorithm):
         bbox = [ulx, lrx, lry, uly]
         image=None # Fechar imagem
 
+        # Transformação de coordenadas
+        crsSrc = layer.sourceCrs()
+        crsDest = QgsCoordinateReferenceSystem(prj)
+        if crsSrc != crsDest:
+            transf_SRC = True
+            coordTransf = QgsCoordinateTransform(crsSrc, crsDest, QgsProject.instance())
+        else:
+            transf_SRC = False
+
         # Amostra de Raster por poligono
         dic = {}
         for feat in layer.getFeatures():
@@ -273,6 +283,8 @@ class SupervisedClassification(QgsProcessingAlgorithm):
                     bands_dic[k+1] = []
                 dic[code] = {'valores': bands_dic}
             geom = feat.geometry()
+            if transf_SRC:
+                geom.transform(coordTransf)
             if geom.isMultipart():
                 poly = geom.asMultiPolygon()[0][0]
             else:
@@ -342,7 +354,10 @@ class SupervisedClassification(QgsProcessingAlgorithm):
             dic[code]['desvpad'] = desvpad
             dic[code]['mvc'] = MVC
             dic[code]['det'] = np.linalg.det(MVC*fator**2)
-            dic[code]['MVC_inv'] = np.linalg.inv(MVC)
+            if dic[code]['det'] == 0 and metodo == 3:
+                raise QgsProcessingException(self.tr('Covariance matrix is singular. Choose another method!', 'Matriz Covariância é singular. Escolha outro método!'))
+            elif dic[code]['det'] != 0:
+                dic[code]['MVC_inv'] = np.linalg.inv(MVC)
             ordem += [[np.trace(MVC), code]]
         ordem = sorted(ordem, reverse = True)
 
@@ -367,6 +382,8 @@ class SupervisedClassification(QgsProcessingAlgorithm):
                     if classe:
                         img_class[lin,col] = classe
                 feedback.setProgress(int((lin+1) * total))
+                if feedback.isCanceled():
+                    break
 
         elif metodo == 1: # Elipsoide
             for lin in range(rows):
@@ -386,6 +403,8 @@ class SupervisedClassification(QgsProcessingAlgorithm):
                     if classe:
                         img_class[lin,col] = classe
                 feedback.setProgress(int((lin+1) * total))
+                if feedback.isCanceled():
+                    break
 
         elif metodo == 2: # Distância Euclidiana
             for lin in range(rows):
@@ -404,6 +423,8 @@ class SupervisedClassification(QgsProcessingAlgorithm):
                             classe = code
                     img_class[lin,col] = classe
                 feedback.setProgress(int((lin+1) * total))
+                if feedback.isCanceled():
+                    break
 
         elif metodo == 3: # Distância de Mahalanobis
             for lin in range(rows):
@@ -423,6 +444,8 @@ class SupervisedClassification(QgsProcessingAlgorithm):
                             classe = code
                     img_class[lin,col] = classe
                 feedback.setProgress(int((lin+1) * total))
+                if feedback.isCanceled():
+                    break
 
 
         # Salvando Resultado
