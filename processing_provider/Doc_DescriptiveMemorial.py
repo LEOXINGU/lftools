@@ -497,7 +497,7 @@ class DescriptiveMemorial(QgisAlgorithm):
         texto_var2 = self.tr('the vertex ', str2HTML('o vértice ')) + '''<span> </span><b>[Vn]</b>, '''+ self.tr('with coordinates ', 'de coordenadas ') + '''[Coordn]; '''+ self.tr('[Az_n] and [Dist_n]m up to ', str2HTML('[Az_n] e [Dist_n]m até '))
 
         texto_final = self.tr('the vertex ', str2HTML('o vértice ')) + '''<b>[P-01]</b>, '''+ self.tr('with coordinates', 'de coordenadas') + ''' [Coord1],
-    ''' + self.tr('the starting point for the description of this perimeter. All coordinates described here are georeferenced to the Geodetic Reference System (SGR)',
+    ''' + self.tr('the starting point for the description of this perimeter. All coordinates described here are georeferenced to the Geodetic Reference System (GRS)',
          str2HTML('ponto inicial da descrição deste perímetro. Todas as coordenadas aqui descritas estão georreferenciadas ao Sistema Geodésico de Referência (SGR)')) + ''' <b>[GRS]</b>,
     ''' + self.tr('and are projected in the UTM system, zone [FUSO] and hemisphere [HEMISFERIO], from which all azimuths and distances, area and perimeter were calculated.',
          str2HTML('sendo projetadas no Sistema UTM, fuso [FUSO] e hemisfério [HEMISFERIO], a partir das quais todos os azimutes e distâncias, área e perímetro foram calculados.')) + '''
