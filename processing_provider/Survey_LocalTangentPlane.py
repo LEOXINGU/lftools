@@ -162,7 +162,7 @@ Saiba mais:'''
         self.addParameter(
             QgsProcessingParameterCrs(
                 self.GRS,
-                self.tr('Ellipsoid parameters', 'Parâmetros do Elipoide'),
+                self.tr('Ellipsoid parameters', 'Parâmetros do Elipsoide'),
                 QgsCoordinateReferenceSystem('EPSG:4674')
             )
         )
