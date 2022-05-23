@@ -163,6 +163,15 @@ Com esta ferramenta é possível realizar o correto georreferenciamento de arqui
             raise QgsProcessingException(self.invalidSourceError(parameters, self.VECTOR))
 
         # Validação dos vetores de georreferenciamento
+        if entrada.sourceCrs() != deslc.sourceCrs(): #mesmo SRC
+            raise QgsProcessingException(self.tr('The CRS of the vectors layer must be the same as the input layer!','O SRC da camada vetores deve ser igual ao da camada de entrada!'))
+        for feat in deslc.getFeatures():
+            try:
+                coords = feat.geometry().asPolyline()
+            except:
+                raise QgsProcessingException(self.tr('The geometry type of vectors layer must be Polyline!', 'O tipo de geometria da camada de deslocamento (vetores) deve ser Polyline!'))
+            if len(coords) != 2:
+                raise QgsProcessingException(self.tr('The vectors must be lines with exactly two vertices!', 'Os vetores devem ser linhas com extamente dois vértices!'))
 
         # OUTPUT
         (sink, dest_id) = self.parameterAsSink(
