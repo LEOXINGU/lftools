@@ -17,7 +17,6 @@ __copyright__ = '(C) 2022, Leandro França'
 
 from qgis.PyQt.QtCore import QCoreApplication
 from qgis.core import (QgsApplication,
-                       QgsProcessingParameterVectorLayer,
                        QgsGeometry,
                        QgsWkbTypes,
                        QgsFeature,
@@ -94,7 +93,7 @@ class FrontLotLine(QgsProcessingAlgorithm):
 
     def initAlgorithm(self, config=None):
         self.addParameter(
-            QgsProcessingParameterVectorLayer(
+            QgsProcessingParameterFeatureSource(
                 self.INPUT,
                 self.tr('Parcels', 'Lotes'),
                 [QgsProcessing.TypeVectorPolygon]
@@ -111,7 +110,7 @@ class FrontLotLine(QgsProcessingAlgorithm):
 
     def processAlgorithm(self, parameters, context, feedback):
 
-        lotes = self.parameterAsVectorLayer(
+        lotes = self.parameterAsSource(
             parameters,
             self.INPUT,
             context
