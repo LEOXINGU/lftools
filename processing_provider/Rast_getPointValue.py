@@ -231,7 +231,8 @@ class GetPointValue(QgsProcessingAlgorithm):
         # Abrir Raster
         feedback.pushInfo(self.tr('Opening raster file...', 'Abrindo arquivo Raster...'))
         image = gdal.Open(RasterIN.dataProvider().dataSourceUri())
-        SRC = QgsCoordinateReferenceSystem(image.GetProjection())
+        prj=image.GetProjection()
+        SRC = QgsCoordinateReferenceSystem(prj)
         ulx, xres, xskew, uly, yskew, yres  = image.GetGeoTransform()
         cols = image.RasterXSize
         rows = image.RasterYSize
@@ -245,15 +246,22 @@ class GetPointValue(QgsProcessingAlgorithm):
         xres = abs(xres)
         yres = abs(yres)
 
-        # Verificar SRC
-        if not SRC.description() == CRS.description():
-            raise QgsProcessingException(self.tr('The raster layer and the homologous point vector layer must have the same CRS!', 'A camada raster e a camada vetorial de pontos homólogos devem ter o mesmo SRC!'))
+        # Transformação de coordenadas
+        crsSrc = pontos.sourceCrs()
+        crsDest = QgsCoordinateReferenceSystem(prj)
+        if crsSrc != crsDest:
+            transf_SRC = True
+            coordTransf = QgsCoordinateTransform(crsSrc, crsDest, QgsProject.instance())
+        else:
+            transf_SRC = False
 
         # Calcular valor interpolado para cada ponto
         Percent = 100.0/pontos.featureCount() if pontos.featureCount()>0 else 0
         newfeat = QgsFeature(Fields)
         for index, feat in enumerate(pontos.getFeatures()):
             geom = feat.geometry()
+            if transf_SRC:
+                geom.transform(coordTransf)
             att = feat.attributes()
             if geom.isMultipart():
                 pnts = geom.asMultiPoint()
