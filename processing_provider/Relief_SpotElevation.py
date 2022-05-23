@@ -178,33 +178,13 @@ class SpotElevation(QgsProcessingAlgorithm):
         # Field index
         campo_id = curvas.fields().indexFromName(campo[0])
 
-        # output
-        Fields = QgsFields()
-        CRS = curvas.sourceCrs()
-        itens  = {
-                     self.tr('elevation','cota') : QVariant.Double,
-                     self.tr('type','tipo') : QVariant.Int,
-                     }
-        for item in itens:
-            Fields.append(QgsField(item, itens[item]))
-        (sink, dest_id) = self.parameterAsSink(
-            parameters,
-            self.SPOTS,
-            context,
-            Fields,
-            QgsWkbTypes.Point,
-            CRS
-        )
-        if sink is None:
-            raise QgsProcessingException(self.invalidSinkError(parameters, self.SPOTS))
-
 
         # Abrir arquivo Raster
         feedback.pushInfo(self.tr('Opening raster file...', 'Abrindo arquivo Raster...'))
         # Abrir Raster layer como array
         image = gdal.Open(RasterIN)
         band = image.GetRasterBand(1).ReadAsArray()
-        prj=image.GetProjection()
+        prj = image.GetProjection()
         geotransform = image.GetGeoTransform()
         SRC = QgsCoordinateReferenceSystem()
         SRC.createFromWkt(prj)
@@ -217,9 +197,33 @@ class SpotElevation(QgsProcessingAlgorithm):
         resol_Y = abs(yres)
         image=None # Close image
 
-        # Verificar se o Raster e os Vetores tem o mesmo SRC
-        if not SRC.description() == CRS.description():
-            raise QgsProcessingException(self.tr('The input raster and vector layers must have the same CRS!', 'As camadas raster e vetorial de entrada devem ter o mesmo SRC!'))
+        # Transformação de coordenadas
+        crsSrc = curvas.sourceCrs()
+        crsDest = QgsCoordinateReferenceSystem(prj)
+        if crsSrc != crsDest:
+            transf_SRC = True
+            coordTransf = QgsCoordinateTransform(crsSrc, crsDest, QgsProject.instance())
+        else:
+            transf_SRC = False
+
+        # OUTPUT
+        Fields = QgsFields()
+        itens  = {
+                     self.tr('elevation','cota') : QVariant.Double,
+                     self.tr('type','tipo') : QVariant.Int,
+                     }
+        for item in itens:
+            Fields.append(QgsField(item, itens[item]))
+        (sink, dest_id) = self.parameterAsSink(
+            parameters,
+            self.SPOTS,
+            context,
+            Fields,
+            QgsWkbTypes.Point,
+            crsDest
+        )
+        if sink is None:
+            raise QgsProcessingException(self.invalidSinkError(parameters, self.SPOTS))
 
         # Verificar todas as feicoes e armazenar aquelas que sao anel linear
         poligonos = []
@@ -227,6 +231,8 @@ class SpotElevation(QgsProcessingAlgorithm):
         cotas = []
         for feature in curvas.getFeatures():
             geom = feature.geometry()
+            if transf_SRC:
+                geom.transform(coordTransf)
             if geom.isMultipart():
                 coord = geom.asMultiPolyline()[0]
             else:
@@ -295,7 +301,6 @@ class SpotElevation(QgsProcessingAlgorithm):
             if np.shape(recorte)==np.shape(recorte_img):
                 produto = recorte*recorte_img
             else:
-                #progress.setInfo('<b>Chegou no recorte...<br/>')
                 recorte = recorte[0:np.shape(recorte_img)[0], 0:np.shape(recorte_img)[1]]
                 produto = recorte*recorte_img
             min = 1e8
