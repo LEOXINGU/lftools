@@ -18,7 +18,7 @@ __copyright__ = '(C) 2021, Leandro França'
 from PyQt5.QtCore import *
 from qgis.core import *
 from lftools.geocapt.imgs import Imgs
-from lftools.geocapt.cartography import areaGauss
+from lftools.geocapt.cartography import areaGauss, geom2PointList
 import os
 from qgis.PyQt.QtGui import QIcon
 
@@ -106,7 +106,7 @@ class PolygonOrientation(QgsProcessingAlgorithm):
             )
         )
 
-        opcoes = [self.tr('Polygon sequence','Sequência do polígono'),
+        opcoes = [self.tr('Polygon sequence (do not change)','Sequência do polígono (não alterar)'),
 				  self.tr('Northmost','Mais ao Norte'),
 				  self.tr('Southernmost','Mais ao Sul'),
 				  self.tr('Eastmost','Mais ao Leste'),
@@ -163,18 +163,7 @@ class PolygonOrientation(QgsProcessingAlgorithm):
         if salvar is None:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.SAVE))
 
-        camada.startEditing() # coloca no modo edição
-
-        total = 100.0 / camada.featureCount() if camada.featureCount() else 0
-
-        for current, feat in enumerate(camada.getFeatures()):
-            geom = feat.geometry()
-            if geom.isMultipart():
-                coords = geom.asMultiPolygon()[0][0]
-            else:
-                coords = geom.asPolygon()[0]
-            coords = coords[:-1]
-
+        def OrientarPoligono(coords):
             # definir primeiro vértice
             if primeiro == 1: # Mais ao norte
                 ind = None
@@ -190,7 +179,6 @@ class PolygonOrientation(QgsProcessingAlgorithm):
                             ymax = pnt.y()
                             x_ymax = pnt.x()
                             ind = k
-
             elif primeiro == 2: # Mais ao sul
                 ind = None
                 ymin = 1e10
@@ -205,7 +193,6 @@ class PolygonOrientation(QgsProcessingAlgorithm):
                             ymin = pnt.y()
                             x_ymim = pnt.x()
                             ind = k
-
             elif primeiro == 3: # Mais ao Leste
                 ind = None
                 xmax = -1e10
@@ -213,7 +200,6 @@ class PolygonOrientation(QgsProcessingAlgorithm):
                     if pnt.x() > xmax:
                         xmax = pnt.x()
                         ind = k
-
             elif primeiro == 4: # Mais ao Oeste
                 ind = None
                 xmin = 1e10
@@ -221,10 +207,8 @@ class PolygonOrientation(QgsProcessingAlgorithm):
                     if pnt.x() < xmin:
                         xmin = pnt.x()
                         ind = k
-
             if primeiro != 0:
                 coords = coords[ind :] + coords[0 : ind]
-
             #rotacionar
             coords = coords +[coords[0]]
             areaG = areaGauss(coords)
@@ -232,11 +216,32 @@ class PolygonOrientation(QgsProcessingAlgorithm):
                 coords = coords[::-1]
             elif areaG > 0 and sentido == 1:
                 coords = coords[::-1]
+            return coords
 
+        camada.startEditing() # coloca no modo edição
+
+        total = 100.0 / camada.featureCount() if camada.featureCount() else 0
+
+        for current, feat in enumerate(camada.getFeatures()):
+            geom = feat.geometry()
             if geom.isMultipart():
-                newGeom = QgsGeometry.fromMultiPolygonXY([[coords]])
+                poligonos = geom2PointList(geom)
+                mPol = QgsMultiPolygon()
+                for pol in poligonos:
+                    coords = pol[0]
+                    coords = coords[:-1]
+                    coords = OrientarPoligono(coords)
+                    anel = QgsLineString(coords)
+                    pol = QgsPolygon(anel)
+                    mPol.addGeometry(pol)
+                newGeom = QgsGeometry(mPol)
             else:
-                newGeom = QgsGeometry.fromPolygonXY([coords])
+                coords = geom2PointList(geom)[0]
+                coords = coords[:-1]
+                coords = OrientarPoligono(coords)
+                anel = QgsLineString(coords)
+                pol = QgsPolygon(anel)
+                newGeom = QgsGeometry(pol)
 
             camada.changeGeometry(feat.id(), newGeom)
 
