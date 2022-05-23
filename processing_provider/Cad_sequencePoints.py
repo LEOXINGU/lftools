@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Vect_sequencePoints.py
+Cad_sequencePoints.py
 ***************************************************************************
 *                                                                         *
 *   This program is free software; you can redistribute it and/or modify  *
@@ -20,28 +20,22 @@ from qgis.core import (QgsApplication,
                        QgsProcessingParameterVectorLayer,
                        QgsGeometry,
                        QgsProcessing,
+                       QgsProject,
                        QgsProcessingParameterField,
                        QgsProcessingParameterEnum,
                        QgsProcessingParameterBoolean,
                        QgsFeatureSink,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
-                       QgsProcessingParameterFeatureSource,
+                       QgsCoordinateTransform,
                        QgsProcessingParameterFeatureSink)
 from lftools.geocapt.imgs import Imgs
 import os
 from qgis.PyQt.QtGui import QIcon
 
 class SequencePoints(QgsProcessingAlgorithm):
-    POINTS = 'POINTS'
-    POLYGON = 'POLYGON'
-    FIELD = 'FIELD'
-    FIRST = 'FIRST'
-    SAVE = 'SAVE'
-    LOC = QgsApplication.locale()[:2]
 
-    INPUT = 'INPUT'
-    OUTPUT = 'OUTPUT'
+    LOC = QgsApplication.locale()[:2]
 
     def translate(self, string):
         return QCoreApplication.translate('Processing', string)
@@ -66,16 +60,16 @@ class SequencePoints(QgsProcessingAlgorithm):
         return self.tr('Sequence points', 'Sequenciar pontos')
 
     def group(self):
-        return self.tr('Vector', 'Vetor')
+        return self.tr('Cadastre', 'Cadastro')
 
     def groupId(self):
-        return 'vector'
+        return 'cadastro'
 
     def tags(self):
         return self.tr('sequence,reverse,vertex,point,organize,topography').split(',')
 
     def icon(self):
-        return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/vetor.png'))
+        return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/cadastre.png'))
 
     txt_en = 'This script fills a certain attribute of the features of a layer of points according to its sequence in relation to the polygon of another layer.'
     txt_pt = 'Este script preenche um determinado atributo das feições de uma camada de pontos de acordo com sua sequência em relação ao polígono de outra camada.'
@@ -93,6 +87,13 @@ class SequencePoints(QgsProcessingAlgorithm):
                     </div>'''
         return self.tr(self.txt_en, self.txt_pt) + footer
 
+    POINTS = 'POINTS'
+    SELECTEDPOINTS = 'SELECTEDPOINTS'
+    POLYGON = 'POLYGON'
+    SELECTEDPOLYGONS = 'SELECTEDPOLYGONS'
+    FIELD = 'FIELD'
+    FIRST = 'FIRST'
+    SAVE = 'SAVE'
 
     def initAlgorithm(self, config=None):
         self.addParameter(
@@ -100,6 +101,14 @@ class SequencePoints(QgsProcessingAlgorithm):
                 self.POINTS,
                 self.tr('Points', 'Pontos'),
                 [QgsProcessing.TypeVectorPoint]
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterBoolean(
+                self.SELECTEDPOINTS,
+                self.tr('Only selected points', 'Apenas pontos selecionados'),
+                defaultValue=False
             )
         )
 
@@ -117,6 +126,14 @@ class SequencePoints(QgsProcessingAlgorithm):
                 self.POLYGON,
                 self.tr('Polygon', 'Polígono'),
                 [QgsProcessing.TypeVectorPolygon]
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterBoolean(
+                self.SELECTEDPOLYGONS,
+                self.tr('Only selected polygon', 'Apenas polígono selecionado'),
+                defaultValue=False
             )
         )
 
@@ -178,16 +195,36 @@ class SequencePoints(QgsProcessingAlgorithm):
             context
         )
 
-        # As duas camadas devem ter o mesmo SRC
-        if poligono.crs() != pontos.crs():
-            raise QgsProcessingException(self.tr('Both layers must have the same CRS!', 'As duas camadas devem ter o mesmo SRC!'))
+        pnt_selecionados = self.parameterAsBool(
+            parameters,
+            self.SELECTEDPOINTS,
+            context
+        )
+
+        pol_selecionados = self.parameterAsBool(
+            parameters,
+            self.SELECTEDPOLYGONS,
+            context
+        )
+
+        # Transformação de coordenadas
+        crsSrc = poligono.crs()
+        crsDest = pontos.crs()
+        if crsSrc != crsDest:
+            transf_SRC = True
+            coordTransf = QgsCoordinateTransform(crsSrc, crsDest, QgsProject.instance())
+        else:
+            transf_SRC = False
 
         # Camada de polígonos deve ter apenas 1 polígono
-        if poligono.featureCount() != 1:
+        n_pol = poligono.selectedFeatureCount() if pol_selecionados else poligono.featureCount()
+        if n_pol != 1:
             raise QgsProcessingException(self.tr('Polygon layer must have only 1 feature!', 'A camada do tipo polígono deve ter apenas 1 feição!'))
 
-        for feat in poligono.getFeatures():
+        for feat in poligono.getSelectedFeatures() if pol_selecionados else poligono.getFeatures():
             pol = feat.geometry()
+            if transf_SRC:
+                pol.transform(coordTransf)
 
         if pol.isMultipart():
             coords = pol.asMultiPolygon()[0][0]
@@ -231,7 +268,7 @@ class SequencePoints(QgsProcessingAlgorithm):
             coords = coords[ind :] + coords[0 : ind]
 
         # Número de vértices do polígono deve ser igual ao número de pontos
-        if (len(coords)) != pontos.featureCount():
+        if len(coords) != (pontos.selectedFeatureCount() if pnt_selecionados else pontos.featureCount()):
             raise QgsProcessingException(self.tr('The number of points must equal the number of vertices of the polygon!', 'O número de pontos deve ser igual ao número de vértices do polígono!'))
 
 
@@ -244,7 +281,7 @@ class SequencePoints(QgsProcessingAlgorithm):
         for cont, vertice in enumerate(coords):
             dist1 = 1e9
             pnt_id = None
-            for feat in pontos.getFeatures():
+            for feat in pontos.getSelectedFeatures() if pnt_selecionados else pontos.getFeatures():
                 pnt = feat.geometry().asPoint()
                 if norma2(vertice, pnt) < dist1:
                     dist1 = norma2(vertice, pnt)

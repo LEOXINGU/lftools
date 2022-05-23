@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Vect_PolygonOrientation.py
+Cad_PolygonOrientation.py
 ***************************************************************************
 *                                                                         *
 *   This program is free software; you can redistribute it and/or modify  *
@@ -54,16 +54,16 @@ class PolygonOrientation(QgsProcessingAlgorithm):
         return self.tr('Orient polygons', 'Orientar polígonos')
 
     def group(self):
-        return self.tr('Vector', 'Vetor')
+        return self.tr('Cadastre', 'Cadastro')
 
     def groupId(self):
-        return 'vector'
+        return 'cadastro'
 
     def tags(self):
         return self.tr('cadastre,clockwise,counterclockwise,oriented,orientation,northmost').split(',')
 
     def icon(self):
-        return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/vetor.png'))
+        return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/cadastre.png'))
 
     txt_en = 'This tool orients the geometry of polygon-like features clockwise or counterclockwise, defining the first vertex as the north, south, east, or west.'
     txt_pt = 'Esta ferramenta orienta a geometria de feições do tipo polígono no sentido horário ou antihorário, definindo o primeiro vértice mais ao norte, sul, leste ou oeste.'

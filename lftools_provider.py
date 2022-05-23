@@ -65,7 +65,7 @@ from lftools.processing_provider.Vect_DirectionalMerge import DirectionalMerge
 from lftools.processing_provider.Vect_ExtendLines import ExtendLines
 from lftools.processing_provider.Vect_PolygonAngles import CalculatePolygonAngles
 from lftools.processing_provider.Vect_reverseVertexOrder import ReverseVertexOrder
-from lftools.processing_provider.Vect_sequencePoints import SequencePoints
+from lftools.processing_provider.Cad_sequencePoints import SequencePoints
 from lftools.processing_provider.Doc_AreaPerimeter import AreaPerimterReport
 from lftools.processing_provider.Doc_DescriptiveMemorial import DescriptiveMemorial
 from lftools.processing_provider.Doc_MarkInformation import SurveyMarkDoc
@@ -88,7 +88,7 @@ from lftools.processing_provider.Drone_createGCPfile import CreateGCPfile
 from lftools.processing_provider.Drone_verticalAdjustment import VerticalAdjustment
 from lftools.processing_provider.Relief_DEMfilter import DEMfilter
 from lftools.processing_provider.Relief_SpotElevation import SpotElevation
-from lftools.processing_provider.Vect_PolygonOrientation import PolygonOrientation
+from lftools.processing_provider.Cad_PolygonOrientation import PolygonOrientation
 from lftools.processing_provider.Easy_getAttributeByLocation import GetAttributeByLocation
 from lftools.processing_provider.Rast_bandArithmetic import BandArithmetic
 from lftools.processing_provider.Gnss_NMEA2layer import NMEA2layer
