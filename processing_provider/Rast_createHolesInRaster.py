@@ -208,8 +208,19 @@ class CreateHolesInRaster(QgsProcessingAlgorithm):
         # Remendos
         total = 100.0 /layer.featureCount() if layer.featureCount() else 0
 
+        # Transformação de coordenadas
+        crsSrc = layer.sourceCrs()
+        crsDest = QgsCoordinateReferenceSystem(prj)
+        if crsSrc != crsDest:
+            transf_SRC = True
+            coordTransf = QgsCoordinateTransform(crsSrc, crsDest, QgsProject.instance())
+        else:
+            transf_SRC = False
+
         for cont, feat in enumerate(layer.getFeatures()):
             geom = feat.geometry()
+            if transf_SRC:
+                geom.transform(coordTransf)
             coords = geom.asPolygon()[0]
             caminho = []
             for ponto in coords:
