@@ -90,6 +90,7 @@ Obs.: Este algoritmo utiliza o centroide da feição para ordenar geograficament
         return self.tr(self.txt_en, self.txt_pt) + footer
 
     INPUT = 'INPUT'
+    SELECTED = 'SELECTED'
     FIELD = 'FIELD'
     METHOD = 'METHOD'
     SAVE = 'SAVE'
@@ -100,6 +101,14 @@ Obs.: Este algoritmo utiliza o centroide da feição para ordenar geograficament
                 self.INPUT,
                 self.tr('Points', 'Pontos'),
                 [QgsProcessing.TypeVectorAnyGeometry]
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterBoolean(
+                self.SELECTED,
+                self.tr('Only selected', 'Apenas selecionados'),
+                defaultValue= False
             )
         )
 
@@ -165,12 +174,18 @@ Obs.: Este algoritmo utiliza o centroide da feição para ordenar geograficament
             context
         )
 
+        selecionados = self.parameterAsBool(
+            parameters,
+            self.SELECTED,
+            context
+        )
+
         dtype = [('id', int), ('x', float), ('y', float)]
         valores = []
 
         # Ler feições
         feedback.pushInfo(self.tr('Reading features...', 'Lendo feições...'))
-        for feat in layer.getFeatures():
+        for feat in layer.getSelectedFeatures() if selecionados else layer.getFeatures():
             geom = feat.geometry().centroid()
             id = feat.id()
             x = geom.asPoint().x() * (1 if metodo in [0,2,3,4] else -1)
@@ -192,7 +207,7 @@ Obs.: Este algoritmo utiliza o centroide da feição para ordenar geograficament
 
         # Salvando resultado
         total = 100.0 /len(valores) if len(valores)!=0 else 0
-        for cont, feat in enumerate(layer.getFeatures()):
+        for cont, feat in enumerate(layer.getSelectedFeatures() if selecionados else layer.getFeatures()):
             id = feat.id()
             layer.changeAttributeValue(feat.id(), columnIndex, dic[id])
             feedback.setProgress(int((cont+1) * total))
