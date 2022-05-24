@@ -19,6 +19,7 @@ from PyQt5.QtCore import QCoreApplication, QVariant
 from qgis.core import *
 import processing
 from lftools.geocapt.imgs import Imgs
+from lftools.geocapt.topogeo import dms2dd
 import os
 from qgis.PyQt.QtGui import QIcon
 
@@ -97,8 +98,7 @@ class CoordinatesToLayer(QgsProcessingAlgorithm):
             QgsProcessingParameterField(
                 self.X,
                 self.tr('X Coordinate', 'Coordenada X'),
-                parentLayerParameterName=self.TABLE,
-                type=QgsProcessingParameterField.Numeric
+                parentLayerParameterName=self.TABLE
             )
         )
 
@@ -106,8 +106,7 @@ class CoordinatesToLayer(QgsProcessingAlgorithm):
             QgsProcessingParameterField(
                 self.Y,
                 self.tr('Y Coordinate', 'Coordenada Y'),
-                parentLayerParameterName=self.TABLE,
-                type=QgsProcessingParameterField.Numeric
+                parentLayerParameterName=self.TABLE
             )
         )
 
@@ -116,7 +115,6 @@ class CoordinatesToLayer(QgsProcessingAlgorithm):
                 self.Z,
                 self.tr('Z Coordinate', 'Coordenada Z'),
                 parentLayerParameterName=self.TABLE,
-                type=QgsProcessingParameterField.Numeric,
                 optional = True
             )
         )
@@ -196,14 +194,37 @@ class CoordinatesToLayer(QgsProcessingAlgorithm):
             att = feat.attributes()
             X = att[X_id]
             Y = att[Y_id]
+            valido = True
+            if isinstance(X, str) or isinstance(Y, str):
+                try:
+                    X = float(X.replace(',','.'))
+                    Y = float(Y.replace(',','.'))
+                except:
+                    try:
+                        X = dms2dd(X)
+                        Y = dms2dd(Y)
+                    except:
+                        valido = False
+                        feedback.pushInfo(self.tr('Feature id {} has attributes X={} and Y={} incompatible for point geometry!'.format(feat.id(), X, Y),
+                                                  'Feição de id {} tem atributos X={} e Y={} incompatíveis para geometria ponto!'.format(feat.id(), X, Y) ))
             if Z_field:
                 Z = att[Z_id]
-                geom = QgsGeometry(QgsPoint(float(X), float(Y), float(Z)))
-            else:
-                geom = QgsGeometry.fromPointXY(QgsPointXY(float(X), float(Y)))
-            feature.setGeometry(geom)
-            feature.setAttributes(att)
-            sink.addFeature(feature, QgsFeatureSink.FastInsert)
+                if isinstance(Z, str):
+                    try:
+                        Z = float(Z.replace(',','.'))
+                    except:
+                        valido = False
+                        feedback.pushInfo(self.tr('Feature id {} has attributes Z={} incompatible for point geometry!'.format(feat.id(), Z),
+                                                  'Feição de id {} tem atributos Z={} incompatível para geometria ponto!'.format(feat.id(),Z) ))
+            if valido:
+                if Z_field:
+                    geom = QgsGeometry(QgsPoint(float(X), float(Y), float(Z)))
+                else:
+                    geom = QgsGeometry.fromPointXY(QgsPointXY(float(X), float(Y)))
+                feature.setGeometry(geom)
+                feature.setAttributes(att)
+                sink.addFeature(feature, QgsFeatureSink.FastInsert)
+
             if feedback.isCanceled():
                 break
             feedback.setProgress(int(current * total))
