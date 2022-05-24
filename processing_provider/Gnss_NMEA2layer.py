@@ -37,6 +37,7 @@ from qgis.core import (QgsProcessing,
                        QgsProcessingParameterRasterLayer,
                        QgsProcessingParameterRasterDestination,
                        QgsApplication,
+                       QgsProcessingParameterCrs,
                        QgsProject,
                        QgsRasterLayer,
                        QgsCoordinateTransform,
@@ -118,6 +119,7 @@ Modos:
     TYPE = 'TYPE'
     HEIGHT = 'HEIGHT'
     OUTPUT = 'OUTPUT'
+    CRS = 'CRS'
 
     def initAlgorithm(self, config=None):
 
@@ -155,6 +157,12 @@ Modos:
             )
 
         self.addParameter(
+            QgsProcessingParameterCrs(
+                self.CRS,
+                self.tr('Grid CRS', 'SRC'),
+                QgsCoordinateReferenceSystem('EPSG:4674')))
+
+        self.addParameter(
             QgsProcessingParameterFeatureSink(
                 self.OUTPUT,
                 self.tr('Point layer', 'Camada de ponto(s)')
@@ -180,6 +188,14 @@ Modos:
             self.HEIGHT,
             context
         )
+
+        crs = self.parameterAsCrs(
+            parameters,
+            self.CRS,
+            context
+        )
+        if not crs.isGeographic():
+            raise QgsProcessingException(self.tr('Choose a geographic CRS!', 'Escolha um SRC geográfico!'))
 
         arq = open(caminho, encoding='utf-8')
 
@@ -256,7 +272,7 @@ Modos:
         for item in itens:
             Fields.append(QgsField(item, itens[item]))
 
-        (sink, dest_id) = self.parameterAsSink( parameters, self.OUTPUT, context, Fields, QgsWkbTypes.PointZ, QgsCoordinateReferenceSystem(int(self.tr('4326','4674'))))
+        (sink, dest_id) = self.parameterAsSink( parameters, self.OUTPUT, context, Fields, QgsWkbTypes.PointZ, crs)
         if sink is None:
             raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT))
 
