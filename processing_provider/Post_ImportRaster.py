@@ -275,7 +275,7 @@ class ImportRaster(QgsProcessingAlgorithm):
 
         namecol = self.parameterAsBool(
             parameters,
-            self.USER,
+            self.NAMECOL,
             context
         )
         namecol = '-F ' if namecol else ''
