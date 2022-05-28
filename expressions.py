@@ -263,11 +263,43 @@ def removespetialchar (palavra, feature, parent):
     return re.sub('[^a-zA-Z0-9 \\\]', '', palavraSemAcento)
 
 
+
+# Area no SGL
+def areaParteSGL(coordsGeo, coords, crsGeo):
+    centroide = QgsGeometry.fromPolygonXY([coordsGeo]).centroid().asPoint()
+    alt = []
+    for pnt in coords[:-1]:
+        if str(pnt.z()) != 'nan':
+            alt += [pnt.z()]
+        else:
+            alt += [0]
+    h0 = np.array(alt).mean()
+    lon0 = centroide.x()
+    lat0 = centroide.y()
+    EPSG = int(crsGeo.authid().split(':')[-1]) # pegando o EPGS do SRC do QGIS
+    proj_crs = CRS.from_epsg(EPSG) # transformando para SRC do pyproj
+    a=proj_crs.ellipsoid.semi_major_metre
+    f_inv = proj_crs.ellipsoid.inverse_flattening
+    f=1/f_inv
+    # CENTRO DE ROTAÇÃO
+    Xo, Yo, Zo = geod2geoc(lon0, lat0, h0, a, f)
+    # CONVERSÃO DAS COORDENADAS
+    coordsSGL = []
+    for k, coord in enumerate(coordsGeo):
+        lon = coord.x()
+        lat = coord.y()
+        h = coords[k].z() if str(coords[k].z()) != 'nan' else 0
+        X, Y, Z = geod2geoc(lon, lat, h, a, f)
+        E, N, U = geoc2enu(X, Y, Z, lon0, lat0, Xo, Yo, Zo)
+        coordsSGL += [QgsPointXY(E, N)]
+    return abs(areaGauss(coordsSGL))
+
+
 @qgsfunction(args='auto', group='LF Tools')
 def areaLTP (layer_name, feature, parent):
     """
     Calculates the area on the Local Tangent Plane (LTP), also known as Local Geodetic Coordinate System, which is a spatial reference system based on the tangent plane on the feature centroid defined by the local vertical direction.
-    <p>Note: PolygonZ or MultiPoligonZ is required.</p>
+    <p>Note: PolygonZ or MultiPoligonZ should be used to obtain the most accurate result.</p>
     <h2>Examplo:</h2>
     <ul>
       <li>areaLTP('layer_name') -> 607503.4825 </li>
@@ -278,56 +310,34 @@ def areaLTP (layer_name, feature, parent):
     else:
         layer = QgsProject.instance().mapLayer(layer_name)
 
-    crsUTM = layer.crs()
-    crsGeo = QgsCoordinateReferenceSystem(crsUTM.geographicCrsAuthId())
-
-    coordinateTransformer = QgsCoordinateTransform()
-    coordinateTransformer.setDestinationCrs(crsGeo)
-    coordinateTransformer.setSourceCrs(crsUTM)
-
     geom = feature.geometry()
-    geomGeo = reprojectPoints(geom, coordinateTransformer)
+
+    if not layer.crs().isGeographic():
+        crsProj = layer.crs()
+        crsGeo = QgsCoordinateReferenceSystem(crsProj.geographicCrsAuthId())
+        coordinateTransformer = QgsCoordinateTransform()
+        coordinateTransformer.setDestinationCrs(crsGeo)
+        coordinateTransformer.setSourceCrs(crsProj)
+        geomGeo = reprojectPoints(geom, coordinateTransformer)
+    else:
+        geomGeo = geom
+        crsGeo = layer.crs()
+
     if geom.isMultipart():
-        coords = geom2PointList(geom)[0][0]
-        coordsGeo = geomGeo.asMultiPolygon()[0][0]
+        coordsM = geom2PointList(geom)
+        coordsGeoM = geomGeo.asMultiPolygon()
+        areaSGL = 0
+        for k, coords in enumerate(coordsM):
+            coordsGeo = coordsGeoM[k]
+            areaSGL += areaParteSGL(coordsGeo[0], coords[0], crsGeo)
+
     else:
         coords = geom2PointList(geom)[0]
         coordsGeo = geomGeo.asPolygon()[0]
+        areaSGL = areaParteSGL(coordsGeo, coords, crsGeo)
 
-    centroide = geomGeo.centroid().asPoint()
+    return areaSGL
 
-    try:
-        alt = []
-        for pnt in coords[:-1]:
-            alt += [pnt.z()]
-
-        h0 = np.array(alt).mean()
-        lon0 = centroide.x()
-        lat0 = centroide.y()
-
-        EPSG = int(crsGeo.authid().split(':')[-1]) # pegando o EPGS do SRC do QGIS
-        proj_crs = CRS.from_epsg(EPSG) # transformando para SRC do pyproj
-        a=proj_crs.ellipsoid.semi_major_metre
-        f_inv = proj_crs.ellipsoid.inverse_flattening
-        f=1/f_inv
-        # CENTRO DE ROTAÇÃO
-        Xo, Yo, Zo = geod2geoc(lon0, lat0, h0, a, f)
-
-        # CONVERSÃO DAS COORDENADAS
-        coordsSGL = []
-        for k, coord in enumerate(coordsGeo):
-            lon = coord.x()
-            lat = coord.y()
-            h = coords[k].z()
-            X, Y, Z = geod2geoc(lon, lat, h, a, f)
-            E, N, U = geoc2enu(X, Y, Z, lon0, lat0, Xo, Yo, Zo)
-            coordsSGL += [QgsPointXY(E, N)]
-
-        areaSGL = abs(areaGauss(coordsSGL))
-        return areaSGL
-
-    except:
-        return 0
 
 
 @qgsfunction(args='auto', group='LF Tools')
@@ -548,7 +558,7 @@ def deedtable3(prefixo, titulo, decimal, fontsize, layer_name, tipo, azimuteDist
     <p>Note 2: Table types: 'proj' - projected, 'geo' - geographic, 'both' - both coordinate systems.</p>
     <p>Note 3: Define 1 or 0 for with or without azimuths and distances, respectivelly.</p>
 
-    <h2>Exemple:</h2>
+    <h2>Exemples:</h2>
     <ul>
       <li>deedtable3('preffix', 'title', precision, fontsize, layer_name, type, azimuth_dist) = HTML</li>
       <li>deedtable3('V-', ' - Area X', 3, 12, 'layer_name', 'proj', 1) = HTML</li>
@@ -566,13 +576,14 @@ def deedtable3(prefixo, titulo, decimal, fontsize, layer_name, tipo, azimuteDist
 
     format_num = '{:,.Xf}'.replace('X', str(decimal))
 
-    coordinateTransformer = QgsCoordinateTransform()
-    coordinateTransformer.setDestinationCrs(crsGeo)
-    coordinateTransformer.setSourceCrs(crsUTM)
-
     geom = feature.geometry()
 
-    if geom.type() == 2 and geom:
+    if geom.type() == 2 and geom and not crsUTM.isGeographic(): #poligono e SRC projetado
+
+        coordinateTransformer = QgsCoordinateTransform()
+        coordinateTransformer.setDestinationCrs(crsGeo)
+        coordinateTransformer.setSourceCrs(crsUTM)
+
         if geom.isMultipart():
             coords = geom2PointList(geom)[0][0]
         else:
@@ -800,4 +811,126 @@ def deedtable3(prefixo, titulo, decimal, fontsize, layer_name, tipo, azimuteDist
         return resultado
 
     else:
-        return tr('Verify geometry', 'Verificar geometria')
+        return tr('Verify layer geometry and CRS!', 'Verificar geometria e SRC da camada!')
+
+
+
+@qgsfunction(args='auto', group='LF Tools')
+def deedtext(layer_name, descr_pnt_ini, estilo, prefixo, decimal, fontsize, feature, parent):
+    """
+    Generates a description of a property with coordinates as text.
+    <p>Note 1: Layer with projected CRS is required.</p>
+    <p>Note 2: Coordinates styles: 'E,N,h', 'N,E,h', 'E,N' (default) or 'N,E'.</p>
+
+    <h2>Exemples:</h2>
+    <ul>
+      <li>deedtext('layer_name', 'initial_description', 'style', 'preffix', precision, fontsize) = HTML</li>
+      <li>deedtext('layer_name', 'northernmost point', 'E,N,h', 'V-', 2, 12) = HTML</li>
+      <li>deedtext('layer_name', 'rightmost point of the person in front of the property', 'N,E', 'P-', 3, 10) = HTML</li>
+    </ul>
+    """
+    if len(QgsProject.instance().mapLayersByName(layer_name)) == 1:
+        layer = QgsProject.instance().mapLayersByName(layer_name)[0]
+    else:
+        layer = QgsProject.instance().mapLayer(layer_name)
+
+    SRC = layer.crs()
+    SGR = QgsCoordinateReferenceSystem(SRC.geographicCrsAuthId()).description()
+    try:
+        projecao = SRC.description().split(r' / ')[-1]
+        PROJ = tr(projecao, projecao.replace('zone', 'fuso'))
+    except:
+        PROJ = SRC.description()
+
+    format_num = '{:,.Xf}'.replace('X', str(decimal))
+
+    geom = feature.geometry()
+    if geom.type() == 2 and geom and not SRC.isGeographic(): #poligono e SRC projetado
+        if geom.isMultipart():
+            coords = geom2PointList(geom)[0][0]
+        else:
+            coords = geom2PointList(geom)[0]
+        pnts_UTM = {}
+        for k, coord in enumerate(coords[:-1]):
+            pnts_UTM[k+1] = [coord, prefixo, prefixo + '{:02}'.format(k+1)]
+
+        # Calculo dos Azimutes e Distancias
+        tam = len(pnts_UTM)
+        Az_lista, Dist = [], []
+        for k in range(tam):
+            pntA = pnts_UTM[k+1][0]
+            pntB = pnts_UTM[1 if k+2 > tam else k+2][0]
+            Az_lista += [(180/pi)*azimute(pntA, pntB)[0]]
+            Dist += [sqrt((pntA.x() - pntB.x())**2 + (pntA.y() - pntB.y())**2)]
+
+        # definindo estilo das coordendas
+        estilo = estilo.replace(' ','').lower()
+        if estilo == 'E,N,h'.lower():
+            estilo_vertices = '<b>E [Xn]m</b>, <b>N [Yn]m</b> ' + tr('and', 'e') +  ' <b>h [hn]m</b>'
+        elif estilo =='N,E,h'.lower():
+            estilo_vertices = '<b>N [Yn]m</b>, <b>E [Xn]m</b> ' + tr('and', 'e') +  ' <b>h [hn]m</b>'
+        elif estilo =='E,N'.lower():
+            estilo_vertices = '<b>E [Xn]m</b> ' + tr('and', 'e') +  ' <b>N [Yn]m</b>'
+        elif estilo =='N,E'.lower():
+            estilo_vertices = '<b>N [Yn]m</b> ' + tr('and', 'e') +  ' <b>E [Xn]m</b>'
+        else: # default
+            estilo_vertices = '<b>E [Xn]m</b> ' + tr('and', 'e') +  ' <b>N [Yn]m</b>'
+
+        # conteudo do memorial
+        text_ini = tr('<div style="text-align: justify; font-size: [FONTSIZE]px; font-family: Arial;">The description of this perimeter begins at the vertex <b>[Vn]</b>, with coordinates ' + estilo_vertices + ', [descr_pnt_ini]from this, with the following flat azimuths and distances: ',
+                      '<div style="text-align: justify; font-size: [FONTSIZE]px; font-family: Arial;">Inicia-se a descrição deste perímetro no vértice <b>[Vn]</b>, de coordenadas ' + estilo_vertices + ', [descr_pnt_ini]deste, segue com os seguintes azimutes planos e distâncias: ')
+
+        text_meio = tr('[Azn] and [Dn]m up to the vertex <b>[Vn]</b>, with coordinates ' + estilo_vertices + ', ',
+                       '[Azn] e [Dn]m até o vértice <b>[Vn]</b>, de coordenadas ' + estilo_vertices + ', ')
+
+        text_fim = tr('''the starting point for the description of this perimeter.
+        All coordinates described here are georeferenced to the Geodetic Reference System (GRS) (SGR) <b>[SGR]</b>, and are projected in the system <b>[PROJ]</b>,
+        from which all azimuths and distances, area and perimeter were calculated.''',
+        '''ponto inicial da descrição deste perímetro.
+        Todas as coordenadas aqui descritas estão georreferenciadas ao Sistema Geodésico de Referência (SGR) <b>[SGR]</b>, sendo projetadas no sistema <b>[PROJ]</b>,
+        a partir das quais todos os azimutes e distâncias foram calculados.</div>
+        ''')
+
+        # Texto inicial
+        itens = {'[Vn]': pnts_UTM[1][2],
+                 '[Xn]': tr(format_num.format(pnts_UTM[1][0].x()), format_num.format(pnts_UTM[1][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                 '[Yn]': tr(format_num.format(pnts_UTM[1][0].y()), format_num.format(pnts_UTM[1][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                 '[descr_pnt_ini]': descr_pnt_ini + ', ' if descr_pnt_ini else ''
+                    }
+        if 'h' in estilo:
+            itens['[hn]'] = tr(format_num.format(pnts_UTM[1][0].z()), format_num.format(pnts_UTM[1][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.'))
+        for item in itens:
+            text_ini = text_ini.replace(item, itens[item]).replace('[FONTSIZE]', str(fontsize))
+
+        # Texto do meio
+        LINHAS = ''
+        for k in range(tam):
+            linha0 = text_meio
+            indice = k+2 if k+2 <= tam else 1
+            itens = {'[Vn]': pnts_UTM[indice][2],
+                     '[Xn]': tr(format_num.format(pnts_UTM[indice][0].x()),
+                              format_num.format(pnts_UTM[indice][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                     '[Yn]': tr(format_num.format(pnts_UTM[indice][0].y()),
+                              format_num.format(pnts_UTM[indice][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                     '[Azn]': tr(DD2DMS(Az_lista[k],1), DD2DMS(Az_lista[k],1).replace('.', ',')),
+                     '[Dn]': tr(format_num.format(Dist[k]), format_num.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'))
+                        }
+            if 'h' in estilo:
+                itens['[hn]'] = tr(format_num.format(pnts_UTM[indice][0].z()),
+                                   format_num.format(pnts_UTM[indice][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.'))
+            for item in itens:
+                linha0 = linha0.replace(item, itens[item])
+            LINHAS += linha0
+
+        # Texto final
+        itens = {'[SGR]': SGR,
+                 '[PROJ]': PROJ
+                    }
+        for item in itens:
+            text_fim = text_fim.replace(item, itens[item])
+
+        FINAL = text_ini + LINHAS + text_fim
+        return FINAL
+
+    else:
+        return tr('Verify layer geometry and CRS!', 'Verificar geometria e SRC da camada!')
