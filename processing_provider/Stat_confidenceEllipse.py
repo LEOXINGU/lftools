@@ -141,12 +141,6 @@ class ConfidenceEllipse(QgsProcessingAlgorithm):
             )
         )
 
-        self.addParameter(
-            QgsProcessingParameterBoolean(
-                self.PESO,
-                self.tr('Use Weight', 'Utilizar Peso'),
-                defaultValue=False))
-
 
         self.addParameter(
             QgsProcessingParameterField(
@@ -157,12 +151,6 @@ class ConfidenceEllipse(QgsProcessingAlgorithm):
                 optional=True
             )
         )
-
-        self.addParameter(
-            QgsProcessingParameterBoolean(
-                self.AGRUPAR,
-                self.tr('Group by Attribute', 'Agrupar por Atributo'),
-                defaultValue=False))
 
         self.addParameter(
             QgsProcessingParameterField(
@@ -202,23 +190,9 @@ class ConfidenceEllipse(QgsProcessingAlgorithm):
         # size = chi2.ppf(confidence, 2)
         size = [2.27886856637673, 4.605170185988092, 5.991464547107979, 9.21034037197618][size]
 
-        Peso = self.parameterAsBool(
-            parameters,
-            self.PESO,
-            context
-        )
-
         Campo_Peso = self.parameterAsFields(
             parameters,
             self.CAMPO_PESO,
-            context
-        )
-        if Peso and not Campo_Peso:
-            raise QgsProcessingException(self.tr('Insert Weight Field!', 'Insira o Campo Peso!'))
-
-        Agrupar = self.parameterAsBool(
-            parameters,
-            self.AGRUPAR,
             context
         )
 
@@ -227,13 +201,11 @@ class ConfidenceEllipse(QgsProcessingAlgorithm):
             self.CAMPO_AGRUPAR,
             context
         )
-        if Agrupar and not Campo_Agrupar:
-            raise QgsProcessingException(self.tr('Insert Group Field!', 'Insira o Campo de Agupamento!'))
 
         # Field index
-        if Peso:
+        if Campo_Peso:
             Campo_Peso = layer.fields().indexFromName(Campo_Peso[0])
-        if Agrupar:
+        if Campo_Agrupar:
             Campo_Agrupar = layer.fields().indexFromName(Campo_Agrupar[0])
 
         # OUTPUT
@@ -265,7 +237,7 @@ class ConfidenceEllipse(QgsProcessingAlgorithm):
         if sink is None:
             raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT))
 
-        if Agrupar:
+        if Campo_Agrupar:
             dic = {}
             for feat in layer.getFeatures():
                 pnt = feat.geometry().asPoint()
@@ -273,10 +245,10 @@ class ConfidenceEllipse(QgsProcessingAlgorithm):
                 if grupo in dic:
                     dic[grupo]['x'] = dic[grupo]['x'] + [pnt.x()]
                     dic[grupo]['y'] = dic[grupo]['y'] + [pnt.y()]
-                    if Peso:
+                    if Campo_Peso:
                         dic[grupo]['w'] = dic[grupo]['w'] + [int(feat[Campo_Peso])]
                 else:
-                    if Peso:
+                    if Campo_Peso:
                         dic[grupo] = {'x':[pnt.x()], 'y':[pnt.y()], 'w':[int(feat[Campo_Peso])]}
                     else:
                         dic[grupo] = {'x':[pnt.x()], 'y':[pnt.y()]}
@@ -288,10 +260,10 @@ class ConfidenceEllipse(QgsProcessingAlgorithm):
                 if grupo in dic:
                     dic[grupo]['x'] = dic[grupo]['x'] + [pnt.x()]
                     dic[grupo]['y'] = dic[grupo]['y'] + [pnt.y()]
-                    if Peso:
+                    if Campo_Peso:
                         dic[grupo]['w'] = dic[grupo]['w'] + [int(feat[Campo_Peso])]
                 else:
-                    if Peso:
+                    if Campo_Peso:
                         dic[grupo] = {'x':[pnt.x()], 'y':[pnt.y()], 'w':[int(feat[Campo_Peso])]}
                     else:
                         dic[grupo] = {'x':[pnt.x()], 'y':[pnt.y()]}
@@ -301,13 +273,13 @@ class ConfidenceEllipse(QgsProcessingAlgorithm):
         for current, grupo in enumerate(dic):
             x = np.array(dic[grupo]['x'])
             y = np.array(dic[grupo]['y'])
-            if Peso:
+            if Campo_Peso:
                 w = dic[grupo]['w']
 
             if len(x)==1:
                 raise QgsProcessingException(self.tr("Invalid Group Field!","Campo de Agrupamento Inválido!"))
 
-            if Peso:
+            if Campo_Peso:
                 if (np.array(w) > 0).sum() > 1: # Mais de um ponto com peso maior que zero
                     MVC = np.cov(x,y, fweights = w)
                     mediaX = float(np.average(x, weights = w))
