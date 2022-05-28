@@ -93,6 +93,7 @@ Obs.: Este algoritmo utiliza o centroide da feição para ordenar geograficament
     SELECTED = 'SELECTED'
     FIELD = 'FIELD'
     METHOD = 'METHOD'
+    GROUP = 'GROUP'
     SAVE = 'SAVE'
 
     def initAlgorithm(self, config=None):
@@ -118,6 +119,16 @@ Obs.: Este algoritmo utiliza o centroide da feição para ordenar geograficament
                 self.tr('Sequence Field', 'Campo de ordenação dos vértices'),
                 parentLayerParameterName=self.INPUT,
                 type=QgsProcessingParameterField.Numeric
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterField(
+                self.GROUP,
+                self.tr('Group Field', 'Campo de Agrupamento'),
+                parentLayerParameterName=self.INPUT,
+                type=QgsProcessingParameterField.Any,
+                optional=True
             )
         )
 
@@ -168,6 +179,14 @@ Obs.: Este algoritmo utiliza o centroide da feição para ordenar geograficament
 
         columnIndex = layer.fields().indexFromName(campo[0])
 
+        Campo_Agrupar = self.parameterAsFields(
+            parameters,
+            self.GROUP,
+            context
+        )
+        if Campo_Agrupar:
+            Campo_Agrupar = layer.fields().indexFromName(Campo_Agrupar[0])
+
         metodo = self.parameterAsEnum(
             parameters,
             self.METHOD,
@@ -185,12 +204,20 @@ Obs.: Este algoritmo utiliza o centroide da feição para ordenar geograficament
 
         # Ler feições
         feedback.pushInfo(self.tr('Reading features...', 'Lendo feições...'))
+        if Campo_Agrupar:
+            cont_grupo = {}
+            id_grupo = {}
         for feat in layer.getSelectedFeatures() if selecionados else layer.getFeatures():
             geom = feat.geometry().centroid()
             id = feat.id()
             x = geom.asPoint().x() * (1 if metodo in [0,2,3,4] else -1)
             y = geom.asPoint().y() * (1 if metodo in [3,4,5,7] else -1)
             valores += [(id, x, y)]
+            if Campo_Agrupar:
+                valor_grupo = feat[Campo_Agrupar]
+                id_grupo[id] = valor_grupo
+                if valor_grupo not in cont_grupo:
+                    cont_grupo[valor_grupo] = 0
 
         estr = np.array(valores, dtype=dtype)
         feedback.pushInfo(self.tr('Sorting the features...', 'Ordenando as feições...'))
@@ -200,8 +227,13 @@ Obs.: Este algoritmo utiliza o centroide da feição para ordenar geograficament
             ordenado = np.sort(estr, order=['y', 'x'])
 
         dic = {}
-        for k, ord in enumerate(ordenado):
-            dic[ord[0]] = k+1
+        if Campo_Agrupar:
+            for k, ord in enumerate(ordenado):
+                cont_grupo[id_grupo[ord[0]]] += 1
+                dic[ord[0]] = cont_grupo[id_grupo[ord[0]]]
+        else:
+            for k, ord in enumerate(ordenado):
+                dic[ord[0]] = k+1
 
         layer.startEditing()
 
