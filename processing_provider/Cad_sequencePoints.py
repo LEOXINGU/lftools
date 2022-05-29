@@ -30,6 +30,7 @@ from qgis.core import (QgsApplication,
                        QgsCoordinateTransform,
                        QgsProcessingParameterFeatureSink)
 from lftools.geocapt.imgs import Imgs
+from lftools.geocapt.cartography import OrientarPoligono
 import os
 from qgis.PyQt.QtGui import QIcon
 
@@ -219,7 +220,7 @@ class SequencePoints(QgsProcessingAlgorithm):
         # Camada de polígonos deve ter apenas 1 polígono
         n_pol = poligono.selectedFeatureCount() if pol_selecionados else poligono.featureCount()
         if n_pol != 1:
-            raise QgsProcessingException(self.tr('Polygon layer must have only 1 feature!', 'A camada do tipo polígono deve ter apenas 1 feição!'))
+            raise QgsProcessingException(self.tr('Polygon layer must have only 1 selected feature!', 'A camada do polígono deve ter apenas 1 feição selecionada!'))
 
         for feat in poligono.getSelectedFeatures() if pol_selecionados else poligono.getFeatures():
             pol = feat.geometry()
@@ -232,43 +233,10 @@ class SequencePoints(QgsProcessingAlgorithm):
             coords = pol.asPolygon()[0]
         coords = coords[:-1]
 
-        if primeiro == 1: #Mais ao norte
-            ind = None
-            ymax = -1e10
-            for k, pnt in enumerate(coords):
-                if pnt.y() > ymax:
-                    ymax = pnt.y()
-                    ind = k
-
-        elif primeiro == 2: #Mais ao sul
-            ind = None
-            ymin = 1e10
-            for k, pnt in enumerate(coords):
-                if pnt.y() < ymin:
-                    ymin = pnt.y()
-                    ind = k
-
-        elif primeiro == 3: #Mais ao Leste
-            ind = None
-            xmax = -1e10
-            for k, pnt in enumerate(coords):
-                if pnt.x() > xmax:
-                    xmax = pnt.x()
-                    ind = k
-
-        elif primeiro == 4: #Mais ao Oeste
-            ind = None
-            xmin = 1e10
-            for k, pnt in enumerate(coords):
-                if pnt.x() < xmin:
-                    xmin = pnt.x()
-                    ind = k
-
-        if primeiro != 0:
-            coords = coords[ind :] + coords[0 : ind]
+        coords = OrientarPoligono(coords, primeiro, sentido=2)
 
         # Número de vértices do polígono deve ser igual ao número de pontos
-        if len(coords) != (pontos.selectedFeatureCount() if pnt_selecionados else pontos.featureCount()):
+        if len(coords)-1 != (pontos.selectedFeatureCount() if pnt_selecionados else pontos.featureCount()):
             raise QgsProcessingException(self.tr('The number of points must equal the number of vertices of the polygon!', 'O número de pontos deve ser igual ao número de vértices do polígono!'))
 
 
@@ -278,7 +246,7 @@ class SequencePoints(QgsProcessingAlgorithm):
         def norma2(p1, p2):
             return (p1.x() - p2.x())**2 + (p1.y() - p2.y())**2
 
-        for cont, vertice in enumerate(coords):
+        for cont, vertice in enumerate(coords[:-1]):
             dist1 = 1e9
             pnt_id = None
             for feat in pontos.getSelectedFeatures() if pnt_selecionados else pontos.getFeatures():
