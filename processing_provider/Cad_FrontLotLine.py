@@ -67,7 +67,7 @@ class FrontLotLine(QgsProcessingAlgorithm):
         return 'cadastro'
 
     def tags(self):
-        return self.tr('cadastro,sequence,number,code,codificar,organize,system,lot,line,front,cadastre,street,borderer,testada,linha').split(',')
+        return self.tr('cadastro,parcela,sequence,number,code,codificar,organize,system,lot,line,front,cadastre,street,borderer,testada,linha,loteamento').split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/cadastre.png'))
@@ -142,16 +142,15 @@ class FrontLotLine(QgsProcessingAlgorithm):
             else:
                 linhas += [geom.asPolygon()[0]]
 
-        tam = len(linhas)
+        TAM = len(linhas)
 
         total = 100.0 / lotes.featureCount() if lotes.featureCount() else 0
         feature = QgsFeature()
 
         # Calculando a diferenca para cada linha
-        new_lines = []
-        for current, i in enumerate(range(tam)):
+        for current, i in enumerate(range(TAM)):
             geom1 = QgsGeometry.fromPolylineXY(linhas[i])
-            for j in range(tam):
+            for j in range(TAM):
                 if i != j:
                     geom2 = QgsGeometry.fromPolylineXY(linhas[j])
                     if geom1.intersects(geom2):
@@ -160,14 +159,35 @@ class FrontLotLine(QgsProcessingAlgorithm):
             if geom1.length() > 0:
                 if geom1.isMultipart():
                     partes = geom1.asMultiPolyline()
-                    for parte in partes:
-                        new_lines += [parte]
+                    partes_novas = []
+                    while len(partes)>1:
+                        tam = len(partes)
+                        for i in range(0,tam-1):
+                            mergeou = False
+                            parte_A = partes[i]
+                            for j in range(i+1,tam):
+                                parte_B = partes[j]
+                                if parte_A[0] == parte_B[0] or parte_A[0] == parte_B[-1] or parte_A[-1] == parte_B[0] or parte_A[-1] == parte_B[-1]:
+                                    mergeou = True
+                                    parte_nova = QgsGeometry.fromPolylineXY(parte_A).combine(QgsGeometry.fromPolylineXY(parte_B))
+                                    parte_nova = parte_nova.asPolyline()
+                                    break
+                            if mergeou:
+                                del partes[i], partes[j-1]
+                                partes = [parte_nova] + partes
+                                break
+                            else:
+                                partes_novas += [parte_A]
+                                del partes[i]
+                                break
+                    if partes:
+                        partes_novas += partes
+                    for parte in partes_novas:
                         geom = QgsGeometry.fromPolylineXY(parte)
                         feature.setGeometry(geom)
                         feature.setAttributes(atributos[i])
                         sink.addFeature(feature, QgsFeatureSink.FastInsert)
                 else:
-                    new_lines += [geom1.asPolyline()]
                     feature.setGeometry(geom1)
                     feature.setAttributes(atributos[i])
                     sink.addFeature(feature, QgsFeatureSink.FastInsert)
