@@ -67,7 +67,7 @@ class SequencePoints(QgsProcessingAlgorithm):
         return 'cadastro'
 
     def tags(self):
-        return self.tr('sequence,reverse,vertex,point,organize,topography').split(',')
+        return self.tr('sequence,reverse,vertex,point,organize,topography,ordenar').split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/cadastre.png'))
