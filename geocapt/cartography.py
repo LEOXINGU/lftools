@@ -280,6 +280,65 @@ def geom2PointList(geom):
             return newPol
 
 
+# Orientar polígono
+def OrientarPoligono(coords, primeiro, sentido):
+    # definir primeiro vértice
+    if primeiro == 1: # Mais ao norte
+        ind = None
+        ymax = -1e10
+        x_ymax = 1e10
+        for k, pnt in enumerate(coords):
+            if pnt.y() > ymax:
+                ymax = pnt.y()
+                x_ymax = pnt.x()
+                ind = k
+            elif pnt.y() == ymax:
+                if pnt.x() < x_ymax:
+                    ymax = pnt.y()
+                    x_ymax = pnt.x()
+                    ind = k
+    elif primeiro == 2: # Mais ao sul
+        ind = None
+        ymin = 1e10
+        x_ymim = -1e10
+        for k, pnt in enumerate(coords):
+            if pnt.y() < ymin:
+                ymin = pnt.y()
+                x_ymim = pnt.x()
+                ind = k
+            elif pnt.y() == ymin:
+                if pnt.x() > x_ymim:
+                    ymin = pnt.y()
+                    x_ymim = pnt.x()
+                    ind = k
+    elif primeiro == 3: # Mais ao Leste
+        ind = None
+        xmax = -1e10
+        for k, pnt in enumerate(coords):
+            if pnt.x() > xmax:
+                xmax = pnt.x()
+                ind = k
+    elif primeiro == 4: # Mais ao Oeste
+        ind = None
+        xmin = 1e10
+        for k, pnt in enumerate(coords):
+            if pnt.x() < xmin:
+                xmin = pnt.x()
+                ind = k
+    if primeiro != 0:
+        coords = coords[ind :] + coords[0 : ind]
+
+    #rotacionar
+    coords = coords +[coords[0]]
+    areaG = areaGauss(coords)
+    if areaG < 0 and sentido == 0:
+        coords = coords[::-1]
+    elif areaG > 0 and sentido == 1:
+        coords = coords[::-1]
+    return coords
+
+    
+
 def map_sistem(lon, lat, ScaleD=1e6):
     # Escala 1:1.000.000
     nome = ''
