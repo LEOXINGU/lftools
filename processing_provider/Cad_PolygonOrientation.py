@@ -18,7 +18,7 @@ __copyright__ = '(C) 2021, Leandro França'
 from PyQt5.QtCore import *
 from qgis.core import *
 from lftools.geocapt.imgs import Imgs
-from lftools.geocapt.cartography import areaGauss, geom2PointList
+from lftools.geocapt.cartography import areaGauss, geom2PointList, OrientarPoligono
 import os
 from qgis.PyQt.QtGui import QIcon
 
@@ -163,61 +163,6 @@ class PolygonOrientation(QgsProcessingAlgorithm):
         if salvar is None:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.SAVE))
 
-        def OrientarPoligono(coords):
-            # definir primeiro vértice
-            if primeiro == 1: # Mais ao norte
-                ind = None
-                ymax = -1e10
-                x_ymax = 1e10
-                for k, pnt in enumerate(coords):
-                    if pnt.y() > ymax:
-                        ymax = pnt.y()
-                        x_ymax = pnt.x()
-                        ind = k
-                    elif pnt.y() == ymax:
-                        if pnt.x() < x_ymax:
-                            ymax = pnt.y()
-                            x_ymax = pnt.x()
-                            ind = k
-            elif primeiro == 2: # Mais ao sul
-                ind = None
-                ymin = 1e10
-                x_ymim = -1e10
-                for k, pnt in enumerate(coords):
-                    if pnt.y() < ymin:
-                        ymin = pnt.y()
-                        x_ymim = pnt.x()
-                        ind = k
-                    elif pnt.y() == ymin:
-                        if pnt.x() > x_ymim:
-                            ymin = pnt.y()
-                            x_ymim = pnt.x()
-                            ind = k
-            elif primeiro == 3: # Mais ao Leste
-                ind = None
-                xmax = -1e10
-                for k, pnt in enumerate(coords):
-                    if pnt.x() > xmax:
-                        xmax = pnt.x()
-                        ind = k
-            elif primeiro == 4: # Mais ao Oeste
-                ind = None
-                xmin = 1e10
-                for k, pnt in enumerate(coords):
-                    if pnt.x() < xmin:
-                        xmin = pnt.x()
-                        ind = k
-            if primeiro != 0:
-                coords = coords[ind :] + coords[0 : ind]
-            #rotacionar
-            coords = coords +[coords[0]]
-            areaG = areaGauss(coords)
-            if areaG < 0 and sentido == 0:
-                coords = coords[::-1]
-            elif areaG > 0 and sentido == 1:
-                coords = coords[::-1]
-            return coords
-
         camada.startEditing() # coloca no modo edição
 
         total = 100.0 / camada.featureCount() if camada.featureCount() else 0
@@ -230,7 +175,7 @@ class PolygonOrientation(QgsProcessingAlgorithm):
                 for pol in poligonos:
                     coords = pol[0]
                     coords = coords[:-1]
-                    coords = OrientarPoligono(coords)
+                    coords = OrientarPoligono(coords, primeiro, sentido)
                     anel = QgsLineString(coords)
                     pol = QgsPolygon(anel)
                     mPol.addGeometry(pol)
@@ -238,7 +183,7 @@ class PolygonOrientation(QgsProcessingAlgorithm):
             else:
                 coords = geom2PointList(geom)[0]
                 coords = coords[:-1]
-                coords = OrientarPoligono(coords)
+                coords = OrientarPoligono(coords, primeiro, sentido)
                 anel = QgsLineString(coords)
                 pol = QgsPolygon(anel)
                 newGeom = QgsGeometry(pol)
