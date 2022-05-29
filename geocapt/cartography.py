@@ -102,6 +102,7 @@ def areaGauss(coord):
         P3 = coord[ 0 if k==(tam-1) else (k+1)]
         soma += P2.x()*(P1.y() - P3.y())
     return soma/2
+    
 
 def raioMedioGauss(lat, EPSG):
     proj_crs = CRS.from_epsg(EPSG)
@@ -337,7 +338,7 @@ def OrientarPoligono(coords, primeiro, sentido):
         coords = coords[::-1]
     return coords
 
-    
+
 
 def map_sistem(lon, lat, ScaleD=1e6):
     # Escala 1:1.000.000
