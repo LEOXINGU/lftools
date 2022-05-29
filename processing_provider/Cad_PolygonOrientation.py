@@ -60,7 +60,7 @@ class PolygonOrientation(QgsProcessingAlgorithm):
         return 'cadastro'
 
     def tags(self):
-        return self.tr('cadastre,clockwise,counterclockwise,oriented,orientation,northmost').split(',')
+        return self.tr('cadastre,clockwise,counterclockwise,oriented,orientation,northmost,ordenar').split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/cadastre.png'))
