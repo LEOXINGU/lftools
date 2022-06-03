@@ -107,7 +107,7 @@ class FrontLotLine(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterNumber(
                 self.TOLERANCE,
-                self.tr('Tolerance for snapping in meters', 'Tolerância para a aderência em metros'),
+                self.tr('Tolerance for snapping in meters', 'Tolerância para a aderência (metros)'),
                 type=1,
                 defaultValue = 0.01
             )
