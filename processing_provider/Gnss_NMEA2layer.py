@@ -160,7 +160,9 @@ Modos:
             QgsProcessingParameterCrs(
                 self.CRS,
                 self.tr('Grid CRS', 'SRC'),
-                QgsCoordinateReferenceSystem('EPSG:4674')))
+                eval(self.tr("QgsCoordinateReferenceSystem('EPSG:4326')", "QgsCoordinateReferenceSystem('EPSG:4674')"))
+                )
+            )
 
         self.addParameter(
             QgsProcessingParameterFeatureSink(
