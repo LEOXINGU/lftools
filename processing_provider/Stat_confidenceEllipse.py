@@ -111,9 +111,7 @@ class ConfidenceEllipse(QgsProcessingAlgorithm):
 
     INPUT = 'INPUT'
     TAM = 'TAM'
-    PESO = 'PESO'
     CAMPO_PESO = 'CAMPO_PESO'
-    AGRUPAR = 'AGRUPAR'
     CAMPO_AGRUPAR = 'CAMPO_AGRUPAR'
     OUTPUT = 'OUTPUT'
 
@@ -240,7 +238,11 @@ class ConfidenceEllipse(QgsProcessingAlgorithm):
         if Campo_Agrupar:
             dic = {}
             for feat in layer.getFeatures():
-                pnt = feat.geometry().asPoint()
+                geom = feat.geometry()
+                if geom.isMultipart():
+                    pnt = geom.asMultiPoint()[0]
+                else:
+                    pnt = geom.asPoint()
                 grupo = feat[Campo_Agrupar]
                 if grupo in dic:
                     dic[grupo]['x'] = dic[grupo]['x'] + [pnt.x()]
@@ -255,7 +257,11 @@ class ConfidenceEllipse(QgsProcessingAlgorithm):
         else:
             dic = {}
             for feat in layer.getFeatures():
-                pnt = feat.geometry().asPoint()
+                geom = feat.geometry()
+                if geom.isMultipart():
+                    pnt = geom.asMultiPoint()[0]
+                else:
+                    pnt = geom.asPoint()
                 grupo = 'ungrouped'
                 if grupo in dic:
                     dic[grupo]['x'] = dic[grupo]['x'] + [pnt.x()]
