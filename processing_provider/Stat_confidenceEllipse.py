@@ -348,8 +348,7 @@ class ConfidenceEllipse(QgsProcessingAlgorithm):
             pol = QgsGeometry.fromPolygonXY([coord + [coord[0]]])
             feat = QgsFeature(Fields)
             feat.setGeometry(pol)
-            cont = 1
-            att = [cont, str(grupo), mediaX, mediaY, std_X,std_Y,
+            att = [current+1, str(grupo), mediaX, mediaY, std_X,std_Y,
                    confidence, float(np.degrees(phi)),
                    float(np.sqrt(size)*a), float(np.sqrt(size)*b)]
             feat.setAttributes(att)
