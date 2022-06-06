@@ -96,6 +96,7 @@ from lftools.processing_provider.Reamb_ResizePhotos import ResizePhotos
 from lftools.processing_provider.Rast_rgb2hsv import RGB2HSV
 from lftools.processing_provider.Cad_GeoNumbering import GeoNumbering
 from lftools.processing_provider.Cad_FrontLotLine import FrontLotLine
+from lftools.processing_provider.Stat_centralTendency import CentralTendency
 
 
 class LFToolsProvider(QgsProcessingProvider):
@@ -177,6 +178,7 @@ class LFToolsProvider(QgsProcessingProvider):
         self.addAlgorithm(RGB2HSV())
         self.addAlgorithm(GeoNumbering())
         self.addAlgorithm(FrontLotLine())
+        self.addAlgorithm(CentralTendency())
 
     def id(self):
         return 'lftools'
