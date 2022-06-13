@@ -97,6 +97,7 @@ from lftools.processing_provider.Rast_rgb2hsv import RGB2HSV
 from lftools.processing_provider.Cad_GeoNumbering import GeoNumbering
 from lftools.processing_provider.Cad_FrontLotLine import FrontLotLine
 from lftools.processing_provider.Stat_centralTendency import CentralTendency
+from lftools.processing_provider.Doc_PointsFromText import PointsFromText
 
 
 class LFToolsProvider(QgsProcessingProvider):
@@ -179,6 +180,7 @@ class LFToolsProvider(QgsProcessingProvider):
         self.addAlgorithm(GeoNumbering())
         self.addAlgorithm(FrontLotLine())
         self.addAlgorithm(CentralTendency())
+        self.addAlgorithm(PointsFromText())
 
     def id(self):
         return 'lftools'
