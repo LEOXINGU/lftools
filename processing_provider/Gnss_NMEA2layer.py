@@ -44,7 +44,6 @@ from qgis.core import (QgsProcessing,
                        QgsProcessingLayerPostProcessorInterface,
                        QgsCoordinateReferenceSystem)
 
-from osgeo import osr, gdal_array, gdal
 from lftools.geocapt.imgs import Imgs
 from lftools.geocapt.cartography import raioMedioGauss
 import numpy as np
@@ -334,7 +333,7 @@ Modos:
             data_hora_ini = unicode(datetime.datetime(ano, mes, dia, int(valores[0, -5]), int(valores[0, -4]), int(valores[0, -3])))
             data_hora_fim = unicode(datetime.datetime(ano, mes, dia, int(valores[-1, -5]), int(valores[-1, -4]), int(valores[-1, -3])))
             # Raio Médio de Gauss
-            R = raioMedioGauss(lat, 4326)
+            R = raioMedioGauss(lat, int(self.tr('4326','4674')))
             sigma_x = (R+h)*np.radians(s_lon)
             sigma_y = (R+h)*np.radians(s_lat)
 
