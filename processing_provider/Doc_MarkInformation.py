@@ -83,7 +83,7 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
         return 'documents'
 
     def tags(self):
-        return self.tr('monograph,mark,report,geodetic,descriptive,memorial,property,topography,survey,real,estate,georreferencing,plan,cadastral,cadastre,documnt').split(',')
+        return self.tr('monograph,mark,report,geodetic,descriptive,memorial,property,topography,survey,real,estate,georreferencing,plan,cadastral,cadastre,document').split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/document.png'))
