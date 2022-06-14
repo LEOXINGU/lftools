@@ -60,7 +60,7 @@ class ConnectFeatures(QgsProcessingAlgorithm):
         return 'connectfeatures'
 
     def displayName(self):
-        return self.tr('Connect feições', 'Conectar feições')
+        return self.tr('Connect features', 'Conectar feições')
 
     def group(self):
         return self.tr('Cadastre', 'Cadastro')
