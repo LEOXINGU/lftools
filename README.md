@@ -8,6 +8,21 @@
   </p>
 </p>
 
+## Tutorials
+<div style="text-align: center;"><a
+ style="font-weight: bold;"
+ href="https://www.youtube.com/watch?v=uuy39iutMhM&list=PLswoyLl1BbPp4zd-M4CmP_B2Qr2ROY3LT&index=1">Click here to learn how to use the LFTools plugin on YouTube</a></div>
+
+## Requirement for QGIS 3.22 in MacOS:
+    
+Install the following package as follows:
+```
+pip3 install Pillow
+```
+
+## Description of each tool
+
+
 <!-- TABLE OF CONTENTS -->
 <details open="open">
   <summary>Set of Tools</summary>
@@ -15,10 +30,19 @@
     <li>
       <a href="#cadastre">Cadastre</a>
       <ul>
+        <li><a href="#connect-feições">Connect feições</a></li>
+      </ul>
+      <ul>
         <li><a href="#front-lot-lines">Front Lot Lines</a></li>
       </ul>
       <ul>
         <li><a href="#geographic-numbering">Geographic Numbering</a></li>
+      </ul>
+      <ul>
+        <li><a href="#orient-polygons">Orient polygons</a></li>
+      </ul>
+      <ul>
+        <li><a href="#sequence-points">Sequence points</a></li>
       </ul>
       </li><li>
       <a href="#cartography">Cartography</a>
@@ -41,6 +65,9 @@
       </ul>
       <ul>
         <li><a href="#geodetic-mark-report">Geodetic mark report</a></li>
+      </ul>
+      <ul>
+        <li><a href="#points-from-deed-description">Points from Deed Description</a></li>
       </ul>
       <ul>
         <li><a href="#synthetic-deed-description">Synthetic deed description</a></li>
@@ -89,6 +116,9 @@
       <a href="#gnss">GNSS</a>
       <ul>
         <li><a href="#nmea-to-layer">NMEA to layer</a></li>
+      </ul>
+      <ul>
+        <li><a href="#pos-file-(.pos)-to-layer">POS file (.pos) to layer</a></li>
       </ul>
       </li><li>
       <a href="#postgis">PostGIS</a>
@@ -179,6 +209,9 @@
       </li><li>
       <a href="#spatial-statistics">Spatial Statistics</a>
       <ul>
+        <li><a href="#central-tendency">Central Tendency</a></li>
+      </ul>
+      <ul>
         <li><a href="#confidence-ellipses">Confidence ellipses</a></li>
       </ul>
       <ul>
@@ -216,13 +249,7 @@
         <li><a href="#merge-lines-in-direction">Merge lines in direction</a></li>
       </ul>
       <ul>
-        <li><a href="#orient-polygons">Orient polygons</a></li>
-      </ul>
-      <ul>
         <li><a href="#reverse-vertex-order">Reverse vertex order</a></li>
-      </ul>
-      <ul>
-        <li><a href="#sequence-points">Sequence points</a></li>
       </ul>
       </li>
   </ol>
@@ -255,10 +282,19 @@
       </li><li>
       <a href="#cadastro">Cadastro</a>
       <ul>
+        <li><a href="#conectar-feições">Conectar feições</a></li>
+      </ul>
+      <ul>
         <li><a href="#linhas-de-testada">Linhas de Testada</a></li>
       </ul>
       <ul>
         <li><a href="#numerar-geograficamente">Numerar geograficamente</a></li>
+      </ul>
+      <ul>
+        <li><a href="#orientar-polígonos">Orientar polígonos</a></li>
+      </ul>
+      <ul>
+        <li><a href="#sequenciar-pontos">Sequenciar pontos</a></li>
       </ul>
       </li><li>
       <a href="#cartografia">Cartografia</a>
@@ -284,6 +320,9 @@
       </ul>
       <ul>
         <li><a href="#planilha-de-área-e-perímetro">Planilha de área e perímetro</a></li>
+      </ul>
+      <ul>
+        <li><a href="#reconstituição-de-memorial">Reconstituição de Memorial</a></li>
       </ul>
       </li><li>
       <a href="#drones">Drones</a>
@@ -322,10 +361,16 @@
       <ul>
         <li><a href="#pontos-aleatórios-gaussiano">Pontos aleatórios gaussiano</a></li>
       </ul>
+      <ul>
+        <li><a href="#tendência-central">Tendência central</a></li>
+      </ul>
       </li><li>
       <a href="#gnss">GNSS</a>
       <ul>
         <li><a href="#nmea-para-camada">NMEA para camada</a></li>
+      </ul>
+      <ul>
+        <li><a href="#pos-para-camada">POS para camada</a></li>
       </ul>
       </li><li>
       <a href="#mão-na-roda">Mão na Roda</a>
@@ -438,12 +483,6 @@
       <ul>
         <li><a href="#mesclar-linhas-na-direção">Mesclar linhas na direção</a></li>
       </ul>
-      <ul>
-        <li><a href="#orientar-polígonos">Orientar polígonos</a></li>
-      </ul>
-      <ul>
-        <li><a href="#sequenciar-pontos">Sequenciar pontos</a></li>
-      </ul>
       </li>
   </ol>
 </details>
@@ -453,6 +492,18 @@
 
 ## Cadastre
 
+
+### Connect feições
+Creates new vertices between adjacent polygons to ensure perfect connectivity (topology) between them.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/cadastre_connectFeatures.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 ### Front Lot Lines
 Generates front lot lines from a polygon layer of parcels.
@@ -473,6 +524,30 @@ This tool fills in a numeric attribute following a geographic criterion, for exa
   <tbody>
     <tr>
       <td><img src="images/tutorial/cadastre_geonumbering.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Orient polygons
+This tool orients the geometry of polygon-like features clockwise or counterclockwise, defining the first vertex as the north, south, east, or west.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/vect_orient_polygon.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Sequence points
+This script fills a certain attribute of the features of a layer of points according to its sequence in relation to the polygon of another layer.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/vect_sequence_points.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -555,6 +630,18 @@ This tool generates report(s) with the informations about a geodetic landmarks a
   <tbody>
     <tr>
       <td><img src="images/tutorial/doc_mark.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Points from Deed Description
+Performs the reconstitution of a Deed Description using Regular Expressions (RegEx).
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/doc_pointsFromText.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -743,6 +830,18 @@ Loads a NMEA file (protocol 0183) from GNSS receivers as a point layer.</br>Mode
 </table>
 </div>
 
+### POS file (.pos) to layer
+Loads a POS file (.pos) from GNSS processing as a point layer.</br>Compatibility: RTKLIB, IBGE-PPP.</br>Types:</br>◼️ All processed points</br>◼️ Last point
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/gnss_pos2layer.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
 
 
 ## PostGIS
@@ -838,7 +937,7 @@ This tool allows you to restore a database content by importing all the backup i
 
 
 ### Band Arithmetic
-Performs an arithmetic operation on the bands of a raster. The predefined formula is used to calculate the Green Leaf Index (GLI) for a RGB raster. However you can enter your own formula.</br>Examples:</br>NDVI with RGN raster: ( b3 - b1) / (b3 + b1)</br>NDWI with RGN raster: ( b3 - b2) / (b3 + b2)</br>GLI with RGB raster: (2*b2 - b1 - b3) / (2*b2 + b1 + b3)</br>Obs.:</br>The operators supported are:  + , - , * , /
+Performs an arithmetic operation on the bands of a raster. The predefined formula is used to calculate the Green Leaf Index (GLI) for a RGB raster. However you can enter your own formula.</br>Examples:</br>NDVI with RGN raster: ( b3 - b1) / (b3 + b1)</br>NDWI with RGN raster: ( b3 - b2) / (b3 + b2)</br>GLI with RGB raster: (2*b2 - b1 - b3) / (2*b2 + b1 + b3)</br>VARI with RGB raster: (b2 - b1) / (b2 + b1 - b3)</br>VIgreen with RGB raster: (b2 - b1) / (b2 + b1)</br>Obs.:</br>The operators supported are:  + , - , * , /
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
@@ -850,7 +949,7 @@ Performs an arithmetic operation on the bands of a raster. The predefined formul
 </div>
 
 ### Binary Thresholding
-Creates a binarized raster by dividing the input raster into two distinct classes from statistical data (lower and upper threshold) of area samples.</br>A class matches the values within the range of thresholds, where the value 1 (true) is returned. The other class corresponds to values outside the range, returning the value 0 (false).
+Creates a binarized raster, dividing the input raster into two distinct classes from statistical data (lower and upper threshold) from area or point samples. Optionally, minimum and maximum threshold values can also be set.</br>A class matches the values within the range of thresholds, where the value 1 (true) is returned. The other class corresponds to values outside the range, returning the value 0 (false).
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
@@ -1080,6 +1179,18 @@ This tool generates a layer of points with <b>Spot Elevations</b> from a <b>Digi
 ## Spatial Statistics
 
 
+### Central Tendency
+Returns the central tendency point(s) for clustering points using the average or median of the input point coordinates.</br>Note 1: Layer in a projected SRC gets more accurate results.</br>Note 2: The Median algorithm is less influenced by outliers.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/stat_central_tendency.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
 ### Confidence ellipses
 Creates ellipses based on the covariance matrix to summarize the spatial characteristics of point type geographic features: central tendency, dispersion, and directional trends.
 <div align="center">
@@ -1163,7 +1274,7 @@ This tool calculates the coordinates (X, Y, Z) of a point from azimuth and zenit
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/survey_SGL_coord.jpg"></td>
+      <td><img src="images/tutorial/survey_LTP.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1222,18 +1333,6 @@ This algorithm merges lines that touch at their starting or ending points and ha
 </table>
 </div>
 
-### Orient polygons
-This tool orients the geometry of polygon-like features clockwise or counterclockwise, defining the first vertex as the north, south, east, or west.
-<div align="center">
-<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
-  <tbody>
-    <tr>
-      <td><img src="images/tutorial/vect_orient_polygon.jpg"></td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
 ### Reverse vertex order
 Inverts vertex order for polygons and lines.
 <div align="center">
@@ -1241,18 +1340,6 @@ Inverts vertex order for polygons and lines.
   <tbody>
     <tr>
       <td><img src="images/tutorial/vect_reverse_vertex_sequence.jpg"></td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-### Sequence points
-This script fills a certain attribute of the features of a layer of points according to its sequence in relation to the polygon of another layer.
-<div align="center">
-<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
-  <tbody>
-    <tr>
-      <td><img src="images/tutorial/vect_sequence_points.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1332,7 +1419,7 @@ Este algoritmo transforma coordenadas entre os seguintes sistemas de referência
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/survey_SGL_coord.jpg"></td>
+      <td><img src="images/tutorial/survey_LTP.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1342,6 +1429,18 @@ Este algoritmo transforma coordenadas entre os seguintes sistemas de referência
 
 ## Cadastro
 
+
+### Conectar feições
+Gera novos vértices entre polígonos adjacentes para garantir a perfeita conectividade (topologia) entre eles.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/cadastre_connectFeatures.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 ### Linhas de Testada
 Gera as linhas de testada das parcelas a partir dos polígonos dos lotes.
@@ -1362,6 +1461,30 @@ Esta ferramenta preenche um atributo numérico seguindo um critério geográfico
   <tbody>
     <tr>
       <td><img src="images/tutorial/cadastre_geonumbering.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Orientar polígonos
+Esta ferramenta orienta a geometria de feições do tipo polígono no sentido horário ou antihorário, definindo o primeiro vértice mais ao norte, sul, leste ou oeste.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/vect_orient_polygon.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Sequenciar pontos
+Este script preenche um determinado atributo das feições de uma camada de pontos de acordo com sua sequência em relação ao polígono de outra camada.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/vect_sequence_points.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1456,6 +1579,18 @@ Esta gera o Relatório de Cálculo Analítico de Área, Azimutes, Lados, Coorden
   <tbody>
     <tr>
       <td><img src="images/tutorial/doc_analytical_results.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Reconstituição de Memorial
+Realiza a reconstituição de Memorial descritivo utilizando Expressões Regulares (RegEx).
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/doc_pointsFromText.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1603,6 +1738,18 @@ Gera pontos aleatórios no espaço 2D a partir de um ponto central (X0, Y0), des
 </table>
 </div>
 
+### Tendência central
+Esta ferramenta retorna o(s) ponto(s) de tendência central para agrupamento de pontos utilizando a média ou mediana das coordenadas dos pontos de entrada.</br>Observação 1: Camada em um SRC projetado obtém resultado mais acurados.</br>Observação 2: O algoritmo da Mediana é menos influenciado por outliers.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/stat_central_tendency.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
 
 
 ## GNSS
@@ -1615,6 +1762,18 @@ Carrega um arquivo NMEA de rastreio GNSS (protocolo 0183) como uma camada do tip
   <tbody>
     <tr>
       <td><img src="images/tutorial/gnss_nmea.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### POS para camada
+Carrega um arquivo POS resultante do processamento de dados GNSS como uma camada do tipo ponto.</br>Compatibilidade: RTKLIB, IBGE-PPP</br>Tipos:</br>◼️ Todos os pontos processados</br>◼️ Último ponto
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/gnss_pos2layer.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1756,7 +1915,7 @@ Esta ferramenta realiza a troca do tipo de codificação de um arquivo <b>.sql</
 
 
 ### Aritmética de bandas
-Executa uma operação aritmética entre as bandas de um raster. A fórmula predefinida é usado para calcular o Green Leaf Index (GLI) para um raster RGB. No entanto, você pode inserir sua própria fórmula.</br>Exemplos:</br>NDVI com raster RGN: ( b3 - b1) / (b3 + b1)</br>NDWI com raster RGN: ( b3 - b2) / (b3 + b2)</br>GLI com raster RGB: (2*b2 - b1 - b3) / (2*b2 + b1 + b3)</br>Obs.:</br>Os operadores suportados são: + , - , * , /
+Executa uma operação aritmética entre as bandas de um raster. A fórmula predefinida é usado para calcular o Green Leaf Index (GLI) para um raster RGB. No entanto, você pode inserir sua própria fórmula.</br>Exemplos:</br>NDVI com raster RGN: ( b3 - b1) / (b3 + b1)</br>NDWI com raster RGN: ( b3 - b2) / (b3 + b2)</br>GLI com raster RGB: (2*b2 - b1 - b3) / (2*b2 + b1 + b3)</br>VARI com raster RGB: (b2 - b1) / (b2 + b1 - b3)</br>VIgreen com raster RGB: (b2 - b1) / (b2 + b1)</br>Obs.:</br>Os operadores suportados são: + , - , * , /
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
@@ -1768,7 +1927,7 @@ Executa uma operação aritmética entre as bandas de um raster. A fórmula pred
 </div>
 
 ### Carregar raster pela localização
-Carrega um conjunto de arquivos raster que interseptam as geometrias de uma camada vetorial de entrada.
+Carrega um conjunto de arquivos raster que interceptam as geometrias de uma camada vetorial de entrada.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
@@ -1876,7 +2035,7 @@ Cria uma camada vetorial com o inventário de arquivos raster de uma pasta. O ti
 </div>
 
 ### Limiarização Binária
-Cria um raster binarizado, dividindo o raster de entrada em duas classes distintas a partir de dados estatísticos (limiar inferior e superior) de amostras de áreas.</br>Uma classe irá corresponder aos valores compreendidos dentro do intervalo dos limiares, sendo retornado o valor 1 (verdadeiro). Já a outra classe correpondem aos valores fora do intervalo, sendo retornado o valor 0 (falso).
+Cria um raster binarizado, dividindo o raster de entrada em duas classes distintas a partir de dados estatísticos (limiar inferior e superior) de amostras de áreas ou pontuais. Opcionalmente, os valores de limiar mínimo e máximo também podem ser definidos.</br>Uma classe irá corresponder aos valores compreendidos dentro do intervalo dos limiares, sendo retornado o valor 1 (verdadeiro). Já a outra classe correpondem aos valores fora do intervalo, sendo retornado o valor 0 (falso).
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
@@ -2041,30 +2200,6 @@ Este algoritmo mescla linhas que se tocam nos seus pontos inicial ou final e tem
   <tbody>
     <tr>
       <td><img src="images/tutorial/vect_directional_merge.jpg"></td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-### Orientar polígonos
-Esta ferramenta orienta a geometria de feições do tipo polígono no sentido horário ou antihorário, definindo o primeiro vértice mais ao norte, sul, leste ou oeste.
-<div align="center">
-<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
-  <tbody>
-    <tr>
-      <td><img src="images/tutorial/vect_orient_polygon.jpg"></td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-### Sequenciar pontos
-Este script preenche um determinado atributo das feições de uma camada de pontos de acordo com sua sequência em relação ao polígono de outra camada.
-<div align="center">
-<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
-  <tbody>
-    <tr>
-      <td><img src="images/tutorial/vect_sequence_points.jpg"></td>
     </tr>
   </tbody>
 </table>
