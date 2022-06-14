@@ -14,7 +14,7 @@
  href="https://www.youtube.com/watch?v=uuy39iutMhM&list=PLswoyLl1BbPp4zd-M4CmP_B2Qr2ROY3LT&index=1">Click here to learn how to use the LFTools plugin on YouTube</a></div>
 
 ## Requirement for QGIS 3.22 in MacOS:
-    
+
 Install the following package as follows:
 ```
 pip3 install Pillow
@@ -30,7 +30,7 @@ pip3 install Pillow
     <li>
       <a href="#cadastre">Cadastre</a>
       <ul>
-        <li><a href="#connect-feições">Connect feições</a></li>
+        <li><a href="#connect-features">Connect features</a></li>
       </ul>
       <ul>
         <li><a href="#front-lot-lines">Front Lot Lines</a></li>
@@ -493,7 +493,7 @@ pip3 install Pillow
 ## Cadastre
 
 
-### Connect feições
+### Connect features
 Creates new vertices between adjacent polygons to ensure perfect connectivity (topology) between them.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
@@ -2204,5 +2204,3 @@ Este algoritmo mescla linhas que se tocam nos seus pontos inicial ou final e tem
   </tbody>
 </table>
 </div>
-
-
