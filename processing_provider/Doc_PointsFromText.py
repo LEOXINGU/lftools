@@ -247,10 +247,10 @@ class PointsFromText(QgsProcessingAlgorithm):
             feedback.pushInfo(self.tr(str(x_list)))
             feedback.pushInfo(self.tr('Coordenadas Y:'))
             feedback.pushInfo(self.tr(str(y_list)))
-            raise QgsProcessingException('Erro na quantidade de coordenadas')
+            raise QgsProcessingException(self.tr('Error: The number of input values does not match.', 'Erro na quantidade de coordenadas'))
 
         tam = tam_nome
-        feedback.pushInfo(self.tr('Código e coordenadas:'))
+        feedback.pushInfo(self.tr('Codes and coordinates', 'Código e coordenadas:'))
         for k, nome in enumerate(nm_list):
             feedback.pushInfo(self.tr('{}   {}  {}'.format(nome ,x_list[k], y_list[k])))
 
