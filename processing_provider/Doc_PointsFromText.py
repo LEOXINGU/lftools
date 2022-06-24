@@ -26,6 +26,7 @@ from qgis.core import (QgsProcessing,
                        QgsApplication,
                        QgsProcessingParameterString,
                        QgsProcessingParameterCrs,
+                       QgsProcessingParameterBoolean,
                        QgsFields,
                        QgsWkbTypes,
                        QgsField,
@@ -51,6 +52,7 @@ class PointsFromText(QgsProcessingAlgorithm):
     TEXT = 'TEXT'
     CRS = 'CRS'
     OUTPUT ='OUTPUT'
+    DEC_SEPARATOR = 'DEC_SEPARATOR'
 
     LOC = QgsApplication.locale()[:2]
 
@@ -146,6 +148,14 @@ class PointsFromText(QgsProcessingAlgorithm):
         )
 
         self.addParameter(
+            QgsProcessingParameterBoolean(
+            self.DEC_SEPARATOR,
+            self.tr('Decimal separator is dot', 'Separador decimal é ponto'),
+            defaultValue = False if self.LOC == 'pt' else True
+            )
+        )
+
+        self.addParameter(
             QgsProcessingParameterFeatureSink(
                 self.OUTPUT,
                 self.tr('Point layer','Vértices do Memorial')
@@ -182,6 +192,12 @@ class PointsFromText(QgsProcessingAlgorithm):
         texto = self.parameterAsString(
             parameters,
             self.TEXT,
+            context
+        )
+
+        sep_decimal = self.parameterAsBool(
+            parameters,
+            self.DEC_SEPARATOR,
             context
         )
 
@@ -240,20 +256,34 @@ class PointsFromText(QgsProcessingAlgorithm):
 
         # Removendo caracteres não digito
         lista_X, lista_Y = [],[]
-        for k in range(tam):
-            txt = ''
-            for s in x_list[k]:
-                if s.isdigit() or s == ',':
-                    txt += s
-            txt = txt.replace(',','.')
-            lista_X += [float(txt)]
+        if sep_decimal:
+            for k in range(tam):
+                txt = ''
+                for s in x_list[k]:
+                    if s.isdigit() or s == '.':
+                        txt += s
+                lista_X += [float(txt)]
 
-            txt = ''
-            for s in y_list[k]:
-                if s.isdigit() or s == ',':
-                    txt += s
-            txt = txt.replace(',','.')
-            lista_Y += [float(txt)]
+                txt = ''
+                for s in y_list[k]:
+                    if s.isdigit() or s == '.':
+                        txt += s
+                lista_Y += [float(txt)]
+        else:
+            for k in range(tam):
+                txt = ''
+                for s in x_list[k]:
+                    if s.isdigit() or s == ',':
+                        txt += s
+                txt = txt.replace(',','.')
+                lista_X += [float(txt)]
+
+                txt = ''
+                for s in y_list[k]:
+                    if s.isdigit() or s == ',':
+                        txt += s
+                txt = txt.replace(',','.')
+                lista_Y += [float(txt)]
 
         # Varrer pontos
         feat = QgsFeature()
