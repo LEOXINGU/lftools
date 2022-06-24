@@ -415,8 +415,8 @@ def deedtable(layer_name, ini, fim, titulo, fontsize, feature, parent):
     for feat in layer.getFeatures():
         pnt = feat.geometry().asPoint()
         coord = geom2PointList(feat.geometry())
-        pnts_UTM[feat['ordem']] = [coordinateTransformer.transform(pnt), feat['tipo'], feat['codigo'], MeridianConvergence(pnt.x(), pnt.y(), crsDest) ]
-        pnts_GEO[feat['sequence']] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), feat['tipo'], feat['codigo'] ]
+        pnts_UTM[feat['sequence']] = [coordinateTransformer.transform(pnt), feat['type'], feat['code'], MeridianConvergence(pnt.x(), pnt.y(), crsDest) ]
+        pnts_GEO[feat['sequence']] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), feat['type'], feat['code'] ]
 
     # Calculo dos Azimutes e Distancias
     tam = len(pnts_UTM)
