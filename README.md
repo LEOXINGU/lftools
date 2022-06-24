@@ -17,7 +17,7 @@
 
 Install the following package as follows:
 ```
-pip3 install Pillow
+pip install Pillow
 ```
 
 ## Description of each tool
