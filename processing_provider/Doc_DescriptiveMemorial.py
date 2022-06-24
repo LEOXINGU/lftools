@@ -166,7 +166,7 @@ class DescriptiveMemorial(QgisAlgorithm):
                 self.tr('Logo (JPEG)', 'Logomarca (JPEG)'),
                 behavior=QgsProcessingParameterFile.File,
                 defaultValue=None,
-                fileFilter = 'Image (*.jpeg *.jpg)',
+                fileFilter = 'Image (*.jpeg *.jpg *.JPG)',
                 optional = True
             )
         )
