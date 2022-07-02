@@ -72,6 +72,7 @@ def transformGeom2D(geom, CoordTransf):
             return newGeom
         else:
             pnt = geom.asPoint()
+            x, y = CoordTransf(pnt)
             newPnt = QgsPointXY(x,y)
             newGeom = QgsGeometry.fromPointXY(newPnt)
             return newGeom
