@@ -6,7 +6,7 @@
 name=LF Tools
 qgisMinimumVersion=3.10
 description=Tools for cartographic production, surveying, database management, digital image processing and spatial analysis.
-version=1.7.0
+version=1.7.1
 author=Leandro França
 email=geoleandro.franca@gmail.com
 
@@ -21,6 +21,7 @@ repository=https://github.com/LEOXINGU/lftools
 hasProcessingProvider=yes
 # Uncomment the following line and add your changelog:
 # changelog=
+	1.7.1 - Bug fix of Ponts from text tool
 	1.7.0 - New tools for cadastre and others
 	1.6.2 - Bug fix of the Front Lot Lines tool
 	1.6.1 - Bug fix of Descriptive Memorial for PointZ error
