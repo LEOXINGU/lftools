@@ -134,7 +134,7 @@ Tipos:
         )
 
         tipo = [self.tr('All points processed','Todos os pontos processados'),
-                self.tr('SLast point','Último ponto')
+                self.tr('Last point','Último ponto')
                ]
 
         self.addParameter(
@@ -159,7 +159,7 @@ Tipos:
         self.addParameter(
             QgsProcessingParameterCrs(
                 self.CRS,
-                self.tr('Grid CRS', 'SRC'),
+                self.tr('CRS', 'SRC'),
                 eval(self.tr("QgsCoordinateReferenceSystem('EPSG:4326')", "QgsCoordinateReferenceSystem('EPSG:4674')"))
                 )
             )
@@ -220,7 +220,7 @@ Tipos:
 
         arq = codecs.open(caminho, 'r', encoding='utf-8', errors='ignore')
 
-        tipo = self.parameterAsEnum(
+        saida = self.parameterAsEnum(
             parameters,
             self.TYPE,
             context
@@ -309,11 +309,16 @@ Tipos:
             feat['num_sat'] = nsat
             feat['quality'] = quality
 
-            feat.setGeometry(QgsPoint(lon, lat, h))
-            sink.addFeature(feat, QgsFeatureSink.FastInsert)
+            if saida == 0:
+                feat.setGeometry(QgsPoint(lon, lat, h))
+                sink.addFeature(feat, QgsFeatureSink.FastInsert)
             if feedback.isCanceled():
                 break
             feedback.setProgress(int((k+1) * total))
+
+        if saida == 1:
+            feat.setGeometry(QgsPoint(lon, lat, h))
+            sink.addFeature(feat, QgsFeatureSink.FastInsert)
 
         feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
         feedback.pushInfo(self.tr('Leandro Franca - Cartographic Engineer', 'Leandro França - Eng Cart'))
