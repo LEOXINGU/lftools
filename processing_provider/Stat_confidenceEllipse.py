@@ -135,7 +135,7 @@ class ConfidenceEllipse(QgsProcessingAlgorithm):
                 self.TAM,
                 self.tr('Size', 'Tamanho'),
 				options = tipos,
-                defaultValue= 1
+                defaultValue = 1
             )
         )
 
@@ -144,9 +144,9 @@ class ConfidenceEllipse(QgsProcessingAlgorithm):
             QgsProcessingParameterField(
                 self.CAMPO_PESO,
                 self.tr('Weight Field', 'Campo de Peso'),
-                parentLayerParameterName=self.INPUT,
-                type=QgsProcessingParameterField.Numeric,
-                optional=True
+                parentLayerParameterName = self.INPUT,
+                type = QgsProcessingParameterField.Numeric,
+                optional = True
             )
         )
 
@@ -155,8 +155,8 @@ class ConfidenceEllipse(QgsProcessingAlgorithm):
                 self.CAMPO_AGRUPAR,
                 self.tr('Group Field', 'Campo de Agrupamento'),
                 parentLayerParameterName=self.INPUT,
-                type=QgsProcessingParameterField.Any,
-                optional=True
+                type = QgsProcessingParameterField.Any,
+                optional = True
             )
         )
 
