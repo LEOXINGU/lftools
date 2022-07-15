@@ -21,6 +21,8 @@ from lftools.geocapt.imgs import Imgs
 from lftools.geocapt.cartography import *
 import os
 from qgis.PyQt.QtGui import QIcon
+from lftools import geomag
+from datetime import date
 
 class Extent2UTMGrid(QgsProcessingAlgorithm):
 
@@ -85,6 +87,14 @@ class Extent2UTMGrid(QgsProcessingAlgorithm):
                       <p align="right">
                       <b>'''+self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
                       </p>'''+ social_BW + '''</div>
+                      <div>
+                      <p><b>'''+ self.tr('Source:','Créditos:') + ''' </b></p>
+                      <p>
+                      <b><a href="https://github.com/cmweiss/geomag" target="_blank">Christopher Weiss: geomag Python package</a></b>
+                      </p>
+                      <p>
+                      <b><a href="https://www.ngdc.noaa.gov/geomag/geomag.shtml" target="_blank">NCEI Geomagnetic Modeling Team and British Geological Survey. 2019. World Magnetic Model 2020. NOAA National Centers for Environmental Information. doi: 10.25921/11v3-da71, 2020.</a></b>
+                      </p>
                     </div>'''
         return self.tr(self.txt_en, self.txt_pt) + footer
 
@@ -129,7 +139,7 @@ class Extent2UTMGrid(QgsProcessingAlgorithm):
             QgsProcessingParameterBoolean(
                 self.CHART_SIZE,
                 self.tr('Calculate Chart Size (Height and Width)', 'Calcular Altura e Largura da Carta'),
-                defaultValue= False
+                defaultValue= True
             )
         )
 
@@ -137,7 +147,7 @@ class Extent2UTMGrid(QgsProcessingAlgorithm):
             QgsProcessingParameterBoolean(
                 self.MC,
                 self.tr('Calculate Meridian Convergence (MC)', 'Calcular Convergência Meridiana (CM)'),
-                defaultValue= False
+                defaultValue= True
             )
         )
 
@@ -145,7 +155,7 @@ class Extent2UTMGrid(QgsProcessingAlgorithm):
             QgsProcessingParameterBoolean(
                 self.MD,
                 self.tr('Calculate Magnetic Declination (MD)', 'Calcular Declinação Magnética (DM)'),
-                defaultValue= False
+                defaultValue= True
             )
         )
 
@@ -153,7 +163,7 @@ class Extent2UTMGrid(QgsProcessingAlgorithm):
             QgsProcessingParameterBoolean(
                 self.ZONE_HEMISF,
                 self.tr('Calculate Zone and Hemisphere', 'Calcular Fuso e Hemisfério'),
-                defaultValue= False
+                defaultValue= True
             )
         )
 
@@ -335,6 +345,14 @@ class Extent2UTMGrid(QgsProcessingAlgorithm):
                 if zone_hemisf:
                     zone, hemisf = FusoHemisf(QgsPointXY(lon, lat))
                     feat[self.tr('zone_hemisphere', 'fuso_hemisfério')] = str(zone)+hemisf
+
+                if mag_decl:
+                    data = date.today()
+                    DM = geomag.declination(centroide.y(), centroide.x(), h=0, time = data)
+                    var_DM = geomag.declination(centroide.y(), centroide.x(), h=0, time = date(data.year + 1 , data.month, data.day)) - DM
+                    feat[self.tr('MD', 'DM')] = float(DM)
+                    feat[self.tr('VAR_MD', 'var_DM')] = float(var_DM)
+                    feat[self.tr('Epoch', 'Época')] = '{}-{:02d}-{:02d}'.format(data.year , data.month, data.day)
 
                 # Coordinate Transformations (if needed)
                 geom = geom if crs.isGeographic() else reprojectPoints(geom, coordinateTransformer)
