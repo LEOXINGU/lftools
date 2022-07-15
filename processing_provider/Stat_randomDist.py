@@ -128,7 +128,7 @@ class RandomDist(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.STDX,
                 self.tr('Standard Deviation for X', 'Desvio-padrão para X'),
-                type =1,
+                type = 1,
                 defaultValue = 2
                 )
             )
@@ -137,7 +137,7 @@ class RandomDist(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.STDY,
                 self.tr('Standard Deviation for Y', 'Desvio-padrão para Y'),
-                type =1,
+                type = 1,
                 defaultValue = 1
                 )
             )
@@ -146,7 +146,7 @@ class RandomDist(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.ROTATION,
                 self.tr('Rotation Angle', 'Ângulo de Rotação'),
-                type =1,
+                type = 1,
                 defaultValue = 45
                 )
             )
