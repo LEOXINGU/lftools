@@ -105,7 +105,7 @@ class Inom2utmGrid(QgsProcessingAlgorithm):
                 self.TYPE,
                 self.tr('Type', 'Tipo'),
 				options = tipos,
-                defaultValue= 0
+                defaultValue = 0
             )
         )
 
