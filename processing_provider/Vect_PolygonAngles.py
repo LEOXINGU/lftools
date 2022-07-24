@@ -141,46 +141,52 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
 
         total = 100.0 / source.featureCount() if source.featureCount() else 0
         fet = QgsFeature()
-        for current, pol in enumerate(source.getFeatures()):
-            geom = pol.geometry()
+        for current, feat in enumerate(source.getFeatures()):
+            geom = feat.geometry()
             if geom.isMultipart():
-                coord = geom.asMultiPolygon[0][0] # Primeiro polígono e primeiro anel
+                poligonos = geom.asMultiPolygon() # Poligonos
+                coords = []
+                for poligono in poligonos:
+                    coords += [poligono[0]] # anel externo
             else:
-                coord = geom.asPolygon()[0] # Primeiro anel
-            AreaGauss = areaGauss(coord[:-1])
-            tam = len(coord[:-1])
-            cont = 0
-            pntsDic = {}
-            for ponto in coord[:-1]:
-                cont += 1
-                pntsDic[cont] = {'pnt': ponto}
-            # Cálculo dos Ângulos Internos e Externos
-            for k in range(tam):
-                P1 = pntsDic[ tam if k==0 else k]['pnt']
-                P2 = pntsDic[k+1]['pnt']
-                P3 = pntsDic[ 1 if (k+2)==(tam+1) else (k+2)]['pnt']
-                alfa = azimute(P2, P1)[0] - azimute(P2,P3)[0]
-                alfa = alfa if alfa > 0 else alfa+2*pi
-                if AreaGauss > 0: # sentido horário
-                    pntsDic[k+1]['alfa_int'] = alfa*180/pi
-                    pntsDic[k+1]['alfa_ext'] = 360 - alfa*180/pi
-                else: # sentido anti-horário
-                    pntsDic[k+1]['alfa_ext'] = alfa*180/pi
-                    pntsDic[k+1]['alfa_int'] = 360 - alfa*180/pi
-            # Carregando ângulos internos na camada
-            for ponto in pntsDic:
-                fet.setGeometry(QgsGeometry.fromPointXY(pntsDic[ponto]['pnt']))
-                fet.setAttributes([ponto,
-                                    float(pntsDic[ponto]['alfa_int']),
-                                    dd2dms(pntsDic[ponto]['alfa_int'],1),
-                                    float(pntsDic[ponto]['alfa_ext']),
-                                    dd2dms(pntsDic[ponto]['alfa_ext'],1)
-                                        ])
-                sink.addFeature(fet, QgsFeatureSink.FastInsert)
+                coords = [geom.asPolygon()[0]] # anel externo
 
-                if feedback.isCanceled():
-                    break
-                feedback.setProgress(int(current * total))
+            # para cada parte
+            for coord in coords:
+                AreaGauss = areaGauss(coord[:-1])
+                tam = len(coord[:-1])
+                cont = 0
+                pntsDic = {}
+                for ponto in coord[:-1]:
+                    cont += 1
+                    pntsDic[cont] = {'pnt': ponto}
+                # Cálculo dos Ângulos Internos e Externos
+                for k in range(tam):
+                    P1 = pntsDic[ tam if k==0 else k]['pnt']
+                    P2 = pntsDic[k+1]['pnt']
+                    P3 = pntsDic[ 1 if (k+2)==(tam+1) else (k+2)]['pnt']
+                    alfa = azimute(P2, P1)[0] - azimute(P2,P3)[0]
+                    alfa = alfa if alfa > 0 else alfa+2*pi
+                    if AreaGauss > 0: # sentido horário
+                        pntsDic[k+1]['alfa_int'] = alfa*180/pi
+                        pntsDic[k+1]['alfa_ext'] = 360 - alfa*180/pi
+                    else: # sentido anti-horário
+                        pntsDic[k+1]['alfa_ext'] = alfa*180/pi
+                        pntsDic[k+1]['alfa_int'] = 360 - alfa*180/pi
+                # Carregando ângulos internos na camada
+                for ponto in pntsDic:
+                    fet.setGeometry(QgsGeometry.fromPointXY(pntsDic[ponto]['pnt']))
+                    fet.setAttributes([ponto,
+                                        float(pntsDic[ponto]['alfa_int']),
+                                        dd2dms(pntsDic[ponto]['alfa_int'],1),
+                                        float(pntsDic[ponto]['alfa_ext']),
+                                        dd2dms(pntsDic[ponto]['alfa_ext'],1)
+                                            ])
+                    sink.addFeature(fet, QgsFeatureSink.FastInsert)
+
+            if feedback.isCanceled():
+                break
+            feedback.setProgress(int(current * total))
 
         feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
         feedback.pushInfo(self.tr('Leandro França - Cartographic Engineer', 'Leandro França - Eng Cart'))
