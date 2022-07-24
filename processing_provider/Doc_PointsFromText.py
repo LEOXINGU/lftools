@@ -222,6 +222,9 @@ class PointsFromText(QgsProcessingAlgorithm):
         if sink is None:
             raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT))
 
+        # Eliminando espaços duplos e nova linha no texto
+        texto = texto.replace('  ',' ').replace('\n','').replace('\t',' ')
+
         # Extraindo dados
         nm_list = re.findall(regex_nome, texto)
         x_list = re.findall(regex_x, texto)
