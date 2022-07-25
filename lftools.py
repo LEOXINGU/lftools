@@ -41,7 +41,7 @@ from PyQt5.QtCore import QCoreApplication
 from .lftools_provider import LFToolsProvider
 from .expressions import *
 
-exprs = (coord2inom, fieldstat, dd2dms, projectCRS, layerCRS,
+exprs = (coord2inom, fieldstat, dd2dms, projectCRS, layerCRS, magneticdec,
          dms2dd, scalefactor, zonehemisf, deedtable, inom2mi, meridianconv,
          removespetialchar, deedtable2, deedtable3, areaLTP, deedtext)
 
