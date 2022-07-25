@@ -42,10 +42,12 @@ from lftools.geocapt.topogeo import (dd2dms as DD2DMS,
                                      azimute, str2HTML,
                                      geod2geoc,
                                      geoc2enu)
+from lftools import geomag
 from numpy import array, pi, sqrt, median
 import numpy as np
 from pyproj.crs import CRS
 import unicodedata
+from datetime import date
 import re
 # https://qgis.org/pyqgis/3.2/core/Expression/QgsExpression.html
 
@@ -152,7 +154,7 @@ def scalefactor(lon, lat, feature, parent):
 @qgsfunction(args='auto', group='LF Tools')
 def meridianconv(lon, lat, feature, parent):
     """
-    Calculates the Meridian Convergence based on a feature coordinates.
+    Calculates the Meridian Convergence based on a feature coordinates (Longitude and Latitude).
     <h2>Example usage:</h2>
     <ul>
       <li>meridianconv("lon", "lat") -> -0.3451</li>
@@ -160,6 +162,27 @@ def meridianconv(lon, lat, feature, parent):
     """
     SRC = QgsCoordinateReferenceSystem('EPSG:4326')
     return MeridianConvergence(lon, lat, SRC)
+
+
+@qgsfunction(args='auto', group='LF Tools')
+def magneticdec(lon, lat, h, ano, mes, dia, feature, parent):
+    """
+    Calculates magnetic declination based on Position (Longitude, Latitude and Altitude), and Date (Year, Month and Day).
+    <h2>Example usage:</h2>
+    <ul>
+      <li>magneticdec("lon", "lat", "h", 2022, 5, 31) -> -21.22381</li>
+    </ul>
+    <div>
+    <p><b>Source:</b></p>
+    <p>
+    <b><a href="https://github.com/cmweiss/geomag" target="_blank">Christopher Weiss: geomag Python package</a></b>
+    </p>
+    <p>
+    <b><a href="https://www.ngdc.noaa.gov/geomag/geomag.shtml" target="_blank">NCEI Geomagnetic Modeling Team and British Geological Survey. 2019. World Magnetic Model 2020. NOAA National Centers for Environmental Information. doi: 10.25921/11v3-da71, 2020.</a></b>
+    </p>
+  </div>
+    """
+    return geomag.declination(lat, lon, h, time = date(ano,mes,dia))
 
 
 @qgsfunction(args='auto', group='LF Tools')
@@ -304,6 +327,12 @@ def areaLTP (layer_name, feature, parent):
     <ul>
       <li>areaLTP('layer_name') -> 607503.4825 </li>
     </ul>
+    <div>
+    <p><b>About the LTP:</b></p>
+    <p>
+    <b><a href="https://geoone.com.br/sistema-geodesico-local/" target="_blank">França, L. Local Geodetic Coordinate System. GeoOne. 2022.</a></b>
+    </p>
+  </div>
     """
     if len(QgsProject.instance().mapLayersByName(layer_name)) == 1:
         layer = QgsProject.instance().mapLayersByName(layer_name)[0]
