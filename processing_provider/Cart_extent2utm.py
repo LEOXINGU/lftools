@@ -254,6 +254,7 @@ class Extent2UTMGrid(QgsProcessingAlgorithm):
 
         # Output Definition
         Fields = QgsFields()
+        Fields.append(QgsField(self.tr('id'), QVariant.Int))
         Fields.append(QgsField('inom', QVariant.String))
         Fields.append(QgsField('mi', QVariant.String))
         Fields.append(QgsField(self.tr('scale', 'escala'), QVariant.Int))
@@ -292,8 +293,8 @@ class Extent2UTMGrid(QgsProcessingAlgorithm):
 
         Percent = 100.0/(len(LON)*len(LAT))
         current = 0
-        for lon in LON:
-            for lat in LAT:
+        for lat in LAT[::-1]:
+            for lon in LON:
                 if lon>=0:
                     lon0 = modf(lon/d_lon)[1]*d_lon
                 else:
@@ -320,6 +321,7 @@ class Extent2UTMGrid(QgsProcessingAlgorithm):
                 inom100k = ''
                 resto = ''
                 att = [inom, None, escala]
+                feat['id'] = current+1
                 feat['inom'] = inom
                 feat[self.tr('scale', 'escala')] = escala
                 if len(inom_list) >= 5:
