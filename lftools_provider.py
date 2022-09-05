@@ -100,6 +100,7 @@ from lftools.processing_provider.Stat_centralTendency import CentralTendency
 from lftools.processing_provider.Doc_PointsFromText import PointsFromText
 from lftools.processing_provider.Cad_ConnectPolygons import ConnectFeatures
 from lftools.processing_provider.Gnss_pos2layer import Pos2layer
+from lftools.processing_provider.Gnss_StopAndGo import StopAndGo
 
 
 class LFToolsProvider(QgsProcessingProvider):
@@ -185,6 +186,7 @@ class LFToolsProvider(QgsProcessingProvider):
         self.addAlgorithm(PointsFromText())
         self.addAlgorithm(ConnectFeatures())
         self.addAlgorithm(Pos2layer())
+        self.addAlgorithm(StopAndGo())
 
     def id(self):
         return 'lftools'
