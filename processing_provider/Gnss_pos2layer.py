@@ -183,7 +183,7 @@ Tipos:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.FILE))
 
         path, file = os.path.split(caminho)
-        nome = file[:-5]
+        nome = file
 
         aa = self.parameterAsDouble(
             parameters,
