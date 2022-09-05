@@ -36,6 +36,7 @@ from qgis.core import (QgsProcessing,
                        QgsProcessingParameterFeatureSource,
                        QgsProcessingParameterFeatureSink,
                        QgsProcessingParameterFileDestination,
+                       QgsProcessingLayerPostProcessorInterface,
                        QgsApplication,
                        QgsProject,
                        QgsCoordinateTransform,
@@ -93,12 +94,18 @@ class CentralTendency(QgsProcessingAlgorithm):
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/statistics.png'))
 
-    txt_en = '''Returns the central tendency point(s) for clustering points using the average or median of the input point coordinates.
-Note 1: Layer in a projected SRC gets more accurate results.
-Note 2: The Median algorithm is less influenced by outliers.'''
-    txt_pt = '''Esta ferramenta retorna o(s) ponto(s) de tendência central para agrupamento de pontos utilizando a média ou mediana das coordenadas dos pontos de entrada.
-Observação 1: Camada em um SRC projetado obtém resultado mais acurados.
-Observação 2: O algoritmo da Mediana é menos influenciado por outliers.'''
+    txt_en = '''RThis tool returns the central tendency point(s) for clustering points of entry points.
+The following statistics can be obtained by grouping:
+◼️ <b>Mean Center</b>: calculation of the average in X and Y
+◼️ <b>Median Center</b>: calculation of the median in X and Y (less influenced by outliers)
+◼️ <b>Central Feature</b>: identification of the central feature (smallest Euclidean distance)
+Note: Layer in a projected SRC gets more accurate results.'''
+    txt_pt = '''Esta ferramenta retorna o(s) ponto(s) de tendência central para agrupamento de pontos dos pontos de entrada.
+As seguintes estatísticas pode ser obtidas por agrupamento:
+◼️ <b>Centro Médio</b>: cálculo da média em X e Y
+◼️ <b>Centro Mediano</b>: cálculo da mediana em X e Y (menos influenciado por outliers)
+◼️ <b>Feição Central</b>: identificação da feição central (menor distância euclidiana)
+Observação: Camada em um SRC projetado obtém resultado mais acurados.'''
     figure = 'images/tutorial/stat_central_tendency.jpg'
 
     def shortHelpString(self):
@@ -130,7 +137,8 @@ Observação 2: O algoritmo da Mediana é menos influenciado por outliers.'''
         )
 
         tipos = [self.tr('Mean Center', 'Centro Médio'),
-                 self.tr('Median Center', 'Centro Mediano')]
+                 self.tr('Median Center', 'Centro Mediano'),
+                 self.tr('Central Feature', 'Feição Central')]
 
         self.addParameter(
             QgsProcessingParameterEnum(
@@ -165,7 +173,7 @@ Observação 2: O algoritmo da Mediana é menos influenciado por outliers.'''
         self.addParameter(
             QgsProcessingParameterFeatureSink(
                 self.OUTPUT,
-                self.tr('Central point(s)', 'Ponto(s) Cental(is)')
+                self.tr('Central point', 'Ponto Cental')
             )
         )
 
@@ -204,7 +212,6 @@ Observação 2: O algoritmo da Mediana é menos influenciado por outliers.'''
             Campo_Agrupar = layer.fields().indexFromName(Campo_Agrupar[0])
 
         # OUTPUT
-        Fields = QgsFields()
         if estat == 0: # média
             itens  = {
                  'id' : QVariant.Int,
@@ -233,6 +240,16 @@ Observação 2: O algoritmo da Mediana é menos influenciado por outliers.'''
                  'max_x' : QVariant.Double,
                  'max_y' : QVariant.Double,
                  }
+        elif estat == 2: # feição central
+            itens = {
+                    self.tr('group','grupo'): QVariant.String,
+                    self.tr('count', 'contagem'): QVariant.Int}
+
+        if estat in (0,1):
+            Fields = QgsFields()
+        else:
+            Fields = layer.fields()
+
         for item in itens:
             Fields.append(QgsField(item, itens[item]))
         (sink, dest_id) = self.parameterAsSink(
@@ -295,8 +312,27 @@ Observação 2: O algoritmo da Mediana é menos influenciado por outliers.'''
             sorter = np.argsort(valores) # ordenar valores
             valores = valores[sorter]
             pesos = pesos[sorter]
-            q = 1.*pesos.cumsum()/pesos.sum() # quantis pomderados
+            q = 1.*pesos.cumsum()/pesos.sum() # quantis ponderados
             return np.interp(quantis, q, valores)
+
+        # Função para retornar a feição central
+        def CentralFeature(x, y, w):
+            dist_soma = 1e15
+            indice = -1
+            for i in range(len(x)):
+                x1 = x[i]
+                y1 = y[i]
+                soma = 0
+                for j in range(len(y)):
+                    if i != j:
+                        x2 = x[j]
+                        y2 = y[j]
+                        peso = w[j]
+                        soma += peso*((x1 - x2)**2 + (y1 - y2)**2)
+                if soma < dist_soma:
+                    dist_soma = soma
+                    indice = i
+            return x[indice], y[indice]
 
         # Cálculo
         feature = QgsFeature()
@@ -333,6 +369,8 @@ Observação 2: O algoritmo da Mediana é menos influenciado por outliers.'''
                 else:
                     perc25X, medianX, perc75X = np.quantile(x, [0.25, 0.5, 0.75])
                     perc25Y, medianY, perc75Y = np.quantile(y, [0.25, 0.5, 0.75])
+            elif estat == 2:
+                central_X, central_Y = CentralFeature(x, y, w)
 
             max_x = np.max(x)
             max_y = np.max(y)
@@ -355,6 +393,19 @@ Observação 2: O algoritmo da Mediana é menos influenciado por outliers.'''
                     float(medianX), float(medianY),
                     float(perc75X), float(perc75Y),
                     float(max_x), float(max_y)]
+            elif estat == 2:
+                pnt = QgsGeometry.fromPointXY(QgsPointXY(float(central_X), float(central_Y)))
+                # Pegar atributos do ponto central
+                for feat in layer.getFeatures():
+                    geom = feat.geometry()
+                    if geom.isMultipart():
+                        coord = geom.asMultiPoint()[0]
+                    else:
+                        coord = geom.asPoint()
+                    if coord.x() == central_X and coord.y() == central_Y:
+                        att = feat.attributes()
+                        break
+                att += [str(grupo), len(x)]
 
             feat.setGeometry(pnt)
             feat.setAttributes(att)
@@ -367,4 +418,19 @@ Observação 2: O algoritmo da Mediana é menos influenciado por outliers.'''
         feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
         feedback.pushInfo(self.tr('Leandro Franca - Cartographic Engineer', 'Leandro França - Eng Cart'))
 
+        global renamer
+        tipos = [self.tr('Mean Center', 'Centro Médio'),
+                 self.tr('Median Center', 'Centro Mediano'),
+                 self.tr('Central Feature', 'Feição Central')]
+        renamer = Renamer(self.tr('Central tendency - ', 'Tendência central - ') + tipos[estat])
+        context.layerToLoadOnCompletionDetails(dest_id).setPostProcessor(renamer)
+
         return {self.OUTPUT: dest_id}
+
+class Renamer (QgsProcessingLayerPostProcessorInterface):
+    def __init__(self, layer_name):
+        self.name = layer_name
+        super().__init__()
+
+    def postProcessLayer(self, layer, context, feedback):
+        layer.setName(self.name)
