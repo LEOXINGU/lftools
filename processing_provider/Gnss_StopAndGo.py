@@ -122,9 +122,7 @@ Dados de entrada:
     INPUT = 'INPUT'
     TIME = 'TIME'
     DIST = 'DIST'
-    HEIGHT = 'HEIGHT'
     OUTPUT = 'OUTPUT'
-    CRS = 'CRS'
     TYPE = 'TYPE'
 
     def initAlgorithm(self, config=None):
@@ -155,24 +153,6 @@ Dados de entrada:
                 type =1,
                 defaultValue = 2.0,
                 minValue = 0.5
-                )
-            )
-
-        self.addParameter(
-            QgsProcessingParameterNumber(
-                self.HEIGHT,
-                self.tr('Antenna height', 'Altura da antena'),
-                type =1,
-                defaultValue = 0.0,
-                minValue = 0
-                )
-            )
-
-        self.addParameter(
-            QgsProcessingParameterCrs(
-                self.CRS,
-                self.tr('CRS', 'SRC'),
-                eval(self.tr("QgsCoordinateReferenceSystem('EPSG:4326')", "QgsCoordinateReferenceSystem('EPSG:4674')"))
                 )
             )
 
@@ -207,12 +187,6 @@ Dados de entrada:
         if layer is None:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.INPUT))
 
-        aa = self.parameterAsDouble(
-            parameters,
-            self.HEIGHT,
-            context
-        )
-
         tempo_min = self.parameterAsDouble(
             parameters,
             self.TIME,
@@ -230,14 +204,6 @@ Dados de entrada:
         if not dist_max:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.DIST))
         dist_max /= 1e2 # metros
-
-        crs = self.parameterAsCrs(
-            parameters,
-            self.CRS,
-            context
-        )
-        if not crs.isGeographic():
-            raise QgsProcessingException(self.tr('Choose a geographic CRS!', 'Escolha um SRC geográfico!'))
 
         itens  = {"ord": QVariant.Int,
                   "lat": QVariant.Double,
@@ -258,7 +224,7 @@ Dados de entrada:
         for item in itens:
             Fields.append(QgsField(item, itens[item]))
 
-        (sink, dest_id) = self.parameterAsSink( parameters, self.OUTPUT, context, Fields, QgsWkbTypes.PointZ, crs)
+        (sink, dest_id) = self.parameterAsSink( parameters, self.OUTPUT, context, Fields, QgsWkbTypes.PointZ, layer.sourceCrs())
         if sink is None:
             raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT))
 
