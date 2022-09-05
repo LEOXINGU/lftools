@@ -324,11 +324,10 @@ Observação: Camada em um SRC projetado obtém resultado mais acurados.'''
                 y1 = y[i]
                 soma = 0
                 for j in range(len(y)):
-                    if i != j:
-                        x2 = x[j]
-                        y2 = y[j]
-                        peso = w[j]
-                        soma += peso*((x1 - x2)**2 + (y1 - y2)**2)
+                    x2 = x[j]
+                    y2 = y[j]
+                    peso = w[j]
+                    soma += peso*np.sqrt((x1 - x2)**2 + (y1 - y2)**2)
                 if soma < dist_soma:
                     dist_soma = soma
                     indice = i
