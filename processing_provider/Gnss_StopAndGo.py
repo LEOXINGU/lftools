@@ -123,7 +123,6 @@ Dados de entrada:
     TIME = 'TIME'
     DIST = 'DIST'
     OUTPUT = 'OUTPUT'
-    TYPE = 'TYPE'
 
     def initAlgorithm(self, config=None):
 
@@ -155,19 +154,6 @@ Dados de entrada:
                 minValue = 0.5
                 )
             )
-
-        tipo = [self.tr('VEMOS2009'),
-                self.tr('VEMOS2017')
-               ]
-
-        self.addParameter(
-            QgsProcessingParameterEnum(
-                self.TYPE,
-                self.tr('Velocity Model', 'Modelo de Velocidade'),
-				options = tipo,
-                optional = True
-            )
-        )
 
         self.addParameter(
             QgsProcessingParameterFeatureSink(
@@ -228,11 +214,6 @@ Dados de entrada:
         if sink is None:
             raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT))
 
-        model_vel = self.parameterAsEnum(
-            parameters,
-            self.TYPE,
-            context
-        )
 
         # Transformar distancia para graus
         extensao = layer.sourceExtent()
