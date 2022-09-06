@@ -46,8 +46,11 @@ from qgis.core import (QgsProcessing,
 
 from lftools.geocapt.imgs import Imgs
 from lftools.geocapt.cartography import raioMedioGauss
+from lftools.geocapt.vemos import vemos
+from lftools.geocapt.topogeo import dist2degrees
 import numpy as np
-import datetime, codecs
+from datetime import datetime
+import codecs
 import os
 from qgis.PyQt.QtGui import QIcon
 
@@ -112,6 +115,11 @@ Tipos:
                       <p align="right">
                       <b>'''+self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
                       </p>'''+ social_BW + '''</div>
+                      <div>
+                      <p><b>'''+ self.tr('Velocity models:','Modelos de velocidade:') + ''' </b></p>
+                      <p>
+                      <b><a href="https://www.sirgas.org/pt/velocity-model/" target="_blank">VEMOS: Modelo de velocidade para o SIRGAS</a></b>
+                      </p>
                     </div>'''
         return self.tr(self.txt_en, self.txt_pt) + footer
 
@@ -121,6 +129,7 @@ Tipos:
     HEIGHT = 'HEIGHT'
     OUTPUT = 'OUTPUT'
     CRS = 'CRS'
+    VEMOS = 'VEMOS'
 
     def initAlgorithm(self, config=None):
 
@@ -164,6 +173,20 @@ Tipos:
                 )
             )
 
+        vemos = [self.tr('None', 'Nenhum'),
+                self.tr('VEMOS2009'),
+                self.tr('VEMOS2017')
+                ]
+
+        self.addParameter(
+            QgsProcessingParameterEnum(
+                self.VEMOS,
+                self.tr('Velocity Model', 'Modelo de Velocidade'),
+				options = vemos,
+                defaultValue= 0
+            )
+        )
+
         self.addParameter(
             QgsProcessingParameterFeatureSink(
                 self.OUTPUT,
@@ -198,6 +221,12 @@ Tipos:
         )
         if not crs.isGeographic():
             raise QgsProcessingException(self.tr('Choose a geographic CRS!', 'Escolha um SRC geográfico!'))
+
+        model_vel = self.parameterAsEnum(
+            parameters,
+            self.VEMOS,
+            context
+        )
 
         itens  = {"ord": QVariant.Int,
                   "lat": QVariant.Double,
@@ -255,7 +284,7 @@ Tipos:
                 h = float(pnt[4])
                 ano, mes, dia = pnt[0].split('/')
                 hora, minuto, segundo = pnt[1].split(':')
-                datahora = unicode(datetime.datetime(int(ano), int(mes), int(dia), int(hora), int(minuto), int(float(segundo))))
+                datahora = unicode(datetime(int(ano), int(mes), int(dia), int(hora), int(minuto), int(float(segundo))))
                 quality = int(pnt[5])
                 nsat = int(pnt[6])
                 slat = float(pnt[7])
@@ -276,7 +305,7 @@ Tipos:
                 h = float(pnt[26])
                 ano, mes, dia = pnt[4].split('-')
                 hora, minuto, segundo = pnt[5].split(':')
-                datahora = unicode(datetime.datetime(int(ano), int(mes), int(dia), int(hora), int(minuto), int(float(segundo))))
+                datahora = unicode(datetime(int(ano), int(mes), int(dia), int(hora), int(minuto), int(float(segundo))))
                 quality = 6
                 nsat = int(pnt[6])
                 slat = float(pnt[15])
@@ -309,12 +338,22 @@ Tipos:
             feat['num_sat'] = nsat
             feat['quality'] = quality
 
+            if model_vel > 0:
+                vlat, vlon = vemos(lat, lon, ['vemos2009','vemos2017'][model_vel-1])
+                delta_tempo = datetime.strptime(datahora, "%Y-%m-%d %H:%M:%S") - datetime.strptime('2000-04-24 12:00:00', "%Y-%m-%d %H:%M:%S")
+                anos = delta_tempo.days/365.25
+                dLat = dist2degrees(vlat*anos, lat, 4674)
+                dLon = dist2degrees(vlon*anos, lat, 4674)
+                lat -= dLat
+                lon -= dLon
+
             if saida == 0:
                 feat.setGeometry(QgsPoint(lon, lat, h))
                 sink.addFeature(feat, QgsFeatureSink.FastInsert)
             if feedback.isCanceled():
                 break
             feedback.setProgress(int((k+1) * total))
+
 
         if saida == 1:
             feat.setGeometry(QgsPoint(lon, lat, h))
