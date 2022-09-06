@@ -16,6 +16,7 @@ __copyright__ = '(C) 2021, Leandro França'
 
 from numpy import radians, arctan, pi, sin, cos, matrix, sqrt, degrees, array, diag, ones, zeros, floor
 from numpy.linalg import norm, pinv, inv
+from pyproj.crs import CRS
 
 def azimute(A,B):
     # Cálculo dos Azimutes entre dois pontos (Vetor AB origem A extremidade B)
@@ -221,3 +222,16 @@ def enu2geoc(E, N, U, lon0, lat0, Xo, Yo, Zo):
 
     R = M*(T-Fo) + [[Xo], [Yo], [Zo]]
     return (R[0,0], R[1,0], R[2,0])
+
+# Transformar distancia em metros para graus
+def dist2degrees(dist, lat, EPSG):
+    proj_crs = CRS.from_epsg(EPSG)
+    a = proj_crs.ellipsoid.semi_major_metre
+    f = 1/proj_crs.ellipsoid.inverse_flattening
+    e2 = f*(2-f)
+    N = a/sqrt(1-e2*(sin(lat))**2) # Raio de curvatura 1º vertical
+    M = a*(1-e2)/(1-e2*(sin(lat))**2)**(3/2.) # Raio de curvatura meridiana
+    R = sqrt(M*N) # Raio médio de Gauss
+    theta = dist/R
+    dist = degrees(theta) # Radianos para graus
+    return dist
