@@ -583,7 +583,7 @@ def deedtable2(prefixo, titulo, decimal, fontsize, feature, parent):
 def deedtable3(prefixo, titulo, decimal, fontsize, layer_name, tipo, azimuteDist, feature, parent):
     """
     Generates the Vertices and Sides Descriptive Table, also known as Synthetic Deed Description, based on vertices of a PolygonZ or MultiPoligonZ.
-    <p>Note 1: Layer with projected CRS is required.</p>
+    <p>Note 1: A layer or QGIS Project with a projected SRC is required.</p>
     <p>Note 2: Table types: 'proj' - projected, 'geo' - geographic, 'both' - both coordinate systems.</p>
     <p>Note 3: Define 1 or 0 for with or without azimuths and distances, respectivelly.</p>
 
@@ -600,30 +600,48 @@ def deedtable3(prefixo, titulo, decimal, fontsize, layer_name, tipo, azimuteDist
     else:
         layer = QgsProject.instance().mapLayer(layer_name)
 
-    crsUTM = layer.crs()
-    crsGeo = QgsCoordinateReferenceSystem(crsUTM.geographicCrsAuthId())
+    SRC = layer.crs()
+    SGR = QgsCoordinateReferenceSystem(SRC.geographicCrsAuthId())
 
     format_num = '{:,.Xf}'.replace('X', str(decimal))
 
     geom = feature.geometry()
-
-    if geom.type() == 2 and geom and not crsUTM.isGeographic(): #poligono e SRC projetado
-
-        coordinateTransformer = QgsCoordinateTransform()
-        coordinateTransformer.setDestinationCrs(crsGeo)
-        coordinateTransformer.setSourceCrs(crsUTM)
+    if geom.type() == 2 and geom:
 
         if geom.isMultipart():
             coords = geom2PointList(geom)[0][0]
         else:
             coords = geom2PointList(geom)[0]
-
         pnts_UTM = {}
         pnts_GEO = {}
-        for k, coord in enumerate(coords[:-1]):
-            pnts_UTM[k+1] = [coord, prefixo, prefixo + '{:02}'.format(k+1)]
-            pnt = coordinateTransformer.transform(QgsPointXY(coord.x(), coord.y()))
-            pnts_GEO[k+1] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), prefixo, prefixo + '{:02}'.format(k+1) ]
+
+        if not SRC.isGeographic(): # Projetado
+            coordinateTransformer = QgsCoordinateTransform()
+            coordinateTransformer.setDestinationCrs(SGR)
+            coordinateTransformer.setSourceCrs(SRC)
+
+            for k, coord in enumerate(coords[:-1]):
+                pnts_UTM[k+1] = [coord, prefixo, prefixo + '{:02}'.format(k+1)]
+                pnt = coordinateTransformer.transform(QgsPointXY(coord.x(), coord.y()))
+                pnts_GEO[k+1] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), prefixo, prefixo + '{:02}'.format(k+1) ]
+
+            try:
+                projecao = SRC.description().split(r' / ')[-1]
+                PROJ = tr(projecao, projecao.replace('zone', 'fuso'))
+            except:
+                PROJ = SRC.description()
+
+        else: # Geográfico
+            CRS_projeto = QgsCoordinateReferenceSystem(SRC_Projeto('EPSG'))
+            coordinateTransformer = QgsCoordinateTransform()
+            coordinateTransformer.setDestinationCrs(CRS_projeto)
+            coordinateTransformer.setSourceCrs(SRC)
+
+            for k, coord in enumerate(coords[:-1]):
+                pnts_GEO[k+1] = [coord, prefixo, prefixo + '{:02}'.format(k+1)]
+                pnt = coordinateTransformer.transform(QgsPointXY(coord.x(), coord.y()))
+                pnts_UTM[k+1] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), prefixo, prefixo + '{:02}'.format(k+1) ]
+
         # Calculo dos Azimutes e Distancias
         tam = len(pnts_UTM)
         Az_lista, Dist = [], []
@@ -840,7 +858,7 @@ def deedtable3(prefixo, titulo, decimal, fontsize, layer_name, tipo, azimuteDist
         return resultado
 
     else:
-        return tr('Verify layer geometry and CRS!', 'Verificar geometria e SRC da camada!')
+        return tr('Check if the geometry is null or invalid! Or if Atlas is on!', 'Verifique se a geometria é nula ou inválida! Ou se o Atlas está ligado!')
 
 
 
@@ -848,7 +866,7 @@ def deedtable3(prefixo, titulo, decimal, fontsize, layer_name, tipo, azimuteDist
 def deedtext(layer_name, descr_pnt_ini, estilo, prefixo, decimal, fontsize, feature, parent):
     """
     Generates a description of a property with coordinates as text.
-    <p>Note 1: Layer with projected CRS is required.</p>
+    <p>Note 1: A layer or QGIS Project with a projected SRC is required.</p>
     <p>Note 2: Coordinates styles: 'E,N,h', 'N,E,h', 'E,N' (default) or 'N,E'.</p>
 
     <h2>Exemples:</h2>
@@ -864,24 +882,52 @@ def deedtext(layer_name, descr_pnt_ini, estilo, prefixo, decimal, fontsize, feat
         layer = QgsProject.instance().mapLayer(layer_name)
 
     SRC = layer.crs()
-    SGR = QgsCoordinateReferenceSystem(SRC.geographicCrsAuthId()).description()
-    try:
-        projecao = SRC.description().split(r' / ')[-1]
-        PROJ = tr(projecao, projecao.replace('zone', 'fuso'))
-    except:
-        PROJ = SRC.description()
+    SGR = QgsCoordinateReferenceSystem(SRC.geographicCrsAuthId())
 
     format_num = '{:,.Xf}'.replace('X', str(decimal))
 
     geom = feature.geometry()
-    if geom.type() == 2 and geom and not SRC.isGeographic(): #poligono e SRC projetado
+    if geom.type() == 2 and geom:
+
         if geom.isMultipart():
             coords = geom2PointList(geom)[0][0]
         else:
             coords = geom2PointList(geom)[0]
         pnts_UTM = {}
-        for k, coord in enumerate(coords[:-1]):
-            pnts_UTM[k+1] = [coord, prefixo, prefixo + '{:02}'.format(k+1)]
+        pnts_GEO = {}
+
+        if not SRC.isGeographic(): # Projetado
+            coordinateTransformer = QgsCoordinateTransform()
+            coordinateTransformer.setDestinationCrs(SGR)
+            coordinateTransformer.setSourceCrs(SRC)
+
+            for k, coord in enumerate(coords[:-1]):
+                pnts_UTM[k+1] = [coord, prefixo, prefixo + '{:02}'.format(k+1)]
+                pnt = coordinateTransformer.transform(QgsPointXY(coord.x(), coord.y()))
+                pnts_GEO[k+1] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), prefixo, prefixo + '{:02}'.format(k+1) ]
+
+            try:
+                projecao = SRC.description().split(r' / ')[-1]
+                PROJ = tr(projecao, projecao.replace('zone', 'fuso'))
+            except:
+                PROJ = SRC.description()
+
+        else: # Geográfico
+            CRS_projeto = QgsCoordinateReferenceSystem(SRC_Projeto('EPSG'))
+            coordinateTransformer = QgsCoordinateTransform()
+            coordinateTransformer.setDestinationCrs(CRS_projeto)
+            coordinateTransformer.setSourceCrs(SRC)
+
+            for k, coord in enumerate(coords[:-1]):
+                pnts_GEO[k+1] = [coord, prefixo, prefixo + '{:02}'.format(k+1)]
+                pnt = coordinateTransformer.transform(QgsPointXY(coord.x(), coord.y()))
+                pnts_UTM[k+1] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), prefixo, prefixo + '{:02}'.format(k+1) ]
+
+            try:
+                projecao = CRS_projeto.description().split(r' / ')[-1]
+                PROJ = tr(projecao, projecao.replace('zone', 'fuso'))
+            except:
+                PROJ = SRC.description()
 
         # Calculo dos Azimutes e Distancias
         tam = len(pnts_UTM)
@@ -906,8 +952,8 @@ def deedtext(layer_name, descr_pnt_ini, estilo, prefixo, decimal, fontsize, feat
             estilo_vertices = '<b>E [Xn]m</b> ' + tr('and', 'e') +  ' <b>N [Yn]m</b>'
 
         # conteudo do memorial
-        text_ini = tr('<div style="text-align: justify; font-size: [FONTSIZE]px; font-family: Arial;">The description of this perimeter begins at the vertex <b>[Vn]</b>, with coordinates ' + estilo_vertices + ', [descr_pnt_ini]from this, with the following flat azimuths and distances: ',
-                      '<div style="text-align: justify; font-size: [FONTSIZE]px; font-family: Arial;">Inicia-se a descrição deste perímetro no vértice <b>[Vn]</b>, de coordenadas ' + estilo_vertices + ', [descr_pnt_ini]deste, segue com os seguintes azimutes planos e distâncias: ')
+        text_ini = tr('<div style="text-align: justify; font-size: [FONTSIZE]px; font-family: Arial;">The description of this perimeter begins at the vertex <b>[Vn]</b>, with coordinates ' + estilo_vertices + ', [descr_pnt_ini] from this, with the following flat azimuths and distances: ',
+                      '<div style="text-align: justify; font-size: [FONTSIZE]px; font-family: Arial;">Inicia-se a descrição deste perímetro no vértice <b>[Vn]</b>, de coordenadas ' + estilo_vertices + ', [descr_pnt_ini] deste, segue com os seguintes azimutes planos e distâncias: ')
 
         text_meio = tr('[Azn] and [Dn]m up to the vertex <b>[Vn]</b>, with coordinates ' + estilo_vertices + ', ',
                        '[Azn] e [Dn]m até o vértice <b>[Vn]</b>, de coordenadas ' + estilo_vertices + ', ')
@@ -952,7 +998,7 @@ def deedtext(layer_name, descr_pnt_ini, estilo, prefixo, decimal, fontsize, feat
             LINHAS += linha0
 
         # Texto final
-        itens = {'[SGR]': SGR,
+        itens = {'[SGR]': SGR.description(),
                  '[PROJ]': PROJ
                     }
         for item in itens:
@@ -962,4 +1008,264 @@ def deedtext(layer_name, descr_pnt_ini, estilo, prefixo, decimal, fontsize, feat
         return FINAL
 
     else:
-        return tr('Verify layer geometry and CRS!', 'Verificar geometria e SRC da camada!')
+        return tr('Check if the geometry is null or invalid! Or if Atlas is on!', 'Verifique se a geometria é nula ou inválida! Ou se o Atlas está ligado!')
+
+
+@qgsfunction(args='auto', group='LF Tools')
+def geoneighbors(layer_name, street, borderer_field, prefixo, decimal, fontsize, feature, parent):
+    """
+    Generates a table of coordinates with neighbors (boundaries) and a polygon and distances.
+    <p>Note: A layer or QGIS Project with a projected SRC is required.</p>
+
+    <h2>Exemples:</h2>
+    <ul>
+      <li>geoneighbors('layer_name', 'borderer_field', 'preffix', precision, fontsize) = HTML</li>
+      <li>geoneighbors('layer_name', street, borderer_field , 'V-', 2, 12) = HTML</li>
+    </ul>
+    """
+    if len(QgsProject.instance().mapLayersByName(layer_name)) == 1:
+        layer = QgsProject.instance().mapLayersByName(layer_name)[0]
+    else:
+        layer = QgsProject.instance().mapLayer(layer_name)
+
+    SRC = layer.crs()
+    SGR = QgsCoordinateReferenceSystem(SRC.geographicCrsAuthId())
+
+    format_num = '{:,.Xf}'.replace('X', str(decimal))
+
+    geom = feature.geometry()
+
+    if geom.type() == 2 and geom:
+
+        # Pegar vizinhos
+        geom1 = feature.geometry()
+        feat1 = feature
+        confront = {}
+        for feat2 in layer.getFeatures():
+            geom2 = feat2.geometry()
+            cd_lote2 = str(feat2[borderer_field])
+            if feat1 != feat2:
+                if geom1.intersects(geom2):
+                    inters = geom1.intersection(geom2)
+                    confront[feat2.id()] = [cd_lote2, inters]
+
+        if geom1.isMultipart():
+            coords = geom1.asMultiPolygon()[0][0]
+        else:
+            coords = geom1.asPolygon()[0]
+
+        vizinhos = []
+        for pnt in coords[:-1]:
+            geom1 = QgsGeometry.fromPointXY(pnt)
+            vante = ''
+            compl = ''
+            for item in confront:
+                geom2 = confront[item][1]
+                if geom2.type() == 1 and geom1.intersects(geom2): #Line
+                    coord_lin = geom2.asPolyline()
+                    if pnt != coord_lin[-1]:
+                        vante = confront[item][0]
+                elif geom2.type() == 0 and geom1.intersects(geom2): #Point
+                    compl = confront[item][0]
+            vizinhos += [(vante, compl)]
+
+        if geom.isMultipart():
+            coords = geom2PointList(geom)[0][0]
+        else:
+            coords = geom2PointList(geom)[0]
+        pnts_UTM = {}
+        pnts_GEO = {}
+
+        if not SRC.isGeographic(): # Projetado
+            coordinateTransformer = QgsCoordinateTransform()
+            coordinateTransformer.setDestinationCrs(SGR)
+            coordinateTransformer.setSourceCrs(SRC)
+
+            for k, coord in enumerate(coords[:-1]):
+                pnts_UTM[k+1] = [coord, prefixo, prefixo + '{:02}'.format(k+1)]
+                pnt = coordinateTransformer.transform(QgsPointXY(coord.x(), coord.y()))
+                pnts_GEO[k+1] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), prefixo, prefixo + '{:02}'.format(k+1) ]
+
+            try:
+                projecao = SRC.description().split(r' / ')[-1]
+                PROJ = tr(projecao, projecao.replace('zone', 'fuso'))
+            except:
+                PROJ = SRC.description()
+
+        else: # Geográfico
+            CRS_projeto = QgsCoordinateReferenceSystem(SRC_Projeto('EPSG'))
+            coordinateTransformer = QgsCoordinateTransform()
+            coordinateTransformer.setDestinationCrs(CRS_projeto)
+            coordinateTransformer.setSourceCrs(SRC)
+
+            for k, coord in enumerate(coords[:-1]):
+                pnts_GEO[k+1] = [coord, prefixo, prefixo + '{:02}'.format(k+1)]
+                pnt = coordinateTransformer.transform(QgsPointXY(coord.x(), coord.y()))
+                pnts_UTM[k+1] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), prefixo, prefixo + '{:02}'.format(k+1) ]
+
+            try:
+                projecao = CRS_projeto.description().split(r' / ')[-1]
+                PROJ = tr(projecao, projecao.replace('zone', 'fuso'))
+            except:
+                PROJ = SRC.description()
+
+        # Calculo dos Azimutes e Distancias
+        tam = len(pnts_UTM)
+        Az_lista, Dist = [], []
+        for k in range(tam):
+            pntA = pnts_UTM[k+1][0]
+            pntB = pnts_UTM[1 if k+2 > tam else k+2][0]
+            Az_lista += [(180/pi)*azimute(pntA, pntB)[0]]
+            Dist += [sqrt((pntA.x() - pntB.x())**2 + (pntA.y() - pntB.y())**2)]
+
+
+
+        # conteudo da tabela
+        texto = '''<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1"
+ http-equiv="content-type">
+  <title></title>
+</head>
+<body>
+<div align="center">
+<table class="MsoTableGrid"
+ style="border: medium none ; width: 100%; border-collapse: collapse;"
+ border="1" cellpadding="0" cellspacing="0"
+ width="100%">
+  <tbody>
+    <tr style="">
+      <td
+ style="border: 1pt solid windowtext; padding: 0cm 5.4pt; width: 10.06%;"
+ width="10%">
+      <p class="MsoNormal"
+ style="margin-bottom: 0cm; text-align: center; line-height: normal;"
+ align="center"><b>'''+ tr('Vertex', 'Vértice') + '''<o:p></o:p></b></p>
+      </td>
+      <td
+ style="border-style: solid solid solid none; border-color: windowtext windowtext windowtext -moz-use-text-color; border-width: 1pt 1pt 1pt medium; padding: 0cm 5.4pt; width: 11.22%;"
+ width="11%">
+      <p class="MsoNormal"
+ style="margin-bottom: 0cm; text-align: center; line-height: normal;"
+ align="center"><b>Latitude<o:p></o:p></b></p>
+      </td>
+      <td
+ style="border-style: solid solid solid none; border-color: windowtext windowtext windowtext -moz-use-text-color; border-width: 1pt 1pt 1pt medium; padding: 0cm 5.4pt; width: 13.06%;"
+ width="13%">
+      <p class="MsoNormal"
+ style="margin-bottom: 0cm; text-align: center; line-height: normal;"
+ align="center"><b>Longitude<o:p></o:p></b></p>
+      </td>
+      <td
+ style="border-style: solid solid solid none; border-color: windowtext windowtext windowtext -moz-use-text-color; border-width: 1pt 1pt 1pt medium; padding: 0cm 5.4pt; width: 20%;"
+ width="20%">
+      <p class="MsoNormal"
+ style="margin-bottom: 0cm; text-align: center; line-height: normal;"
+ align="center"><b>'''+ tr('Forward neighbor', 'Confrontante a vante') + '''<o:p></o:p></b></p>
+      </td>
+      <td
+ style="border-style: solid solid solid none; border-color: windowtext windowtext windowtext -moz-use-text-color; border-width: 1pt 1pt 1pt medium; padding: 0cm 5.4pt; width: 17.12%;"
+ width="17%">
+      <p class="MsoNormal"
+ style="margin-bottom: 0cm; text-align: center; line-height: normal;"
+ align="center"><b>'''+ tr('Distance (m)', 'Distância (m)') + '''<o:p></o:p></b></p>
+      </td>
+      <td
+ style="border-style: solid solid solid none; border-color: windowtext windowtext windowtext -moz-use-text-color; border-width: 1pt 1pt 1pt medium; padding: 0cm 5.4pt; width: 17.56%;"
+ width="17%">
+      <p class="MsoNormal"
+ style="margin-bottom: 0cm; text-align: center; line-height: normal;"
+ align="center"><b>'''+ tr('Complement', 'Complemento') + '''<o:p></o:p></b></p>
+      </td>
+    </tr>
+    [LINHAS]
+  </tbody>
+</table>
+</div>
+</body>
+</html>
+'''
+
+        linha = '''<tr style="">
+      <td
+ style="border-style: none solid solid; border-color: -moz-use-text-color windowtext windowtext; border-width: medium 1pt 1pt; padding: 0cm 5.4pt; width: 10.06%;"
+ width="10%">
+      <p class="MsoNormal"
+ style="margin-bottom: 0cm; text-align: center; line-height: normal;"
+ align="center">[Vn]<o:p></o:p></p>
+      </td>
+      <td
+ style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0cm 5.4pt; width: 11.22%;"
+ width="11%">
+      <p class="MsoNormal"
+ style="margin-bottom: 0cm; text-align: center; line-height: normal;"
+ align="center">[LAT]<o:p></o:p></p>
+      </td>
+      <td
+ style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0cm 5.4pt; width: 13.06%;"
+ width="13%">
+      <p class="MsoNormal"
+ style="margin-bottom: 0cm; text-align: center; line-height: normal;"
+ align="center">[LON]<o:p></o:p></p>
+      </td>
+      <td
+ style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0cm 5.4pt; width: 20%;"
+ width="20%">
+      <p class="MsoNormal"
+ style="margin-bottom: 0cm; text-align: center; line-height: normal;"
+ align="center">[confr]<o:p></o:p></p>
+      </td>
+      <td
+ style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0cm 5.4pt; width: 17.12%;"
+ width="17%">
+      <p class="MsoNormal"
+ style="margin-bottom: 0cm; text-align: center; line-height: normal;"
+ align="center">[dist]<o:p></o:p></p>
+      </td>
+      <td
+ style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0cm 5.4pt; width: 17.56%;"
+ width="17%">
+      <p class="MsoNormal"
+ style="margin-bottom: 0cm; text-align: center; line-height: normal;"
+ align="center">[comp]<o:p></o:p></p>
+      </td>
+    </tr>'''
+
+
+        # Texto do meio
+        LINHAS = ''
+        ruas = str(street).split(',')
+        n_ruas = 0
+        for k in range(tam):
+            linha0 = linha
+
+            if not vizinhos[k][0]:
+                try:
+                    rua = ruas[n_ruas].strip()
+                    n_ruas += 1
+                except:
+                    rua = street
+
+            LAT = tr(DD2DMS(pnts_GEO[k+1][0].y(),decimal + 3), DD2DMS(pnts_GEO[k+1][0].y(),decimal + 3).replace('.', ','))
+            LON = tr(DD2DMS(pnts_GEO[k+1][0].x(),decimal + 3), DD2DMS(pnts_GEO[k+1][0].x(),decimal + 3).replace('.', ','))
+            LAT = LAT + 'N' if LAT[0] != '-' else LAT[1:] + 'S'
+            LON = LON + 'E' if LON[0] != '-' else LON[1:] + 'W'
+            itens = {'[Vn]': pnts_UTM[k+1][2],
+                     '[LON]': LON,
+                     '[LAT]': LAT,
+                     '[h]': tr(format_num.format(pnts_GEO[k+1][0].z()), format_num.format(pnts_GEO[k+1][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                     '[confr]': vizinhos[k][0] if vizinhos[k][0] else rua,
+                     '[dist]': tr(format_num.format(Dist[k]), format_num.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                     '[comp]': tr('Punctual neighbor with ' + vizinhos[k][1], 'Confrontação pontual com ' + vizinhos[k][1]) if vizinhos[k][1] else '-',
+                        }
+
+            for item in itens:
+                linha0 = linha0.replace(item, itens[item])
+            LINHAS += linha0
+
+        # Resultado final
+        return texto.replace('[LINHAS]', LINHAS)
+
+    else:
+        return tr('Check if the geometry is null or invalid! Or if Atlas is on!', 'Verifique se a geometria é nula ou inválida! Ou se o Atlas está ligado!')
