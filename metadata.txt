@@ -6,7 +6,7 @@
 name=LF Tools
 qgisMinimumVersion=3.10
 description=Tools for cartographic production, surveying, database management, digital image processing and spatial analysis.
-version=1.8.0
+version=1.9.0
 author=Leandro França
 email=geoleandro.franca@gmail.com
 
@@ -21,6 +21,7 @@ repository=https://github.com/LEOXINGU/lftools
 hasProcessingProvider=yes
 # Uncomment the following line and add your changelog:
 # changelog=
+	1.9.0 - New tool for GNSS stop and go
 	1.8.0 - New function to calculate magnetic declination
 	1.7.2 - Bug fix of Calculate Polygon Angles tool
 	1.7.1 - Bug fix of Points from Text tool
@@ -46,7 +47,7 @@ hasProcessingProvider=yes
 	1.0.1 - Improvement in tools' translation and description
 	1.0   - Initial version
 # Tags are comma separated with spaces allowed
-tags=cartography, surveying, topography, raster, vector, postgis, cadastre, processing, reambulation, geotag, expressions, document, memorial, description, drones, GNSS, NMEA, magnetic, ellipses, lftools, brazil
+tags=cartography, surveying, topography, raster, vector, postgis, cadastre, processing, reambulation, geotag, expressions, document, memorial, description, drones, GNSS, NMEA, RTKLIB, magnetic, ellipses, lftools, brazil
 
 homepage=https://github.com/LEOXINGU/lftools/wiki/LF-Tools-for-QGIS
 category=cartography
