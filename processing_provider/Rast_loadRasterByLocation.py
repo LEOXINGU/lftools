@@ -50,7 +50,7 @@ from qgis.core import (QgsProcessing,
 from osgeo import osr, gdal_array, gdal #https://gdal.org/python/
 from lftools.geocapt.imgs import Imgs
 from lftools.geocapt.cartography import reprojectPoints
-import os
+import os, shutil
 import numpy as np
 from qgis.PyQt.QtGui import QIcon
 
@@ -92,8 +92,10 @@ class LoadRasterByLocation(QgsProcessingAlgorithm):
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/raster.png'))
 
-    txt_en = 'Loads a set of raster files that intersect the geometries of an input vector layer.'
-    txt_pt = 'Carrega um conjunto de arquivos raster que interceptam as geometrias de uma camada vetorial de entrada.'
+    txt_en = '''Loads a set of raster files that intersect the geometries of an input vector layer.
+    Optionally, it is possible to copy the selected rasters and paste them in another folder.'''
+    txt_pt = '''Carrega um conjunto de arquivos raster que interceptam as geometrias de uma camada vetorial de entrada.
+    Opcionalmente é possível copiar os rasters selcionados e colar em outra pasta.'''
     figure = 'images/tutorial/raster_loadByLocation.jpg'
 
     def shortHelpString(self):
@@ -113,6 +115,7 @@ class LoadRasterByLocation(QgsProcessingAlgorithm):
     SUBFOLDER = 'SUBFOLDER'
     FORMAT = 'FORMAT'
     INPUT = 'INPUT'
+    OUTPUTFOLDER = 'OUTPUTFOLDER'
 
     def initAlgorithm(self, config=None):
         # INPUT
@@ -149,6 +152,17 @@ class LoadRasterByLocation(QgsProcessingAlgorithm):
             )
         )
 
+        # OUTPUT
+        self.addParameter(
+            QgsProcessingParameterFile(
+                self.OUTPUTFOLDER,
+                self.tr('Destination folder', 'Pasta de destino'),
+                behavior=QgsProcessingParameterFile.Folder,
+                defaultValue=None,
+                optional = True
+            )
+        )
+
     def processAlgorithm(self, parameters, context, feedback):
 
         pasta = self.parameterAsFile(
@@ -179,6 +193,13 @@ class LoadRasterByLocation(QgsProcessingAlgorithm):
         if source is None:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.INPUT))
         crs = source.sourceCrs()
+
+        # Copiar arquivos selecionados
+        saida = self.parameterAsFile(
+            parameters,
+            self.OUTPUTFOLDER,
+            context
+        )
 
         # List files
         feedback.pushInfo(self.tr('Checking files in the folder...', 'Checando arquivos na pasta...'))
@@ -226,9 +247,15 @@ class LoadRasterByLocation(QgsProcessingAlgorithm):
                     selecao += [file_path]
                     break
 
+            if saida and os.path.exists(saida):
+                for caminho in selecao:
+                    head, tail = os.path.split(caminho)
+                    shutil.copy2(caminho, os.path.join(saida, tail))
+
             if feedback.isCanceled():
                 break
             feedback.setProgress(int((current+1) * total))
+
 
         self.LISTA = selecao
         self.FORMATO = formato
