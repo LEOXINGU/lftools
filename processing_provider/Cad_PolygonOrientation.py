@@ -29,6 +29,7 @@ class PolygonOrientation(QgsProcessingAlgorithm):
     ORIENTATION = 'ORIENTATION'
     FIRST = 'FIRST'
     SAVE = 'SAVE'
+    STREET = 'STREET'
     LOC = QgsApplication.locale()[:2]
 
     def translate(self, string):
@@ -124,9 +125,17 @@ class PolygonOrientation(QgsProcessingAlgorithm):
 
         self.addParameter(
             QgsProcessingParameterBoolean(
+                self.STREET,
+                self.tr('First vertex with forefront bordering the street','Primeiro vértice com vante confrontando o sistema viário'),
+                defaultValue = False
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterBoolean(
                 self.SAVE,
                 self.tr('Save Editions', 'Salvar Edições'),
-                defaultValue=False
+                defaultValue = False
             )
         )
 
@@ -155,6 +164,14 @@ class PolygonOrientation(QgsProcessingAlgorithm):
             context
         )
 
+        rua = self.parameterAsBool(
+            parameters,
+            self.STREET,
+            context
+        )
+        if rua is None:
+            raise QgsProcessingException(self.invalidSourceError(parameters, self.STREET))
+
         salvar = self.parameterAsBool(
             parameters,
             self.SAVE,
@@ -164,6 +181,8 @@ class PolygonOrientation(QgsProcessingAlgorithm):
             raise QgsProcessingException(self.invalidSourceError(parameters, self.SAVE))
 
         camada.startEditing() # coloca no modo edição
+
+        feedback.pushInfo(self.tr('Orienting polygons...', 'Orientando polígonos...'))
 
         total = 100.0 / camada.featureCount() if camada.featureCount() else 0
 
@@ -193,6 +212,48 @@ class PolygonOrientation(QgsProcessingAlgorithm):
             if feedback.isCanceled():
                 break
             feedback.setProgress(int((current+1) * total))
+
+        if rua:
+            feedback.pushInfo(self.tr('Identifying the first forward point for road access...', 'Identificando primeiro ponto com vante para o acesso viário...'))
+            for feat1 in camada.getFeatures():
+                # Pegar vizinhos
+                geom1 = feat1.geometry()
+                if not geom1.isMultipart():
+                    COORDS = geom2PointList(geom1)[0]
+                    COORDS  = COORDS[:-1]
+                    coords = geom1.asPolygon()[0]
+                    coords = coords[:-1]
+                    confront = {}
+                    for feat2 in camada.getFeatures():
+                        geom2 = feat2.geometry()
+                        cd_lote2 = feat2.id()
+                        if feat1 != feat2:
+                            if geom1.intersects(geom2):
+                                inters = geom1.intersection(geom2)
+                                confront[feat2.id()] = [cd_lote2, inters]
+
+                    lista = []
+                    for pnt in coords:
+                        vante = -1
+                        geom1 = QgsGeometry.fromPointXY(pnt)
+                        for item in confront:
+                            geom2 = confront[item][1]
+                            if geom2.type() == 1 and geom1.intersects(geom2): #Line
+                                coord_lin = geom2.asPolyline()
+                                if pnt != coord_lin[-1]:
+                                    vante = confront[item][0]
+                                    break
+                        lista += [[pnt, vante]]
+
+                    for ind, item in enumerate(lista):
+                        if item[-1] == -1:
+                            COORDS = COORDS[ind :] + COORDS[0 : ind]
+                            break
+
+                    anel = QgsLineString(COORDS)
+                    pol = QgsPolygon(anel)
+                    newGeom = QgsGeometry(pol)
+                    ok = camada.changeGeometry(feat1.id(), newGeom)
 
         if salvar:
             camada.commitChanges() # salva as edições
