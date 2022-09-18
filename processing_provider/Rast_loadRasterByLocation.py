@@ -220,42 +220,44 @@ class LoadRasterByLocation(QgsProcessingAlgorithm):
         feedback.pushInfo(self.tr('Verifying raster files...', 'Verificando arquivos raster...'))
         selecao = []
         for current, file_path in enumerate(lista):
-            image = gdal.Open(file_path)
-            prj=image.GetProjection() # wkt
-            ulx, xres, xskew, uly, yskew, yres  = image.GetGeoTransform()
-            cols = image.RasterXSize # Number of columns
-            rows = image.RasterYSize # Number of rows
-            image=None # Close image
+            try:
+                image = gdal.Open(file_path)
+                prj = image.GetProjection() # wkt
+                ulx, xres, xskew, uly, yskew, yres = image.GetGeoTransform()
+                cols = image.RasterXSize # Number of columns
+                rows = image.RasterYSize # Number of rows
+                image=None # Close image
 
-            # Creating BBox
-            coord = [[QgsPointXY(ulx, uly),
-                      QgsPointXY(ulx+cols*xres, uly),
-                      QgsPointXY(ulx+cols*xres, uly+rows*yres),
-                      QgsPointXY(ulx, uly+rows*yres),
-                      QgsPointXY(ulx, uly)]]
-            geom = QgsGeometry.fromPolygonXY(coord)
+                # Creating BBox
+                coord = [[QgsPointXY(ulx, uly),
+                          QgsPointXY(ulx+cols*xres, uly),
+                          QgsPointXY(ulx+cols*xres, uly+rows*yres),
+                          QgsPointXY(ulx, uly+rows*yres),
+                          QgsPointXY(ulx, uly)]]
+                geom = QgsGeometry.fromPolygonXY(coord)
 
-            # CRS transformation
-            CRS= QgsCoordinateReferenceSystem(prj) # Create image CRS
-            coordinateTransformer = QgsCoordinateTransform()
-            coordinateTransformer.setDestinationCrs(crs)
-            coordinateTransformer.setSourceCrs(CRS)
-            geom_transf = reprojectPoints(geom, coordinateTransformer)
+                # CRS transformation
+                CRS= QgsCoordinateReferenceSystem(prj) # Create image CRS
+                coordinateTransformer = QgsCoordinateTransform()
+                coordinateTransformer.setDestinationCrs(crs)
+                coordinateTransformer.setSourceCrs(CRS)
+                geom_transf = reprojectPoints(geom, coordinateTransformer)
 
-            for feat in source.getFeatures():
-                if geom_transf.intersects(feat.geometry()):
-                    selecao += [file_path]
-                    break
+                for feat in source.getFeatures():
+                    if geom_transf.intersects(feat.geometry()):
+                        selecao += [file_path]
+                        break
 
-            if saida and os.path.exists(saida):
-                for caminho in selecao:
-                    head, tail = os.path.split(caminho)
-                    shutil.copy2(caminho, os.path.join(saida, tail))
+                if saida and os.path.exists(saida):
+                    for caminho in selecao:
+                        head, tail = os.path.split(caminho)
+                        shutil.copy2(caminho, os.path.join(saida, tail))
+            except:
+                feedback.pushInfo(self.tr('Problem opening the file: {}'.format(file_path), 'Problema para abrir o arquivo: {}'.format(file_path)))
 
             if feedback.isCanceled():
                 break
             feedback.setProgress(int((current+1) * total))
-
 
         self.LISTA = selecao
         self.FORMATO = formato
