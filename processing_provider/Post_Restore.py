@@ -134,7 +134,7 @@ class Restore(QgsProcessingAlgorithm):
                 self.VERSION,
                 self.tr('PostgreSQL version', 'Versão do PostgreSQL'),
 				options = self.versions,
-                defaultValue= 2
+                defaultValue = 6
             )
         )
 
