@@ -144,7 +144,7 @@ Nota: Para realizar esta operação, é necessário que o banco de dados esteja 
                 self.VERSION,
                 self.tr('PostgreSQL version', 'Versão do PostgreSQL'),
 				options = self.versions,
-                defaultValue= 2
+                defaultValue = 6
             )
         )
 
