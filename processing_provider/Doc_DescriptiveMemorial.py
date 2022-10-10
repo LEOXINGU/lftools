@@ -59,6 +59,8 @@ class DescriptiveMemorial(QgisAlgorithm):
     SLOGAN = 'SLOGAN'
     DECIMAL = 'DECIMAL'
     PROJECTION = 'PROJECTION'
+    TOPOLOGY = 'TOPOLOGY'
+    ATTRIBUTES = 'ATTRIBUTES'
     LOC = QgsApplication.locale()[:2]
 
 
@@ -194,7 +196,23 @@ class DescriptiveMemorial(QgisAlgorithm):
             QgsProcessingParameterBoolean(
                 self.PROJECTION,
                 self.tr('Verify map projection', 'Verificar projeção do mapa'),
-                defaultValue=True
+                defaultValue = True
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterBoolean(
+                self.ATTRIBUTES,
+                self.tr('Verify attributes', 'Verificar atributos'),
+                defaultValue = True
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterBoolean(
+                self.TOPOLOGY,
+                self.tr('Verify topology', 'Verificar topologia'),
+                defaultValue = False
             )
         )
 
@@ -261,34 +279,141 @@ class DescriptiveMemorial(QgisAlgorithm):
             context
         )
 
+        topologia = self.parameterAsBool(
+            parameters,
+            self.TOPOLOGY,
+            context
+        )
+
+        atributos = self.parameterAsBool(
+            parameters,
+            self.ATTRIBUTES,
+            context
+        )
+
         meses = {1: 'janeiro', 2:'fevereiro', 3: 'março', 4:'abril', 5:'maio', 6:'junho', 7:'julho', 8:'agosto', 9:'setembro', 10:'outubro', 11:'novembro', 12:'dezembro'}
 
-        # Validando dados de entrada
-        # ponto_limite
-        ordem_list = list(range(1,vertices.featureCount()+1))
-        ordem_comp = []
-        for feat in vertices.getFeatures():
-            try:
-                ordem_comp += [feat['sequence']]
-                codigo_item = feat['code']
-            except:
-                raise QgsProcessingException(self.tr('Check that your layer "limit_point_p" has the correct field names for the TopoGeo model! More information: https://bit.ly/3FDNQGC', 'Verifique se sua camada "Ponto Limite" está com os nomes dos campos corretos para o modelo TopoGeo! Mais informações: https://geoone.com.br/ebook_gratis/'))
-            if not codigo_item or codigo_item in ['', ' ']:
-                raise QgsProcessingException(self.tr('The code attribute must be filled in for all features!', 'O atributo código deve ser preenchido para todas as feições!'))
-        ordem_comp.sort()
-        if ordem_list != ordem_comp:
-            raise QgsProcessingException(self.tr('The point sequence field must be filled in correctly!', 'O campo de sequência dos pontos deve preenchido corretamente!'))
-        # elemento_confrontante
-        for feat in limites.getFeatures():
-            try:
-                att1 = feat['start_pnt_descr']
-                att2 = feat['borderer']
-            except:
-                raise QgsProcessingException(self.tr('Check that your layer "boundary_element_l" has the correct field names for the TopoGeo model! More information: https://bit.ly/3FDNQGC', 'Verifique se sua camada "Elemento confrontante" está com os nomes dos campos corretos para o modelo TopoGeo! Mais informações: https://geoone.com.br/ebook_gratis/'))
-            if not att1 or att1 in ['', ' ']:
-                raise QgsProcessingException(self.tr('The attribute of the starting point description must be filled in for all features!', 'O atributo de descrição do ponto inicial deve ser preenchido para todas as feições!'))
-            if not att2 or att2 in ['', ' ']:
-                raise QgsProcessingException(self.tr("The confrontant's name must be filled in for all features!", 'O nome do confrontante deve ser preenchido para todas as feições!'))
+        # Validando atributos dos dados de entrada
+        if atributos:
+            feedback.pushInfo(self.tr('Validating layer attributes...', 'Validando atributos das camadas...' ))
+            # ponto_limite
+            ordem_list = list(range(1,vertices.featureCount()+1))
+            ordem_comp = []
+            for feat in vertices.getFeatures():
+                try:
+                    ordem_comp += [feat['sequence']]
+                    codigo_item = feat['code']
+                except:
+                    raise QgsProcessingException(self.tr('Check that your layer "limit_point_p" has the correct field names for the TopoGeo model! More information: https://bit.ly/3FDNQGC', 'Verifique se sua camada "Ponto Limite" está com os nomes dos campos corretos para o modelo TopoGeo! Mais informações: https://geoone.com.br/ebook_gratis/'))
+                if not codigo_item or codigo_item in ['', ' ']:
+                    raise QgsProcessingException(self.tr('The code attribute must be filled in for all features!', 'O atributo código deve ser preenchido para todas as feições!'))
+            ordem_comp.sort()
+            if ordem_list != ordem_comp:
+                raise QgsProcessingException(self.tr('The point sequence field must be filled in correctly!', 'O campo de sequência dos pontos deve preenchido corretamente!'))
+
+            # elemento_confrontante
+            for feat in limites.getFeatures():
+                try:
+                    att1 = feat['start_pnt_descr']
+                    att2 = feat['borderer']
+                except:
+                    raise QgsProcessingException(self.tr('Check that your layer "boundary_element_l" has the correct field names for the TopoGeo model! More information: https://bit.ly/3FDNQGC', 'Verifique se sua camada "Elemento confrontante" está com os nomes dos campos corretos para o modelo TopoGeo! Mais informações: https://geoone.com.br/ebook_gratis/'))
+                if not att1 or att1 in ['', ' ']:
+                    raise QgsProcessingException(self.tr('The attribute of the starting point description must be filled in for all features!', 'O atributo de descrição do ponto inicial deve ser preenchido para todas as feições!'))
+                if not att2 or att2 in ['', ' ']:
+                    raise QgsProcessingException(self.tr("The confrontant's name must be filled in for all features!", 'O nome do confrontante deve ser preenchido para todas as feições!'))
+
+        # Validando a Topologia dos dados de entrada
+        if topologia:
+            feedback.pushInfo(self.tr('Validating topology of geometries...', 'Validando topologia das geometrias...' ))
+            # Verificar se cada vértice da camada limite (linha) tem o correspondente da camada vétice (ponto)
+            for feat1 in limites.getFeatures():
+                geom1 = feat1.geometry()
+                if geom1.isMultipart():
+                    linha = feat1.geometry().asMultiPolyline()[0]
+                else:
+                    linha = feat1.geometry().asPolyline()
+                for pnt in linha:
+                    corresp = False
+                    for feat2 in vertices.getFeatures():
+                        vert = feat2.geometry().asPoint()
+                        if vert == pnt:
+                            corresp = True
+                            continue
+                    if not corresp:
+                        raise QgsProcessingException(self.tr('Coordinate point ({}, {}) of the "boundary_element_l" layer has no correspondent in the "limit_point_p" layer!',
+                                                             'Ponto de coordenadas ({}, {}) da camada "Elemento Confrontante" não possui correspondente na camada "Ponto Limite"!').format(pnt.x(), pnt.y()))
+
+    		# Verificar se cada vértice da camada parcela (polígono) tem o correspondente da camada vétice (ponto)
+            for feat1 in area.getFeatures():
+                geom1 = feat1.geometry()
+                if geom1.isMultipart():
+                    pols = geom1.asMultiPolygon()
+                else:
+                    pols = [geom1.asPolygon()]
+                for pol in pols:
+                    for pnt in pol[0]:
+                        corresp = False
+                        for feat2 in vertices.getFeatures():
+                            vert = feat2.geometry().asPoint()
+                            if vert == pnt:
+                                corresp = True
+                                continue
+                        if not corresp:
+                            raise QgsProcessingException(self.tr('Coordinate point ({}, {}) of the "property_area_a" layer has no correspondent in the "limit_point_p" layer!',
+                                                                 'Ponto de coordenadas ({}, {}) da camada "Área do imóvel" não possui correspondente na camada "Ponto Limite"!').format(pnt.x(), pnt.y()))
+
+            # Verificar se cada vértice da camada Ponto Limite tem o correspondente da camada Elemento confrontante
+            for feat1 in vertices.getFeatures():
+                geom1 = feat1.geometry()
+                vert = geom1.asPoint()
+                corresp = False
+                for feat2 in area.getFeatures():
+                    geom2 = feat2.geometry()
+                    if geom1.intersects(geom2):
+                        corresp = True
+                        break
+                if not corresp:
+                    raise QgsProcessingException(self.tr('Coordinate point ({}, {}) of the "limit_point_p" layer has no correspondent in the "boundary_element_l" layer!',
+                                                         'Ponto de coordenadas ({}, {}) da camada "Ponto Limite" não possui correspondente na camada "Elemento confrontante"!').format(vert.x(), vert.y()))
+
+            # Geometrias duplicadas na camada limit_point_p
+            pontos = []
+            for feat1 in vertices.getFeatures():
+                vert = feat1.geometry().asPoint()
+                if vert not in pontos:
+                    pontos += [vert]
+                else:
+                    raise QgsProcessingException(self.tr('Coordinate point ({}, {}) of the "limit_point_p" layer is duplicated!',
+                                                         'Ponto de coordenadas ({}, {}) da camada "Ponto Limite" está duplicado!').format(vert.x(), vert.y()))
+            # Nós duplicados dentro da camada boundary_element_l
+            for feat1 in limites.getFeatures():
+                geom1 = feat1.geometry()
+                if geom1.isMultipart():
+                    linha = feat1.geometry().asMultiPolyline()[0]
+                else:
+                    linha = feat1.geometry().asPolyline()
+                pontos = []
+                for pnt in linha:
+                    if pnt not in pontos:
+                        pontos += [pnt]
+                    else:
+                        raise QgsProcessingException(self.tr('Coordinate point ({}, {}) of the "boundary_element_l" layer is duplicated!',
+                                                             'Ponto de coordenadas ({}, {}) da camada "Elemento confrontante" está duplicado!').format(pnt.x(), pnt.y()))
+            # Nós duplicados dentro da camada property_area_a
+            for feat1 in area.getFeatures():
+                geom1 = feat1.geometry()
+                if geom1.isMultipart():
+                    pol = feat1.geometry().asMultiPolygon()[0][0]
+                else:
+                    pol = feat1.geometry().asPolygon()[0]
+                pontos = []
+                for pnt in pol[:-1]:
+                    if pnt not in pontos:
+                        pontos += [pnt]
+                    else:
+                        raise QgsProcessingException(self.tr('Coordinate point ({}, {}) of the "property_area_a" layer is duplicated!',
+                                                             'Ponto de coordenadas ({}, {}) da camada "Área do imóvel" está duplicado!').format(pnt.x(), pnt.y()))
 
         # Pegando informações dos confrontantes (limites)
         ListaDescr = []
