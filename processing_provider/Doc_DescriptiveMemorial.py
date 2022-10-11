@@ -516,10 +516,11 @@ class DescriptiveMemorial(QgisAlgorithm):
         # Área do imóvel
         Fields = area.fields()
         fieldnames = [field.name() for field in Fields]
-        for fieldname in fieldnames:
-            att = feat1[fieldname]
-            if not att or att in ['', ' ']:
-                raise QgsProcessingException(self.tr('All attributes of the class "area_imovel" must be filled!', 'Todos os atributos da classe "area_imovel" devem ser preenchido!'))
+        if atributos:
+            for fieldname in fieldnames:
+                att = feat1[fieldname]
+                if not att or att in ['', ' ']:
+                    raise QgsProcessingException(self.tr('All attributes of the class "area_imovel" must be filled!', 'Todos os atributos da classe "area_imovel" devem ser preenchido!'))
 
         # Transformar Coordenadas de Geográficas para o sistema UTM
         coordinateTransformer = QgsCoordinateTransform()
