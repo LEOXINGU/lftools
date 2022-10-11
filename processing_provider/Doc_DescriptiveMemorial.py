@@ -212,7 +212,7 @@ class DescriptiveMemorial(QgisAlgorithm):
             QgsProcessingParameterBoolean(
                 self.TOPOLOGY,
                 self.tr('Verify topology', 'Verificar topologia'),
-                defaultValue = False
+                defaultValue = True
             )
         )
 
@@ -237,7 +237,7 @@ class DescriptiveMemorial(QgisAlgorithm):
         area = self.parameterAsSource(parameters,
                                                      'INPUT3',
                                                      context)
-        coord = self.parameterAsEnum(
+        coordenadas = self.parameterAsEnum(
             parameters,
             self.COORD,
             context
@@ -367,10 +367,11 @@ class DescriptiveMemorial(QgisAlgorithm):
             for feat1 in vertices.getFeatures():
                 geom1 = feat1.geometry()
                 vert = geom1.asPoint()
+                geom1 = geom1.buffer(0.001/110000,5)
                 corresp = False
-                for feat2 in area.getFeatures():
+                for feat2 in limites.getFeatures():
                     geom2 = feat2.geometry()
-                    if geom1.intersects(geom2):
+                    if geom2.intersects(geom1):
                         corresp = True
                         break
                 if not corresp:
@@ -415,11 +416,59 @@ class DescriptiveMemorial(QgisAlgorithm):
                         raise QgsProcessingException(self.tr('Coordinate point ({}, {}) of the "property_area_a" layer is duplicated!',
                                                              'Ponto de coordenadas ({}, {}) da camada "Área do imóvel" está duplicado!').format(pnt.x(), pnt.y()))
 
+        feedback.pushInfo(self.tr('Sequencing "boundary_element_l" features...', 'Ordenando a sequência dos confrontantes...' ))
+        # Pegando ponto inicial
+        for feat1 in vertices.getFeatures():
+            ordem_pnt = feat1['sequence']
+            if ordem_pnt == 1:
+                ponto_ini = feat1.geometry().asPoint()
+        # listando confrontantes
+        dic_linhas = {}
+        for linha in limites.getFeatures():
+            dic_linhas[linha.id()] = linha
+        # idenficando primeiro confrontante
+        first_lin = -1
+        lista_ordem = []
+        last_coord = []
+        for item in dic_linhas:
+            geom = dic_linhas[item].geometry()
+            if geom.isMultipart():
+                coord = geom.asMultiPolyline()[0]
+            else:
+                coord = geom.asPolyline()
+            if coord[0] == ponto_ini:
+                lista_ordem += [item]
+                last_coord += [coord[-1]]
+                break
+        # Verificar sequência dos confrontantes
+        cont = 0
+        while cont < len(dic_linhas)-1:
+            encontrou = False
+            ponto_fim = last_coord[-1]
+            for item in dic_linhas:
+                if item not in lista_ordem:
+                    geom = dic_linhas[item].geometry()
+                    if geom.isMultipart():
+                        coord = geom.asMultiPolyline()[0]
+                    else:
+                        coord = geom.asPolyline()
+                    ponto_ini = coord[0]
+                    if ponto_fim == ponto_ini:
+                        lista_ordem += [item]
+                        last_coord += [coord[-1]]
+                        encontrou = True
+                        cont += 1
+                        break
+            if not encontrou:
+                raise QgsProcessingException(self.tr('Coordinate point ({}, {}) of the "boundary_element_l" layer is not connected!',
+                                                     'Ponto de coordenadas ({}, {}) da camada "Elemento confrontante" não está conectado!').format(ponto_fim.x(), ponto_fim.y()))
+
         # Pegando informações dos confrontantes (limites)
         ListaDescr = []
         ListaCont = []
         soma = 0
-        for linha in limites.getFeatures():
+        for item in lista_ordem:
+            linha = dic_linhas[item]
             geom = linha.geometry()
             if geom.isMultipart():
                 Lin_coord = geom.asMultiPolyline()[0]
@@ -497,36 +546,36 @@ class DescriptiveMemorial(QgisAlgorithm):
 
 
         def CoordN (x, y, z):
-            if coord in (0,1,2,3):
+            if coordenadas in (0,1,2,3):
                 Xn = self.tr(format_num.format(x), format_num.format(x).replace(',', 'X').replace('.', ',').replace('X', '.'))
                 Yn = self.tr(format_num.format(y), format_num.format(y).replace(',', 'X').replace('.', ',').replace('X', '.'))
-            if coord in (4,5,6,7):
+            if coordenadas in (4,5,6,7):
                 Xn = str2HTML(self.tr(dd2dms(x,4), dd2dms(x,4).replace('.', ','))).replace('-','') + 'W' if x < 0 else 'E'
                 Yn = str2HTML(self.tr(dd2dms(y,4), dd2dms(y,4).replace('.', ','))).replace('-','') + 'S' if y < 0 else 'N'
             Zn = self.tr(format_num.format(z), format_num.format(z).replace(',', 'X').replace('.', ',').replace('X', '.'))
 
-            if coord == 0:
+            if coordenadas == 0:
                 txt = '''<b>N [Yn]m </b>''' + self.tr('and','e') +''' <b>E [Xn]m</b>'''
                 return txt.replace('[Yn]', Yn).replace('[Xn]', Xn)
-            elif coord == 1:
+            elif coordenadas == 1:
                 txt = '''<b>E [Xn]m </b>''' + self.tr('and','e') +''' <b>N [Yn]m</b>'''
                 return txt.replace('[Yn]', Yn).replace('[Xn]', Xn)
-            elif coord == 2:
+            elif coordenadas == 2:
                 txt = '''<b>N [Yn]m</b>, <b>E [Xn]m</b> ''' + self.tr('and','e') +''' <b>h [Zn]m</b>'''
                 return txt.replace('[Yn]', Yn).replace('[Xn]', Xn).replace('[Zn]', Zn)
-            elif coord == 3:
+            elif coordenadas == 3:
                 txt = '''<b>E [Xn]m</b>, <b>N [Yn]m</b> ''' + self.tr('and','e') +''' <b>h [Zn]m</b>'''
                 return txt.replace('[Yn]', Yn).replace('[Xn]', Xn).replace('[Zn]', Zn)
-            elif coord == 4:
+            elif coordenadas == 4:
                 txt = '''<b> [Yn] </b>''' + self.tr('and','e') +''' <b> [Xn]</b>'''
                 return txt.replace('[Yn]', Yn).replace('[Xn]', Xn)
-            elif coord == 5:
+            elif coordenadas == 5:
                 txt = '''<b> [Xn] </b>''' + self.tr('and','e') +''' <b> [Yn]</b>'''
                 return txt.replace('[Yn]', Yn).replace('[Xn]', Xn)
-            elif coord == 6:
+            elif coordenadas == 6:
                 txt = '''<b> [Yn]</b>, <b> [Xn]</b> ''' + self.tr('and','e') +''' <b>h [Zn]m</b>'''
                 return txt.replace('[Yn]', Yn).replace('[Xn]', Xn).replace('[Zn]', Zn)
-            elif coord == 7:
+            elif coordenadas == 7:
                 txt = '''<b> [Xn]</b>, <b> [Yn]</b> ''' + self.tr('and','e') +''' <b>h [Zn]m</b>'''
                 return txt.replace('[Yn]', Yn).replace('[Xn]', Xn).replace('[Zn]', Zn)
 
@@ -668,7 +717,7 @@ class DescriptiveMemorial(QgisAlgorithm):
         for w,t in enumerate(ListaCont):
             linha0 = texto_var1
             itens =    {'[Vn]': pnts[t[0]+1][2],
-                        '[Coordn]': CoordN(pnts[t[0]+1][0].x(), pnts[t[0]+1][0].y(), pnts[t[0]+1][3][2]) if coord in (0,1,2,3) else CoordN(pnts[t[0]+1][3][0], pnts[t[0]+1][3][1], pnts[t[0]+1][3][2]),
+                        '[Coordn]': CoordN(pnts[t[0]+1][0].x(), pnts[t[0]+1][0].y(), pnts[t[0]+1][3][2]) if coordenadas in (0,1,2,3) else CoordN(pnts[t[0]+1][3][0], pnts[t[0]+1][3][1], pnts[t[0]+1][3][2]),
                         '[Az_n]': str2HTML(self.tr(dd2dms(Az_lista[t[0]],1), dd2dms(Az_lista[t[0]],1).replace('.', ','))),
                         '[Dist_n]': self.tr(format_num.format(Dist[t[0]]), format_num.format(Dist[t[0]]).replace(',', 'X').replace('.', ',').replace('X', '.')),
                         '[Descr_k]': ListaDescr[w][0],
@@ -681,7 +730,7 @@ class DescriptiveMemorial(QgisAlgorithm):
             for k in range(t[0]+1, t[0]+t[1]):
                 linha1 = texto_var2
                 itens = {'[Vn]': pnts[k+1][2],
-                        '[Coordn]': CoordN(pnts[k+1][0].x(), pnts[k+1][0].y(), pnts[k+1][3][2]) if coord in (0,1,2,3) else CoordN(pnts[k+1][3][0], pnts[k+1][3][1], pnts[k+1][3][2]),
+                        '[Coordn]': CoordN(pnts[k+1][0].x(), pnts[k+1][0].y(), pnts[k+1][3][2]) if coordenadas in (0,1,2,3) else CoordN(pnts[k+1][3][0], pnts[k+1][3][1], pnts[k+1][3][2]),
                         '[Az_n]': str2HTML(self.tr(dd2dms(Az_lista[k],1), dd2dms(Az_lista[k],1).replace('.', ','))),
                         '[Dist_n]': self.tr(format_num.format(Dist[k]), format_num.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'))
                         }
@@ -692,7 +741,7 @@ class DescriptiveMemorial(QgisAlgorithm):
 
         # Inserindo dados finais
         itens = {   '[P-01]': pnts[1][2],
-                    '[Coord1]': CoordN(pnts[1][0].x(), pnts[1][0].y(), pnts[1][3][2])  if coord in (0,1,2,3) else CoordN(pnts[1][3][0], pnts[1][3][1], pnts[1][3][2]),
+                    '[Coord1]': CoordN(pnts[1][0].x(), pnts[1][0].y(), pnts[1][3][2])  if coordenadas in (0,1,2,3) else CoordN(pnts[1][3][0], pnts[1][3][1], pnts[1][3][2]),
                     '[GRS]': SRC.split(' /')[0],
                     '[FUSO]': str(FusoHemisf(centroideG)[0]),
                     '[HEMISFERIO]': FusoHemisf(centroideG)[1],
