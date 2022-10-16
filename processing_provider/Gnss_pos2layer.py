@@ -151,7 +151,7 @@ Tipos:
                 self.TYPE,
                 self.tr('Type', 'Tipo'),
 				options = tipo,
-                defaultValue= 0
+                defaultValue = 0
             )
         )
 
@@ -159,7 +159,7 @@ Tipos:
             QgsProcessingParameterNumber(
                 self.HEIGHT,
                 self.tr('Antenna height', 'Altura da antena'),
-                type =1,
+                type = 1,
                 defaultValue = 0.0,
                 minValue = 0
                 )
@@ -338,7 +338,7 @@ Tipos:
             feat['num_sat'] = nsat
             feat['quality'] = quality
 
-            if model_vel > 0:
+            if model_vel > 0 and saida == 0:
                 vlat, vlon = vemos(lat, lon, ['vemos2009','vemos2017'][model_vel-1])
                 delta_tempo = datetime.strptime(datahora, "%Y-%m-%d %H:%M:%S") - datetime.strptime('2000-04-24 12:00:00', "%Y-%m-%d %H:%M:%S")
                 anos = delta_tempo.days/365.25
@@ -346,6 +346,8 @@ Tipos:
                 dLon = dist2degrees(vlon*anos, lat, 4674)
                 lat -= dLat
                 lon -= dLon
+                feat['lat'] = float(lat)
+                feat['lon'] = float(lon)
 
             if saida == 0:
                 feat.setGeometry(QgsPoint(lon, lat, h))
@@ -356,6 +358,16 @@ Tipos:
 
 
         if saida == 1:
+            if model_vel > 0:
+                vlat, vlon = vemos(lat, lon, ['vemos2009','vemos2017'][model_vel-1])
+                delta_tempo = datetime.strptime(datahora, "%Y-%m-%d %H:%M:%S") - datetime.strptime('2000-04-24 12:00:00', "%Y-%m-%d %H:%M:%S")
+                anos = delta_tempo.days/365.25
+                dLat = dist2degrees(vlat*anos, lat, 4674)
+                dLon = dist2degrees(vlon*anos, lat, 4674)
+                lat -= dLat
+                lon -= dLon
+                feat['lat'] = float(lat)
+                feat['lon'] = float(lon)
             feat.setGeometry(QgsPoint(lon, lat, h))
             sink.addFeature(feat, QgsFeatureSink.FastInsert)
 
