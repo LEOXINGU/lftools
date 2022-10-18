@@ -163,8 +163,6 @@ Com esta ferramenta é possível realizar o correto georreferenciamento de arqui
             raise QgsProcessingException(self.invalidSourceError(parameters, self.VECTOR))
 
         # Validação dos vetores de georreferenciamento
-        if entrada.sourceCrs() != deslc.sourceCrs(): #mesmo SRC
-            raise QgsProcessingException(self.tr('The CRS of the vectors layer must be the same as the input layer!','O SRC da camada vetores deve ser igual ao da camada de entrada!'))
         for feat in deslc.getFeatures():
             try:
                 coords = feat.geometry().asPolyline()
@@ -173,6 +171,13 @@ Com esta ferramenta é possível realizar o correto georreferenciamento de arqui
             if len(coords) != 2:
                 raise QgsProcessingException(self.tr('The vectors must be lines with exactly two vertices!', 'Os vetores devem ser linhas com extamente dois vértices!'))
 
+        # Transformação de coordenadas
+        if entrada.sourceCrs() != deslc.sourceCrs():
+            transf_SRC = True
+            coordTransf = QgsCoordinateTransform(entrada.sourceCrs(), deslc.sourceCrs(), QgsProject.instance())
+        else:
+            transf_SRC = False
+
         # OUTPUT
         (sink, dest_id) = self.parameterAsSink(
             parameters,
@@ -180,7 +185,7 @@ Com esta ferramenta é possível realizar o correto georreferenciamento de arqui
             context,
             entrada.fields(),
             entrada.wkbType(),
-            entrada.sourceCrs()
+            deslc.sourceCrs()
         )
         if sink is None:
             raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT))
@@ -205,6 +210,8 @@ Com esta ferramenta é possível realizar o correto georreferenciamento de arqui
         total = 100.0 / entrada.featureCount() if entrada.featureCount() else 0
         for current, feat in enumerate(entrada.getFeatures()):
             geom = feat.geometry()
+            if transf_SRC:
+                geom.transform(coordTransf)
             newgeom = transformGeom2D(geom, CoordTransf)
             feature.setGeometry(newgeom)
             feature.setAttributes(feat.attributes())
