@@ -208,6 +208,7 @@ Modos:
 
         lista = []
         PDOP, HDOP, VDOP = -1, -1, -1
+        nmea_quality = {0:'0: Invalid', 1:'1: Standalone', 2:'2: DGPS', 3:'3: n/a', 4:'4: RTK fixed', 5:'5: RTK float'}
 
         for line in arq.readlines():
             try:
@@ -223,7 +224,7 @@ Modos:
                     seg = float(partes[1][4:10])
                     lat = (-1 if partes[3] == 'S' else 1)*( float(partes[2][0:2]) + float(partes[2][2:-1])/60)
                     lon = (-1 if partes[5] == 'W' else 1)*( float(partes[4][0:3]) + float(partes[4][3:-1])/60)
-                    quality = int(partes[6])
+                    quality = nmea_quality[int(partes[6])]
                     num_sat = int(partes[7])
                     HDOP = float(partes[8])
                     H = float(partes[9]) - aa
@@ -253,7 +254,7 @@ Modos:
                       "HDOP": QVariant.Double,
                       "VDOP": QVariant.Double,
                       "PDOP": QVariant.Double,
-                      "quality": QVariant.Int,
+                      "quality": QVariant.String,
                       "num_sat": QVariant.Int
                  }
         else:
@@ -286,20 +287,20 @@ Modos:
                 sink.addFeature(feat, QgsFeatureSink.FastInsert)
 
         elif tipo == 1:
-            valores = valores[valores[:,-2]==4] # eliminando observações de baixa qualidade
+            valores = valores[valores[:,-2] == nmea_quality[4] ] # eliminando observações de baixa qualidade
             if len(valores) == 0:
                 raise QgsProcessingException(self.tr('There is no observation with RTK correction.', 'Não existe observação com correção RTK.'))
             # calculo de valores médios
-            lat = valores[:,0].mean()
-            s_lat = valores[:,0].std()
-            lon = valores[:,1].mean()
-            s_lon = valores[:,1].std()
-            h = valores[:,2].mean()
-            s_h = valores[:,2].std()
-            H = valores[:,3].mean()
-            N = valores[:,4].mean()
-            data_hora_ini = unicode(datetime.datetime(ano, mes, dia, int(valores[0, -5]), int(valores[0, -4]), int(valores[0, -3])))
-            data_hora_fim = unicode(datetime.datetime(ano, mes, dia, int(valores[-1, -5]), int(valores[-1, -4]), int(valores[-1, -3])))
+            lat = valores[:,0].astype('float').mean()
+            s_lat = valores[:,0].astype('float').std()
+            lon = valores[:,1].astype('float').mean()
+            s_lon = valores[:,1].astype('float').std()
+            h = valores[:,2].astype('float').mean()
+            s_h = valores[:,2].astype('float').std()
+            H = valores[:,3].astype('float').mean()
+            N = valores[:,4].astype('float').mean()
+            data_hora_ini = unicode(datetime.datetime(ano, mes, dia, int(valores[0, -5]), int(valores[0, -4]), int(float(valores[0, -3]))))
+            data_hora_fim = unicode(datetime.datetime(ano, mes, dia, int(valores[-1, -5]), int(valores[-1, -4]), int(float(valores[-1, -3]))))
             # Raio Médio de Gauss
             R = raioMedioGauss(lat, int(self.tr('4326','4674')))
             sigma_x = (R+h)*np.radians(s_lon)
@@ -322,16 +323,16 @@ Modos:
 
         elif tipo == 2:
             # calculo de valores médios
-            lat = valores[:,0].mean()
-            s_lat = valores[:,0].std()
-            lon = valores[:,1].mean()
-            s_lon = valores[:,1].std()
-            h = valores[:,2].mean()
-            s_h = valores[:,2].std()
-            H = valores[:,3].mean()
-            N = valores[:,4].mean()
-            data_hora_ini = unicode(datetime.datetime(ano, mes, dia, int(valores[0, -5]), int(valores[0, -4]), int(valores[0, -3])))
-            data_hora_fim = unicode(datetime.datetime(ano, mes, dia, int(valores[-1, -5]), int(valores[-1, -4]), int(valores[-1, -3])))
+            lat = valores[:,0].astype('float').mean()
+            s_lat = valores[:,0].astype('float').std()
+            lon = valores[:,1].astype('float').mean()
+            s_lon = valores[:,1].astype('float').std()
+            h = valores[:,2].astype('float').mean()
+            s_h = valores[:,2].astype('float').std()
+            H = valores[:,3].astype('float').mean()
+            N = valores[:,4].astype('float').mean()
+            data_hora_ini = unicode(datetime.datetime(ano, mes, dia, int(valores[0, -5]), int(valores[0, -4]), int(float(valores[0, -3]))))
+            data_hora_fim = unicode(datetime.datetime(ano, mes, dia, int(valores[-1, -5]), int(valores[-1, -4]), int(float(valores[-1, -3]))))
             # Raio Médio de Gauss
             R = raioMedioGauss(lat, int(self.tr('4326','4674')))
             sigma_x = (R+h)*np.radians(s_lon)
