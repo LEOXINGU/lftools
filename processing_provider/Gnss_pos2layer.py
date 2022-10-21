@@ -237,7 +237,7 @@ Tipos:
                   "sigma_y": QVariant.Double,
                   "sigma_z": QVariant.Double,
                   "num_sat": QVariant.Int,
-                  "quality": QVariant.Int
+                  "quality": QVariant.String
              }
         Fields = QgsFields()
         for item in itens:
@@ -254,6 +254,7 @@ Tipos:
             self.TYPE,
             context
         )
+        quality_dic = {1:'1: fix', 2:'2: float', 3:'3: sbas', 4:'4: dgps', 5: '5: single', 6: '6: ppp'}
 
         # IBGE ou RTKLIB
         for linha in arq.readlines():
@@ -285,7 +286,7 @@ Tipos:
                 ano, mes, dia = pnt[0].split('/')
                 hora, minuto, segundo = pnt[1].split(':')
                 datahora = unicode(datetime(int(ano), int(mes), int(dia), int(hora), int(minuto), int(float(segundo))))
-                quality = int(pnt[5])
+                quality = quality_dic[int(pnt[5])]
                 nsat = int(pnt[6])
                 slat = float(pnt[7])
                 slon = float(pnt[8])
@@ -306,7 +307,7 @@ Tipos:
                 ano, mes, dia = pnt[4].split('-')
                 hora, minuto, segundo = pnt[5].split(':')
                 datahora = unicode(datetime(int(ano), int(mes), int(dia), int(hora), int(minuto), int(float(segundo))))
-                quality = 6
+                quality = 'ppp-ibge'
                 nsat = int(pnt[6])
                 slat = float(pnt[15])
                 slon = float(pnt[16])
