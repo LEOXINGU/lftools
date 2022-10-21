@@ -170,7 +170,7 @@ def geoc2geod(X, Y, Z, a, f):
     tg_u = (a/b)*Z/sqrt(X**2 + Y**2)
     sen_u = tg_u/sqrt(1+tg_u**2)
     cos_u = 1/sqrt(1+tg_u**2)
-    lon =arctan(Y/X)
+    lon = arctan(Y/X)
     lat = arctan( (Z+ e2_2 * b * sen_u**3) / (sqrt(X**2 + Y**2) - e2 * a * cos_u**3))
     N = a/sqrt(1-(e2*sin(lat)**2))
     h = sqrt(X**2 + Y**2)/cos(lat) - N
