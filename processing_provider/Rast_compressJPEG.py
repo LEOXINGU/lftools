@@ -209,6 +209,21 @@ class CompressJPEG(QgsProcessingAlgorithm):
             context
         )
 
+        image = gdal.Open(RasterIN) # https://gdal.org/python/
+        GDT = image.GetRasterBand(1).DataType
+        n_bands = image.RasterCount
+
+        # Validação dos dados de entrada
+        # Se não tiver 3 ou 4 bandas
+        if n_bands not in (3,4):
+            raise QgsProcessingException(self.tr('The input image must have 3 or 4 bands!', 'A imagem de entrada deve ter 3 ou 4 bandas!'))
+        # Tipo de dado 8 btis
+        if GDT != gdal.GDT_Byte:
+            raise QgsProcessingException(self.tr('Data type must be 8 bit!', 'Tipo de dado deve ser de 8 bit!'))
+        # Se Photometric tem que ter 3 bandas
+        if tipo in (0, 2) and n_bands != 3:
+            raise QgsProcessingException(self.tr('The image must have 3 bands for Photometric compression!', 'A imagem deve ter 3 bandas para a compressão Photometric!'))
+
         degree = ['65%', '75%', '85%']
         qualidade = 'JPEG_QUALITY=' + degree[qualidade]
 
