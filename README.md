@@ -505,7 +505,7 @@ Creates new vertices between adjacent polygons to ensure perfect connectivity (t
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/cadastre_connectFeatures.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/cadastre_connectFeatures.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -517,7 +517,7 @@ Generates front lot lines from a polygon layer of parcels.
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/cadastre_frontlotline.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/cadastre_frontlotline.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -529,7 +529,7 @@ This tool fills in a numeric attribute following a geographic criterion, for exa
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/cadastre_geonumbering.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/cadastre_geonumbering.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -541,7 +541,7 @@ This tool orients the geometry of polygon-like features clockwise or countercloc
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/vect_orient_polygon.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/vect_orient_polygon.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -553,7 +553,7 @@ This script fills a certain attribute of the features of a layer of points accor
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/vect_sequence_points.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/vect_sequence_points.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -570,7 +570,7 @@ This algorithm returns the frame related to a scale of the Brazilian Mapping Sys
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/grid_coord_utm.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/grid_coord_utm.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -582,7 +582,7 @@ This algorithm returns the polygons correspondent to the <b>frames</b> related t
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/grid_ext_utm.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/grid_ext_utm.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -594,7 +594,7 @@ This algorithm returns the polygon correspondent to the frame related to a scale
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/grid_inom_utm.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/grid_inom_utm.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -611,7 +611,7 @@ This tool generates a Report for the Analytical Calculation of Area, Azimuths, P
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/doc_analytical_results.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/doc_analytical_results.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -623,7 +623,7 @@ Elaboration of Deed Description based on vector layers that define a property.
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/doc_descriptive_memorial.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/doc_descriptive_memorial.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -635,7 +635,7 @@ This tool generates report(s) with the informations about a geodetic landmarks a
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/doc_mark.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/doc_mark.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -647,7 +647,7 @@ Performs the reconstitution of a Deed Description using Regular Expressions (Reg
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/doc_pointsFromText.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/doc_pointsFromText.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -659,7 +659,7 @@ This tool generates the Vertices and Sides Descriptive Table, also known as Synt
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/doc_descriptive_table.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/doc_descriptive_table.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -676,7 +676,7 @@ This tool makes it possible to copy or move files to a new folder from a point l
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/drone_copySelectedFiles.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/drone_copySelectedFiles.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -688,7 +688,7 @@ Generate text file with Ground Control Points (GCP) from a point layer.
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/drone_createGCP.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/drone_createGCP.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -700,7 +700,7 @@ This tool performs the georeferencing adjustment of any raster image using Groun
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/drone_georref_adjust.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/drone_georref_adjust.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -712,7 +712,7 @@ This tool has the objective of joining the files from several folders in another
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/drone_joinFolders.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/drone_joinFolders.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -724,7 +724,7 @@ This tool aims to create an Overviews file (.ovr). This algorithm has the advant
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/raster_overviews.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/raster_overviews.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -736,7 +736,7 @@ This tool separates drone photographs into new folders to be processed by blocks
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/drone_photosByBlocks.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/drone_photosByBlocks.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -748,7 +748,7 @@ This tool removes the 4th band (apha band), transfering the transparency informa
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/raster_remove_alpha.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/raster_remove_alpha.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -760,7 +760,7 @@ Exports any 8 bit RGB or RGBA raster layer as a JPEG file. Ideal for reducing th
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/raster_jpeg_tfw.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/raster_jpeg_tfw.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -772,7 +772,7 @@ This tool performs the vertical adjustment of Digital Elevation Models (DEM) fro
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/drone_verticalAdjustment.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/drone_verticalAdjustment.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -789,7 +789,7 @@ This algorithm fills in the attributes of a specific field from another layer, i
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/easy_get_attributes.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/easy_get_attributes.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -801,7 +801,7 @@ This tool calculates the line feature's lengths and polygon feature's perimeter 
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/easy_measure_layer.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/easy_measure_layer.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -813,7 +813,7 @@ Generates a <b>point layer</b> from a coordinate table, whether it comes from a 
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/easy_coord_layer.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/easy_coord_layer.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -830,7 +830,7 @@ Loads a NMEA file (protocol 0183) from GNSS receivers as a point layer.</br>Mode
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/gnss_nmea.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/gnss_nmea.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -842,7 +842,7 @@ Loads a POS file (.pos) from GNSS processing as a point layer.</br>Compatibility
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/gnss_pos2layer.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/gnss_pos2layer.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -854,7 +854,7 @@ It finds the central points (vertices) of the concentrations of points surveyed 
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/gnss_ppk.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/gnss_ppk.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -871,7 +871,7 @@ This tool creates a <b>backup</b> file in the "<b>.sql</b>" format for a Postgre
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/post_backup.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/post_backup.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -883,7 +883,7 @@ This tool changes the encoding type of a .sql file. A new file will be created w
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/post_encoding.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/post_encoding.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -895,7 +895,7 @@ This tool allows the user to clone any PostgreSQL database. From a model databas
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/post_clonedb.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/post_clonedb.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -907,7 +907,7 @@ This tool allows you to delete / drop any PostgreSQL database.</br>Notes:</br>- 
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/post_deletedb.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/post_deletedb.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -919,7 +919,7 @@ This tool allows you to load a raster layer into a PostGIS database.
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/post_importraster.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/post_importraster.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -931,7 +931,7 @@ This tool allows you to rename a PostgreSQL database.</br>Note: To run this oper
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/post_renamedb.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/post_renamedb.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -943,7 +943,7 @@ This tool allows you to restore a database content by importing all the backup i
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/post_restore.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/post_restore.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -960,7 +960,7 @@ Performs an arithmetic operation on the bands of a raster. The predefined formul
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/raster_bandArithmetic.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/raster_bandArithmetic.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -972,7 +972,7 @@ Creates a binarized raster, dividing the input raster into two distinct classes 
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/raster_thresholding.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/raster_thresholding.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -984,7 +984,7 @@ Creates holes in Raster by defining "no data" pixels (transparent) from the Poly
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/raster_create_holes.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/raster_create_holes.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -996,7 +996,7 @@ Cells of a raster with values outside the interval (minimum and maximum) are def
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/raster_define_null_px.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/raster_define_null_px.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1008,7 +1008,7 @@ This tool estimates the value of the points from Raster, making the proper inter
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/raster_getpointvalue.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/raster_getpointvalue.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1020,7 +1020,7 @@ Extracts a difined band of a raster (for multiband rasters).
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/raster_extract_band.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/raster_extract_band.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1032,7 +1032,7 @@ Fills Raster null pixels (no data) with data obtained from other smaller raster 
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/raster_fill_holes.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/raster_fill_holes.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1044,7 +1044,7 @@ JPEG compression is a lossy method to reduce the raster file size (about to 10%)
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/raster_jpeg_compress.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/raster_jpeg_compress.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1056,7 +1056,7 @@ Loads a set of raster files that intersect the geometries of an input vector lay
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/raster_loadByLocation.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/raster_loadByLocation.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1068,7 +1068,7 @@ Creates raster mosaic: a combination or merge of two or more images.
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/raster_mosaic.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/raster_mosaic.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1080,7 +1080,7 @@ Combine three image bands into one picture by display each band as either Red, G
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/raster_rgb.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/raster_rgb.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1092,7 +1092,7 @@ Converts the red, green, and blue values of an RGB image to Hue (H), Saturation 
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/raster_rgb2hsv.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/raster_rgb2hsv.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1104,7 +1104,7 @@ Creates a vector layer with the inventory of raster files in a folder. The geome
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/raster_inventory.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/raster_inventory.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1116,7 +1116,7 @@ Rescales the values of the raster pixels with radiometric resolution of 16 bits 
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/raster_histogram.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/raster_histogram.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1128,7 +1128,7 @@ Performs the supervised classification of a raster layer with two or more bands.
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/raster_classification.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/raster_classification.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1145,7 +1145,7 @@ Imports photos with geotag to a Point Layer.
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/reamb_geotag.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/reamb_geotag.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1157,7 +1157,7 @@ The largest width or height value of the original image is resized to the user-d
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/reamb_resize_photo.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/reamb_resize_photo.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1174,7 +1174,7 @@ This tool applies the filtering technique in the Raster pixel by pixel, based on
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/relief_demfilter.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/relief_demfilter.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1186,7 +1186,7 @@ This tool generates a layer of points with <b>Spot Elevations</b> from a <b>Digi
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/relief_spot_elevation.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/relief_spot_elevation.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1203,7 +1203,7 @@ RThis tool returns the central tendency point(s) for clustering points of entry 
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/stat_central_tendency.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/stat_central_tendency.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1215,7 +1215,7 @@ Creates ellipses based on the covariance matrix to summarize the spatial charact
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/stat_ellipses.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/stat_ellipses.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1227,7 +1227,7 @@ Generate gaussian (normal) random points in 2D space with a given mean position 
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/stat_random_points.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/stat_random_points.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1244,7 +1244,7 @@ Calculation of points or line from a set of azimuths and distances.
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/survey_azimuth_distance.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/survey_azimuth_distance.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1256,7 +1256,7 @@ Calculates the adjusted coordinates from angles and horizontal distances of a Cl
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/survey_closed_polygonal.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/survey_closed_polygonal.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1268,7 +1268,7 @@ This tool performs the following types of coordinate transformation:</br>◼️ 
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/survey_helmert2D.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/survey_helmert2D.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1280,7 +1280,7 @@ This tool calculates the coordinates (X, Y, Z) of a point from azimuth and zenit
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/survey_3D_coord.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/survey_3D_coord.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1292,7 +1292,7 @@ This tool calculates the coordinates (X, Y, Z) of a point from azimuth and zenit
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/survey_LTP.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/survey_LTP.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1304,7 +1304,7 @@ This algorithm performs the traverse adjustments of a framed polygonal by least 
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/survey_traverse.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/survey_traverse.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1321,7 +1321,7 @@ This algorithm calculates the inner and outer angles of the polygon vertices of 
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/vect_polygon_angles.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/vect_polygon_angles.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1333,7 +1333,7 @@ Extends lines at their <b>start</b> and/or <b>end</b> points.
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/vect_extend_lines.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/vect_extend_lines.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1345,7 +1345,7 @@ This algorithm merges lines that touch at their starting or ending points and ha
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/vect_directional_merge.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/vect_directional_merge.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1357,7 +1357,7 @@ Inverts vertex order for polygons and lines.
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/vect_reverse_vertex_sequence.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/vect_reverse_vertex_sequence.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1377,7 +1377,7 @@ Cálculo de pontos ou linha a partir de um conjunto de azimutes e distâncias.
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/survey_azimuth_distance.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/survey_azimuth_distance.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1389,7 +1389,7 @@ Esta ferramenta calcula as coordenadas (X,Y,Z) de um ponto a partir de mediçõe
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/survey_3D_coord.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/survey_3D_coord.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1401,7 +1401,7 @@ Este algoritmo realiza o ajustamento de poligonal enquadrada pelo método dos m�
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/survey_traverse.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/survey_traverse.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1413,7 +1413,7 @@ Cálculo das coordenadas ajustadas a partir de medições de ângulos e distânc
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/survey_closed_polygonal.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/survey_closed_polygonal.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1425,7 +1425,7 @@ Esta ferramenta realiza os seguintes tipos de transformação de coordenadas:</b
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/survey_helmert2D.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/survey_helmert2D.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1437,7 +1437,7 @@ Este algoritmo transforma coordenadas entre os seguintes sistemas de referência
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/survey_LTP.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/survey_LTP.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1454,7 +1454,7 @@ Gera novos vértices entre polígonos adjacentes para garantir a perfeita conect
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/cadastre_connectFeatures.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/cadastre_connectFeatures.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1466,7 +1466,7 @@ Gera as linhas de testada das parcelas a partir dos polígonos dos lotes.
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/cadastre_frontlotline.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/cadastre_frontlotline.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1478,7 +1478,7 @@ Esta ferramenta preenche um atributo numérico seguindo um critério geográfico
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/cadastre_geonumbering.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/cadastre_geonumbering.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1490,7 +1490,7 @@ Esta ferramenta orienta a geometria de feições do tipo polígono no sentido ho
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/vect_orient_polygon.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/vect_orient_polygon.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1502,7 +1502,7 @@ Este script preenche um determinado atributo das feições de uma camada de pont
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/vect_sequence_points.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/vect_sequence_points.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1519,7 +1519,7 @@ Este algoritmo retorna o polígono correspondente à <b>moldura</b> relativa a u
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/grid_coord_utm.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/grid_coord_utm.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1531,7 +1531,7 @@ Este algoritmo retorna os polígonos correspondentes às molduras relacionadas a
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/grid_ext_utm.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/grid_ext_utm.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1543,7 +1543,7 @@ Este algoritmo retorna o polígono correspondente à <b>moldura</b> relativa a u
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/grid_inom_utm.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/grid_inom_utm.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1560,7 +1560,7 @@ Elaboração de Memorial Descritivo a partir de camadas vetorias que definem uma
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/doc_descriptive_memorial.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/doc_descriptive_memorial.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1572,7 +1572,7 @@ Esta ferramenta gera a Tabela Descriva de Vértices e Lados, também conhecida c
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/doc_descriptive_table.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/doc_descriptive_table.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1584,7 +1584,7 @@ Esta ferramenta gera monografia(s) de marcos geodésicos de forma automática a 
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/doc_mark.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/doc_mark.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1596,7 +1596,7 @@ Esta gera o Relatório de Cálculo Analítico de Área, Azimutes, Lados, Coorden
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/doc_analytical_results.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/doc_analytical_results.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1608,7 +1608,7 @@ Realiza a reconstituição de Memorial descritivo utilizando Expressões Regular
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/doc_pointsFromText.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/doc_pointsFromText.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1625,7 +1625,7 @@ Esta ferramenta realiza o ajuste vertical de Modelos Digitais de Elevação (MDE
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/drone_verticalAdjustment.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/drone_verticalAdjustment.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1637,7 +1637,7 @@ Esta ferramenta realiza o ajuste do georreferenciamento de qualquer imagem raste
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/drone_georref_adjust.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/drone_georref_adjust.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1649,7 +1649,7 @@ Esta ferramenta possibilita copiar ou mover arquivos para uma nova pasta a parti
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/drone_copySelectedFiles.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/drone_copySelectedFiles.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1661,7 +1661,7 @@ Esta ferramenta separa fotografias de drones em novas pastas para serem processa
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/drone_photosByBlocks.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/drone_photosByBlocks.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1673,7 +1673,7 @@ Gera arquivo texto com Pontos de Controle no Terreno (GCP) a partir de uma camad
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/drone_createGCP.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/drone_createGCP.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1685,7 +1685,7 @@ Esta ferramenta tem o objetivo de juntar os arquivos de várias pastas em uma ou
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/drone_joinFolders.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/drone_joinFolders.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1697,7 +1697,7 @@ Esta ferramenta tem como objetivo criar um arquivo .ovr, correspondente às Over
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/raster_overviews.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/raster_overviews.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1709,7 +1709,7 @@ Esta ferramenta remove a 4ª banda (banda alfa), transferindo a informação de 
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/raster_remove_alpha.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/raster_remove_alpha.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1721,7 +1721,7 @@ Exporta qualquer camada raster RGB ou RGBA de 8 bits como um arquivo JPEG. Ideal
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/raster_jpeg_tfw.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/raster_jpeg_tfw.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1738,7 +1738,7 @@ Cria elipses a partir da matriz variância-covariância para resumir as caracter
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/stat_ellipses.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/stat_ellipses.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1750,7 +1750,7 @@ Gera pontos aleatórios no espaço 2D a partir de um ponto central (X0, Y0), des
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/stat_random_points.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/stat_random_points.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1762,7 +1762,7 @@ Esta ferramenta retorna o(s) ponto(s) de tendência central para agrupamento de 
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/stat_central_tendency.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/stat_central_tendency.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1779,7 +1779,7 @@ Carrega um arquivo NMEA de rastreio GNSS (protocolo 0183) como uma camada do tip
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/gnss_nmea.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/gnss_nmea.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1791,7 +1791,7 @@ Carrega um arquivo POS resultante do processamento de dados GNSS como uma camada
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/gnss_pos2layer.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/gnss_pos2layer.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1803,7 +1803,7 @@ Encontra os pontos centrais (vértices) das concentrações de pontos levantados
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/gnss_ppk.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/gnss_ppk.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1820,7 +1820,7 @@ Esta ferramenta calcula em campos virtuais os comprimentos de feições do tipo 
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/easy_measure_layer.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/easy_measure_layer.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1832,7 +1832,7 @@ Este algoritmo preenche os atributos de um campo específico a partir de outra c
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/easy_get_attributes.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/easy_get_attributes.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1844,7 +1844,7 @@ Geração de uma camada de pontos a partir das coordenadas preenchidas em uma pl
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/easy_coord_layer.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/easy_coord_layer.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1861,7 +1861,7 @@ Esta ferramenta gera um arquivo de <b>backup</b> no formato "<b>.sql</b>" para u
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/post_backup.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/post_backup.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1873,7 +1873,7 @@ Esta ferramenta permite clonar qualquer banco PostgreSQL. A partir de um banco d
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/post_clonedb.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/post_clonedb.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1885,7 +1885,7 @@ Esta ferramenta permite apagar (delete/drop) qualquer banco do PostgreSQL.</br>O
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/post_deletedb.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/post_deletedb.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1897,7 +1897,7 @@ Esta ferramenta permite carregar uma camada raster para dentro de um banco de da
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/post_importraster.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/post_importraster.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1909,7 +1909,7 @@ Esta ferramenta permite renomear um banco de dados do PostgreSQL.</br>Nota: Para
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/post_renamedb.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/post_renamedb.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1921,7 +1921,7 @@ Esta ferramenta permite <b>restaurar</b>, ou seja, importar um banco de dados pa
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/post_restore.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/post_restore.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1933,7 +1933,7 @@ Esta ferramenta realiza a troca do tipo de codificação de um arquivo <b>.sql</
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/post_encoding.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/post_encoding.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1950,7 +1950,7 @@ Executa uma operação aritmética entre as bandas de um raster. A fórmula pred
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/raster_bandArithmetic.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/raster_bandArithmetic.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1962,7 +1962,7 @@ Carrega um conjunto de arquivos raster que interceptam as geometrias de uma cama
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/raster_loadByLocation.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/raster_loadByLocation.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1974,7 +1974,7 @@ Realize a classificação supervisionada de camada raster com duas ou mais banda
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/raster_classification.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/raster_classification.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1986,7 +1986,7 @@ Realiza a combinação de três bandas em uma única imagem, apresentando-as nas
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/raster_rgb.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/raster_rgb.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1998,7 +1998,7 @@ A compressão JPEG é um método "com perdas" para reduzir o tamanho de um arqui
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/raster_jpeg_compress.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/raster_jpeg_compress.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -2010,7 +2010,7 @@ As células do raster com valores fora do intervalo (mínimo e máximo) são def
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/raster_define_null_px.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/raster_define_null_px.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -2022,7 +2022,7 @@ Cria buracos em Raster definindo pixels nulos (transparentes) a partir de Camada
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/raster_create_holes.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/raster_create_holes.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -2034,7 +2034,7 @@ Esta ferramenta estima o valor dos pontos a partir de Raster, fazendo a devida i
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/raster_getpointvalue.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/raster_getpointvalue.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -2046,7 +2046,7 @@ Extrai uma das bandas de um arquivo raster (para imagens multi-bandas/multi-cana
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/raster_extract_band.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/raster_extract_band.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -2058,7 +2058,7 @@ Cria uma camada vetorial com o inventário de arquivos raster de uma pasta. O ti
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/raster_inventory.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/raster_inventory.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -2070,7 +2070,7 @@ Cria um raster binarizado, dividindo o raster de entrada em duas classes distint
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/raster_thresholding.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/raster_thresholding.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -2082,7 +2082,7 @@ Cria um mosaico: uma combinação ou mesclagem de duas ou mais imagens.
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/raster_mosaic.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/raster_mosaic.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -2094,7 +2094,7 @@ Converte os valores de vermelho, verde e azul de uma imagem RGB em imagens Matiz
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/raster_rgb2hsv.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/raster_rgb2hsv.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -2106,7 +2106,7 @@ Reescalona os valores dos pixels de raster com resolução radiométrica de 16 b
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/raster_histogram.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/raster_histogram.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -2118,7 +2118,7 @@ Preenche vazios de Raster (pixels nulos) com dados obtidos de outras camadas ras
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/raster_fill_holes.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/raster_fill_holes.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -2135,7 +2135,7 @@ Importa fotos com geotag para uma camada de pontos.
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/reamb_geotag.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/reamb_geotag.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -2147,7 +2147,7 @@ O maior valor de largura ou altura da imagem original é redimensionado para o v
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/reamb_resize_photo.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/reamb_resize_photo.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -2164,7 +2164,7 @@ Esta ferramenta aplica a técnica de filtragem no Raster pixel a pixel, baseando
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/relief_demfilter.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/relief_demfilter.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -2176,7 +2176,7 @@ Esta ferramenta gera uma camada de <b>pontos cotados</b> gerados a partir de um 
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/relief_spot_elevation.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/relief_spot_elevation.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -2193,7 +2193,7 @@ Este algoritmo calcula os ângulos internos e externos dos vértices de uma cama
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/vect_polygon_angles.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/vect_polygon_angles.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -2205,7 +2205,7 @@ Estende linhas nos seus pontos inicial e/ou final.
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/vect_extend_lines.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/vect_extend_lines.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -2217,7 +2217,7 @@ Inverte a ordem dos vértices para polígonos e linhas.
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/vect_reverse_vertex_sequence.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/vect_reverse_vertex_sequence.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -2229,7 +2229,7 @@ Este algoritmo mescla linhas que se tocam nos seus pontos inicial ou final e tem
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td><img src="images/tutorial/vect_directional_merge.jpg"></td>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/vect_directional_merge.jpg"></td>
     </tr>
   </tbody>
 </table>
