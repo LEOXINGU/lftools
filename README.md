@@ -1,6 +1,6 @@
 <!-- PROJECT LOGO -->
 <p align="center">
-    <img src="images/lftools_logo.png" alt="Logo" width="90" height="75">
+    <img src="https://github.com/LEOXINGU/lftools/blob/main/images/lftools_logo.png" alt="Logo" width="90" height="75">
   <h3 align="center">LF Tools</h3>
   <p align="center">
     <b><i>Tools for cartographic production, surveying, digital image processing and spatial analysis</i><b>
@@ -14,7 +14,7 @@
  href="https://www.youtube.com/watch?v=uuy39iutMhM&list=PLswoyLl1BbPp4zd-M4CmP_B2Qr2ROY3LT&index=1">Click here to learn how to use the LFTools plugin on YouTube</a></div>
 
 ## Requirement for QGIS 3.22 in MacOS:
-
+    
 Install the following package as follows:
 ```
 pip install Pillow
@@ -119,6 +119,9 @@ pip install Pillow
       </ul>
       <ul>
         <li><a href="#pos-file-(.pos)-to-layer">POS file (.pos) to layer</a></li>
+      </ul>
+      <ul>
+        <li><a href="#stop-and-go">Stop and Go</a></li>
       </ul>
       </li><li>
       <a href="#postgis">PostGIS</a>
@@ -371,6 +374,9 @@ pip install Pillow
       </ul>
       <ul>
         <li><a href="#pos-para-camada">POS para camada</a></li>
+      </ul>
+      <ul>
+        <li><a href="#semicinemático">Semicinemático</a></li>
       </ul>
       </li><li>
       <a href="#mão-na-roda">Mão na Roda</a>
@@ -842,6 +848,18 @@ Loads a POS file (.pos) from GNSS processing as a point layer.</br>Compatibility
 </table>
 </div>
 
+### Stop and Go
+It finds the central points (vertices) of the concentrations of points surveyed by the Kinematic method (stop and go) from the processing of GNSS data.</br>Input data:</br>◼️ GNSS point layer from RTKLIB or IBGE-PPP from .pos file</br>◼️ Minimum time to survey the point in minutes</br>◼️ Tolerance in cm to consider the static point
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/gnss_ppk.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
 
 
 ## PostGIS
@@ -1033,7 +1051,7 @@ JPEG compression is a lossy method to reduce the raster file size (about to 10%)
 </div>
 
 ### Load raster by location
-Loads a set of raster files that intersect the geometries of an input vector layer.
+Loads a set of raster files that intersect the geometries of an input vector layer.</br>    Optionally, it is possible to copy the selected rasters and paste them in another folder.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
@@ -1180,7 +1198,7 @@ This tool generates a layer of points with <b>Spot Elevations</b> from a <b>Digi
 
 
 ### Central Tendency
-Returns the central tendency point(s) for clustering points using the average or median of the input point coordinates.</br>Note 1: Layer in a projected SRC gets more accurate results.</br>Note 2: The Median algorithm is less influenced by outliers.
+RThis tool returns the central tendency point(s) for clustering points of entry points.</br>The following statistics can be obtained by grouping:</br>◼️ <b>Mean Center</b>: calculation of the average in X and Y</br>◼️ <b>Median Center</b>: calculation of the median in X and Y (less influenced by outliers)</br>◼️ <b>Central Feature</b>: identification of the central feature (smallest Euclidean distance)</br>Note: Layer in a projected SRC gets more accurate results.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
@@ -1739,7 +1757,7 @@ Gera pontos aleatórios no espaço 2D a partir de um ponto central (X0, Y0), des
 </div>
 
 ### Tendência central
-Esta ferramenta retorna o(s) ponto(s) de tendência central para agrupamento de pontos utilizando a média ou mediana das coordenadas dos pontos de entrada.</br>Observação 1: Camada em um SRC projetado obtém resultado mais acurados.</br>Observação 2: O algoritmo da Mediana é menos influenciado por outliers.
+Esta ferramenta retorna o(s) ponto(s) de tendência central para agrupamento de pontos dos pontos de entrada.</br>As seguintes estatísticas pode ser obtidas por agrupamento:</br>◼️ <b>Centro Médio</b>: cálculo da média em X e Y</br>◼️ <b>Centro Mediano</b>: cálculo da mediana em X e Y (menos influenciado por outliers)</br>◼️ <b>Feição Central</b>: identificação da feição central (menor distância euclidiana)</br>Observação: Camada em um SRC projetado obtém resultado mais acurados.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
@@ -1774,6 +1792,18 @@ Carrega um arquivo POS resultante do processamento de dados GNSS como uma camada
   <tbody>
     <tr>
       <td><img src="images/tutorial/gnss_pos2layer.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Semicinemático
+Encontra os pontos centrais (vértices) das concentrações de pontos levantados pelo método Seminemático (stop and go) provenientes do processamento de dados GNSS.</br>Dados de entrada:</br>◼️ Camada do tipo ponto gerada do arquivo .pos do RTKLIB ou IBGE-PPP</br>◼️ Tempo mínimo de levantamento do ponto em minutos</br>◼️ Tolerância em cm para considerar o ponto estático
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="images/tutorial/gnss_ppk.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1927,7 +1957,7 @@ Executa uma operação aritmética entre as bandas de um raster. A fórmula pred
 </div>
 
 ### Carregar raster pela localização
-Carrega um conjunto de arquivos raster que interceptam as geometrias de uma camada vetorial de entrada.
+Carrega um conjunto de arquivos raster que interceptam as geometrias de uma camada vetorial de entrada.</br>    Opcionalmente é possível copiar os rasters selcionados e colar em outra pasta.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
@@ -2204,3 +2234,5 @@ Este algoritmo mescla linhas que se tocam nos seus pontos inicial ou final e tem
   </tbody>
 </table>
 </div>
+
+
