@@ -25,6 +25,7 @@ from qgis.core import (QgsApplication,
                        QgsFeature,
                        QgsField,
                        QgsFields,
+                       QgsAction,
                        QgsCoordinateReferenceSystem,
                        QgsProcessing,
                        QgsProcessingParameterFile,
@@ -349,14 +350,22 @@ class ImportPhotos(QgsProcessingAlgorithm):
         feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
         feedback.pushInfo(self.tr('Leandro Franca - Cartographic Engineer', 'Leandro França - Eng Cart'))
         self.SAIDA = dest_id
+        self.pasta = pasta
         return {self.OUTPUT: dest_id}
 
     def postProcessAlgorithm(self, context, feedback):
         layer = QgsProcessingUtils.mapLayerFromString(self.SAIDA, context)
-        layer.setMapTipTemplate('''<img src="file:///[%''' + self.tr('path','caminho') + '''%]" width="450">''')
-        layer.triggerRepaint()
-        # Carregar QML
-        # path='./path/to/style.qml'
-        # output.loadNamedStyle(path)
-        # output.triggerRepaint()
+        if self.pasta[0:2] in (r'\\', r'//'):
+            layer.setMapTipTemplate(r'''<img src="file://[%''' + self.tr('path','caminho') + '''%]" width="450">''')
+        else:
+            layer.setMapTipTemplate(r'''<img src="file:///[%''' + self.tr('path','caminho') + '''%]" width="450">''')
+
+        acManager = layer.actions()
+        acActor = QgsAction(1 , 'Abrir foto',"""
+import os
+os.popen(r'[%"caminho"%]')
+""", False)
+        acActor.setActionScopes({'Field', 'Layer', 'Canvas', 'Feature'})
+        acManager.addAction(acActor)
+
         return {self.OUTPUT: self.SAIDA}
