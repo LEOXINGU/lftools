@@ -751,7 +751,7 @@ class DescriptiveMemorial(QgisAlgorithm):
                     '[CREA]': str2HTML(feat1['prof_id']),
                     '[LOCAL]': str2HTML((feat1['county']) +' - ' + (feat1['state']).upper()),
                     '[DATA]': self.tr((feat1['survey_date'].toPyDate()).strftime("%b %d, %Y"),
-                                       (feat1['survey_date'].toPyDate()).strftime("%d de {} de %Y").format(meses[feat1['survey_date'].month()]))
+                                       (feat1['survey_date'].toPyDate()).strftime("%d de {} de %Y").format(str2HTML(meses[feat1['survey_date'].month()])))
                     }
 
         for item in itens:
