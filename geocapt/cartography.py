@@ -20,6 +20,7 @@ import numpy as np
 from math import floor, modf
 import math
 from pyproj.crs import CRS
+from lftools.geocapt.topogeo import azimute
 from qgis.core import (QgsGeometry,
                        QgsPointXY,
                        QgsCoordinateTransform,
@@ -102,7 +103,7 @@ def areaGauss(coord):
         P3 = coord[ 0 if k==(tam-1) else (k+1)]
         soma += P2.x()*(P1.y() - P3.y())
     return soma/2
-    
+
 
 def raioMedioGauss(lat, EPSG):
     proj_crs = CRS.from_epsg(EPSG)
@@ -339,6 +340,41 @@ def OrientarPoligono(coords, primeiro, sentido):
     return coords
 
 
+# Azimute principal das feições
+def main_azimuth(geometry):
+    pnts = geom2PointList(geometry)
+    pnts = np.hstack(pnts)
+    a = []
+    for pnt in pnts:
+        a += [(pnt.x(), pnt.y())]
+    if len(a) < 2:
+        return 0
+    else:
+        ca = np.cov(a,y = None,rowvar = 0,bias = 1)
+        v, vect = np.linalg.eig(ca)
+        if v[0] > v[1]:
+            vetor_maior = vect[:,0]
+        else:
+            vetor_maior = vect[:,1]
+        # se segundo quadrante levar para o quarto
+        if vetor_maior[0] > 0 and vetor_maior[1] < 0:
+            vetor_maior *= -1
+        # se terceiro quadrante levar para o primeiro
+        if vetor_maior[0] < 0 and vetor_maior[1] < 0:
+            vetor_maior *= -1
+        # se direção X
+        if vetor_maior[0] != 0 and vetor_maior[1] == 0:
+            direcao = -90
+        # se direção Y
+        elif vetor_maior[1] != 0 and vetor_maior[0] == 0:
+            direcao = 0
+        # se Zero
+        elif vetor_maior[0] == 0 and vetor_maior[1] == 0:
+            direcao = 0
+        else:
+            vetor = QgsPointXY(vetor_maior[0], vetor_maior[1])
+            direcao = np.degrees(azimute(QgsPointXY(0,0), vetor)[0])
+        return direcao
 
 def map_sistem(lon, lat, ScaleD=1e6):
     # Escala 1:1.000.000
