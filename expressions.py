@@ -36,6 +36,7 @@ from lftools.geocapt.cartography import (map_sistem,
                                          geom2PointList,
                                          reprojectPoints,
                                          areaGauss,
+                                         main_azimuth,
                                          inom2mi as INOM2MI)
 from lftools.geocapt.topogeo import (dd2dms as DD2DMS,
                                      dms2dd as DMS2DD,
@@ -162,6 +163,19 @@ def meridianconv(lon, lat, feature, parent):
     """
     SRC = QgsCoordinateReferenceSystem('EPSG:4326')
     return MeridianConvergence(lon, lat, SRC)
+
+
+@qgsfunction(args='auto', group='LF Tools')
+def mainAzimuth(geometry, feature, parent):
+    """
+    Calculates the principal azimuth of a feature by returning the orientation of the longest side in degrees.
+    <h2>Example usage:</h2>
+    <ul>
+      <li>mainAzimuth(geometry) -> 63.87543</li>
+    </ul>
+    """
+    az = float(main_azimuth(geometry))
+    return az
 
 
 @qgsfunction(args='auto', group='LF Tools')
