@@ -1239,7 +1239,10 @@ def geoneighbors(layer_name, street, borderer_field, prefixo, decimal, fontsize,
             for item in confront:
                 geom2 = confront[item][1]
                 if geom2.type() == 1 and geom1.intersects(geom2): #Line
-                    coord_lin = geom2.asPolyline()
+                    try:
+                        coord_lin = geom2.asPolyline()
+                    except:
+                        coord_lin = geom2.asMultiPolyline()[-1]
                     if pnt != coord_lin[-1]:
                         vante = confront[item][0]
                 elif geom2.type() == 0 and geom1.intersects(geom2): #Point
