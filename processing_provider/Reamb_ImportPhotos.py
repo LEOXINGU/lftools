@@ -283,7 +283,7 @@ class ImportPhotos(QgsProcessingAlgorithm):
                     lat, lon = coordenadas(exif)
                     if lat != 0:
                         if 17 in exif['GPSInfo']:
-                            Az = azimute(exif)
+                            Az = float(azimute(exif))
                         if 6 in exif['GPSInfo']:
                             try:
                                 altitude = float(exif['GPSInfo'][6][0])/exif['GPSInfo'][6][1]
