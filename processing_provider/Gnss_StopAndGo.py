@@ -200,7 +200,7 @@ Dados de entrada:
                   "sigma_y": QVariant.Double,
                   "sigma_z": QVariant.Double,
                   "num_sat": QVariant.Int,
-                  "quality": QVariant.Int,
+                  "quality": QVariant.String,
                   "start_time": QVariant.String,
                   "end_time": QVariant.String,
                   "count": QVariant.Int,
@@ -299,24 +299,25 @@ Dados de entrada:
         for grupo in grupos:
             x = grupos[grupo]['x']
             y = grupos[grupo]['y']
-            central_X, central_Y = CentralFeature(x, y)
-            # Pegar atributos do ponto central
-            for feat in layer.getFeatures():
-                geom = feat.geometry()
-                if geom.isMultipart():
-                    pnt = geom.asMultiPoint()[0]
-                else:
-                    pnt = geom.asPoint()
-                if pnt.x() == central_X and pnt.y() == central_Y:
-                    att = feat.attributes()
+            if len(x) > 0:
+                central_X, central_Y = CentralFeature(x, y)
+                # Pegar atributos do ponto central
+                for feat in layer.getFeatures():
+                    geom = feat.geometry()
+                    if geom.isMultipart():
+                        pnt = geom.asMultiPoint()[0]
+                    else:
+                        pnt = geom.asPoint()
+                    if pnt.x() == central_X and pnt.y() == central_Y:
+                        att = feat.attributes()
+                        break
+                pnt = QgsGeometry.fromPointXY(QgsPointXY(float(central_X), float(central_Y)))
+                att += [grupos[grupo]['t_ini'], grupos[grupo]['t_fim'], len(x), str(grupo)]
+                feat.setGeometry(pnt)
+                feat.setAttributes(att)
+                sink.addFeature(feat, QgsFeatureSink.FastInsert)
+                if feedback.isCanceled():
                     break
-            pnt = QgsGeometry.fromPointXY(QgsPointXY(float(central_X), float(central_Y)))
-            att += [grupos[grupo]['t_ini'], grupos[grupo]['t_fim'], len(x), str(grupo)]
-            feat.setGeometry(pnt)
-            feat.setAttributes(att)
-            sink.addFeature(feat, QgsFeatureSink.FastInsert)
-            if feedback.isCanceled():
-                break
 
         feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
         feedback.pushInfo(self.tr('Leandro Franca - Cartographic Engineer', 'Leandro França - Eng Cart'))
