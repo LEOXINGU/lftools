@@ -424,10 +424,20 @@ class DescriptiveMemorial(QgisAlgorithm):
                 ponto_ini = feat1.geometry().asPoint()
         # listando confrontantes
         dic_linhas = {}
+        validar = False
         for linha in limites.getFeatures():
             dic_linhas[linha.id()] = linha
+            geom = linha.geometry()
+            if geom.isMultipart():
+                pnt1 = geom.asMultiPolyline()[0][0]
+            else:
+                pnt1 = geom.asPolyline()[0]
+            if ponto_ini == pnt1: # Verifica se o primeiro pnt limite coincide com o primeiro vértice da linha da camada elemento confrontante
+                validar = True
+        if not validar:
+            raise QgsProcessingException(self.tr("The first point of the limit_point_p layer must coincide with the first vertex of a line of the boundary_element_l layer!",
+            'O primeiro vértice da camada ponto limite deve coincidir com o primeiro vértice de uma linha da camada elemento confrontante!'))
         # idenficando primeiro confrontante
-        first_lin = -1
         lista_ordem = []
         last_coord = []
         for item in dic_linhas:
