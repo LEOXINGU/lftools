@@ -250,11 +250,11 @@ def projectCRS(output_type, feature, parent):
 @qgsfunction(args='auto', group='LF Tools')
 def layerCRS(layer_name, output_type, feature, parent):
     """
-    Return the descriptive name  or the EPSG code of a layer's CRS.
+    Return the descriptive name or the EPSG code of a layer's CRS.
     <h2>Example usage:</h2>
     <ul>
-      <li>LayerCRS('EPSG') -> EPSG:4326</li>
-      <li>LayerCRS('') -> SIRGAS 2000 / UTM 23 S</li>
+      <li>LayerCRS('layer_name','EPSG') -> EPSG:4326</li>
+      <li>LayerCRS('layer_name','') -> SIRGAS 2000 / UTM 23 S</li>
     </ul>
     """
     if len(QgsProject.instance().mapLayersByName(layer_name)) == 1:
