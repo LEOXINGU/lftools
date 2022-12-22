@@ -284,21 +284,78 @@ def zonehemisf(lon, lat, feature, parent):
 
 
 @qgsfunction(args='auto', group='LF Tools')
-def removespetialchar (palavra, feature, parent):
+def removespetialchar (text, feature, parent):
     """
     Replaces special characters.
-    <h2>Examplo:</h2>
+    <h2>Example:</h2>
     <ul>
       <li>removespetialchar('coração') -> coracao </li>
       <li>removespetialchar('gênesis') -> genesis</li>
     </ul>
     """
     # Unicode normalize transforma um caracter em seu equivalente em latin.
-    nfkd = unicodedata.normalize('NFKD', palavra)
+    nfkd = unicodedata.normalize('NFKD', text)
     palavraSemAcento = u"".join([c for c in nfkd if not unicodedata.combining(c)])
     # Usa expressão regular para retornar a palavra apenas com números, letras e espaço
     return re.sub('[^a-zA-Z0-9 \\\]', '', palavraSemAcento)
 
+
+@qgsfunction(args='auto', group='LF Tools')
+def cusum (layer_name, sequence_field, value_field, group_field, feature, parent):
+    """
+    Calculates the cumulative sum of attributes considering the sequence and value fields. The group field also can be used, otherwise set as ''.
+    <h2>Examples:</h2>
+    <ul>
+      <li>cusum (layer_name, sequence_field, value_field, group_field) -> cumulative sum </li>
+      <li>cusum ('layer_name', 'seq', 'measure', 'class') -> 543.87 </li>
+      <li>cusum ('layer_name', 'seq', 'measure', '') -> 943.18 </li>
+    </ul>
+    """
+    if len(QgsProject.instance().mapLayersByName(layer_name)) == 1:
+        layer = QgsProject.instance().mapLayersByName(layer_name)[0]
+    else:
+        layer = QgsProject.instance().mapLayer(layer_name)
+    field_names = [campo.name() for campo in layer.fields()]
+
+    if group_field in field_names: # Grupos
+        grupos = {}
+        for feat in layer.getFeatures():
+            if feat[group_field] not in grupos:
+                grupos[feat[group_field]] = [feat]
+            else:
+                grupos[feat[group_field]] += [feat]
+
+        dic = {}
+        for grupo in grupos:
+            dic2 = {}
+            for feat in grupos[grupo]:
+                valor = feat[value_field]
+                dic2[feat[sequence_field]] = valor
+
+            chaves = list(dic2.keys())
+            chaves.sort()
+
+            soma = 0
+            for id in chaves:
+                soma += dic2[id]
+                dic2[id] = soma
+            dic[grupo] = dic2
+        return dic[feature[group_field]][feature[sequence_field]]
+
+    else:
+        dic = {}
+        for feat in layer.getFeatures():
+            valor = feat[value_field]
+            dic[feat[sequence_field]] = valor
+
+        chaves = list(dic.keys())
+        chaves.sort()
+
+        soma = 0
+        for id in chaves:
+            soma += dic[id]
+            dic[id] = soma
+        return dic[feature[sequence_field]]
 
 
 # Area no SGL
