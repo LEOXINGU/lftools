@@ -42,7 +42,7 @@ from .lftools_provider import LFToolsProvider
 from .expressions import *
 
 exprs = (coord2inom, fieldstat, dd2dms, projectCRS, layerCRS, magneticdec, mainAzimuth,
-         dms2dd, scalefactor, zonehemisf, deedtable, inom2mi, meridianconv, cusum,
+         dms2dd, scalefactor, zonehemisf, deedtable, inom2mi, meridianconv, cusum, inter_area,
          removespetialchar, deedtable2, deedtable3, areaLTP, deedtext, geoneighbors)
 
 cmd_folder = os.path.split(inspect.getfile(inspect.currentframe()))[0]
