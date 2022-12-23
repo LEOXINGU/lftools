@@ -247,6 +247,7 @@ def projectCRS(output_type, feature, parent):
     else:
         return b.description()
 
+
 @qgsfunction(args='auto', group='LF Tools')
 def layerCRS(layer_name, output_type, feature, parent):
     """
@@ -266,6 +267,7 @@ def layerCRS(layer_name, output_type, feature, parent):
         return b.authid()
     else:
         return b.description()
+
 
 @qgsfunction(args='auto', group='LF Tools')
 def zonehemisf(lon, lat, feature, parent):
@@ -357,6 +359,55 @@ def cusum (layer_name, sequence_field, value_field, group_field, feature, parent
             dic[id] = soma
         return dic[feature[sequence_field]]
 
+
+@qgsfunction(args='auto', group='LF Tools')
+def inter_area (this_layer, other_layer, calc_CRS, filter, feature, parent):
+    """
+    Calculates for each feature the sum of the intersection areas considering other layer's features, the projected CRS for calculation and a expression filter (optional).
+    <h2>Examples:</h2>
+    <ul>
+      <li>inter_area (this_layer, other_layer, calc_CRS, filter) -> intersection area </li>
+      <li>inter_area ('this_layer', 'other_layer', 'EPSG:31983', '"type" = \\\'B\\\'') -> 7543.87 </li>
+      <li>inter_area ('this_layer', 'other_layer', 'EPSG:31985', '"class" < 4') -> 658.12 </li>
+      <li>inter_area ('this_layer', 'other_layer', 'EPSG:31984', '') -> 1048.432 </li>
+    </ul>
+    """
+    if len(QgsProject.instance().mapLayersByName(this_layer)) == 1:
+        layer1 = QgsProject.instance().mapLayersByName(this_layer)[0]
+    else:
+        layer1 = QgsProject.instance().mapLayer(this_layer)
+
+    if len(QgsProject.instance().mapLayersByName(other_layer)) == 1:
+        layer2 = QgsProject.instance().mapLayersByName(other_layer)[0]
+    else:
+        layer2 = QgsProject.instance().mapLayer(other_layer)
+
+    exp = QgsExpression(filter)
+    request = QgsFeatureRequest(exp)
+
+    crs1 = QgsCoordinateReferenceSystem(layer1.crs())
+    crs2 = QgsCoordinateReferenceSystem(layer2.crs())
+    transf1 = QgsCoordinateTransform()
+    transf1.setDestinationCrs(crs1)
+    transf1.setSourceCrs(crs2)
+
+    calc_CRS = QgsCoordinateReferenceSystem(calc_CRS)
+    transf2 = QgsCoordinateTransform()
+    transf2.setDestinationCrs(calc_CRS)
+    transf2.setSourceCrs(crs1)
+
+    area = 0
+    iterLayer2 = layer2.getFeatures(request) if filter else layer2.getFeatures()
+    geom1 = feature.geometry()
+    for feat2 in iterLayer2:
+        geom2 = feat2.geometry()
+        geom2.transform(transf1)
+        if geom1.intersects(geom2):
+            inter = geom1.intersection(geom2)
+            if inter.type() == 2: #Polygon
+                inter.transform(transf2)
+                area += inter.area()
+    return area
 
 # Area no SGL
 def areaParteSGL(coordsGeo, coords, crsGeo):
