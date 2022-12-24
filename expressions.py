@@ -367,8 +367,8 @@ def inter_area (this_layer, other_layer, calc_CRS, filter, feature, parent):
     <h2>Examples:</h2>
     <ul>
       <li>inter_area (this_layer, other_layer, calc_CRS, filter) -> intersection area </li>
-      <li>inter_area ('this_layer', 'other_layer', 'EPSG:31983', '"type" = \\\'B\\\'') -> 7543.87 </li>
-      <li>inter_area ('this_layer', 'other_layer', 'EPSG:31985', '"class" < 4') -> 658.12 </li>
+      <li>inter_area ('this_layer', 'other_layer', @project_crs, '"classe" = \\\'V\\\'') -> 18409.37 </li>
+      <li>inter_area ('this_layer', 'other_layer', 'EPSG:31985', '"type" < 4') -> 658.12 </li>
       <li>inter_area ('this_layer', 'other_layer', 'EPSG:31984', '') -> 1048.432 </li>
     </ul>
     """
@@ -407,7 +407,7 @@ def inter_area (this_layer, other_layer, calc_CRS, filter, feature, parent):
             if inter.type() == 2: #Polygon
                 inter.transform(transf2)
                 area += inter.area()
-    return area
+    return float(area)
 
 # Area no SGL
 def areaParteSGL(coordsGeo, coords, crsGeo):
