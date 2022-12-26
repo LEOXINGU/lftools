@@ -95,7 +95,7 @@ class FrontLotLine(QgsProcessingAlgorithm):
     OUTPUT = 'OUTPUT'
     TOLERANCE = 'TOLERANCE'
 
-    def initAlgorithm(self, config=None):
+    def initAlgorithm(self, config = None):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT,
@@ -108,7 +108,7 @@ class FrontLotLine(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.TOLERANCE,
                 self.tr('Tolerance for snapping in meters', 'Tolerância para a aderência (metros)'),
-                type=1,
+                type = 1,
                 defaultValue = 0.01
             )
         )
