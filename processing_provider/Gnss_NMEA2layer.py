@@ -48,6 +48,7 @@ from lftools.geocapt.imgs import Imgs
 from lftools.geocapt.cartography import raioMedioGauss
 import numpy as np
 import datetime
+import codecs
 import os
 from qgis.PyQt.QtGui import QIcon
 
@@ -198,7 +199,7 @@ Modos:
         if not crs.isGeographic():
             raise QgsProcessingException(self.tr('Choose a geographic CRS!', 'Escolha um SRC geográfico!'))
 
-        arq = open(caminho, encoding='utf-8')
+        arq = codecs.open(caminho, 'r', encoding='utf-8', errors='ignore')
 
         tipo = self.parameterAsEnum(
             parameters,
