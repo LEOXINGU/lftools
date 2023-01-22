@@ -82,7 +82,7 @@ class RTKCorrection(QgsProcessingAlgorithm):
         return 'rtkcorrection'
 
     def displayName(self):
-        return self.tr('RTK Correction', 'Correção do RTK')
+        return self.tr('RTK Points Correction', 'Correção de Pontos RTK')
 
     def group(self):
         return self.tr('GNSS')
