@@ -81,12 +81,6 @@ class ConfidenceEllipse(QgsProcessingAlgorithm):
     def groupId(self):
         return 'spatialstatistics'
 
-    def shortHelpString(self):
-        if self.LOC == 'pt':
-            return ""
-        else:
-            return self.tr("")
-
     def tags(self):
         return self.tr('ellipse,elipse,confidence,deviational,standard,tendency,dispertion,directional,trend,confidence,covariance,mvc').split(',')
 
