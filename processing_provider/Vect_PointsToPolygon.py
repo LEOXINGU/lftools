@@ -121,7 +121,7 @@ class PointsToPolygon(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSink(
                 self.POLYGON,
-                self.tr('Polygon', 'Polígono')
+                self.tr('Polygon from points', 'Polígono a partir de pontos')
             )
         )
 
