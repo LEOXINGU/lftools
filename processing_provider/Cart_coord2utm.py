@@ -88,7 +88,8 @@ class Coord2UTMGrid(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterPoint(
                 self.POINT,
-                self.tr('Point', 'Ponto')
+                self.tr('Point', 'Ponto'),
+                defaultValue = QgsPointXY(0.0, 0.0)
             )
         )
 
