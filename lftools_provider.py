@@ -103,6 +103,9 @@ from lftools.processing_provider.Gnss_pos2layer import Pos2layer
 from lftools.processing_provider.Gnss_StopAndGo import StopAndGo
 from lftools.processing_provider.Vect_LineSequence import LineSequence
 from lftools.processing_provider.Vect_PointsToPolygon import PointsToPolygon
+from lftools.processing_provider.Vect_LinesToPolygon import LinesToPolygon
+from lftools.processing_provider.Gnss_RTKCorrection import RTKCorrection
+from lftools.processing_provider.Stat_standardDistance import StandardDistance
 
 
 class LFToolsProvider(QgsProcessingProvider):
@@ -191,6 +194,9 @@ class LFToolsProvider(QgsProcessingProvider):
         self.addAlgorithm(StopAndGo())
         self.addAlgorithm(LineSequence())
         self.addAlgorithm(PointsToPolygon())
+        self.addAlgorithm(LinesToPolygon())
+        self.addAlgorithm(RTKCorrection())
+        self.addAlgorithm(StandardDistance())
 
     def id(self):
         return 'lftools'
