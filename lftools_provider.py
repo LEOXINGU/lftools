@@ -102,6 +102,7 @@ from lftools.processing_provider.Cad_ConnectPolygons import ConnectFeatures
 from lftools.processing_provider.Gnss_pos2layer import Pos2layer
 from lftools.processing_provider.Gnss_StopAndGo import StopAndGo
 from lftools.processing_provider.Vect_LineSequence import LineSequence
+from lftools.processing_provider.Vect_PointsToPolygon import PointsToPolygon
 
 
 class LFToolsProvider(QgsProcessingProvider):
@@ -189,6 +190,7 @@ class LFToolsProvider(QgsProcessingProvider):
         self.addAlgorithm(Pos2layer())
         self.addAlgorithm(StopAndGo())
         self.addAlgorithm(LineSequence())
+        self.addAlgorithm(PointsToPolygon())
 
     def id(self):
         return 'lftools'
