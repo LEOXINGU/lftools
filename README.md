@@ -93,6 +93,9 @@ pip install Pillow
         <li><a href="#photos-by-blocks">Photos by blocks</a></li>
       </ul>
       <ul>
+        <li><a href="#point-cloud-adjustment">Point cloud adjustment</a></li>
+      </ul>
+      <ul>
         <li><a href="#remove-alpha-band">Remove alpha band</a></li>
       </ul>
       <ul>
@@ -119,6 +122,9 @@ pip install Pillow
       </ul>
       <ul>
         <li><a href="#pos-file-(.pos)-to-layer">POS file (.pos) to layer</a></li>
+      </ul>
+      <ul>
+        <li><a href="#rtk-points-correction">RTK Points Correction</a></li>
       </ul>
       <ul>
         <li><a href="#stop-and-go">Stop and Go</a></li>
@@ -207,6 +213,9 @@ pip install Pillow
         <li><a href="#dem-filter">DEM filter</a></li>
       </ul>
       <ul>
+        <li><a href="#dem-to-text">DEM to Text</a></li>
+      </ul>
+      <ul>
         <li><a href="#generate-spot-elevations">Generate Spot Elevations</a></li>
       </ul>
       </li><li>
@@ -219,6 +228,9 @@ pip install Pillow
       </ul>
       <ul>
         <li><a href="#gaussian-random-points">Gaussian random points</a></li>
+      </ul>
+      <ul>
+        <li><a href="#standard-distance">Standard Distance</a></li>
       </ul>
       </li><li>
       <a href="#survey">Survey</a>
@@ -249,7 +261,16 @@ pip install Pillow
         <li><a href="#extend-lines">Extend lines</a></li>
       </ul>
       <ul>
+        <li><a href="#line-sequence">Line sequence</a></li>
+      </ul>
+      <ul>
+        <li><a href="#lines-to-polygon">Lines to polygon</a></li>
+      </ul>
+      <ul>
         <li><a href="#merge-lines-in-direction">Merge lines in direction</a></li>
+      </ul>
+      <ul>
+        <li><a href="#points-to-polygon">Points to polygon</a></li>
       </ul>
       <ul>
         <li><a href="#reverse-vertex-order">Reverse vertex order</a></li>
@@ -333,6 +354,9 @@ pip install Pillow
         <li><a href="#ajuste-vertical">Ajuste Vertical</a></li>
       </ul>
       <ul>
+        <li><a href="#ajuste-de-nuvem-de-pontos">Ajuste de Nuvem de Pontos</a></li>
+      </ul>
+      <ul>
         <li><a href="#ajuste-do-georreferenciamento">Ajuste do Georreferenciamento</a></li>
       </ul>
       <ul>
@@ -359,6 +383,9 @@ pip install Pillow
       </li><li>
       <a href="#estatística-espacial">Estatística Espacial</a>
       <ul>
+        <li><a href="#distância-padrão">Distância padrão</a></li>
+      </ul>
+      <ul>
         <li><a href="#elipses-de-confiança">Elipses de confiança</a></li>
       </ul>
       <ul>
@@ -369,6 +396,9 @@ pip install Pillow
       </ul>
       </li><li>
       <a href="#gnss">GNSS</a>
+      <ul>
+        <li><a href="#correção-de-pontos-rtk">Correção de Pontos RTK</a></li>
+      </ul>
       <ul>
         <li><a href="#nmea-para-camada">NMEA para camada</a></li>
       </ul>
@@ -470,6 +500,9 @@ pip install Pillow
       </li><li>
       <a href="#relevo">Relevo</a>
       <ul>
+        <li><a href="#exportar-mde-como-texto">Exportar MDE como Texto</a></li>
+      </ul>
+      <ul>
         <li><a href="#filtro-de-mde">Filtro de MDE</a></li>
       </ul>
       <ul>
@@ -487,7 +520,16 @@ pip install Pillow
         <li><a href="#inverter-ordem-dos-vértices">Inverter ordem dos vértices</a></li>
       </ul>
       <ul>
+        <li><a href="#linhas-para-polígono">Linhas para polígono</a></li>
+      </ul>
+      <ul>
         <li><a href="#mesclar-linhas-na-direção">Mesclar linhas na direção</a></li>
+      </ul>
+      <ul>
+        <li><a href="#pontos-para-polígono">Pontos para polígono</a></li>
+      </ul>
+      <ul>
+        <li><a href="#sequência-de-linhas">Sequência de linhas</a></li>
       </ul>
       </li>
   </ol>
@@ -742,6 +784,18 @@ This tool separates drone photographs into new folders to be processed by blocks
 </table>
 </div>
 
+### Point cloud adjustment
+This tool performs the horizontal and vertical adjustment of Cloud of Points in (TXT) format using LineStringZ vectors.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/drone_point_cloud_adjust.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
 ### Remove alpha band
 This tool removes the 4th band (apha band), transfering the transparency information as "NoData" to pixels of the RGB output.
 <div align="center">
@@ -843,6 +897,18 @@ Loads a POS file (.pos) from GNSS processing as a point layer.</br>Compatibility
   <tbody>
     <tr>
       <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/gnss_pos2layer.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### RTK Points Correction
+Performs base RTK correction using post-process coordinates, for example by PPP, and applies corrections to all rover points.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/gnss_rtk_correction.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1180,6 +1246,18 @@ This tool applies the filtering technique in the Raster pixel by pixel, based on
 </table>
 </div>
 
+### DEM to Text
+This tool exports a Digital Elevation Model (DEM) as a text file (txt) for later transformation into a point cloud.</br>Optionally, the associated Orthomosaic RGB colors can be taken to the text file.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/relief_dem2txt.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
 ### Generate Spot Elevations
 This tool generates a layer of points with <b>Spot Elevations</b> from a <b>Digital Terrain Model</b> and a vector layer of <b>contour lines</b>.
 <div align="center">
@@ -1228,6 +1306,18 @@ Generate gaussian (normal) random points in 2D space with a given mean position 
   <tbody>
     <tr>
       <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/stat_random_points.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Standard Distance
+Measures the degree to which features are concentrated or dispersed around the geometric mean center.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/stat_standard_distance.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1339,6 +1429,30 @@ Extends lines at their <b>start</b> and/or <b>end</b> points.
 </table>
 </div>
 
+### Line sequence
+This script fills in a certain attribute of the features of a layer of lines according to their connectivity sequence between them.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/vect_line_sequence.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Lines to polygon
+This tool generates a polygon layer from a connected line layer.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/vect_lines2polygon.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
 ### Merge lines in direction
 This algorithm merges lines that touch at their starting or ending points and has the same direction (given a tolerance in degrees). <p>For the attributes can be considered:</p>1 - merge lines that have the same attributes; or</li><li>2 - keep the attributes of the longest line.</li>
 <div align="center">
@@ -1346,6 +1460,18 @@ This algorithm merges lines that touch at their starting or ending points and ha
   <tbody>
     <tr>
       <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/vect_directional_merge.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Points to polygon
+This tool generates a polygon layer from a point layer and its filled order (sequence) attributes.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/vect_point2polygon.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1631,6 +1757,18 @@ Esta ferramenta realiza o ajuste vertical de Modelos Digitais de Elevação (MDE
 </table>
 </div>
 
+### Ajuste de Nuvem de Pontos
+Esta ferramenta realiza o ajuste horizontal e vertical de Nuvem de Pontos no formato (TXT) utilizando vetores do tipo LineStringZ.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/drone_point_cloud_adjust.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
 ### Ajuste do Georreferenciamento
 Esta ferramenta realiza o ajuste do georreferenciamento de qualquer imagem raster utilizando Pontos de Controle no Terreno.</br>    Os seguintes tipos de transformação de coordenadas podem ser utilizados:</br>◼️	<b>Transformação de Translação</b>: 1 vetor sem ajustamento / 2 ou + vetores com ajustamento.</br>◼️	<b>Transformação Conforme (Helmert 2D)</b>: 2 vetores sem ajustamento / 3 ou + vetores com ajustamento.</br>◼️	<b>Transformação Afim</b>: 3 vetores sem ajustamento / 4 ou + vetores com ajustamento.
 <div align="center">
@@ -1732,6 +1870,18 @@ Exporta qualquer camada raster RGB ou RGBA de 8 bits como um arquivo JPEG. Ideal
 ## Estatística Espacial
 
 
+### Distância padrão
+Mede o grau em que as feições estão concentradas ou dispersas em torno do centro médio geométrico.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/stat_standard_distance.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
 ### Elipses de confiança
 Cria elipses a partir da matriz variância-covariância para resumir as características espaciais de feções geográficas do tipo ponto: tendência central, dispersão e tendências direcionais.
 <div align="center">
@@ -1772,6 +1922,18 @@ Esta ferramenta retorna o(s) ponto(s) de tendência central para agrupamento de 
 
 ## GNSS
 
+
+### Correção de Pontos RTK
+Realiza a correção da base RTK utilizando as coordenas pós-processsas, por exemplo pelo PPP, e aplica as correções a todos os pontos Rover.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/gnss_rtk_correction.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 ### NMEA para camada
 Carrega um arquivo NMEA de rastreio GNSS (protocolo 0183) como uma camada do tipo ponto.</br>Modos:</br>◼️ Cinemático - gera todos os pontos rastreados com suas precisões (PDOP, HDOP e VDOP) e número de satélites.</br>◼️ Estático - calcula a média e desvio-padrão dos pontos observados, para todos os pontos ou somente para os pontos de solução fixa (melhor resultado).
@@ -2158,6 +2320,18 @@ O maior valor de largura ou altura da imagem original é redimensionado para o v
 ## Relevo
 
 
+### Exportar MDE como Texto
+Esta ferramenta exporta um Modelo Digital de Elevação (MDE) como um arquivo de texto (txt) para posterior transformação em nuvem de pontos.</br>Opcionalmente, as cores RGB associadas do Ortomosaico podem ser levadas para o arquivo de texto.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/relief_dem2txt.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
 ### Filtro de MDE
 Esta ferramenta aplica a técnica de filtragem no Raster pixel a pixel, baseando-se nos valores dos níveis de cinza dos pixels vizinhos.</br>O processo de filtragem é feito utilizando matrizes denominadas máscaras (ou kernel), as quais são aplicadas sobre a imagem.
 <div align="center">
@@ -2223,6 +2397,18 @@ Inverte a ordem dos vértices para polígonos e linhas.
 </table>
 </div>
 
+### Linhas para polígono
+Esta ferramenta gera uma camada de polígono a partir de uma camada de linhas conectadas.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/vect_lines2polygon.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
 ### Mesclar linhas na direção
 Este algoritmo mescla linhas que se tocam nos seus pontos inicial ou final e tem a mesma direção (dada uma tolerância em graus).<p>Para os atributos pode ser considerado:</p><li>1 - mesclar linhas que tenham os mesmos atributos; ou</li><li>2 - manter os atributos da linha maior.</li>
 <div align="center">
@@ -2230,6 +2416,30 @@ Este algoritmo mescla linhas que se tocam nos seus pontos inicial ou final e tem
   <tbody>
     <tr>
       <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/vect_directional_merge.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Pontos para polígono
+Esta ferramenta gera uma camada de polígono a partir de uma camada de pontos e seus atributos de ordem (sequência) preenchidos.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/vect_point2polygon.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Sequência de linhas
+Este script preenche um determinado atributo das feições de uma camada do tipo linha de acordo com sua sequência de conectividade entre as linhas.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/vect_line_sequence.jpg"></td>
     </tr>
   </tbody>
 </table>
