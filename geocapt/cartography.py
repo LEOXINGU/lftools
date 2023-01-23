@@ -240,7 +240,7 @@ def geom2PointList(geom):
         else:
             linha = geom.asPolyline()
             newLine =[]
-            tam1 = len(linhas)
+            tam1 = len(linha)
             const1 = geom.constGet()
             for k in range(tam1):
                 newLine += [const1.childPoint(k)]
