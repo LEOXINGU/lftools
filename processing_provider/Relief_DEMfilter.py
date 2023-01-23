@@ -126,8 +126,6 @@ O processo de filtragem é feito utilizando matrizes denominadas máscaras (ou k
             )
         )
 
-
-
         tipos = [self.tr('Mean kernel - 3 by 3','Máscara da média 3 por 3'),
                  self.tr('Mean kernel - 5 by 5','Máscara da média 5 por 5'),
                  self.tr('Median kernel - 3 by 3','Máscara da mediana 3 por 3'),
