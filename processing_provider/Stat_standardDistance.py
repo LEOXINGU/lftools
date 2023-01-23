@@ -88,7 +88,7 @@ class StandardDistance(QgsProcessingAlgorithm):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/statistics.png'))
 
     txt_en = 'Measures the degree to which features are concentrated or dispersed around the geometric mean center.'
-    txt_pt = 'Mede o grau em que as feições estão concentrados ou dispersos em torno do centro médio geométrico.'
+    txt_pt = 'Mede o grau em que as feições estão concentradas ou dispersas em torno do centro médio geométrico.'
     figure = 'images/tutorial/stat_standard_distance.jpg'
 
     def shortHelpString(self):
