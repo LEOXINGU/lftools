@@ -278,9 +278,15 @@ class FillRasterwithPatches(QgsProcessingAlgorithm):
                         if px_value == 0 or band1[lin][col] > limiar: # Verificar Limiar
                             X = origem[0] + resol_X*(col + 0.5)
                             Y = origem[1] - resol_Y*(lin + 0.5)
-                            band1[lin][col] = Interpolar(X, Y, Rem_band1, Rem_origem, Rem_resol_X, Rem_resol_Y, reamostragem, Rem_nulo)
-                            band2[lin][col] = Interpolar(X, Y, Rem_band2, Rem_origem, Rem_resol_X, Rem_resol_Y, reamostragem, Rem_nulo)
-                            band3[lin][col] = Interpolar(X, Y, Rem_band3, Rem_origem, Rem_resol_X, Rem_resol_Y, reamostragem, Rem_nulo)
+                            R = Interpolar(X, Y, Rem_band1, Rem_origem, Rem_resol_X, Rem_resol_Y, reamostragem, Rem_nulo)
+                            G = Interpolar(X, Y, Rem_band2, Rem_origem, Rem_resol_X, Rem_resol_Y, reamostragem, Rem_nulo)
+                            B = Interpolar(X, Y, Rem_band3, Rem_origem, Rem_resol_X, Rem_resol_Y, reamostragem, Rem_nulo)
+                            if R != Rem_nulo:
+                                band1[lin][col] = R
+                            if G != Rem_nulo:
+                                band2[lin][col] = G
+                            if B != Rem_nulo:
+                                band3[lin][col] = B
                     cont += 1
                     feedback.setProgress(int(cont * total))
                     if feedback.isCanceled():
@@ -292,9 +298,15 @@ class FillRasterwithPatches(QgsProcessingAlgorithm):
                         if px_value == Pixel_Nulo or band1[lin][col] > limiar: # Verificar Limiar
                             X = origem[0] + resol_X*(col + 0.5)
                             Y = origem[1] - resol_Y*(lin + 0.5)
-                            band1[lin][col] = Interpolar(X, Y, Rem_band1, Rem_origem, Rem_resol_X, Rem_resol_Y, reamostragem, Rem_nulo)
-                            band2[lin][col] = Interpolar(X, Y, Rem_band2, Rem_origem, Rem_resol_X, Rem_resol_Y, reamostragem, Rem_nulo)
-                            band3[lin][col] = Interpolar(X, Y, Rem_band3, Rem_origem, Rem_resol_X, Rem_resol_Y, reamostragem, Rem_nulo)
+                            R = Interpolar(X, Y, Rem_band1, Rem_origem, Rem_resol_X, Rem_resol_Y, reamostragem, Rem_nulo)
+                            G = Interpolar(X, Y, Rem_band2, Rem_origem, Rem_resol_X, Rem_resol_Y, reamostragem, Rem_nulo)
+                            B = Interpolar(X, Y, Rem_band3, Rem_origem, Rem_resol_X, Rem_resol_Y, reamostragem, Rem_nulo)
+                            if R != Rem_nulo:
+                                band1[lin][col] = R
+                            if G != Rem_nulo:
+                                band2[lin][col] = G
+                            if B != Rem_nulo:
+                                band3[lin][col] = B
                     cont += 1
                     feedback.setProgress(int(cont * total))
                     if feedback.isCanceled():
