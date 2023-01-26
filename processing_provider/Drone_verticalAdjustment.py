@@ -144,8 +144,7 @@ class VerticalAdjustment(QgsProcessingAlgorithm):
             QgsProcessingParameterField(
                 self.FIELD,
                 self.tr('Z Coordinate', 'Coordenada Z'),
-                parentLayerParameterName=self.POINTS,
-                type=QgsProcessingParameterField.Numeric
+                parentLayerParameterName=self.POINTS
             )
         )
 
@@ -179,7 +178,7 @@ class VerticalAdjustment(QgsProcessingAlgorithm):
                 self.RESAMPLING,
                 self.tr('Interpolation', 'Interpolação'),
 				options = interp,
-                defaultValue= 1
+                defaultValue = 1
             )
         )
 
@@ -345,7 +344,7 @@ class VerticalAdjustment(QgsProcessingAlgorithm):
             coord = feat.geometry().asPoint()
             X = coord.x()
             Y = coord.y()
-            Z = feat[Z_id]
+            Z = float(feat[Z_id])
             Zf = Interpolar(X, Y,
                             banda,
                             origem,
