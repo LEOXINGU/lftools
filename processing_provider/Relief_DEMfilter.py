@@ -129,7 +129,11 @@ O processo de filtragem é feito utilizando matrizes denominadas máscaras (ou k
         tipos = [self.tr('Mean kernel - 3 by 3','Máscara da média 3 por 3'),
                  self.tr('Mean kernel - 5 by 5','Máscara da média 5 por 5'),
                  self.tr('Median kernel - 3 by 3','Máscara da mediana 3 por 3'),
-                 self.tr('Median kernel - 5 by 5','Máscara da mediana 5 por 5')
+                 self.tr('Median kernel - 5 by 5','Máscara da mediana 5 por 5'),
+                 self.tr('Minimum kernel - 3 by 3','Máscara de mínimo 3 por 3'),
+                 self.tr('Minimum kernel - 5 by 5','Máscara de mínimo 5 por 5'),
+                 self.tr('Maximum kernel - 3 by 3','Máscara de máximo 3 por 3'),
+                 self.tr('Maximum kernel - 5 by 5','Máscara de máximo 5 por 5')
                ]
 
         self.addParameter(
@@ -175,7 +179,7 @@ O processo de filtragem é feito utilizando matrizes denominadas máscaras (ou k
             self.KERNEL,
             context
         )
-        size = [3,5,3,5][tipo]
+        size = [3,5,3,5,3,5,3,5][tipo]
 
         # output
 
@@ -246,6 +250,28 @@ O processo de filtragem é feito utilizando matrizes denominadas máscaras (ou k
                         RESULT[i][j] = nulo
                     else:
                         RESULT[i][j] = np.median(banda[i:i+m, j:j+m])
+                if feedback.isCanceled():
+                    break
+                current += 1
+                feedback.setProgress(int(current * Percent))
+        elif tipo in [4,5]: #Filtro do Mínimo
+            for i in range(y):
+                for j in range(x):
+                    if np.sum(banda[i:i+m, j:j+m] == nulo) > 0:
+                        RESULT[i][j] = nulo
+                    else:
+                        RESULT[i][j] = np.min(banda[i:i+m, j:j+m])
+                if feedback.isCanceled():
+                    break
+                current += 1
+                feedback.setProgress(int(current * Percent))
+        elif tipo in [6,7]: #Filtro do Máximo
+            for i in range(y):
+                for j in range(x):
+                    if np.sum(banda[i:i+m, j:j+m] == nulo) > 0:
+                        RESULT[i][j] = nulo
+                    else:
+                        RESULT[i][j] = np.max(banda[i:i+m, j:j+m])
                 if feedback.isCanceled():
                     break
                 current += 1
