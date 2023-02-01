@@ -252,6 +252,7 @@ class GetPointValue(QgsProcessingAlgorithm):
         if crsSrc != crsDest:
             transf_SRC = True
             coordTransf = QgsCoordinateTransform(crsSrc, crsDest, QgsProject.instance())
+            InvCoordTransf = QgsCoordinateTransform(crsDest, crsSrc, QgsProject.instance())
         else:
             transf_SRC = False
 
@@ -274,7 +275,10 @@ class GetPointValue(QgsProcessingAlgorithm):
                                         yres,
                                         reamostragem,
                                         valor_nulo)
-                    newfeat.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(X, Y)))
+                    newGeom = QgsGeometry.fromPointXY(QgsPointXY(X, Y))
+                    if transf_SRC:
+                        newGeom.transform(InvCoordTransf)
+                    newfeat.setGeometry(newGeom)
                     newfeat.setAttributes(att + [valor])
                     sink.addFeature(newfeat, QgsFeatureSink.FastInsert)
             else:
@@ -287,7 +291,10 @@ class GetPointValue(QgsProcessingAlgorithm):
                                     yres,
                                     reamostragem,
                                     valor_nulo)
-                newfeat.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(X, Y)))
+                newGeom = QgsGeometry.fromPointXY(QgsPointXY(X, Y))
+                if transf_SRC:
+                    newGeom.transform(InvCoordTransf)
+                newfeat.setGeometry(newGeom)
                 newfeat.setAttributes(att + [valor])
                 sink.addFeature(newfeat, QgsFeatureSink.FastInsert)
 
