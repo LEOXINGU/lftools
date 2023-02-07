@@ -23,16 +23,16 @@ def azimute(A,B):
     if ((B.x()-A.x())>=0 and (B.y()-A.y())>0): #1º quadrante
         AzAB=arctan((B.x()-A.x())/(B.y()-A.y()))
         AzBA=AzAB+pi
-    elif ((B.x()-A.x())>0 and(B.y()-A.y())<0): #2º quadrante
+    elif ((B.x()-A.x())>0 and (B.y()-A.y())<0): #2º quadrante
         AzAB=pi+arctan((B.x()-A.x())/(B.y()-A.y()))
         AzBA=AzAB+pi
-    elif ((B.x()-A.x())<=0 and(B.y()-A.y())<0): #3º quadrante
+    elif ((B.x()-A.x())<=0 and (B.y()-A.y())<0): #3º quadrante
         AzAB=arctan((B.x()-A.x())/(B.y()-A.y()))+pi
         AzBA=AzAB-pi
-    elif ((B.x()-A.x())<0 and(B.y()-A.y())>0): #4º quadrante
+    elif ((B.x()-A.x())<0 and (B.y()-A.y())>0): #4º quadrante
         AzAB=2*pi+arctan((B.x()-A.x())/(B.y()-A.y()))
         AzBA=AzAB+pi
-    elif ((B.x()-A.x())>0 and(B.y()-A.y())==0): # no eixo positivo de x (90º)
+    elif ((B.x()-A.x())>0 and (B.y()-A.y())==0): # no eixo positivo de x (90º)
         AzAB=pi/2
         AzBA=1.5*pi
     else: # ((B.x()-A.x())<0 and(B.y()-A.y())==0) # no eixo negativo de x (270º)
