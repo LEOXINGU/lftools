@@ -117,8 +117,8 @@ class SequencePoints(QgsProcessingAlgorithm):
             QgsProcessingParameterField(
                 self.FIELD,
                 self.tr('Sequence Field', 'Campo de ordenação dos vértices'),
-                parentLayerParameterName=self.POINTS,
-                type=QgsProcessingParameterField.Numeric
+                parentLayerParameterName = self.POINTS,
+                type = QgsProcessingParameterField.Numeric
             )
         )
 
