@@ -153,7 +153,7 @@ class SupervisedClassification(QgsProcessingAlgorithm):
                 self.METHOD,
                 self.tr('Method', 'Método'),
 				options = metodos,
-                defaultValue= 0
+                defaultValue = 0
             )
         )
 
