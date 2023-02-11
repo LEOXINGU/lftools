@@ -157,8 +157,8 @@ class LoadRasterByLocation(QgsProcessingAlgorithm):
             QgsProcessingParameterFile(
                 self.OUTPUTFOLDER,
                 self.tr('Destination folder', 'Pasta de destino'),
-                behavior=QgsProcessingParameterFile.Folder,
-                defaultValue=None,
+                behavior = QgsProcessingParameterFile.Folder,
+                defaultValue = None,
                 optional = True
             )
         )
