@@ -88,7 +88,7 @@ class Pos2layer(QgsProcessingAlgorithm):
         return 'gnss'
 
     def tags(self):
-        return self.tr('gps,position,ibge,rtklib,ppp,navigation,satellites,surveying,glonass,beidou,compass,galileu,track,kinematic,rtk,ntrip,static').split(',')
+        return self.tr('gps,position,ibge,.pos,rtklib,ppp,navigation,satellites,surveying,glonass,beidou,compass,galileu,track,kinematic,rtk,ntrip,static').split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/satellite.png'))
@@ -306,7 +306,13 @@ Tipos:
                 h = float(pnt[26])
                 ano, mes, dia = pnt[4].split('-')
                 hora, minuto, segundo = pnt[5].split(':')
-                datahora = unicode(datetime(int(ano), int(mes), int(dia), int(hora), int(minuto), int(float(segundo))))
+                if int(float(segundo)) != 60:
+                    datahora = unicode(datetime(int(ano), int(mes), int(dia), int(hora), int(minuto), int(float(segundo))))
+                else:
+                    if int(minuto) < 59:
+                        datahora = unicode(datetime(int(ano), int(mes), int(dia), int(hora), int(minuto) + 1, 0))
+                    else:
+                        datahora = unicode(datetime(int(ano), int(mes), int(dia), int(hora) + 1, 0, 0))
                 quality = 'ppp-ibge'
                 nsat = int(pnt[6])
                 slat = float(pnt[15])
