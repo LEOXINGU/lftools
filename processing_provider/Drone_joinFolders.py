@@ -192,7 +192,7 @@ class JoinFolders(QgsProcessingAlgorithm):
                     if os.path.isfile(os.path.join(caminho, arq)):
                         cont += 1
                         shutil.copy(os.path.join(caminho, arq),
-                                    os.path.join(destino, prefixo + "{:04d}.".format(cont) + arq.split('.')[-1]) if renomear else os.path.join(destino, arq))
+                                    os.path.join(destino, prefixo + "{:05d}.".format(cont) + arq.split('.')[-1]) if renomear else os.path.join(destino, arq))
                     if feedback.isCanceled():
                         break
                     feedback.setProgress(int((cont) * total))
