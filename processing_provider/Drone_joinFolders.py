@@ -162,40 +162,29 @@ class JoinFolders(QgsProcessingAlgorithm):
         if not destino:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.OUT_FOLDER))
 
-
-        # Listando arquivos
-        itens = os.listdir(caminho_geral)
-
         # contagem de arquivos
-        pastas = []
-        cont_files = 0
-        for item in itens:
-            caminho = os.path.join(caminho_geral,item)
-            if not os.path.isfile(caminho):
-                pastas += [item]
-                arquivos = os.listdir(caminho)
-                for arq in arquivos:
-                    filepath = os.path.join(caminho,arq)
-                    if os.path.isfile(filepath):
-                        cont_files += 1
+        feedback.pushInfo(self.tr('Checking files in the folders...', 'Checando arquivos nas pastas...'))
+        lista = []
+        for root, dirs, files in os.walk(caminho_geral, topdown=True):
+            for name in files:
+                if (name).lower().endswith(('.jpg', '.jpeg', '.tif', '.tiff')):
+                    lista += [os.path.join(root, name)]
 
+        cont_files = len(lista)
         feedback.pushInfo(self.tr('Number of files to be copied: {}'.format(cont_files), 'Total de arquivos a serem copiados: {}'.format(cont_files)))
         total = 100.0 / cont_files if cont_files else 0
-        cont = 0
 
         # copiando os arquivos
-        for pasta in pastas:
-            caminho = os.path.join(caminho_geral,pasta)
-            if os.path.join(caminho, '') != os.path.join(destino, ''):
-                lista = os.listdir(caminho)
-                for arq in lista:
-                    if os.path.isfile(os.path.join(caminho, arq)):
-                        cont += 1
-                        shutil.copy(os.path.join(caminho, arq),
-                                    os.path.join(destino, prefixo + "{:05d}.".format(cont) + arq.split('.')[-1]) if renomear else os.path.join(destino, arq))
-                    if feedback.isCanceled():
-                        break
-                    feedback.setProgress(int((cont) * total))
+        for cont, filepath in enumerate(lista):
+            if os.path.join(caminho_geral, '') in os.path.join(destino, ''):
+                raise QgsProcessingException(self.tr('Choose another output folder!', 'Escolha outra pasta de destino!'))
+            else:
+                head, arq = os.path.split(filepath)
+                shutil.copy(filepath,
+                            os.path.join(destino, prefixo + "{:05d}.".format(cont+1) + arq.split('.')[-1]) if renomear else os.path.join(destino, arq))
+            if feedback.isCanceled():
+                break
+            feedback.setProgress(int((cont) * total))
 
         feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
         feedback.pushInfo(self.tr('Leandro Franca - Cartographic Engineer', 'Leandro França - Eng Cart'))
