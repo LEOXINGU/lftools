@@ -160,7 +160,7 @@ class MeasureLayers(QgsProcessingAlgorithm):
             if feedback.isCanceled():
                 break
             # check the layer type
-            if layer.type()==0:# VectorLayer
+            if layer.type() == 0:# VectorLayer
                 # check the layer geometry type
                 if layer.geometryType() == QgsWkbTypes.LineGeometry:
                     layer.addExpressionField('$length'+'/'+str(unidade_dist), field_length)
