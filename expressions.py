@@ -1148,17 +1148,23 @@ def deedtable3(prefixo, titulo, decimal, fontsize, layer_name, tipo, azimuteDist
 
 
 @qgsfunction(args='auto', group='LF Tools')
-def deedtext(layer_name, descr_pnt_ini, estilo, prefixo, decimal, fontsize, feature, parent):
+def deedtext(layer_name, description, estilo, prefixo, decimal, fontsize, feature, parent):
     """
     Generates a description of a property with coordinates as text.
     <p>Note 1: A layer or QGIS Project with a projected SRC is required.</p>
     <p>Note 2: Coordinates styles: 'E,N,h', 'N,E,h', 'E,N' (default) or 'N,E'.</p>
+    <p>Note 2: Coordinates styles: 'E,N,h', 'N,E,h', 'E,N' (default) or 'N,E'.</p>
 
     <h2>Exemples:</h2>
     <ul>
-      <li>deedtext('layer_name', 'initial_description', 'style', 'preffix', precision, fontsize) = HTML</li>
+      <li>deedtext('layer_name', 'initial description', 'style', 'preffix', precision, fontsize) = HTML</li>
       <li>deedtext('layer_name', 'northernmost point', 'E,N,h', 'V-', 2, 12) = HTML</li>
-      <li>deedtext('layer_name', 'rightmost point of the person in front of the property', 'N,E', 'P-', 3, 10) = HTML</li>
+      <li>deedtext('layer_name', 'rightmost point in front of the property', 'N,E', 'P-', 3, 10) = HTML</li>
+    </ul>
+    <h2>Exemples with adjointer layer:</h2>
+    <ul>
+      <li>deedtext('layer_name', 'adjoiner_line_layer,id,name', 'style', 'preffix', precision, fontsize) = HTML</li>
+      <li>deedtext('layer_name', 'Adjoiners,ID1,prop', 'E,N', 'P-', 2, 10) = HTML</li>
     </ul>
     """
     if len(QgsProject.instance().mapLayersByName(layer_name)) == 1:
@@ -1236,62 +1242,161 @@ def deedtext(layer_name, descr_pnt_ini, estilo, prefixo, decimal, fontsize, feat
         else: # default
             estilo_vertices = '<b>E [Xn]m</b> ' + tr('and', 'e') +  ' <b>N [Yn]m</b>'
 
-        # conteudo do memorial
-        text_ini = tr('<div style="text-align: justify; font-size: [FONTSIZE]px; font-family: Arial;">The description of this perimeter begins at the vertex <b>[Vn]</b>, with coordinates ' + estilo_vertices + ', [descr_pnt_ini] from this, with the following flat azimuths and distances: ',
-                      '<div style="text-align: justify; font-size: [FONTSIZE]px; font-family: Arial;">Inicia-se a descrição deste perímetro no vértice <b>[Vn]</b>, de coordenadas ' + estilo_vertices + ', [descr_pnt_ini] deste, segue com os seguintes azimutes planos e distâncias: ')
+        # Descrição
+        try:
+            descricao, id, nome = description.replace(' ', '').split(',')
+            if len(QgsProject.instance().mapLayersByName(descricao)) == 1:
+                layer = QgsProject.instance().mapLayersByName(descricao)[0]
+            campos = [field.name() for field in layer.fields()]
+            # Camadas de polígono e confrontantes deve estar com o mesmo SRC
+            filter = '"{}" = {}'.format(id, feature.id())
+            exp = QgsExpression(filter)
+            if id not in campos or nome not in campos:
+                descr_pnt_ini = description
+        except: # >>>>>>>>>>>>>>>>> Apenas inserir a descrição do ponto inicial
+            descr_pnt_ini = description
 
-        text_meio = tr('[Azn] and [Dn]m up to the vertex <b>[Vn]</b>, with coordinates ' + estilo_vertices + ', ',
-                       '[Azn] e [Dn]m até o vértice <b>[Vn]</b>, de coordenadas ' + estilo_vertices + ', ')
+        try:
+            descr_pnt_ini = str(descr_pnt_ini)
 
-        text_fim = tr('''the starting point for the description of this perimeter.
-        All coordinates described here are georeferenced to the Geodetic Reference System (GRS) (SGR) <b>[SGR]</b>, and are projected in the system <b>[PROJ]</b>,
-        from which all azimuths and distances, area and perimeter were calculated.''',
-        '''ponto inicial da descrição deste perímetro.
-        Todas as coordenadas aqui descritas estão georreferenciadas ao Sistema Geodésico de Referência (SGR) <b>[SGR]</b>, sendo projetadas no sistema <b>[PROJ]</b>,
-        a partir das quais todos os azimutes e distâncias foram calculados.</div>
-        ''')
+            # conteudo do memorial
+            text_ini = tr('<div style="text-align: justify; font-size: [FONTSIZE]px; font-family: Arial;">The description of this perimeter begins at the vertex <b>[Vn]</b>, with coordinates ' + estilo_vertices + ', [descr_pnt_ini] from this, with the following flat azimuths and distances: ',
+                          '<div style="text-align: justify; font-size: [FONTSIZE]px; font-family: Arial;">Inicia-se a descrição deste perímetro no vértice <b>[Vn]</b>, de coordenadas ' + estilo_vertices + ', [descr_pnt_ini] deste, segue com os seguintes azimutes planos e distâncias: ')
 
-        # Texto inicial
-        itens = {'[Vn]': pnts_UTM[1][2],
-                 '[Xn]': tr(format_num.format(pnts_UTM[1][0].x()), format_num.format(pnts_UTM[1][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                 '[Yn]': tr(format_num.format(pnts_UTM[1][0].y()), format_num.format(pnts_UTM[1][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                 '[descr_pnt_ini]': descr_pnt_ini + ', ' if descr_pnt_ini else ''
-                    }
-        if 'h' in estilo:
-            itens['[hn]'] = tr(format_num.format(pnts_UTM[1][0].z()), format_num.format(pnts_UTM[1][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.'))
-        for item in itens:
-            text_ini = text_ini.replace(item, itens[item]).replace('[FONTSIZE]', str(fontsize))
+            text_meio = tr('[Azn] and [Dn]m up to the vertex <b>[Vn]</b>, with coordinates ' + estilo_vertices + ', ',
+                           '[Azn] e [Dn]m até o vértice <b>[Vn]</b>, de coordenadas ' + estilo_vertices + ', ')
 
-        # Texto do meio
-        LINHAS = ''
-        for k in range(tam):
-            linha0 = text_meio
-            indice = k+2 if k+2 <= tam else 1
-            itens = {'[Vn]': pnts_UTM[indice][2],
-                     '[Xn]': tr(format_num.format(pnts_UTM[indice][0].x()),
-                              format_num.format(pnts_UTM[indice][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                     '[Yn]': tr(format_num.format(pnts_UTM[indice][0].y()),
-                              format_num.format(pnts_UTM[indice][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                     '[Azn]': tr(DD2DMS(Az_lista[k],1), DD2DMS(Az_lista[k],1).replace('.', ',')),
-                     '[Dn]': tr(format_num.format(Dist[k]), format_num.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'))
+            text_fim = tr('''the starting point for the description of this perimeter.
+            All coordinates described here are georeferenced to the Geodetic Reference System (GRS) (SGR) <b>[SGR]</b>, and are projected in the system <b>[PROJ]</b>,
+            from which all azimuths and distances, area and perimeter were calculated.''',
+            '''ponto inicial da descrição deste perímetro.
+            Todas as coordenadas aqui descritas estão georreferenciadas ao Sistema Geodésico de Referência (SGR) <b>[SGR]</b>, sendo projetadas no sistema <b>[PROJ]</b>,
+            a partir das quais todos os azimutes e distâncias foram calculados.</div>
+            ''')
+
+            # Texto inicial
+            itens = {'[Vn]': pnts_UTM[1][2],
+                     '[Xn]': tr(format_num.format(pnts_UTM[1][0].x()), format_num.format(pnts_UTM[1][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                     '[Yn]': tr(format_num.format(pnts_UTM[1][0].y()), format_num.format(pnts_UTM[1][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                     '[descr_pnt_ini]': descr_pnt_ini + ', ' if descr_pnt_ini else ''
                         }
             if 'h' in estilo:
-                itens['[hn]'] = tr(format_num.format(pnts_UTM[indice][0].z()),
-                                   format_num.format(pnts_UTM[indice][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.'))
+                itens['[hn]'] = tr(format_num.format(pnts_UTM[1][0].z()), format_num.format(pnts_UTM[1][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.'))
             for item in itens:
-                linha0 = linha0.replace(item, itens[item])
-            LINHAS += linha0
+                text_ini = text_ini.replace(item, itens[item]).replace('[FONTSIZE]', str(fontsize))
 
-        # Texto final
-        itens = {'[SGR]': SGR.description(),
-                 '[PROJ]': PROJ
-                    }
-        for item in itens:
-            text_fim = text_fim.replace(item, itens[item])
+            # Texto do meio
+            LINHAS = ''
+            for k in range(tam):
+                linha0 = text_meio
+                indice = k+2 if k+2 <= tam else 1
+                itens = {'[Vn]': pnts_UTM[indice][2],
+                         '[Xn]': tr(format_num.format(pnts_UTM[indice][0].x()),
+                                  format_num.format(pnts_UTM[indice][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                         '[Yn]': tr(format_num.format(pnts_UTM[indice][0].y()),
+                                  format_num.format(pnts_UTM[indice][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                         '[Azn]': tr(DD2DMS(Az_lista[k],1), DD2DMS(Az_lista[k],1).replace('.', ',')),
+                         '[Dn]': tr(format_num.format(Dist[k]), format_num.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'))
+                            }
+                if 'h' in estilo:
+                    itens['[hn]'] = tr(format_num.format(pnts_UTM[indice][0].z()),
+                                       format_num.format(pnts_UTM[indice][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.'))
+                for item in itens:
+                    linha0 = linha0.replace(item, itens[item])
+                LINHAS += linha0
 
-        FINAL = text_ini + LINHAS + text_fim
-        return FINAL
+            # Texto final
+            itens = {'[SGR]': SGR.description(),
+                     '[PROJ]': PROJ
+                        }
+            for item in itens:
+                text_fim = text_fim.replace(item, itens[item])
 
+            FINAL = text_ini + LINHAS + text_fim
+            return FINAL
+
+        except: # >>>>>>>>>>>>>>>>> puxar nome dos confrontantes
+
+            # conteudo do memorial
+            text_ini = tr('<div style="text-align: justify; font-size: [FONTSIZE]px; font-family: Arial;">The description of this perimeter begins at the vertex <b>[Vn]</b>, with coordinates ' + estilo_vertices + ', ',
+                          '<div style="text-align: justify; font-size: [FONTSIZE]px; font-family: Arial;">Inicia-se a descrição deste perímetro no vértice <b>[Vn]</b>, de coordenadas ' + estilo_vertices + ', ')
+
+            text_meio1 = tr('from this, it continues adjoining with [ADJOINER], with the following flat azimuths and distances: [Azn] and [Dn]m up to the vertex <b>[Vn]</b>, with coordinates ' + estilo_vertices + ', ',
+                            'deste, segue confrontando com [ADJOINER], com os seguintes azimutes planos e distâncias: [Azn] e [Dn]m até o vértice <b>[Vn]</b>, de coordenadas ' + estilo_vertices + ', ')
+
+            text_meio2 = tr('[Azn] and [Dn]m up to the vertex <b>[Vn]</b>, with coordinates ' + estilo_vertices + ', ',
+                            '[Azn] e [Dn]m até o vértice <b>[Vn]</b>, de coordenadas ' + estilo_vertices + ', ')
+
+            text_fim = tr('''the starting point for the description of this perimeter.
+            All coordinates described here are georeferenced to the Geodetic Reference System (GRS) (SGR) <b>[SGR]</b>, and are projected in the system <b>[PROJ]</b>,
+            from which all azimuths and distances, area and perimeter were calculated.''',
+            '''ponto inicial da descrição deste perímetro.
+            Todas as coordenadas aqui descritas estão georreferenciadas ao Sistema Geodésico de Referência (SGR) <b>[SGR]</b>, sendo projetadas no sistema <b>[PROJ]</b>,
+            a partir das quais todos os azimutes e distâncias foram calculados.</div>
+            ''')
+
+            # Texto inicial
+            itens = {'[Vn]': pnts_UTM[1][2],
+                     '[Xn]': tr(format_num.format(pnts_UTM[1][0].x()), format_num.format(pnts_UTM[1][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                     '[Yn]': tr(format_num.format(pnts_UTM[1][0].y()), format_num.format(pnts_UTM[1][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.'))
+                        }
+            if 'h' in estilo:
+                itens['[hn]'] = tr(format_num.format(pnts_UTM[1][0].z()), format_num.format(pnts_UTM[1][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.'))
+            for item in itens:
+                text_ini = text_ini.replace(item, itens[item]).replace('[FONTSIZE]', str(fontsize))
+
+            # Texto do meio
+            LINHAS = ''
+            Confrontante = ''
+
+            for k in range(tam):
+                indice = k+2 if k+2 <= tam else 1
+                ponto = QgsPointXY(pnts_GEO[indice][0])
+                for feat in layer.getFeatures(QgsFeatureRequest(exp)):
+                    # Identificar linha de confrontação
+                    geom_lin = feat.geometry()
+                    if geom_lin.intersects(geom):
+                        inter = geom_lin.intersection(geom)
+                        if inter.type() == 1: # linha
+                            if inter.isMultipart():
+                                lin_coords = inter.asMultiPolyline()
+                                lin_coords = sum(lin_coords, [])
+                            else:
+                                lin_coords = inter.asPolyline()
+                            if ponto in lin_coords[:-1]: # Verificar se está no primeiro até penúltimo ponto da linha de confrontação
+                                if feat[nome] != Confrontante:
+                                    linha0 = text_meio1
+                                    Confrontante = feat[nome]
+                                else:
+                                    linha0 = text_meio2
+                                break
+
+                itens = {'[Vn]': pnts_UTM[indice][2],
+                         '[Xn]': tr(format_num.format(pnts_UTM[indice][0].x()),
+                                  format_num.format(pnts_UTM[indice][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                         '[Yn]': tr(format_num.format(pnts_UTM[indice][0].y()),
+                                  format_num.format(pnts_UTM[indice][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                         '[Azn]': tr(DD2DMS(Az_lista[k],1), DD2DMS(Az_lista[k],1).replace('.', ',')),
+                         '[Dn]': tr(format_num.format(Dist[k]), format_num.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                         '[ADJOINER]': Confrontante,
+                            }
+                if 'h' in estilo:
+                    itens['[hn]'] = tr(format_num.format(pnts_UTM[indice][0].z()),
+                                       format_num.format(pnts_UTM[indice][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.'))
+
+                for item in itens:
+                    linha0 = linha0.replace(item, itens[item])
+                LINHAS += linha0
+
+            # Texto final
+            itens = {'[SGR]': SGR.description(),
+                     '[PROJ]': PROJ
+                        }
+            for item in itens:
+                text_fim = text_fim.replace(item, itens[item])
+
+            FINAL = text_ini + LINHAS + text_fim
+            return FINAL
     else:
         return tr('Check if the geometry is null or invalid! Or if Atlas is on!', 'Verifique se a geometria é nula ou inválida! Ou se o Atlas está ligado!')
 
