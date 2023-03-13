@@ -108,6 +108,7 @@ from lftools.processing_provider.Gnss_RTKCorrection import RTKCorrection
 from lftools.processing_provider.Stat_standardDistance import StandardDistance
 from lftools.processing_provider.Drone_PointCloudAdjust import PointCloudAdjust
 from lftools.processing_provider.Relief_DEM2txt import DEM2txt
+from .processing_provider.Cad_AdjoinerLine import AdjoinerLine
 
 
 class LFToolsProvider(QgsProcessingProvider):
@@ -201,6 +202,7 @@ class LFToolsProvider(QgsProcessingProvider):
         self.addAlgorithm(StandardDistance())
         self.addAlgorithm(PointCloudAdjust())
         self.addAlgorithm(DEM2txt())
+        self.addAlgorithm(AdjoinerLine())
 
     def id(self):
         return 'lftools'
