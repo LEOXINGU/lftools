@@ -97,12 +97,12 @@ class StopAndGo(QgsProcessingAlgorithm):
 Input data:
 ◼️ GNSS point layer from RTKLIB or IBGE-PPP from .pos file
 ◼️ Minimum time to survey the point in minutes
-◼️ Tolerance in cm to consider the static point'''
+◼️ Tolerance in centimeters to consider the static point'''
     txt_pt = '''Encontra os pontos centrais (vértices) das concentrações de pontos levantados pelo método Seminemático (stop and go) provenientes do processamento de dados GNSS.
 Dados de entrada:
 ◼️ Camada do tipo ponto gerada do arquivo .pos do RTKLIB ou IBGE-PPP
 ◼️ Tempo mínimo de levantamento do ponto em minutos
-◼️ Tolerância em cm para considerar o ponto estático'''
+◼️ Tolerância em centímetros para considerar o ponto estático'''
 
     figure = 'images/tutorial/gnss_ppk.jpg'
 
