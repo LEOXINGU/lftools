@@ -1363,7 +1363,7 @@ def deedtext(layer_name, description, estilo, prefixo, decimal, fontsize, featur
                                 lin_coords = sum(lin_coords, [])
                             else:
                                 lin_coords = inter.asPolyline()
-                            if ponto in lin_coords[:-1]: # Verificar se está no primeiro até penúltimo ponto da linha de confrontação
+                            if ponto in lin_coords[1:]:
                                 if feat[nome] != Confrontante:
                                     linha0 = text_meio1
                                     Confrontante = feat[nome]
