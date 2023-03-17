@@ -268,7 +268,7 @@ class DescriptiveMemorial(QgisAlgorithm):
             self.DECIMAL,
             context
         )
-        if decimal is None or decimal<1:
+        if decimal is None or decimal < 1:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.DECIMAL))
 
         format_num = '{:,.Xf}'.replace('X', str(decimal))
