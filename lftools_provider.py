@@ -65,7 +65,7 @@ from .processing_provider.Vect_DirectionalMerge import DirectionalMerge
 from .processing_provider.Vect_ExtendLines import ExtendLines
 from .processing_provider.Vect_PolygonAngles import CalculatePolygonAngles
 from .processing_provider.Vect_reverseVertexOrder import ReverseVertexOrder
-from .processing_provider.Cad_sequencePoints import SequencePoints
+from .processing_provider.Vect_sequencePoints import SequencePoints
 from .processing_provider.Doc_AreaPerimeter import AreaPerimterReport
 from .processing_provider.Doc_DescriptiveMemorial import DescriptiveMemorial
 from .processing_provider.Doc_MarkInformation import SurveyMarkDoc
