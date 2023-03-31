@@ -58,7 +58,7 @@ class LineSequence(QgsProcessingAlgorithm):
         return 'linesequence'
 
     def displayName(self):
-        return self.tr('Line sequence', 'Sequência de linhas')
+        return self.tr('Line sequence', 'Sequenciar linhas')
 
     def group(self):
         return self.tr('Vector', 'Vetor')
