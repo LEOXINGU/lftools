@@ -266,19 +266,23 @@ class ImportPhotos(QgsProcessingAlgorithm):
         for index, filepath in enumerate(lista):
             if (filepath).lower().endswith(('.jpg', '.jpeg')):
                 caminho, arquivo = os.path.split(filepath)
-                img = Image.open(os.path.join(caminho,arquivo))
-                if img._getexif():
-                    exif = {
-                        ExifTags.TAGS[k]: v
-                        for k, v in img._getexif().items()
-                        if k in ExifTags.TAGS
-                    }
-                else:
+                try:
+                    img = Image.open(os.path.join(caminho,arquivo))
+                    if img._getexif():
+                        exif = {
+                            ExifTags.TAGS[k]: v
+                            for k, v in img._getexif().items()
+                            if k in ExifTags.TAGS
+                        }
+                    else:
+                        exif = {}
+                    lon, lat = 0, 0
+                    Az = None
+                    date_time = None
+                    altitude = None
+                except:
+                    lon = 0
                     exif = {}
-                lon, lat = 0, 0
-                Az = None
-                date_time = None
-                altitude = None
                 if 'GPSInfo' in exif:
                     lat, lon = coordenadas(exif)
                     if lat != 0:
