@@ -88,7 +88,7 @@ class Pos2layer(QgsProcessingAlgorithm):
         return 'gnss'
 
     def tags(self):
-        return self.tr('gps,position,ibge,.pos,rtklib,ppp,navigation,satellites,surveying,glonass,beidou,compass,galileu,track,kinematic,rtk,ntrip,static').split(',')
+        return self.tr('gps,position,ibge,.pos,rtklib,ppp,navigation,satellites,rinex,surveying,glonass,beidou,compass,galileu,track,kinematic,rtk,ntrip,static').split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/satellite.png'))
