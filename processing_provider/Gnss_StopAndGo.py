@@ -88,7 +88,7 @@ class StopAndGo(QgsProcessingAlgorithm):
         return 'gnss'
 
     def tags(self):
-        return self.tr('gps,position,ibge,rtklib,ppp,ppk,navigation,satellites,surveying,glonass,beidou,compass,galileu,track,kinematic,rtk,ntrip,static,semikinematic,stop,and,go,semicinemático').split(',')
+        return self.tr('gps,position,ibge,rtklib,ppp,ppk,navigation,satellites,surveying,rinex,glonass,beidou,compass,galileu,track,kinematic,rtk,ntrip,static,semikinematic,stop,and,go,semicinemático').split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/satellite.png'))
