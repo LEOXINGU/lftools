@@ -132,6 +132,7 @@ class GetPointValue(QgsProcessingAlgorithm):
                 self.BAND,
                 self.tr('Band number', 'Número da banda'),
                 parentLayerParameterName=self.INPUT,
+                optional = True
             )
         )
 
@@ -189,8 +190,6 @@ class GetPointValue(QgsProcessingAlgorithm):
             self.BAND,
             context
         )
-        if n_banda is None:
-            raise QgsProcessingException(self.invalidSourceError(parameters, self.BAND))
 
         pontos = self.parameterAsSource(
             parameters,
@@ -213,21 +212,6 @@ class GetPointValue(QgsProcessingAlgorithm):
             context
         )
 
-        # Camada de saída
-        Fields = pontos.fields()
-        CRS = pontos.sourceCrs()
-        Fields.append(QgsField(prefixo + self.tr('value', 'valor'), QVariant.Double))
-        (sink, dest_id) = self.parameterAsSink(
-            parameters,
-            self.OUTPUT,
-            context,
-            Fields,
-            QgsWkbTypes.Point,
-            CRS
-        )
-        if sink is None:
-            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT))
-
         # Abrir Raster
         feedback.pushInfo(self.tr('Opening raster file...', 'Abrindo arquivo Raster...'))
         image = gdal.Open(RasterIN.dataProvider().dataSourceUri())
@@ -236,9 +220,8 @@ class GetPointValue(QgsProcessingAlgorithm):
         ulx, xres, xskew, uly, yskew, yres  = image.GetGeoTransform()
         cols = image.RasterXSize
         rows = image.RasterYSize
-        #n_bands = image.RasterCount
+        total_bands = image.RasterCount
         GDT = image.GetRasterBand(1).DataType
-        banda = image.GetRasterBand(n_banda).ReadAsArray()
         valor_nulo = image.GetRasterBand(1).GetNoDataValue()
         if not valor_nulo:
             valor_nulo = 0
@@ -256,17 +239,103 @@ class GetPointValue(QgsProcessingAlgorithm):
         else:
             transf_SRC = False
 
+        # Camada de saída
+        Fields = pontos.fields()
+        CRS = pontos.sourceCrs()
+        if n_banda == 0:
+            for k in range(total_bands):
+                Fields.append(QgsField(prefixo + self.tr('band{}'.format(k+1), 'banda{}'.format(k+1)), QVariant.Double))
+
+        else:
+            Fields.append(QgsField(prefixo + self.tr('band{}'.format(n_banda), 'banda{}'.format(n_banda)), QVariant.Double))
+
+        (sink, dest_id) = self.parameterAsSink(
+            parameters,
+            self.OUTPUT,
+            context,
+            Fields,
+            QgsWkbTypes.Point,
+            CRS
+        )
+        if sink is None:
+            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT))
+
         # Calcular valor interpolado para cada ponto
-        Percent = 100.0/pontos.featureCount() if pontos.featureCount()>0 else 0
-        newfeat = QgsFeature(Fields)
-        for index, feat in enumerate(pontos.getFeatures()):
-            geom = feat.geometry()
-            if transf_SRC:
-                geom.transform(coordTransf)
-            att = feat.attributes()
-            if geom.isMultipart():
-                pnts = geom.asMultiPoint()
-                for pnt in pnts:
+        if n_banda == 0: # Calculo para todas as bandas
+            Percent = 100.0/(total_bands*pontos.featureCount()) if pontos.featureCount()>0 else 0
+            newfeat = QgsFeature(Fields)
+            feicoes = {}
+            for index, feat in enumerate(pontos.getFeatures()):
+                geom = feat.geometry()
+                if transf_SRC:
+                    geom.transform(coordTransf)
+                att = feat.attributes()
+                if geom.isMultipart():
+                    pnt = geom.asMultiPoint()[0]
+                    X, Y = pnt.x(), pnt.y()
+                    for k in range(total_bands):
+                        banda = image.GetRasterBand(k+1).ReadAsArray()
+                        valor = Interpolar(X, Y,
+                                            banda,
+                                            origem,
+                                            xres,
+                                            yres,
+                                            reamostragem,
+                                            valor_nulo)
+                        att += [valor]
+                    newGeom = QgsGeometry.fromPointXY(QgsPointXY(X, Y))
+                else:
+                    pnt = geom.asPoint()
+                    X, Y = pnt.x(), pnt.y()
+                    for k in range(total_bands):
+                        banda = image.GetRasterBand(k+1).ReadAsArray()
+                        valor = Interpolar(X, Y,
+                                            banda,
+                                            origem,
+                                            xres,
+                                            yres,
+                                            reamostragem,
+                                            valor_nulo)
+                        att += [valor]
+                    newGeom = QgsGeometry.fromPointXY(QgsPointXY(X, Y))
+                if transf_SRC:
+                    newGeom.transform(InvCoordTransf)
+                newfeat.setGeometry(newGeom)
+                newfeat.setAttributes(att + [valor])
+                sink.addFeature(newfeat, QgsFeatureSink.FastInsert)
+
+                if feedback.isCanceled():
+                    break
+                feedback.setProgress(int((index+1) * Percent))
+
+        else: # Calculo para uma banda específica
+            Percent = 100.0/pontos.featureCount() if pontos.featureCount()>0 else 0
+            banda = image.GetRasterBand(n_banda).ReadAsArray()
+            newfeat = QgsFeature(Fields)
+            for index, feat in enumerate(pontos.getFeatures()):
+                geom = feat.geometry()
+                if transf_SRC:
+                    geom.transform(coordTransf)
+                att = feat.attributes()
+                if geom.isMultipart():
+                    pnts = geom.asMultiPoint()
+                    for pnt in pnts:
+                        X, Y = pnt.x(), pnt.y()
+                        valor = Interpolar(X, Y,
+                                            banda,
+                                            origem,
+                                            xres,
+                                            yres,
+                                            reamostragem,
+                                            valor_nulo)
+                        newGeom = QgsGeometry.fromPointXY(QgsPointXY(X, Y))
+                        if transf_SRC:
+                            newGeom.transform(InvCoordTransf)
+                        newfeat.setGeometry(newGeom)
+                        newfeat.setAttributes(att + [valor])
+                        sink.addFeature(newfeat, QgsFeatureSink.FastInsert)
+                else:
+                    pnt = geom.asPoint()
                     X, Y = pnt.x(), pnt.y()
                     valor = Interpolar(X, Y,
                                         banda,
@@ -281,26 +350,10 @@ class GetPointValue(QgsProcessingAlgorithm):
                     newfeat.setGeometry(newGeom)
                     newfeat.setAttributes(att + [valor])
                     sink.addFeature(newfeat, QgsFeatureSink.FastInsert)
-            else:
-                pnt = geom.asPoint()
-                X, Y = pnt.x(), pnt.y()
-                valor = Interpolar(X, Y,
-                                    banda,
-                                    origem,
-                                    xres,
-                                    yres,
-                                    reamostragem,
-                                    valor_nulo)
-                newGeom = QgsGeometry.fromPointXY(QgsPointXY(X, Y))
-                if transf_SRC:
-                    newGeom.transform(InvCoordTransf)
-                newfeat.setGeometry(newGeom)
-                newfeat.setAttributes(att + [valor])
-                sink.addFeature(newfeat, QgsFeatureSink.FastInsert)
 
-            if feedback.isCanceled():
-                break
-            feedback.setProgress(int((index+1) * Percent))
+                if feedback.isCanceled():
+                    break
+                feedback.setProgress(int((index+1) * Percent))
 
         feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
         feedback.pushInfo(self.tr('Leandro Franca - Cartographic Engineer', 'Leandro França - Eng Cart'))
