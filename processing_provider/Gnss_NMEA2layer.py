@@ -279,15 +279,18 @@ Modos:
         if sink is None:
             raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT))
 
-        if tipo == 0:
+        if tipo == 0: # Cinemático
             feat = QgsFeature()
             for pnt in lista:
                 feat.setGeometry(QgsPoint(pnt[1],pnt[0], pnt[2]))
-                data_hora = unicode(datetime.datetime(ano, mes, dia, pnt[-5], pnt[-4], int(pnt[-3])))
+                try:
+                    data_hora = unicode(datetime.datetime(ano, mes, dia, pnt[-5], pnt[-4], int(pnt[-3])))
+                except:
+                    data_hora = None
                 feat.setAttributes(pnt[0:5] + [data_hora] + pnt[5:8] + pnt[-2:]  ) # lat, lon, h, H, N, HDOP, VDOP, PDOP, hora, min, seg, quality, num_sat
                 sink.addFeature(feat, QgsFeatureSink.FastInsert)
 
-        elif tipo == 1:
+        elif tipo == 1: # Estático com solução fixa
             valores = valores[valores[:,-2] == nmea_quality[4] ] # eliminando observações de baixa qualidade
             if len(valores) == 0:
                 raise QgsProcessingException(self.tr('There is no observation with RTK correction.', 'Não existe observação com correção RTK.'))
@@ -300,8 +303,11 @@ Modos:
             s_h = valores[:,2].astype('float').std()
             H = valores[:,3].astype('float').mean()
             N = valores[:,4].astype('float').mean()
-            data_hora_ini = unicode(datetime.datetime(ano, mes, dia, int(valores[0, -5]), int(valores[0, -4]), int(float(valores[0, -3]))))
-            data_hora_fim = unicode(datetime.datetime(ano, mes, dia, int(valores[-1, -5]), int(valores[-1, -4]), int(float(valores[-1, -3]))))
+            try:
+                data_hora_ini = unicode(datetime.datetime(ano, mes, dia, int(valores[0, -5]), int(valores[0, -4]), int(float(valores[0, -3]))))
+                data_hora_fim = unicode(datetime.datetime(ano, mes, dia, int(valores[-1, -5]), int(valores[-1, -4]), int(float(valores[-1, -3]))))
+            except:
+                data_hora_ini, data_hora_fim = None
             # Raio Médio de Gauss
             R = raioMedioGauss(lat, int(self.tr('4326','4674')))
             sigma_x = (R+h)*np.radians(s_lon)
@@ -322,7 +328,7 @@ Modos:
                                 len(valores)])
             sink.addFeature(feat, QgsFeatureSink.FastInsert)
 
-        elif tipo == 2:
+        elif tipo == 2: # Estático com todos os valores
             # calculo de valores médios
             lat = valores[:,0].astype('float').mean()
             s_lat = valores[:,0].astype('float').std()
@@ -332,8 +338,11 @@ Modos:
             s_h = valores[:,2].astype('float').std()
             H = valores[:,3].astype('float').mean()
             N = valores[:,4].astype('float').mean()
-            data_hora_ini = unicode(datetime.datetime(ano, mes, dia, int(valores[0, -5]), int(valores[0, -4]), int(float(valores[0, -3]))))
-            data_hora_fim = unicode(datetime.datetime(ano, mes, dia, int(valores[-1, -5]), int(valores[-1, -4]), int(float(valores[-1, -3]))))
+            try:
+                data_hora_ini = unicode(datetime.datetime(ano, mes, dia, int(valores[0, -5]), int(valores[0, -4]), int(float(valores[0, -3]))))
+                data_hora_fim = unicode(datetime.datetime(ano, mes, dia, int(valores[-1, -5]), int(valores[-1, -4]), int(float(valores[-1, -3]))))
+            except:
+                data_hora_ini, data_hora_fim = None, None
             # Raio Médio de Gauss
             R = raioMedioGauss(lat, int(self.tr('4326','4674')))
             sigma_x = (R+h)*np.radians(s_lon)
