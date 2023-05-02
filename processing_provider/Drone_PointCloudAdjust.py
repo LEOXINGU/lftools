@@ -118,6 +118,7 @@ class PointCloudAdjust(QgsProcessingAlgorithm):
     HORIZONTAL = 'HORIZONTAL'
     VERTICAL = 'VERTICAL'
     ADJUSTED = 'ADJUSTED'
+    DECIMAL = 'DECIMAL'
 
     def initAlgorithm(self, config=None):
         # INPUT
@@ -163,6 +164,16 @@ class PointCloudAdjust(QgsProcessingAlgorithm):
             )
         )
 
+        self.addParameter(
+            QgsProcessingParameterNumber(
+                self.DECIMAL,
+                self.tr('Decimal places', 'Casas decimais'),
+                type =0,
+                defaultValue = 2,
+                minValue = 0
+                )
+            )
+
         # OUTPUT
         self.addParameter(
             QgsProcessingParameterFileDestination(
@@ -207,6 +218,16 @@ class PointCloudAdjust(QgsProcessingAlgorithm):
             self.VERTICAL,
             context
         )
+
+        decimal = self.parameterAsInt(
+            parameters,
+            self.DECIMAL,
+            context
+        )
+        if decimal is None or decimal<1:
+            raise QgsProcessingException(self.invalidSourceError(parameters, self.DECIMAL))
+
+        format_num = '{:,.Xf}'.replace('X', str(decimal))
 
         arquivo_saida = self.parameterAsFile(
             parameters,
@@ -260,6 +281,8 @@ class PointCloudAdjust(QgsProcessingAlgorithm):
                     X, Y, Z = lista
                 elif len(lista) == 6:
                     X, Y, Z, R, G, B = lista
+                else:
+                    X, Y, Z = lista[0], lista[1], lista[2]
                 # Correção HORIZONTAL
                 X_novo, Y_novo = CoordTransf_Hz(QgsPointXY(float(X),float(Y)))
                 dz = CoordTransf_V(X_novo, Y_novo)
@@ -268,6 +291,9 @@ class PointCloudAdjust(QgsProcessingAlgorithm):
                     arq_out.write('{:.2f} {:.2f} {:.2f}\n'.format(X_novo, Y_novo, Z_novo))
                 elif len(lista) == 6:
                     arq_out.write('{:.2f} {:.2f} {:.2f} {} {} {}\n'.format(X_novo, Y_novo, Z_novo, int(R), int(G), int(B)))
+                else:
+                    linha = '{:.2f} {:.2f} {:.2f}' + (len(lista)-3)*' {}' + '\n'
+                    arq_out.write(linha.format(X_novo, Y_novo, Z_novo, *lista[3:]))
             except:
                 pass
             if feedback.isCanceled():
