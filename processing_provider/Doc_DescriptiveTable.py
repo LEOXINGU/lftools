@@ -167,7 +167,8 @@ class DescriptiveTable(QgsProcessingAlgorithm):
                 self.DECIMAL,
                 self.tr('Decimal places', 'Casas decimais'),
                 type =0,
-                defaultValue = 2
+                defaultValue = 2,
+                minValue = 0
                 )
             )
 
