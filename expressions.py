@@ -1148,7 +1148,7 @@ def deedtable3(prefixo, titulo, decimal, fontsize, layer_name, tipo, azimuteDist
 
 
 @qgsfunction(args='auto', group='LF Tools')
-def deedtext(layer_name, description, estilo, prefixo, decimal, fontsize, feature, parent):
+def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature, parent):
     """
     Generates a description of a property with coordinates as text.
     <p>Note 1: A layer or QGIS Project with a projected SRC is required.</p>
@@ -1187,15 +1187,43 @@ def deedtext(layer_name, description, estilo, prefixo, decimal, fontsize, featur
         pnts_UTM = {}
         pnts_GEO = {}
 
+        # Prefixo
+        try:
+            descricao, id, nome = prefix.replace(' ', '').split(',') #nome da camada, ID, atributo
+            if len(QgsProject.instance().mapLayersByName(descricao)) == 1:
+                layer = QgsProject.instance().mapLayersByName(descricao)[0]
+            campos = [field.name() for field in layer.fields()]
+            # Camadas de polígono e confrontantes deve estar com o mesmo SRC
+            filter = '"{}" = {}'.format(id, feature.id())
+            exp = QgsExpression(filter)
+            if id not in campos or nome not in campos:
+                prefixo = str(prefix)
+        except: # >>>>>>>>>>>>>>>>> Apenas inserir a descrição do ponto inicial
+            prefixo = str(prefix)
+
         if not SRC.isGeographic(): # Projetado
             coordinateTransformer = QgsCoordinateTransform()
             coordinateTransformer.setDestinationCrs(SGR)
             coordinateTransformer.setSourceCrs(SRC)
 
             for k, coord in enumerate(coords[:-1]):
-                pnts_UTM[k+1] = [coord, prefixo, prefixo + '{:02}'.format(k+1)]
                 pnt = coordinateTransformer.transform(QgsPointXY(coord.x(), coord.y()))
-                pnts_GEO[k+1] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), prefixo, prefixo + '{:02}'.format(k+1) ]
+                if 'prefixo' in locals():
+                    pnts_UTM[k+1] = [coord, prefixo, prefixo + '{:02}'.format(k+1)]
+                    pnts_GEO[k+1] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), prefixo, prefixo + '{:02}'.format(k+1) ]
+                else:
+                    for feat in layer.getFeatures(QgsFeatureRequest(exp)):
+                        # Identificar ponto correspondente
+                        pnt_corresp = feat.geometry().asPoint()
+                        if coord.x() == pnt_corresp.x() and coord.y() == pnt_corresp.y():
+                            prefix = feat[nome]
+                            pnts_UTM[k+1] = [coord, prefix, prefix]
+                            pnts_GEO[k+1] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), prefix, prefix ]
+                            break
+                    else:
+                        prefix = '?'
+                        pnts_UTM[k+1] = [coord, prefix, prefix]
+                        pnts_GEO[k+1] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), prefix, prefix]
 
             try:
                 projecao = SRC.description().split(r' / ')[-1]
@@ -1208,11 +1236,24 @@ def deedtext(layer_name, description, estilo, prefixo, decimal, fontsize, featur
             coordinateTransformer = QgsCoordinateTransform()
             coordinateTransformer.setDestinationCrs(CRS_projeto)
             coordinateTransformer.setSourceCrs(SRC)
-
             for k, coord in enumerate(coords[:-1]):
-                pnts_GEO[k+1] = [coord, prefixo, prefixo + '{:02}'.format(k+1)]
                 pnt = coordinateTransformer.transform(QgsPointXY(coord.x(), coord.y()))
-                pnts_UTM[k+1] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), prefixo, prefixo + '{:02}'.format(k+1) ]
+                if 'prefixo' in locals():
+                    pnts_GEO[k+1] = [coord, prefixo, prefixo + '{:02}'.format(k+1)]
+                    pnts_UTM[k+1] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), prefixo, prefixo + '{:02}'.format(k+1) ]
+                else:
+                    for feat in layer.getFeatures(QgsFeatureRequest(exp)):
+                        # Identificar ponto correspondente
+                        pnt_corresp = feat.geometry().asPoint()
+                        if coord.x() == pnt_corresp.x() and coord.y() == pnt_corresp.y():
+                            prefix = feat[nome]
+                            pnts_GEO[k+1] = [coord, prefix, prefix]
+                            pnts_UTM[k+1] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), prefix, prefix]
+                            break
+                    else:
+                        prefix = '?'
+                        pnts_GEO[k+1] = [coord, prefix, prefix]
+                        pnts_UTM[k+1] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), prefix, prefix]
 
             try:
                 projecao = CRS_projeto.description().split(r' / ')[-1]
