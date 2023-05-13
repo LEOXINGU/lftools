@@ -250,6 +250,8 @@ class ImportPhotos(QgsProcessingAlgorithm):
         fields.append(QgsField(self.tr('azimuth','azimute'), QVariant.Int))
         fields.append(QgsField(self.tr('date_time','data_hora'), QVariant.String))
         fields.append(QgsField(self.tr('path','caminho'), QVariant.String))
+        fields.append(QgsField(self.tr('make','fabricante'), QVariant.String))
+        fields.append(QgsField(self.tr('model','modelo'), QVariant.String))
 
         (sink, dest_id) = self.parameterAsSink(
             parameters,
@@ -297,10 +299,21 @@ class ImportPhotos(QgsProcessingAlgorithm):
                     date_time = data_hora(exif['DateTimeOriginal'])
                 elif 'DateTime' in exif:
                     date_time = data_hora(exif['DateTime'])
+
+                if 'Make' in exif:
+                    fabricante = str(exif['Make'].replace('\x00', ''))
+                else:
+                    fabricante = ''
+
+                if 'Model' in exif:
+                    modelo = str(exif['Model'].replace('\x00', ''))
+                else:
+                    modelo = ''
+
                 if lon != 0:
                     feature = QgsFeature(fields)
                     feature.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(lon, lat)))
-                    feature.setAttributes([arquivo, lon, lat, altitude, Az, date_time, os.path.join(caminho, arquivo)])
+                    feature.setAttributes([arquivo, lon, lat, altitude, Az, date_time, os.path.join(caminho, arquivo), fabricante, modelo])
                     sink.addFeature(feature, QgsFeatureSink.FastInsert)
                 else:
                     feedback.pushInfo(self.tr('The file "{}" has no geotag!'.format(arquivo), 'A imagem "{}" não possui geotag!'.format(arquivo)))
@@ -337,11 +350,13 @@ class ImportPhotos(QgsProcessingAlgorithm):
                     alt_ref = str(tags['GPSAltitudeRef'])
                     altitude = eval(str(tags['GPSAltitude']))
                     date_time = data_hora(meta_dict['DateTime'][0])
+                    modelo = '' # Lembrar de preencher
+                    fabricante = '' # Lembrar de preencher
 
                     if lon != 0:
                         feature = QgsFeature(fields)
                         feature.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(lon, lat)))
-                        feature.setAttributes([arquivo, lon, lat, altitude, Az, date_time, os.path.join(caminho, arquivo)])
+                        feature.setAttributes([arquivo, lon, lat, altitude, Az, date_time, os.path.join(caminho, arquivo), fabricante, modelo])
                         sink.addFeature(feature, QgsFeatureSink.FastInsert)
                 else:
                     feedback.pushInfo(self.tr('The file "{}" has no geotag!'.format(arquivo), 'A imagem "{}" não possui geotag!'.format(arquivo)))
