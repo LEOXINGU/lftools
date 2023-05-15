@@ -109,6 +109,8 @@ from .processing_provider.Stat_standardDistance import StandardDistance
 from .processing_provider.Drone_PointCloudAdjust import PointCloudAdjust
 from .processing_provider.Relief_DEM2txt import DEM2txt
 from .processing_provider.Cad_AdjoinerLine import AdjoinerLine
+from .processing_provider.Cad_ExtractVertices import ExtractVertices
+from .processing_provider.Vect_Overlapping import Overlapping
 
 
 class LFToolsProvider(QgsProcessingProvider):
@@ -203,6 +205,8 @@ class LFToolsProvider(QgsProcessingProvider):
         self.addAlgorithm(PointCloudAdjust())
         self.addAlgorithm(DEM2txt())
         self.addAlgorithm(AdjoinerLine())
+        self.addAlgorithm(ExtractVertices())
+        self.addAlgorithm(Overlapping())
 
     def id(self):
         return 'lftools'
