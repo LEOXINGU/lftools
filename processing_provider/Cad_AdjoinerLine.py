@@ -96,7 +96,6 @@ class AdjoinerLine(QgsProcessingAlgorithm):
 
     INPUT = 'INPUT'
     OUTPUT = 'OUTPUT'
-    TOLERANCE = 'TOLERANCE'
 
     def initAlgorithm(self, config = None):
         self.addParameter(
