@@ -323,7 +323,15 @@ class ImportPhotos(QgsProcessingAlgorithm):
             elif (filepath).lower().endswith(('.tif', '.tiff')):
                 caminho, arquivo = os.path.split(filepath)
                 img = Image.open(os.path.join(caminho,arquivo))
-                meta_dict = {TAGS[key] : img.tag[key] for key in img.tag_v2}
+                try:
+                    meta_dict = {TAGS[key] : img.tag[key] for key in img.tag_v2}
+                except:
+                    exif = img.getexif()
+                    meta_dict = {}
+                    for tag_id, value in exif.items():
+                        tag_name = TAGS.get(tag_id)
+                        meta_dict[tag_name] = value
+
                 gps_offset = img.tag_v2.get(0x8825)
                 tags = {}
                 if gps_offset:
@@ -349,9 +357,19 @@ class ImportPhotos(QgsProcessingAlgorithm):
                     lon = (-1 if lon_ref.upper() == 'W' else 1)*(lon[0] + lon[1]/60 + lon[2]/3600)
                     alt_ref = str(tags['GPSAltitudeRef'])
                     altitude = eval(str(tags['GPSAltitude']))
-                    date_time = data_hora(meta_dict['DateTime'][0])
-                    modelo = '' # Lembrar de preencher
-                    fabricante = '' # Lembrar de preencher
+                    try:
+                        date_time = data_hora(meta_dict['DateTime'][0])
+                    except:
+                        date_time = data_hora(meta_dict['DateTime'])
+                    if 'Make' in meta_dict:
+                        fabricante = str(meta_dict['Make'][0])
+                    else:
+                        fabricante = ''
+
+                    if 'Model' in meta_dict:
+                        modelo = str(meta_dict['Model'][0])
+                    else:
+                        modelo = ''
 
                     if lon != 0:
                         feature = QgsFeature(fields)
@@ -380,7 +398,7 @@ class ImportPhotos(QgsProcessingAlgorithm):
             layer.setMapTipTemplate(r'''<img src="file:///[%''' + self.tr('path','caminho') + '''%]" width="450">''')
 
         acManager = layer.actions()
-        acActor = QgsAction(1 , 'Abrir foto',"""
+        acActor = QgsAction(1 , self.tr('Open photo', 'Abrir foto'),"""
 import os
 os.popen(r'[%"caminho"%]')
 """, False)
