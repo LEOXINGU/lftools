@@ -23,9 +23,6 @@ from qgis.PyQt.QtGui import QIcon
 
 class MeasureLayers(QgsProcessingAlgorithm):
 
-    DISTANCE = 'DISTANCE'
-    AREA = 'AREA'
-    PRECISION = 'PRECISION'
     LOC = QgsApplication.locale()[:2]
 
     def translate(self, string):
@@ -78,6 +75,12 @@ class MeasureLayers(QgsProcessingAlgorithm):
                     </div>'''
         return self.tr(self.txt_en, self.txt_pt) + footer
 
+    DISTANCE = 'DISTANCE'
+    AREA = 'AREA'
+    PRECISION = 'PRECISION'
+    LAYERS = 'LAYERS'
+    TYPE = 'TYPE'
+
     def initAlgorithm(self, config=None):
         units_dist = [self.tr('Meters (m)', 'Metros (m)'),
                       self.tr('Feet (ft)', 'Pés (ft)'),
@@ -89,6 +92,14 @@ class MeasureLayers(QgsProcessingAlgorithm):
                       self.tr('Hectares (ha)', 'Hectares (ha)'),
                       self.tr('Square Kilometers (Km²)', 'Quilômetros quadrados (Km²)')
                ]
+
+        self.addParameter(
+            QgsProcessingParameterMultipleLayers(
+                self.LAYERS,
+                self.tr('Layers', 'Camadas'),
+                layerType = QgsProcessing.TypeVectorAnyGeometry
+            )
+        )
 
         self.addParameter(
             QgsProcessingParameterEnum(
@@ -113,10 +124,21 @@ class MeasureLayers(QgsProcessingAlgorithm):
                 self.PRECISION,
                 self.tr('Precision', 'Precisão'),
                 type = 0, # float = 1 and integer = 0
-                defaultValue = 3
+                defaultValue = 4
             )
         )
 
+        tipo = [self.tr('Ellipsoid', 'Elipsoidal'),
+                 self.tr('Cartesian', 'Cartesiano')]
+
+        self.addParameter(
+            QgsProcessingParameterEnum(
+                self.TYPE,
+                self.tr('Calculation', 'Cálculo'),
+				options = tipo,
+                defaultValue = 0
+            )
+        )
 
     def processAlgorithm(self, parameters, context, feedback):
 
@@ -138,6 +160,16 @@ class MeasureLayers(QgsProcessingAlgorithm):
             context
         )
 
+        formula = self.parameterAsEnum(
+            parameters,
+            self.TYPE,
+            context
+        )
+
+        formula_length = ['$length', 'length($geometry)'][formula]
+        formula_perimeter = ['$perimeter', 'perimeter($geometry)'][formula]
+        formula_area = ['$area', 'area($geometry)'][formula]
+
         # Transformação de unidades
         unid_transf_dist = [1, 0.3048, 0.9144, 1000, 621.4]
         unid_abb_dist = ['m', 'ft', 'yd', 'Km', 'mi']
@@ -146,27 +178,34 @@ class MeasureLayers(QgsProcessingAlgorithm):
         unidade_dist = unid_transf_dist[units_dist]
         unidade_area = unid_transf_area[units_area]
 
-        field_length = QgsField( self.tr('length', 'comprimento')+'_'+unid_abb_dist[units_dist], QVariant.Double, "numeric", 14, precisao)
-        field_perimeter = QgsField( self.tr('perimeter', 'perímetro')+'_'+unid_abb_dist[units_dist], QVariant.Double, "numeric", 14, precisao)
-        field_area = QgsField( self.tr('area', 'área')+'_'+unid_abb_area[units_area], QVariant.Double, "numeric", 14, precisao)
+        formula_tipo = ['ellip', 'cart'][formula]
+
+        field_length = QgsField( self.tr('length', 'comprimento')+ '_' + formula_tipo + '_' + unid_abb_dist[units_dist], QVariant.Double, "numeric", 14, precisao)
+        field_perimeter = QgsField( self.tr('perimeter', 'perímetro') + '_'  + formula_tipo + '_' + unid_abb_dist[units_dist], QVariant.Double, "numeric", 14, precisao)
+        field_area = QgsField( self.tr('area', 'área') + '_'  + formula_tipo + '_' + unid_abb_area[units_area], QVariant.Double, "numeric", 14, precisao)
 
         camadas = [layer.name() for layer in QgsProject.instance().mapLayers().values()]
         num_camadas = len(camadas)
         total = 100.0 / num_camadas if num_camadas else 0
 
-        layers = QgsProject.instance().mapLayers()
+        #layers = QgsProject.instance().mapLayers()
+        layers = self.parameterAsLayerList(
+            parameters,
+            self.LAYERS,
+            context
+        )
 
-        for current, layer in enumerate(layers.values()):
+        for current, layer in enumerate(layers):
             if feedback.isCanceled():
                 break
             # check the layer type
             if layer.type() == 0:# VectorLayer
                 # check the layer geometry type
                 if layer.geometryType() == QgsWkbTypes.LineGeometry:
-                    layer.addExpressionField('$length'+'/'+str(unidade_dist), field_length)
+                    layer.addExpressionField(formula_length + '/' + str(unidade_dist), field_length)
                 if layer.geometryType() == QgsWkbTypes.PolygonGeometry:
-                    layer.addExpressionField('$perimeter'+'/'+str(unidade_dist), field_perimeter)
-                    layer.addExpressionField('$area'+'/'+str(unidade_area), field_area)
+                    layer.addExpressionField(formula_perimeter + '/' + str(unidade_dist), field_perimeter)
+                    layer.addExpressionField(formula_area + '/' + str(unidade_area), field_area)
             feedback.setProgress(int(current * total))
 
         feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
