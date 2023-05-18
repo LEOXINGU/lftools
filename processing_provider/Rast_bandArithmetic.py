@@ -235,6 +235,7 @@ Os operadores suportados são: + , - , * , /'''
                     INDICE = -9999*((DEN == 0) | np.logical_not(transp)) + ((DEN != 0) & transp)*(NUM/(DEN + (DEN == 0)*1))
                 else:
                     if isinstance(Pixel_Nulo, (int, float)):
+                        b1 = dic['b1']
                         INDICE = -9999*((DEN == 0) | (b1 == Pixel_Nulo)) + ((DEN != 0) & (b1 != Pixel_Nulo))*(NUM/(DEN + (DEN == 0)*1))
                     else:
                         INDICE = -9999*(DEN == 0) + (DEN != 0)*(NUM/(DEN + (DEN == 0)*1))
