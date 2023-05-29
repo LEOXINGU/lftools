@@ -262,55 +262,52 @@ class GetPointValue(QgsProcessingAlgorithm):
 
         # Calcular valor interpolado para cada ponto
         if n_banda == 0: # Calculo para todas as bandas
-            Percent = 100.0/(total_bands*pontos.featureCount()) if pontos.featureCount()>0 else 0
-            newfeat = QgsFeature(Fields)
+            Percent = 100.0/total_bands if total_bands>0 else 0
             feicoes = {}
-            for index, feat in enumerate(pontos.getFeatures()):
-                geom = feat.geometry()
-                if transf_SRC:
-                    geom.transform(coordTransf)
-                att = feat.attributes()
-                if geom.isMultipart():
-                    pnt = geom.asMultiPoint()[0]
+            for index, k in enumerate(range(total_bands)):
+                banda = image.GetRasterBand(k+1).ReadAsArray()
+                feedback.pushInfo(self.tr('Getting values from band {}...', 'Pegando valores da banda {}...').format(k+1))
+                for feat in pontos.getFeatures():
+                    geom = feat.geometry()
+                    if transf_SRC:
+                        geom.transform(coordTransf)
+                    if geom.isMultipart():
+                        pnt = geom.asMultiPoint()[0]
+                    else:
+                        pnt = geom.asPoint()
                     X, Y = pnt.x(), pnt.y()
-                    for k in range(total_bands):
-                        banda = image.GetRasterBand(k+1).ReadAsArray()
-                        valor = Interpolar(X, Y,
-                                            banda,
-                                            origem,
-                                            xres,
-                                            yres,
-                                            reamostragem,
-                                            valor_nulo)
-                        att += [valor]
-                    newGeom = QgsGeometry.fromPointXY(QgsPointXY(X, Y))
-                else:
-                    pnt = geom.asPoint()
-                    X, Y = pnt.x(), pnt.y()
-                    for k in range(total_bands):
-                        banda = image.GetRasterBand(k+1).ReadAsArray()
-                        valor = Interpolar(X, Y,
-                                            banda,
-                                            origem,
-                                            xres,
-                                            yres,
-                                            reamostragem,
-                                            valor_nulo)
-                        att += [valor]
-                    newGeom = QgsGeometry.fromPointXY(QgsPointXY(X, Y))
-                if transf_SRC:
-                    newGeom.transform(InvCoordTransf)
-                newfeat.setGeometry(newGeom)
-                newfeat.setAttributes(att + [valor])
-                sink.addFeature(newfeat, QgsFeatureSink.FastInsert)
+                    valor = Interpolar(X, Y,
+                                        banda,
+                                        origem,
+                                        xres,
+                                        yres,
+                                        reamostragem,
+                                        valor_nulo)
+                    coord = (X, Y)
+                    if coord in feicoes:
+                        feicoes[coord] += [valor]
+                    else:
+                        att = feat.attributes()
+                        feicoes[coord] = att + [valor]
 
                 if feedback.isCanceled():
                     break
                 feedback.setProgress(int((index+1) * Percent))
 
+            feedback.pushInfo(self.tr('Saving results...', 'Salvando resultados...'))
+            for coord in feicoes:
+                newGeom = QgsGeometry.fromPointXY(QgsPointXY(coord[0], coord[1]))
+                newfeat = QgsFeature(Fields)
+                if transf_SRC:
+                    newGeom.transform(InvCoordTransf)
+                newfeat.setGeometry(newGeom)
+                newfeat.setAttributes(feicoes[coord])
+                sink.addFeature(newfeat, QgsFeatureSink.FastInsert)
+
         else: # Calculo para uma banda específica
             Percent = 100.0/pontos.featureCount() if pontos.featureCount()>0 else 0
             banda = image.GetRasterBand(n_banda).ReadAsArray()
+            feedback.pushInfo(self.tr('Getting values from band {}...', 'Pegando valores da banda {}...').format(n_banda))
             newfeat = QgsFeature(Fields)
             for index, feat in enumerate(pontos.getFeatures()):
                 geom = feat.geometry()
