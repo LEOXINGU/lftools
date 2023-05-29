@@ -130,7 +130,7 @@ class SaveAsJPEG(QgsProcessingAlgorithm):
             QgsProcessingParameterBoolean(
                 self.WORLDFILE,
                 self.tr('Create world file (.jpw)', 'Criar arquivo mundo (.jpw)'),
-                defaultValue= True
+                defaultValue = True
             )
         )
 
@@ -138,7 +138,7 @@ class SaveAsJPEG(QgsProcessingAlgorithm):
             QgsProcessingParameterBoolean(
                 self.OPEN,
                 self.tr('Load output raster', 'Carregar imagem de Saída'),
-                defaultValue= True
+                defaultValue = True
             )
         )
 
@@ -183,29 +183,43 @@ class SaveAsJPEG(QgsProcessingAlgorithm):
         feedback.pushInfo(self.tr('Reading the input raster...', 'Lendo o raster de entrada...'))
         image = gdal.Open(RasterIN) # https://gdal.org/python/
         ulx, xres, xskew, uly, yskew, yres  = image.GetGeoTransform()
-        prj = image.GetProjection() # wkt
         GDT = image.GetRasterBand(1).DataType
+        prj = image.GetProjection() # wkt
         n_bands = image.RasterCount
-        cols = image.RasterXSize # Number of columns
-        rows = image.RasterYSize # Number of rows
+        # cols = image.RasterXSize # Number of columns
+        # rows = image.RasterYSize # Number of rows
         # Create CRS object
-        CRS=osr.SpatialReference(wkt=prj)
+        # CRS=osr.SpatialReference(wkt=prj)
 
         if n_bands not in [3,4]:
             raise QgsProcessingException(self.tr('The input raster must have 3 or 4 bands!', 'O raster de entrada deve ter 3 ou 4 bandas!'))
         elif GDT != gdal.GDT_Byte:
             raise QgsProcessingException(self.tr('The raster data type must byte (8bit)!', 'O tipo de dado do raster deve ser byte (8bits)!'))
         else:
-            RGB = np.zeros((rows,cols,3), dtype = 'uint8')
-            feedback.pushInfo(self.tr('Creating new RGB bands...', 'Criando novas bandas RGB...'))
-            for k in range(3):
-                band = image.GetRasterBand(k+1).ReadAsArray()
-                RGB[...,k] = band
+            options_list = [
+                '-ot Byte',
+                '-of JPEG'
+            ]
 
-            del band
+            options_string = " ".join(options_list)
+            # https://gdal.org/programs/gdal_translate.html
+            # https://gdal.org/api/python/osgeo.gdal.html#osgeo.gdal.TranslateOptions
+            feedback.pushInfo(self.tr('Salving as JPEG...', 'Salvando como JPEG...'))
+            gdal.Translate(
+                JPEG,
+                image,
+                options = options_string
+            )
+            # RGB = np.zeros((rows,cols,3), dtype = 'uint8')
+            # feedback.pushInfo(self.tr('Creating new RGB bands...', 'Criando novas bandas RGB...'))
+            # for k in range(3):
+            #     band = image.GetRasterBand(k+1).ReadAsArray()
+            #     RGB[...,k] = band
+            #
+            # del band
 
-            new_img = Image.fromarray(RGB)
-            new_img.save(JPEG)
+            # new_img = Image.fromarray(RGB)
+            # new_img.save(JPEG)
 
             image=None # Close dataset
             if ArqMundo:
