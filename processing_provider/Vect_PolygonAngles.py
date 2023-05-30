@@ -18,6 +18,8 @@ __copyright__ = '(C) 2019, Leandro França'
 from PyQt5.QtCore import *
 from qgis.core import *
 from math import atan, pi, sqrt
+from numpy.linalg import norm
+import numpy as np
 import math
 from numpy import floor
 from lftools.geocapt.imgs import Imgs
@@ -124,6 +126,8 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
                      self.tr('ang_inner_dms','ang_int_gms') : QVariant.String,
                      self.tr('ang_outer_dd','ang_ext_dec') : QVariant.Double,
                      self.tr('ang_outer_dms','ang_ext_gms') : QVariant.String,
+                     'feat_id': QVariant.Int,
+                     self.tr('label_azimuth','azimute_rotulo') : QVariant.Double,
                      }
         for item in itens:
             Fields.append(QgsField(item, itens[item]))
@@ -173,6 +177,15 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
                     else: # sentido anti-horário
                         pntsDic[k+1]['alfa_ext'] = alfa*180/pi
                         pntsDic[k+1]['alfa_int'] = 360 - alfa*180/pi
+                    # Cálculo do azimute principal para o rótulo
+                    P2P1 = np.array([P1.x()-P2.x(), P1.y()-P2.y()])
+                    Va =  P2P1/norm(P2P1)
+                    P2P3 = np.array([P3.x()-P2.x(), P3.y()-P2.y()])
+                    Vb =  P2P3/norm(P2P3)
+                    Vr = Va + Vb
+                    Azimute = azimute(QgsPointXY(0,0), QgsPointXY(float(Vr[0]), float(Vr[1]) ))[0]
+                    pntsDic[k+1]['azimute'] = Azimute*180/pi
+
                 # Carregando ângulos internos na camada
                 for ponto in pntsDic:
                     fet.setGeometry(QgsGeometry.fromPointXY(pntsDic[ponto]['pnt']))
@@ -180,7 +193,9 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
                                         float(pntsDic[ponto]['alfa_int']),
                                         dd2dms(pntsDic[ponto]['alfa_int'],1),
                                         float(pntsDic[ponto]['alfa_ext']),
-                                        dd2dms(pntsDic[ponto]['alfa_ext'],1)
+                                        dd2dms(pntsDic[ponto]['alfa_ext'],1),
+                                        feat.id(),
+                                        float(pntsDic[ponto]['azimute'])
                                             ])
                     sink.addFeature(fet, QgsFeatureSink.FastInsert)
 
