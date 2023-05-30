@@ -98,7 +98,7 @@ Subtrahend is the rastar that is subtracting.'''
     txt_pt = '''Esta ferramenta executa a diferença entre dois Modelos Digitais de Elevação (MDE).
 Minuendo é o raster a ser subtraído.
 Subtraendo é o rastar que está subtraindo.'''
-    figure = 'images/tutorial/relief_demfilter.jpg'
+    figure = 'images/tutorial/relief_difference.jpg'
 
     def shortHelpString(self):
         social_BW = Imgs().social_BW
