@@ -218,14 +218,14 @@ class RescaleTo8bits(QgsProcessingAlgorithm):
         eps = np.finfo(float).eps
 
         image = gdal.Open(RasterIN)
-        prj=image.GetProjection()
+        prj = image.GetProjection()
         geotransform  = image.GetGeoTransform()
         GDT = image.GetRasterBand(1).DataType
         Pixel_Nulo = image.GetRasterBand(1).GetNoDataValue()
         n_bands = image.RasterCount
         cols = image.RasterXSize
         rows = image.RasterYSize
-        CRS=osr.SpatialReference(wkt=prj)
+        CRS = osr.SpatialReference(wkt=prj)
 
         # Criate driver
         Driver = gdal.GetDriverByName('GTiff').Create(Output, cols, rows, n_bands, gdal.GDT_Byte)
@@ -279,9 +279,9 @@ class RescaleTo8bits(QgsProcessingAlgorithm):
             if nullPixel:
                 outband.SetNoDataValue(0)
 
-        image=None # Close dataset
-        Driver.FlushCache()                     # write to disk
-        Driver = None                           # save, close
+        image = None # Close dataset
+        Driver.FlushCache() # write to disk
+        Driver = None  # save, close
 
         feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
         feedback.pushInfo(self.tr('Leandro Franca - Cartographic Engineer', 'Leandro França - Eng Cart'))
