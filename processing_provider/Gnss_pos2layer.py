@@ -301,8 +301,8 @@ Tipos:
                     lista += [linha.split(' ')]
             arq.close()
             for k,pnt in enumerate(lista):
-                lat = float(pnt[20]) + float(pnt[20])/abs(float(pnt[20]))*(float(pnt[21])/60. + float(pnt[22])/3600)
-                lon = float(pnt[23]) + float(pnt[23])/abs(float(pnt[23]))*(float(pnt[24])/60. + float(pnt[25])/3600)
+                lat = float(pnt[20]) + (-1 if float(pnt[20]) < 0 else 1)*(float(pnt[21])/60. + float(pnt[22])/3600)
+                lon = float(pnt[23]) + (-1 if float(pnt[23]) < 0 else 1)*(float(pnt[24])/60. + float(pnt[25])/3600)
                 h = float(pnt[26])
                 ano, mes, dia = pnt[4].split('-')
                 hora, minuto, segundo = pnt[5].split(':')
