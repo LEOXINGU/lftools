@@ -1164,7 +1164,12 @@ def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature
     <h2>Exemples with adjointer layer:</h2>
     <ul>
       <li>deedtext('layer_name', 'adjoiner_line_layer,id,name', 'style', 'preffix', precision, fontsize) = HTML</li>
-      <li>deedtext('layer_name', 'Adjoiners,ID1,prop', 'E,N', 'P-', 2, 10) = HTML</li>
+      <li>deedtext('layer_name', 'Adjoiners,ID1,name', 'E,N', 'P-', 2, 10) = HTML</li>
+    </ul>
+    <h2>Exemples with vertex layer:</h2>
+    <ul>
+      <li>deedtext('layer_name', 'initial description', 'style', 'vertex_point_layer,ID,name', precision, fontsize) = HTML</li>
+      <li>deedtext('layer_name', 'northernmost point', 'E,N', 'Vertex,id,name', 2, 10) = HTML</li>
     </ul>
     """
     if len(QgsProject.instance().mapLayersByName(layer_name)) == 1:
@@ -1198,7 +1203,7 @@ def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature
             exp = QgsExpression(filter)
             if id not in campos or nome not in campos:
                 prefixo = str(prefix)
-        except: # >>>>>>>>>>>>>>>>> Apenas inserir a descrição do ponto inicial
+        except:
             prefixo = str(prefix)
 
         if not SRC.isGeographic(): # Projetado
@@ -1443,7 +1448,7 @@ def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature
 
 
 @qgsfunction(args='auto', group='LF Tools')
-def geoneighbors(layer_name, street, borderer_field, prefixo, decimal, fontsize, feature, parent):
+def geoneighbors(layer_name, street, borderer_field, prefix, decimal, fontsize, feature, parent):
     """
     Generates a table of coordinates with neighbors (boundaries) and a polygon and distances.
     <p>Note: A layer or QGIS Project with a projected SRC is required.</p>
@@ -1510,15 +1515,44 @@ def geoneighbors(layer_name, street, borderer_field, prefixo, decimal, fontsize,
         pnts_UTM = {}
         pnts_GEO = {}
 
+        # Prefixo
+        try:
+            descricao, id, nome = prefix.replace(' ', '').split(',') #nome da camada, ID, atributo
+            if len(QgsProject.instance().mapLayersByName(descricao)) == 1:
+                layer = QgsProject.instance().mapLayersByName(descricao)[0]
+            campos = [field.name() for field in layer.fields()]
+            # Camadas de polígono e confrontantes deve estar com o mesmo SRC
+            filter = '"{}" = {}'.format(id, feature.id())
+            exp = QgsExpression(filter)
+            if id not in campos or nome not in campos:
+                prefixo = str(prefix)
+        except:
+            prefixo = str(prefix)
+
+        # Pegando valores dos pontos
         if not SRC.isGeographic(): # Projetado
             coordinateTransformer = QgsCoordinateTransform()
             coordinateTransformer.setDestinationCrs(SGR)
             coordinateTransformer.setSourceCrs(SRC)
 
             for k, coord in enumerate(coords[:-1]):
-                pnts_UTM[k+1] = [coord, prefixo, prefixo + '{:02}'.format(k+1)]
                 pnt = coordinateTransformer.transform(QgsPointXY(coord.x(), coord.y()))
-                pnts_GEO[k+1] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), prefixo, prefixo + '{:02}'.format(k+1) ]
+                if 'prefixo' in locals():
+                    pnts_UTM[k+1] = [coord, prefixo, prefixo + '{:02}'.format(k+1)]
+                    pnts_GEO[k+1] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), prefixo, prefixo + '{:02}'.format(k+1) ]
+                else:
+                    for feat in layer.getFeatures(QgsFeatureRequest(exp)):
+                        # Identificar ponto correspondente
+                        pnt_corresp = feat.geometry().asPoint()
+                        if coord.x() == pnt_corresp.x() and coord.y() == pnt_corresp.y():
+                            prefix = feat[nome]
+                            pnts_UTM[k+1] = [coord, prefix, prefix]
+                            pnts_GEO[k+1] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), prefix, prefix ]
+                            break
+                    else:
+                        prefix = '?'
+                        pnts_UTM[k+1] = [coord, prefix, prefix]
+                        pnts_GEO[k+1] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), prefix, prefix]
 
             try:
                 projecao = SRC.description().split(r' / ')[-1]
@@ -1531,11 +1565,24 @@ def geoneighbors(layer_name, street, borderer_field, prefixo, decimal, fontsize,
             coordinateTransformer = QgsCoordinateTransform()
             coordinateTransformer.setDestinationCrs(CRS_projeto)
             coordinateTransformer.setSourceCrs(SRC)
-
             for k, coord in enumerate(coords[:-1]):
-                pnts_GEO[k+1] = [coord, prefixo, prefixo + '{:02}'.format(k+1)]
                 pnt = coordinateTransformer.transform(QgsPointXY(coord.x(), coord.y()))
-                pnts_UTM[k+1] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), prefixo, prefixo + '{:02}'.format(k+1) ]
+                if 'prefixo' in locals():
+                    pnts_GEO[k+1] = [coord, prefixo, prefixo + '{:02}'.format(k+1)]
+                    pnts_UTM[k+1] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), prefixo, prefixo + '{:02}'.format(k+1) ]
+                else:
+                    for feat in layer.getFeatures(QgsFeatureRequest(exp)):
+                        # Identificar ponto correspondente
+                        pnt_corresp = feat.geometry().asPoint()
+                        if coord.x() == pnt_corresp.x() and coord.y() == pnt_corresp.y():
+                            prefix = feat[nome]
+                            pnts_GEO[k+1] = [coord, prefix, prefix]
+                            pnts_UTM[k+1] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), prefix, prefix]
+                            break
+                    else:
+                        prefix = '?'
+                        pnts_GEO[k+1] = [coord, prefix, prefix]
+                        pnts_UTM[k+1] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), prefix, prefix]
 
             try:
                 projecao = CRS_projeto.description().split(r' / ')[-1]
@@ -1551,8 +1598,7 @@ def geoneighbors(layer_name, street, borderer_field, prefixo, decimal, fontsize,
             pntB = pnts_UTM[1 if k+2 > tam else k+2][0]
             Az_lista += [(180/pi)*azimute(pntA, pntB)[0]]
             Dist += [sqrt((pntA.x() - pntB.x())**2 + (pntA.y() - pntB.y())**2)]
-
-
+            
 
         # conteudo da tabela
         texto = '''<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
