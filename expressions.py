@@ -603,7 +603,7 @@ def deedtable(layer_name, ini, fim, titulo, fontsize, feature, parent):
 
 
 @qgsfunction(args='auto', group='LF Tools')
-def deedtable2(prefixo, titulo, decimal, fontsize, layer_name, tipo, azimuteDist, feature, parent):
+def deedtable2(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist, feature, parent):
     """
     Generates the 2D Vertices and Sides Descriptive Table, also known as Synthetic Deed Description, based on vertices of a Polygon or MultiPoligon.
     <p>Note 1: A layer or QGIS Project with a projected SRC is required.</p>
@@ -638,15 +638,44 @@ def deedtable2(prefixo, titulo, decimal, fontsize, layer_name, tipo, azimuteDist
         pnts_UTM = {}
         pnts_GEO = {}
 
+        # Prefixo
+        try:
+            descricao, id, nome = prefix.replace(' ', '').split(',') #nome da camada, ID, atributo
+            if len(QgsProject.instance().mapLayersByName(descricao)) == 1:
+                layer = QgsProject.instance().mapLayersByName(descricao)[0]
+            campos = [field.name() for field in layer.fields()]
+            # Camadas de polígono e confrontantes deve estar com o mesmo SRC
+            filter = '"{}" = {}'.format(id, feature.id())
+            exp = QgsExpression(filter)
+            if id not in campos or nome not in campos:
+                prefixo = str(prefix)
+        except:
+            prefixo = str(prefix)
+
+        # Pegando valores dos pontos
         if not SRC.isGeographic(): # Projetado
             coordinateTransformer = QgsCoordinateTransform()
             coordinateTransformer.setDestinationCrs(SGR)
             coordinateTransformer.setSourceCrs(SRC)
 
             for k, coord in enumerate(coords[:-1]):
-                pnts_UTM[k+1] = [coord, prefixo, prefixo + '{:02}'.format(k+1)]
                 pnt = coordinateTransformer.transform(QgsPointXY(coord.x(), coord.y()))
-                pnts_GEO[k+1] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), prefixo, prefixo + '{:02}'.format(k+1) ]
+                if 'prefixo' in locals():
+                    pnts_UTM[k+1] = [coord, prefixo, prefixo + '{:02}'.format(k+1)]
+                    pnts_GEO[k+1] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), prefixo, prefixo + '{:02}'.format(k+1) ]
+                else:
+                    for feat in layer.getFeatures(QgsFeatureRequest(exp)):
+                        # Identificar ponto correspondente
+                        pnt_corresp = feat.geometry().asPoint()
+                        if coord.x() == pnt_corresp.x() and coord.y() == pnt_corresp.y():
+                            prefix = feat[nome]
+                            pnts_UTM[k+1] = [coord, prefix, prefix]
+                            pnts_GEO[k+1] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), prefix, prefix ]
+                            break
+                    else:
+                        prefix = '?'
+                        pnts_UTM[k+1] = [coord, prefix, prefix]
+                        pnts_GEO[k+1] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), prefix, prefix]
 
             try:
                 projecao = SRC.description().split(r' / ')[-1]
@@ -659,11 +688,30 @@ def deedtable2(prefixo, titulo, decimal, fontsize, layer_name, tipo, azimuteDist
             coordinateTransformer = QgsCoordinateTransform()
             coordinateTransformer.setDestinationCrs(CRS_projeto)
             coordinateTransformer.setSourceCrs(SRC)
-
             for k, coord in enumerate(coords[:-1]):
-                pnts_GEO[k+1] = [coord, prefixo, prefixo + '{:02}'.format(k+1)]
                 pnt = coordinateTransformer.transform(QgsPointXY(coord.x(), coord.y()))
-                pnts_UTM[k+1] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), prefixo, prefixo + '{:02}'.format(k+1) ]
+                if 'prefixo' in locals():
+                    pnts_GEO[k+1] = [coord, prefixo, prefixo + '{:02}'.format(k+1)]
+                    pnts_UTM[k+1] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), prefixo, prefixo + '{:02}'.format(k+1) ]
+                else:
+                    for feat in layer.getFeatures(QgsFeatureRequest(exp)):
+                        # Identificar ponto correspondente
+                        pnt_corresp = feat.geometry().asPoint()
+                        if coord.x() == pnt_corresp.x() and coord.y() == pnt_corresp.y():
+                            prefix = feat[nome]
+                            pnts_GEO[k+1] = [coord, prefix, prefix]
+                            pnts_UTM[k+1] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), prefix, prefix]
+                            break
+                    else:
+                        prefix = '?'
+                        pnts_GEO[k+1] = [coord, prefix, prefix]
+                        pnts_UTM[k+1] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), prefix, prefix]
+
+            try:
+                projecao = CRS_projeto.description().split(r' / ')[-1]
+                PROJ = tr(projecao, projecao.replace('zone', 'fuso'))
+            except:
+                PROJ = SRC.description()
 
         # Calculo dos Azimutes e Distancias
         tam = len(pnts_UTM)
@@ -869,7 +917,7 @@ def deedtable2(prefixo, titulo, decimal, fontsize, layer_name, tipo, azimuteDist
 
 
 @qgsfunction(args='auto', group='LF Tools')
-def deedtable3(prefixo, titulo, decimal, fontsize, layer_name, tipo, azimuteDist, feature, parent):
+def deedtable3(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist, feature, parent):
     """
     Generates the 3D Vertices and Sides Descriptive Table, also known as Synthetic Deed Description, based on vertices of a PolygonZ or MultiPoligonZ.
     <p>Note 1: A layer or QGIS Project with a projected SRC is required.</p>
@@ -904,15 +952,44 @@ def deedtable3(prefixo, titulo, decimal, fontsize, layer_name, tipo, azimuteDist
         pnts_UTM = {}
         pnts_GEO = {}
 
+        # Prefixo
+        try:
+            descricao, id, nome = prefix.replace(' ', '').split(',') #nome da camada, ID, atributo
+            if len(QgsProject.instance().mapLayersByName(descricao)) == 1:
+                layer = QgsProject.instance().mapLayersByName(descricao)[0]
+            campos = [field.name() for field in layer.fields()]
+            # Camadas de polígono e confrontantes deve estar com o mesmo SRC
+            filter = '"{}" = {}'.format(id, feature.id())
+            exp = QgsExpression(filter)
+            if id not in campos or nome not in campos:
+                prefixo = str(prefix)
+        except:
+            prefixo = str(prefix)
+
+        # Pegando valores dos pontos
         if not SRC.isGeographic(): # Projetado
             coordinateTransformer = QgsCoordinateTransform()
             coordinateTransformer.setDestinationCrs(SGR)
             coordinateTransformer.setSourceCrs(SRC)
 
             for k, coord in enumerate(coords[:-1]):
-                pnts_UTM[k+1] = [coord, prefixo, prefixo + '{:02}'.format(k+1)]
                 pnt = coordinateTransformer.transform(QgsPointXY(coord.x(), coord.y()))
-                pnts_GEO[k+1] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), prefixo, prefixo + '{:02}'.format(k+1) ]
+                if 'prefixo' in locals():
+                    pnts_UTM[k+1] = [coord, prefixo, prefixo + '{:02}'.format(k+1)]
+                    pnts_GEO[k+1] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), prefixo, prefixo + '{:02}'.format(k+1) ]
+                else:
+                    for feat in layer.getFeatures(QgsFeatureRequest(exp)):
+                        # Identificar ponto correspondente
+                        pnt_corresp = feat.geometry().asPoint()
+                        if coord.x() == pnt_corresp.x() and coord.y() == pnt_corresp.y():
+                            prefix = feat[nome]
+                            pnts_UTM[k+1] = [coord, prefix, prefix]
+                            pnts_GEO[k+1] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), prefix, prefix ]
+                            break
+                    else:
+                        prefix = '?'
+                        pnts_UTM[k+1] = [coord, prefix, prefix]
+                        pnts_GEO[k+1] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), prefix, prefix]
 
             try:
                 projecao = SRC.description().split(r' / ')[-1]
@@ -925,11 +1002,30 @@ def deedtable3(prefixo, titulo, decimal, fontsize, layer_name, tipo, azimuteDist
             coordinateTransformer = QgsCoordinateTransform()
             coordinateTransformer.setDestinationCrs(CRS_projeto)
             coordinateTransformer.setSourceCrs(SRC)
-
             for k, coord in enumerate(coords[:-1]):
-                pnts_GEO[k+1] = [coord, prefixo, prefixo + '{:02}'.format(k+1)]
                 pnt = coordinateTransformer.transform(QgsPointXY(coord.x(), coord.y()))
-                pnts_UTM[k+1] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), prefixo, prefixo + '{:02}'.format(k+1) ]
+                if 'prefixo' in locals():
+                    pnts_GEO[k+1] = [coord, prefixo, prefixo + '{:02}'.format(k+1)]
+                    pnts_UTM[k+1] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), prefixo, prefixo + '{:02}'.format(k+1) ]
+                else:
+                    for feat in layer.getFeatures(QgsFeatureRequest(exp)):
+                        # Identificar ponto correspondente
+                        pnt_corresp = feat.geometry().asPoint()
+                        if coord.x() == pnt_corresp.x() and coord.y() == pnt_corresp.y():
+                            prefix = feat[nome]
+                            pnts_GEO[k+1] = [coord, prefix, prefix]
+                            pnts_UTM[k+1] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), prefix, prefix]
+                            break
+                    else:
+                        prefix = '?'
+                        pnts_GEO[k+1] = [coord, prefix, prefix]
+                        pnts_UTM[k+1] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), prefix, prefix]
+
+            try:
+                projecao = CRS_projeto.description().split(r' / ')[-1]
+                PROJ = tr(projecao, projecao.replace('zone', 'fuso'))
+            except:
+                PROJ = SRC.description()
 
         # Calculo dos Azimutes e Distancias
         tam = len(pnts_UTM)
@@ -1598,7 +1694,7 @@ def geoneighbors(layer_name, street, borderer_field, prefix, decimal, fontsize, 
             pntB = pnts_UTM[1 if k+2 > tam else k+2][0]
             Az_lista += [(180/pi)*azimute(pntA, pntB)[0]]
             Dist += [sqrt((pntA.x() - pntB.x())**2 + (pntA.y() - pntB.y())**2)]
-            
+
 
         # conteudo da tabela
         texto = '''<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
