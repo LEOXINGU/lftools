@@ -111,6 +111,7 @@ from .processing_provider.Relief_DEM2txt import DEM2txt
 from .processing_provider.Cad_AdjoinerLine import AdjoinerLine
 from .processing_provider.Vect_Overlapping import Overlapping
 from .processing_provider.Relief_DEMdifference import DEMdifference
+from .processing_provider.Rast_ZonalStatistics import ZonalStatistics
 
 
 class LFToolsProvider(QgsProcessingProvider):
@@ -207,6 +208,7 @@ class LFToolsProvider(QgsProcessingProvider):
         self.addAlgorithm(AdjoinerLine())
         self.addAlgorithm(Overlapping())
         self.addAlgorithm(DEMdifference())
+        self.addAlgorithm(ZonalStatistics())
 
     def id(self):
         return 'lftools'
