@@ -17,6 +17,7 @@ __copyright__ = '(C) 2021, Leandro França'
 from numpy import radians, arctan, pi, sin, cos, matrix, sqrt, degrees, array, diag, ones, zeros, floor
 from numpy.linalg import norm, pinv, inv
 from pyproj.crs import CRS
+import datetime as dt
 
 def azimute(A,B):
     # Cálculo dos Azimutes entre dois pontos (Vetor AB origem A extremidade B)
@@ -235,3 +236,34 @@ def dist2degrees(dist, lat, EPSG):
     theta = dist/R
     dist = degrees(theta) # Radianos para graus
     return dist
+
+# Hora GPS
+def gpsdate(Y, M, DoM, Hr, Mn, Sc):
+    '''
+    		Inputs:
+    		  Year, Month, Day, Hour, Min, Sec
+
+    		Returns: year, month, day of month, day of year, GPS week,
+    			 day of GPS week, second of GPS week, Julian day,
+    			 decimal year.
+    '''
+    UT = Hr + Mn/60 + Sc/3600
+    if M <= 2:
+        y = Y - 1
+        m = M + 12
+    else:
+        y = Y
+        m = M
+    # calculation of the Julian Date
+    JD = int(365.25*y) + int(30.6001*(m+1)) + DoM  + UT/24 + 1720981.5
+    # Calculation of the Decimal Year
+    DecY = (JD - 2451545.0)/365.25
+    # Calculation of the Day of the Year
+    DoY = (dt.date(Y, M, DoM) - dt.date(Y, 1, 1)).days  + 1
+    # calculation of GPS week
+    GPSW = int((JD - 2444244.5)/7)
+    # calculation of day of the GPS Week
+    DoGPSW = round(((JD - 2444244.5)/7 - GPSW)*7)
+    # calculation of second of the GPS Week
+    SoGPSW = round((((JD - 2444244.5)/7 - GPSW)*7)*(24*60*60))
+    return [Y,M,DoM,DoY,GPSW,DoGPSW,SoGPSW,JD,DecY]
