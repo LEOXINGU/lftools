@@ -680,12 +680,20 @@ def deedtable2(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
     format_num = '{:,.Xf}'.replace('X', str(decimal))
 
     geom = feature.geometry()
-    if geom.type() == 2 and geom:
+    TipoGeometria = geom.type()
+    if geom and TipoGeometria in [1,2]:
 
-        if geom.isMultipart():
-            coords = geom2PointList(geom)[0][0]
-        else:
-            coords = geom2PointList(geom)[0]
+        if TipoGeometria == 2: # Polígono
+            if geom.isMultipart():
+                coords = geom2PointList(geom)[0][0]
+            else:
+                coords = geom2PointList(geom)[0]
+        else: # Linha
+            if geom.isMultipart():
+                coords = geom2PointList(geom)[0]
+            else:
+                coords = geom2PointList(geom)
+
         pnts_UTM = {}
         pnts_GEO = {}
 
@@ -709,7 +717,7 @@ def deedtable2(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
             coordinateTransformer.setDestinationCrs(SGR)
             coordinateTransformer.setSourceCrs(SRC)
 
-            for k, coord in enumerate(coords[:-1]):
+            for k, coord in enumerate(coords[:-1] if TipoGeometria == 2 else coords):
                 pnt = coordinateTransformer.transform(QgsPointXY(coord.x(), coord.y()))
                 if 'prefixo' in locals():
                     pnts_UTM[k+1] = [coord, prefixo, prefixo + '{:02}'.format(k+1)]
@@ -739,7 +747,7 @@ def deedtable2(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
             coordinateTransformer = QgsCoordinateTransform()
             coordinateTransformer.setDestinationCrs(CRS_projeto)
             coordinateTransformer.setSourceCrs(SRC)
-            for k, coord in enumerate(coords[:-1]):
+            for k, coord in enumerate(coords[:-1] if TipoGeometria == 2 else coords):
                 pnt = coordinateTransformer.transform(QgsPointXY(coord.x(), coord.y()))
                 if 'prefixo' in locals():
                     pnts_GEO[k+1] = [coord, prefixo, prefixo + '{:02}'.format(k+1)]
@@ -767,11 +775,18 @@ def deedtable2(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
         # Calculo dos Azimutes e Distancias
         tam = len(pnts_UTM)
         Az_lista, Dist = [], []
-        for k in range(tam):
-            pntA = pnts_UTM[k+1][0]
-            pntB = pnts_UTM[1 if k+2 > tam else k+2][0]
-            Az_lista += [(180/pi)*azimute(pntA, pntB)[0]]
-            Dist += [sqrt((pntA.x() - pntB.x())**2 + (pntA.y() - pntB.y())**2)]
+        if TipoGeometria == 2:
+            for k in range(tam):
+                pntA = pnts_UTM[k+1][0]
+                pntB = pnts_UTM[1 if k+2 > tam else k+2][0]
+                Az_lista += [(180/pi)*azimute(pntA, pntB)[0]]
+                Dist += [sqrt((pntA.x() - pntB.x())**2 + (pntA.y() - pntB.y())**2)]
+        else:
+            for k in range(tam-1):
+                pntA = pnts_UTM[k+1][0]
+                pntB = pnts_UTM[k+2][0]
+                Az_lista += [(180/pi)*azimute(pntA, pntB)[0]]
+                Dist += [sqrt((pntA.x() - pntB.x())**2 + (pntA.y() - pntB.y())**2)]
 
         texto = '''<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
         <html>
@@ -952,12 +967,13 @@ def deedtable2(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
                         'lonn': tr(DD2DMS(pnts_GEO[k+1][0].x(),decimal + 3), DD2DMS(pnts_GEO[k+1][0].x(),decimal + 3).replace('.', ',')),
                         'latn': tr(DD2DMS(pnts_GEO[k+1][0].y(),decimal + 3), DD2DMS(pnts_GEO[k+1][0].y(),decimal + 3).replace('.', ',')),
                         'Ln': pnts_UTM[k+1][2] + '/' + pnts_UTM[1 if k+2 > tam else k+2][2],
-                        'Az_n': tr(DD2DMS(Az_lista[k],1), DD2DMS(Az_lista[k],1).replace('.', ',')),
-                        'Dn': tr(format_num.format(Dist[k]), format_num.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'))
+                        'Az_n': '-' if TipoGeometria == 1 and k+1 == tam else tr(DD2DMS(Az_lista[k],1), DD2DMS(Az_lista[k],1).replace('.', ',')),
+                        'Dn': '-' if TipoGeometria == 1 and k+1 == tam else tr(format_num.format(Dist[k]), format_num.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'))
                         }
             for item in itens:
                 linha0 = linha0.replace(item, itens[item])
             LINHAS += linha0
+
         resultado = texto.replace('[CABECALHO]', cabec).replace('[LINHAS]', LINHAS).replace('[TITULO]', str2HTML(titulo.upper())).replace('[FONTSIZE]', str(fontsize))
 
         return resultado
@@ -994,12 +1010,20 @@ def deedtable3(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
     format_num = '{:,.Xf}'.replace('X', str(decimal))
 
     geom = feature.geometry()
-    if geom.type() == 2 and geom:
+    TipoGeometria = geom.type()
+    if geom and TipoGeometria in [1,2]:
 
-        if geom.isMultipart():
-            coords = geom2PointList(geom)[0][0]
-        else:
-            coords = geom2PointList(geom)[0]
+        if TipoGeometria == 2: # Polígono
+            if geom.isMultipart():
+                coords = geom2PointList(geom)[0][0]
+            else:
+                coords = geom2PointList(geom)[0]
+        else: # Linha
+            if geom.isMultipart():
+                coords = geom2PointList(geom)[0]
+            else:
+                coords = geom2PointList(geom)
+
         pnts_UTM = {}
         pnts_GEO = {}
 
@@ -1023,7 +1047,7 @@ def deedtable3(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
             coordinateTransformer.setDestinationCrs(SGR)
             coordinateTransformer.setSourceCrs(SRC)
 
-            for k, coord in enumerate(coords[:-1]):
+            for k, coord in enumerate(coords[:-1] if TipoGeometria == 2 else coords):
                 pnt = coordinateTransformer.transform(QgsPointXY(coord.x(), coord.y()))
                 if 'prefixo' in locals():
                     pnts_UTM[k+1] = [coord, prefixo, prefixo + '{:02}'.format(k+1)]
@@ -1053,7 +1077,7 @@ def deedtable3(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
             coordinateTransformer = QgsCoordinateTransform()
             coordinateTransformer.setDestinationCrs(CRS_projeto)
             coordinateTransformer.setSourceCrs(SRC)
-            for k, coord in enumerate(coords[:-1]):
+            for k, coord in enumerate(coords[:-1] if TipoGeometria == 2 else coords):
                 pnt = coordinateTransformer.transform(QgsPointXY(coord.x(), coord.y()))
                 if 'prefixo' in locals():
                     pnts_GEO[k+1] = [coord, prefixo, prefixo + '{:02}'.format(k+1)]
@@ -1279,8 +1303,8 @@ def deedtable3(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
                         'lonn': tr(DD2DMS(pnts_GEO[k+1][0].x(),decimal + 3), DD2DMS(pnts_GEO[k+1][0].x(),decimal + 3).replace('.', ',')),
                         'latn': tr(DD2DMS(pnts_GEO[k+1][0].y(),decimal + 3), DD2DMS(pnts_GEO[k+1][0].y(),decimal + 3).replace('.', ',')),
                         'Ln': pnts_UTM[k+1][2] + '/' + pnts_UTM[1 if k+2 > tam else k+2][2],
-                        'Az_n': tr(DD2DMS(Az_lista[k],1), DD2DMS(Az_lista[k],1).replace('.', ',')),
-                        'Dn': tr(format_num.format(Dist[k]), format_num.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'))
+                        'Az_n': '-' if TipoGeometria == 1 and k+1 == tam else tr(DD2DMS(Az_lista[k],1), DD2DMS(Az_lista[k],1).replace('.', ',')),
+                        'Dn': '-' if TipoGeometria == 1 and k+1 == tam else tr(format_num.format(Dist[k]), format_num.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'))
                         }
             for item in itens:
                 linha0 = linha0.replace(item, itens[item])
@@ -1330,12 +1354,19 @@ def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature
     format_num = '{:,.Xf}'.replace('X', str(decimal))
 
     geom = feature.geometry()
-    if geom.type() == 2 and geom:
+    TipoGeometria = geom.type()
+    if geom and TipoGeometria in (1,2):
 
-        if geom.isMultipart():
-            coords = geom2PointList(geom)[0][0]
-        else:
-            coords = geom2PointList(geom)[0]
+        if TipoGeometria == 2: # Polígono
+            if geom.isMultipart():
+                coords = geom2PointList(geom)[0][0]
+            else:
+                coords = geom2PointList(geom)[0]
+        else: # Linha
+            if geom.isMultipart():
+                coords = geom2PointList(geom)[0]
+            else:
+                coords = geom2PointList(geom)
         pnts_UTM = {}
         pnts_GEO = {}
 
@@ -1358,7 +1389,7 @@ def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature
             coordinateTransformer.setDestinationCrs(SGR)
             coordinateTransformer.setSourceCrs(SRC)
 
-            for k, coord in enumerate(coords[:-1]):
+            for k, coord in enumerate(coords[:-1] if TipoGeometria == 2 else coords):
                 pnt = coordinateTransformer.transform(QgsPointXY(coord.x(), coord.y()))
                 if 'prefixo' in locals():
                     pnts_UTM[k+1] = [coord, prefixo, prefixo + '{:02}'.format(k+1)]
@@ -1388,7 +1419,7 @@ def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature
             coordinateTransformer = QgsCoordinateTransform()
             coordinateTransformer.setDestinationCrs(CRS_projeto)
             coordinateTransformer.setSourceCrs(SRC)
-            for k, coord in enumerate(coords[:-1]):
+            for k, coord in enumerate(coords[:-1] if TipoGeometria == 2 else coords):
                 pnt = coordinateTransformer.transform(QgsPointXY(coord.x(), coord.y()))
                 if 'prefixo' in locals():
                     pnts_GEO[k+1] = [coord, prefixo, prefixo + '{:02}'.format(k+1)]
@@ -1416,13 +1447,20 @@ def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature
         # Calculo dos Azimutes e Distancias
         tam = len(pnts_UTM)
         Az_lista, Dist = [], []
-        for k in range(tam):
-            pntA = pnts_UTM[k+1][0]
-            pntB = pnts_UTM[1 if k+2 > tam else k+2][0]
-            Az_lista += [(180/pi)*azimute(pntA, pntB)[0]]
-            Dist += [sqrt((pntA.x() - pntB.x())**2 + (pntA.y() - pntB.y())**2)]
+        if TipoGeometria == 2: # Polígono
+            for k in range(tam):
+                pntA = pnts_UTM[k+1][0]
+                pntB = pnts_UTM[1 if k+2 > tam else k+2][0]
+                Az_lista += [(180/pi)*azimute(pntA, pntB)[0]]
+                Dist += [sqrt((pntA.x() - pntB.x())**2 + (pntA.y() - pntB.y())**2)]
+        else: # Linha
+            for k in range(tam-1):
+                pntA = pnts_UTM[k+1][0]
+                pntB = pnts_UTM[k+2][0]
+                Az_lista += [(180/pi)*azimute(pntA, pntB)[0]]
+                Dist += [sqrt((pntA.x() - pntB.x())**2 + (pntA.y() - pntB.y())**2)]
 
-        # definindo estilo das coordendas
+        # Definindo estilo das coordendas
         estilo = estilo.replace(' ','').lower()
         if estilo == 'E,N,h'.lower():
             estilo_vertices = '<b>E [Xn]m</b>, <b>N [Yn]m</b> ' + tr('and', 'e') +  ' <b>h [hn]m</b>'
@@ -1449,6 +1487,9 @@ def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature
         except: # >>>>>>>>>>>>>>>>> Apenas inserir a descrição do ponto inicial
             descr_pnt_ini = description
 
+        if TipoGeometria == 1:
+            descr_pnt_ini = description
+
         try:
             descr_pnt_ini = str(descr_pnt_ini)
 
@@ -1459,13 +1500,22 @@ def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature
             text_meio = tr('[Azn] and [Dn]m up to the vertex <b>[Vn]</b>, with coordinates ' + estilo_vertices + ', ',
                            '[Azn] e [Dn]m até o vértice <b>[Vn]</b>, de coordenadas ' + estilo_vertices + ', ')
 
-            text_fim = tr('''the starting point for the description of this perimeter.
-            All coordinates described here are georeferenced to the Geodetic Reference System (GRS) (SGR) <b>[SGR]</b>, and are projected in the system <b>[PROJ]</b>,
-            from which all azimuths and distances, area and perimeter were calculated.''',
-            '''ponto inicial da descrição deste perímetro.
-            Todas as coordenadas aqui descritas estão georreferenciadas ao Sistema Geodésico de Referência (SGR) <b>[SGR]</b>, sendo projetadas no sistema <b>[PROJ]</b>,
-            a partir das quais todos os azimutes e distâncias foram calculados.</div>
-            ''')
+            if TipoGeometria == 2:
+                text_fim = tr('''the starting point for the description of this perimeter.
+                All coordinates described here are georeferenced to the Geodetic Reference System (GRS) (SGR) <b>[SGR]</b>, and are projected in the system <b>[PROJ]</b>,
+                from which all azimuths and distances, area and perimeter were calculated.''',
+                '''ponto inicial da descrição deste perímetro.
+                Todas as coordenadas aqui descritas estão georreferenciadas ao Sistema Geodésico de Referência (SGR) <b>[SGR]</b>, sendo projetadas no sistema <b>[PROJ]</b>,
+                a partir das quais todos os azimutes e distâncias foram calculados.</div>
+                ''')
+            else:
+                text_fim = tr('''the last point of this perimeter.
+                All coordinates described here are georeferenced to the Geodetic Reference System (GRS) (SGR) <b>[SGR]</b>, and are projected in the system <b>[PROJ]</b>,
+                from which all azimuths and distances, area and perimeter were calculated.''',
+                '''último ponto deste perímetro.
+                Todas as coordenadas aqui descritas estão georreferenciadas ao Sistema Geodésico de Referência (SGR) <b>[SGR]</b>, sendo projetadas no sistema <b>[PROJ]</b>,
+                a partir das quais todos os azimutes e distâncias foram calculados.</div>
+                ''')
 
             # Texto inicial
             itens = {'[Vn]': pnts_UTM[1][2],
@@ -1480,23 +1530,43 @@ def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature
 
             # Texto do meio
             LINHAS = ''
-            for k in range(tam):
-                linha0 = text_meio
-                indice = k+2 if k+2 <= tam else 1
-                itens = {'[Vn]': pnts_UTM[indice][2],
-                         '[Xn]': tr(format_num.format(pnts_UTM[indice][0].x()),
-                                  format_num.format(pnts_UTM[indice][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                         '[Yn]': tr(format_num.format(pnts_UTM[indice][0].y()),
-                                  format_num.format(pnts_UTM[indice][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                         '[Azn]': tr(DD2DMS(Az_lista[k],1), DD2DMS(Az_lista[k],1).replace('.', ',')),
-                         '[Dn]': tr(format_num.format(Dist[k]), format_num.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'))
-                            }
-                if 'h' in estilo:
-                    itens['[hn]'] = tr(format_num.format(pnts_UTM[indice][0].z()),
-                                       format_num.format(pnts_UTM[indice][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.'))
-                for item in itens:
-                    linha0 = linha0.replace(item, itens[item])
-                LINHAS += linha0
+            if TipoGeometria == 2:
+                for k in range(tam):
+                    linha0 = text_meio
+                    indice = k+2 if k+2 <= tam else 1
+                    itens = {'[Vn]': pnts_UTM[indice][2],
+                             '[Xn]': tr(format_num.format(pnts_UTM[indice][0].x()),
+                                      format_num.format(pnts_UTM[indice][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                             '[Yn]': tr(format_num.format(pnts_UTM[indice][0].y()),
+                                      format_num.format(pnts_UTM[indice][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                             '[Azn]': tr(DD2DMS(Az_lista[k],1), DD2DMS(Az_lista[k],1).replace('.', ',')),
+                             '[Dn]': tr(format_num.format(Dist[k]), format_num.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'))
+                                }
+                    if 'h' in estilo:
+                        itens['[hn]'] = tr(format_num.format(pnts_UTM[indice][0].z()),
+                                           format_num.format(pnts_UTM[indice][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.'))
+                    for item in itens:
+                        linha0 = linha0.replace(item, itens[item])
+                    LINHAS += linha0
+
+            else: # Linha
+                for k in range(tam-1):
+                    linha0 = text_meio
+                    indice = k+2
+                    itens = {'[Vn]': pnts_UTM[indice][2],
+                             '[Xn]': tr(format_num.format(pnts_UTM[indice][0].x()),
+                                      format_num.format(pnts_UTM[indice][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                             '[Yn]': tr(format_num.format(pnts_UTM[indice][0].y()),
+                                      format_num.format(pnts_UTM[indice][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                             '[Azn]': tr(DD2DMS(Az_lista[k],1), DD2DMS(Az_lista[k],1).replace('.', ',')),
+                             '[Dn]': tr(format_num.format(Dist[k]), format_num.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'))
+                                }
+                    if 'h' in estilo:
+                        itens['[hn]'] = tr(format_num.format(pnts_UTM[indice][0].z()),
+                                           format_num.format(pnts_UTM[indice][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.'))
+                    for item in itens:
+                        linha0 = linha0.replace(item, itens[item])
+                    LINHAS += linha0
 
             # Texto final
             itens = {'[SGR]': SGR.description(),
@@ -1598,7 +1668,7 @@ def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature
 def geoneighbors(layer_name, street, borderer_field, prefix, decimal, fontsize, feature, parent):
     """
     Generates a table of coordinates with neighbors (boundaries) and a polygon and distances.
-    <p>Note: A layer or QGIS Project with a projected SRC is required.</p>
+    <p>Note: A layer or QGIS Project with a projected CRS is required.</p>
 
     <h2>Exemples:</h2>
     <ul>
@@ -1740,12 +1810,18 @@ def geoneighbors(layer_name, street, borderer_field, prefix, decimal, fontsize, 
         # Calculo dos Azimutes e Distancias
         tam = len(pnts_UTM)
         Az_lista, Dist = [], []
-        for k in range(tam):
-            pntA = pnts_UTM[k+1][0]
-            pntB = pnts_UTM[1 if k+2 > tam else k+2][0]
-            Az_lista += [(180/pi)*azimute(pntA, pntB)[0]]
-            Dist += [sqrt((pntA.x() - pntB.x())**2 + (pntA.y() - pntB.y())**2)]
-
+        if TipoGeometria == 2: # Polígono
+            for k in range(tam):
+                pntA = pnts_UTM[k+1][0]
+                pntB = pnts_UTM[1 if k+2 > tam else k+2][0]
+                Az_lista += [(180/pi)*azimute(pntA, pntB)[0]]
+                Dist += [sqrt((pntA.x() - pntB.x())**2 + (pntA.y() - pntB.y())**2)]
+        else: # Linha
+            for k in range(tam-1):
+                pntA = pnts_UTM[k+1][0]
+                pntB = pnts_UTM[k+2][0]
+                Az_lista += [(180/pi)*azimute(pntA, pntB)[0]]
+                Dist += [sqrt((pntA.x() - pntB.x())**2 + (pntA.y() - pntB.y())**2)]
 
         # conteudo da tabela
         texto = '''<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
