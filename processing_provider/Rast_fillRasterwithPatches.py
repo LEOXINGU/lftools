@@ -198,7 +198,7 @@ class FillRasterwithPatches(QgsProcessingAlgorithm):
             context
         )
 
-        limiar = 240
+        #limiar = 240
 
         # Abrir Raster layer como array
         image = gdal.Open(RasterIN)
@@ -275,7 +275,7 @@ class FillRasterwithPatches(QgsProcessingAlgorithm):
                 for lin in range(row_ini, row_fim):
                     for col in range(col_ini, col_fim):
                         px_value = band4[lin][col]
-                        if px_value == 0 or band1[lin][col] > limiar: # Verificar Limiar
+                        if px_value == 0: # or band1[lin][col] > limiar: # Verificar Limiar
                             X = origem[0] + resol_X*(col + 0.5)
                             Y = origem[1] - resol_Y*(lin + 0.5)
                             R = Interpolar(X, Y, Rem_band1, Rem_origem, Rem_resol_X, Rem_resol_Y, reamostragem, Rem_nulo)
@@ -295,7 +295,7 @@ class FillRasterwithPatches(QgsProcessingAlgorithm):
                 for lin in range(row_ini, row_fim):
                     for col in range(col_ini, col_fim):
                         px_value = band1[lin][col]
-                        if px_value == Pixel_Nulo or band1[lin][col] > limiar: # Verificar Limiar
+                        if px_value == Pixel_Nulo: # or band1[lin][col] > limiar: # Verificar Limiar
                             X = origem[0] + resol_X*(col + 0.5)
                             Y = origem[1] - resol_Y*(lin + 0.5)
                             R = Interpolar(X, Y, Rem_band1, Rem_origem, Rem_resol_X, Rem_resol_Y, reamostragem, Rem_nulo)
@@ -315,7 +315,7 @@ class FillRasterwithPatches(QgsProcessingAlgorithm):
                 for lin in range(row_ini, row_fim):
                     for col in range(col_ini, col_fim):
                         px_value = band1[lin][col]
-                        if px_value == Pixel_Nulo or band1[lin][col] > limiar: # Verificar Limiar
+                        if px_value == Pixel_Nulo: # or band1[lin][col] > limiar: # Verificar Limiar
                             X = origem[0] + resol_X*(col + 0.5)
                             Y = origem[1] - resol_Y*(lin + 0.5)
                             band1[lin][col] = Interpolar(X, Y, Rem_band1, Rem_origem, Rem_resol_X, Rem_resol_Y, reamostragem, Rem_nulo)

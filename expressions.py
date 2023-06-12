@@ -41,14 +41,14 @@ from lftools.geocapt.cartography import (map_sistem,
 from lftools.geocapt.topogeo import (dd2dms as DD2DMS,
                                      dms2dd as DMS2DD,
                                      azimute, str2HTML,
-                                     geod2geoc,
-                                     geoc2enu)
+                                     geod2geoc, geoc2enu,
+                                     gpsdate as GPSDATE)
 from lftools import geomag
 from numpy import array, pi, sqrt, median
 import numpy as np
 from pyproj.crs import CRS
 import unicodedata
-from datetime import date
+from datetime import datetime, date
 import re
 # https://qgis.org/pyqgis/3.2/core/Expression/QgsExpression.html
 
@@ -300,6 +300,57 @@ def removespetialchar (text, feature, parent):
     palavraSemAcento = u"".join([c for c in nfkd if not unicodedata.combining(c)])
     # Usa expressão regular para retornar a palavra apenas com números, letras e espaço
     return re.sub('[^a-zA-Z0-9 \\\]', '', palavraSemAcento)
+
+
+@qgsfunction(args='auto', group='LF Tools')
+def gpsdate (datahora, tempo, feature, parent):
+    """
+    Inputs:
+      datetime or unicode datetime string.
+    <ul>
+      <li>year ('Y')</li>
+      <li>month ('M')</li>
+      <li>day of month ('DoM')</li>
+      <li>day of year ('DoY')</li>
+      <li>GPS week ('GPSW')</li>
+      <li>day of GPS week ('DoGPSW')</li>
+      <li>second of GPS week ('SoGPSW')</li>
+      <li>Julian day ('JD')</li>
+      <li>decimal year ('DecY')</li>
+    </ul>
+    <h2>Examples:</h2>
+    <ul>
+      <li>gpsdate("datatime", 'time') -> time value</li>
+      <li>gpsdate('2023-03-01 15:58:40', 'SoGPSW') -> 316720 </li>
+    </ul>
+    """
+
+    if isinstance(datahora, str):
+        dt_hr = datetime.strptime(datahora, '%Y-%m-%d %H:%M:%S')
+    else:
+        dt_hr = datahora.toPyDateTime()
+    Y, M, DoM, Hr, Mn, Sc = dt_hr.year, dt_hr.month, dt_hr.day, dt_hr.hour, dt_hr.minute, dt_hr.second
+    [Y,M,DoM,DoY,GPSW,DoGPSW,SoGPSW,JD,DecY] = GPSDATE(Y, M, DoM, Hr, Mn, Sc)
+    if tempo.lower() == 'y':
+        return Y
+    elif tempo.lower() == 'm':
+        return M
+    elif tempo.lower() == 'dom':
+        return DoM
+    elif tempo.lower() == 'doy':
+        return DoY
+    elif tempo.lower() == 'gpsw':
+        return GPSW
+    elif tempo.lower() == 'dogpsw':
+        return DoGPSW
+    elif tempo.lower() == 'sogpsw':
+        return SoGPSW
+    elif tempo.lower() == 'jd':
+        return JD
+    elif tempo.lower() == 'decy':
+        return DecY
+    else:
+        return None
 
 
 @qgsfunction(args='auto', group='LF Tools')
