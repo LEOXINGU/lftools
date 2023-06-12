@@ -184,7 +184,7 @@ Subtraendo é o rastar que está subtraindo.'''
         self.addParameter(
             QgsProcessingParameterBoolean(
                 self.OPEN,
-                self.tr('Load filtered raster', 'Carregar raster filtrado'),
+                self.tr('Load raster', 'Carregar raster'),
                 defaultValue= True
             )
         )
