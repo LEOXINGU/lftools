@@ -90,7 +90,7 @@ class VerticalAdjustment(QgsProcessingAlgorithm):
         return 'drones'
 
     def tags(self):
-        return self.tr('drone,model,modelo,mosaic,adjustment,raster,vertical,dem,dsm,mdt,georreferenciamento,ajuste,mds,dtm,GCP,ground control points,pontos de controle,elevation,terrain,surface').split(',')
+        return self.tr('drone,model,modelo,mosaic,adjustment,raster,altimetria,height,altitude,vertical,dem,dsm,mdt,georreferenciamento,ajuste,mds,dtm,GCP,ground control points,pontos de controle,elevation,terrain,surface').split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/drone.png'))
