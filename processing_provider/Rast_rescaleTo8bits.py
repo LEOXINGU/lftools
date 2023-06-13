@@ -86,7 +86,7 @@ class RescaleTo8bits(QgsProcessingAlgorithm):
         return 'raster'
 
     def tags(self):
-        return self.tr('8bit,rescale,radiometric,transform,16bit,reduce,compress').split(',')
+        return self.tr('8bits,rescale,histograma,radiometric,transform,16bits,reduce,compress').split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/raster.png'))
@@ -217,6 +217,7 @@ class RescaleTo8bits(QgsProcessingAlgorithm):
         min8 = 1 if nullPixel else 0
         eps = np.finfo(float).eps
 
+        feedback.pushInfo(self.tr('Opening raster...', 'Abrindo raster...'))
         image = gdal.Open(RasterIN)
         prj = image.GetProjection()
         geotransform  = image.GetGeoTransform()
@@ -232,6 +233,7 @@ class RescaleTo8bits(QgsProcessingAlgorithm):
         Driver.SetGeoTransform(geotransform)
         Driver.SetProjection(CRS.ExportToWkt())
 
+        feedback.pushInfo(self.tr('Calculating statistics...', 'Calculando estatísticas...'))
         bands = []
         max,min = [],[]
         for k in range(n_bands):
@@ -258,6 +260,7 @@ class RescaleTo8bits(QgsProcessingAlgorithm):
             Min = np.min(min)
 
         # Rescale and save bands
+        feedback.pushInfo(self.tr('Rescaling and saving bands...', 'Reescalonando e salvando as bandas...'))
         for k in range(n_bands):
             band = bands[k]
             if porBanda:
