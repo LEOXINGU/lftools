@@ -179,7 +179,7 @@ Os valores das células do raster onde o centro do pixel se encontra exatamente 
             context
         )
         if RasterIN is None:
-            raise QgsProcessingException(self.invalidSourceError(parameters, self.RasterIN))
+            raise QgsProcessingException(self.invalidSourceError(parameters, self.INPUT))
         RasterIN = RasterIN.dataProvider().dataSourceUri()
 
         layer = self.parameterAsSource(
