@@ -133,7 +133,6 @@ class ConfidenceEllipse(QgsProcessingAlgorithm):
             )
         )
 
-
         self.addParameter(
             QgsProcessingParameterField(
                 self.CAMPO_PESO,
