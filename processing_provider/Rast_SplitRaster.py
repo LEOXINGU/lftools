@@ -95,7 +95,7 @@ class SplitRaster(QgsProcessingAlgorithm):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/raster.png'))
 
     txt_en = '''Splits a raster dataset into smaller pieces, by horizontal and vertical tiles.'''
-    txt_pt = '''Divide um conjunto de dados raster em pedaços menores, por blocos horizontais e verticais'''
+    txt_pt = '''Divide um raster em pedaços menores, por blocos horizontais e verticais'''
     figure = 'images/tutorial/raster_split.jpg'
 
     def shortHelpString(self):
