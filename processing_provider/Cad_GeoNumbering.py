@@ -117,8 +117,7 @@ Obs.: Este algoritmo utiliza o centroide da feição para ordenar geograficament
             QgsProcessingParameterField(
                 self.FIELD,
                 self.tr('Sequence Field', 'Campo de ordenação dos vértices'),
-                parentLayerParameterName=self.INPUT,
-                type=QgsProcessingParameterField.Numeric
+                parentLayerParameterName=self.INPUT
             )
         )
 

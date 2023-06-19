@@ -44,12 +44,13 @@ from lftools.geocapt.topogeo import (dd2dms as DD2DMS,
                                      geod2geoc, geoc2enu,
                                      gpsdate as GPSDATE)
 from lftools import geomag
+from lftools.geocapt.imgs import img2html_resized
 from numpy import array, pi, sqrt, median
 import numpy as np
 from pyproj.crs import CRS
 import unicodedata
 from datetime import datetime, date
-import re
+import re, os
 # https://qgis.org/pyqgis/3.2/core/Expression/QgsExpression.html
 
 LOC = QgsApplication.locale()[:2]
@@ -351,6 +352,40 @@ def gpsdate (datahora, tempo, feature, parent):
         return DecY
     else:
         return None
+
+
+@qgsfunction(args='auto', group='LF Tools')
+def str2html(text, feature, parent):
+    """
+    Transform a string (text) with special characters into HTML.
+    <h2>Examples:</h2>
+    <ul>
+      <li>str2html (text) -> HTML </li>
+      <li>str2html ('Açaí') -> A&amp;ccedil;a&amp;iacute; </li>
+    </ul>
+    """
+    return (str2HTML(text))
+
+@qgsfunction(args='auto', group='LF Tools')
+def img2html(filepath, size, feature, parent):
+    """
+    Reads the photo file from a given path and transforms it into an image in base64 textual format for reading as HTML.
+    Images are resized to a new size corresponding to the image's largest side.
+    <h2>Examples:</h2>
+    <ul>
+      <li>img2html (filepath, size) -> HTML </li>
+      <li>img2html ('C:\photos\test.jpg', 350) -> HTML </li>
+    </ul>
+    """
+
+    html = '<img src="data:image/jpg;base64,[FOTO]">'
+
+    if os.path.exists(filepath):
+        foto = img2html_resized(filepath, size)
+    else:
+        foto = ''
+    return html.replace('[FOTO]', foto)
+
 
 
 @qgsfunction(args='auto', group='LF Tools')

@@ -137,7 +137,7 @@ class SaveAsJPEG(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterBoolean(
                 self.OPEN,
-                self.tr('Load output raster', 'Carregar imagem de Saída'),
+                self.tr('Load output raster', 'Carregar imagem de saída'),
                 defaultValue = True
             )
         )

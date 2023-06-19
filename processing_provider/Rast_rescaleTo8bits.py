@@ -159,7 +159,7 @@ class RescaleTo8bits(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterBoolean(
                 self.OPEN,
-                self.tr('Load output raster', 'Carregar imagem de Saída'),
+                self.tr('Load output raster', 'Carregar imagem de saída'),
                 defaultValue= True
             )
         )

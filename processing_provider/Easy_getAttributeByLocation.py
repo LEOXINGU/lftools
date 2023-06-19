@@ -12,8 +12,8 @@ Easy_getAttributeByLocation.py
 ***************************************************************************
 """
 __author__ = 'Leandro França'
-__date__ = '2021-01-08'
-__copyright__ = '(C) 2021, Leandro França'
+__date__ = '2022-01-02'
+__copyright__ = '(C) 2022, Leandro França'
 
 from PyQt5.QtCore import QCoreApplication, QVariant
 from qgis.core import *

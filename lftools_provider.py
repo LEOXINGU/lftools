@@ -112,6 +112,10 @@ from .processing_provider.Cad_AdjoinerLine import AdjoinerLine
 from .processing_provider.Vect_Overlapping import Overlapping
 from .processing_provider.Relief_DEMdifference import DEMdifference
 from .processing_provider.Rast_ZonalStatistics import ZonalStatistics
+from .processing_provider.Drone_PhotosHistogramMatch import PhotosHistogramMatch
+from .processing_provider.Reamb_KmlPhotos import KmlPhotos
+from .processing_provider.Rast_HistogramMatching import HistogramMatching
+from .processing_provider.Rast_SplitRaster import SplitRaster
 
 
 class LFToolsProvider(QgsProcessingProvider):
@@ -209,6 +213,11 @@ class LFToolsProvider(QgsProcessingProvider):
         self.addAlgorithm(Overlapping())
         self.addAlgorithm(DEMdifference())
         self.addAlgorithm(ZonalStatistics())
+        self.addAlgorithm(PhotosHistogramMatch())
+        self.addAlgorithm(KmlPhotos())
+        self.addAlgorithm(HistogramMatching())
+        self.addAlgorithm(SplitRaster())
+
 
     def id(self):
         return 'lftools'
