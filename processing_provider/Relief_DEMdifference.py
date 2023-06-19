@@ -317,6 +317,9 @@ Subtraendo é o rastar que está subtraindo.'''
                     break
                 feedback.setProgress(int((current+1) * Percent))
 
+            # Verificar novos valores de número de linhas e colunas
+            # Verificar nova extensão
+
             new_img = gdal.GetDriverByName('GTiff').Create(Output, cols, rows, 1, gdal.GDT_Float32)
             new_img.SetGeoTransform(geotransform)
             new_img.SetProjection(prj)
@@ -345,6 +348,9 @@ Subtraendo é o rastar que está subtraindo.'''
                 if feedback.isCanceled():
                     break
                 feedback.setProgress(int((current+1) * Percent))
+
+            # Verificar novos valores de número de linhas e colunas
+            # Verificar nova extensão
 
             new_img = gdal.GetDriverByName('GTiff').Create(Output, colsRef, rowsRef, 1, gdal.GDT_Float32)
             new_img.SetGeoTransform(geotransformRef)
