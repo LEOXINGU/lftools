@@ -47,7 +47,7 @@ from qgis.core import (QgsProcessing,
 from lftools.geocapt.imgs import Imgs
 from lftools.geocapt.cartography import raioMedioGauss
 from lftools.geocapt.vemos import vemos
-from lftools.geocapt.topogeo import dist2degrees
+from lftools.geocapt.topogeo import meters2degrees
 import numpy as np
 from datetime import datetime
 import codecs
@@ -349,8 +349,8 @@ Tipos:
                 vlat, vlon = vemos(lat, lon, ['vemos2009','vemos2017'][model_vel-1])
                 delta_tempo = datetime.strptime(datahora, "%Y-%m-%d %H:%M:%S") - datetime.strptime('2000-04-24 12:00:00', "%Y-%m-%d %H:%M:%S")
                 anos = delta_tempo.days/365.25
-                dLat = dist2degrees(vlat*anos, lat, 4674)
-                dLon = dist2degrees(vlon*anos, lat, 4674)
+                dLat = meters2degrees(vlat*anos, lat, QgsCoordinateReferenceSystem('EPSG:4674'))
+                dLon = meters2degrees(vlon*anos, lat, QgsCoordinateReferenceSystem('EPSG:4674'))
                 lat -= dLat
                 lon -= dLon
                 feat['lat'] = float(lat)
@@ -369,8 +369,8 @@ Tipos:
                 vlat, vlon = vemos(lat, lon, ['vemos2009','vemos2017'][model_vel-1])
                 delta_tempo = datetime.strptime(datahora, "%Y-%m-%d %H:%M:%S") - datetime.strptime('2000-04-24 12:00:00', "%Y-%m-%d %H:%M:%S")
                 anos = delta_tempo.days/365.25
-                dLat = dist2degrees(vlat*anos, lat, 4674)
-                dLon = dist2degrees(vlon*anos, lat, 4674)
+                dLat = meters2degrees(vlat*anos, lat, 4674)
+                dLon = meters2degrees(vlon*anos, lat, 4674)
                 lat -= dLat
                 lon -= dLon
                 feat['lat'] = float(lat)
