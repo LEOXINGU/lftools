@@ -82,19 +82,13 @@ class CentralTendency(QgsProcessingAlgorithm):
     def groupId(self):
         return 'spatialstatistics'
 
-    def shortHelpString(self):
-        if self.LOC == 'pt':
-            return ""
-        else:
-            return self.tr("")
-
     def tags(self):
-        return self.tr('deviational,standard,tendency,dispertion,directional,trend,confidence,covariance,mean,average,median,center,distances,centroid,').split(',')
+        return self.tr('deviational,standard,tendency,dispertion,directional,trend,confidence,covariance,mean,average,median,center,distances,centroid').split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/statistics.png'))
 
-    txt_en = '''RThis tool returns the central tendency point(s) for clustering points of entry points.
+    txt_en = '''This tool returns the central tendency point(s) for clustering points of entry points.
 The following statistics can be obtained by grouping:
 ◼️ <b>Mean Center</b>: calculation of the average in X and Y
 ◼️ <b>Median Center</b>: calculation of the median in X and Y (less influenced by outliers)
