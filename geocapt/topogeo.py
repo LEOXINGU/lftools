@@ -18,6 +18,7 @@ from numpy import radians, arctan, pi, sin, cos, matrix, sqrt, degrees, array, d
 from numpy.linalg import norm, pinv, inv
 from pyproj.crs import CRS
 import datetime as dt
+import numpy as np
 
 def azimute(A,B):
     # Cálculo dos Azimutes entre dois pontos (Vetor AB origem A extremidade B)
@@ -225,16 +226,31 @@ def enu2geoc(E, N, U, lon0, lat0, Xo, Yo, Zo):
     return (R[0,0], R[1,0], R[2,0])
 
 # Transformar distancia em metros para graus
-def dist2degrees(dist, lat, EPSG):
+def meters2degrees(dist, lat, SRC):
+    EPSG = int(SRC.authid().split(':')[-1])
     proj_crs = CRS.from_epsg(EPSG)
-    a = proj_crs.ellipsoid.semi_major_metre
-    f = 1/proj_crs.ellipsoid.inverse_flattening
+    a=proj_crs.ellipsoid.semi_major_metre
+    f=1/proj_crs.ellipsoid.inverse_flattening
     e2 = f*(2-f)
-    N = a/sqrt(1-e2*(sin(lat))**2) # Raio de curvatura 1º vertical
-    M = a*(1-e2)/(1-e2*(sin(lat))**2)**(3/2.) # Raio de curvatura meridiana
-    R = sqrt(M*N) # Raio médio de Gauss
+    N = a/np.sqrt(1-e2*(np.sin(lat))**2) # Raio de curvatura 1º vertical
+    M = a*(1-e2)/(1-e2*(np.sin(lat))**2)**(3/2.) # Raio de curvatura meridiana
+    R = np.sqrt(M*N) # Raio médio de Gauss
     theta = dist/R
-    dist = degrees(theta) # Radianos para graus
+    theta = np.degrees(theta) # Radianos para graus
+    return theta
+
+# Transformar de graus para metros
+def degrees2meters(theta, lat, SRC):
+    EPSG = int(SRC.authid().split(':')[-1])
+    proj_crs = CRS.from_epsg(EPSG)
+    a=proj_crs.ellipsoid.semi_major_metre
+    f=1/proj_crs.ellipsoid.inverse_flattening
+    e2 = f*(2-f)
+    N = a/np.sqrt(1-e2*(np.sin(lat))**2) # Raio de curvatura 1º vertical
+    M = a*(1-e2)/(1-e2*(np.sin(lat))**2)**(3/2.) # Raio de curvatura meridiana
+    R = np.sqrt(M*N) # Raio médio de Gauss
+    theta = np.radians(theta)
+    dist = theta*R
     return dist
 
 # Hora GPS
