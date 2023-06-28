@@ -240,8 +240,7 @@ class ImportPhotos(QgsProcessingAlgorithm):
             return data_hora
 
         # Criando Output
-        crs = QgsCoordinateReferenceSystem()
-        crs.createFromSrid(4326)
+        crs = QgsCoordinateReferenceSystem('EPSG:4326')
         fields = QgsFields()
         fields.append(QgsField(self.tr('name','nome'), QVariant.String))
         fields.append(QgsField(self.tr('longitude'), QVariant.Double))
@@ -282,6 +281,7 @@ class ImportPhotos(QgsProcessingAlgorithm):
                     Az = None
                     date_time = None
                     altitude = None
+                    img.close()
                 except:
                     lon = 0
                     exif = {}
@@ -380,6 +380,7 @@ class ImportPhotos(QgsProcessingAlgorithm):
                     feedback.pushInfo(self.tr('The file "{}" has no geotag!'.format(arquivo), 'A imagem "{}" não possui geotag!'.format(arquivo)))
                     if copy_ngeo:
                         shutil.copy2(os.path.join(pasta, arquivo), os.path.join(fotos_nao_geo, arquivo))
+                img.close()
             if feedback.isCanceled():
                 break
             feedback.setProgress(int((index+1) * Percent))
