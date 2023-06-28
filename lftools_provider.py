@@ -116,6 +116,7 @@ from .processing_provider.Drone_PhotosHistogramMatch import PhotosHistogramMatch
 from .processing_provider.Reamb_KmlPhotos import KmlPhotos
 from .processing_provider.Rast_HistogramMatching import HistogramMatching
 from .processing_provider.Rast_SplitRaster import SplitRaster
+from .processing_provider.Stat_nearestPoints import NearestPoints
 
 
 class LFToolsProvider(QgsProcessingProvider):
@@ -217,7 +218,7 @@ class LFToolsProvider(QgsProcessingProvider):
         self.addAlgorithm(KmlPhotos())
         self.addAlgorithm(HistogramMatching())
         self.addAlgorithm(SplitRaster())
-
+        self.addAlgorithm(NearestPoints())
 
     def id(self):
         return 'lftools'
