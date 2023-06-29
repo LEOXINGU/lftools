@@ -1722,7 +1722,6 @@ def geoneighbors(layer_name, street, borderer_field, prefix, decimal, fontsize, 
     format_num = '{:,.Xf}'.replace('X', str(decimal))
 
     geom = feature.geometry()
-
     if geom.type() == 2 and geom:
 
         # Pegar vizinhos
@@ -1845,18 +1844,11 @@ def geoneighbors(layer_name, street, borderer_field, prefix, decimal, fontsize, 
         # Calculo dos Azimutes e Distancias
         tam = len(pnts_UTM)
         Az_lista, Dist = [], []
-        if TipoGeometria == 2: # Polígono
-            for k in range(tam):
-                pntA = pnts_UTM[k+1][0]
-                pntB = pnts_UTM[1 if k+2 > tam else k+2][0]
-                Az_lista += [(180/pi)*azimute(pntA, pntB)[0]]
-                Dist += [sqrt((pntA.x() - pntB.x())**2 + (pntA.y() - pntB.y())**2)]
-        else: # Linha
-            for k in range(tam-1):
-                pntA = pnts_UTM[k+1][0]
-                pntB = pnts_UTM[k+2][0]
-                Az_lista += [(180/pi)*azimute(pntA, pntB)[0]]
-                Dist += [sqrt((pntA.x() - pntB.x())**2 + (pntA.y() - pntB.y())**2)]
+        for k in range(tam):
+            pntA = pnts_UTM[k+1][0]
+            pntB = pnts_UTM[1 if k+2 > tam else k+2][0]
+            Az_lista += [(180/pi)*azimute(pntA, pntB)[0]]
+            Dist += [sqrt((pntA.x() - pntB.x())**2 + (pntA.y() - pntB.y())**2)]
 
         # conteudo da tabela
         texto = '''<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
@@ -1969,7 +1961,6 @@ def geoneighbors(layer_name, street, borderer_field, prefix, decimal, fontsize, 
  align="center">[comp]<o:p></o:p></p>
       </td>
     </tr>'''
-
 
         # Texto do meio
         LINHAS = ''

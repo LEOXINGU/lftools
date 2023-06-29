@@ -30,6 +30,9 @@ pip install Pillow
     <li>
       <a href="#cadastre">Cadastre</a>
       <ul>
+        <li><a href="#adjoiner-lines">Adjoiner Lines</a></li>
+      </ul>
+      <ul>
         <li><a href="#connect-features">Connect features</a></li>
       </ul>
       <ul>
@@ -40,9 +43,6 @@ pip install Pillow
       </ul>
       <ul>
         <li><a href="#orient-polygons">Orient polygons</a></li>
-      </ul>
-      <ul>
-        <li><a href="#sequence-points">Sequence points</a></li>
       </ul>
       </li><li>
       <a href="#cartography">Cartography</a>
@@ -88,6 +88,9 @@ pip install Pillow
       </ul>
       <ul>
         <li><a href="#overviews-with-jpeg-compression">Overviews with JPEG compression</a></li>
+      </ul>
+      <ul>
+        <li><a href="#photos-histogram-matching">Photos Histogram Matching</a></li>
       </ul>
       <ul>
         <li><a href="#photos-by-blocks">Photos by blocks</a></li>
@@ -176,6 +179,9 @@ pip install Pillow
         <li><a href="#fill-with-patches">Fill with patches</a></li>
       </ul>
       <ul>
+        <li><a href="#histogram-matching">Histogram matching</a></li>
+      </ul>
+      <ul>
         <li><a href="#jpeg-compression">JPEG compression</a></li>
       </ul>
       <ul>
@@ -197,10 +203,19 @@ pip install Pillow
         <li><a href="#rescale-to-8-bit">Rescale to 8 bit</a></li>
       </ul>
       <ul>
+        <li><a href="#split-raster">Split raster</a></li>
+      </ul>
+      <ul>
         <li><a href="#supervised-classification">Supervised classification</a></li>
+      </ul>
+      <ul>
+        <li><a href="#zonal-statistics">Zonal Statistics</a></li>
       </ul>
       </li><li>
       <a href="#reambulation">Reambulation</a>
+      <ul>
+        <li><a href="#kml-with-photos">KML with photos</a></li>
+      </ul>
       <ul>
         <li><a href="#photos-with-geotag">Photos with geotag</a></li>
       </ul>
@@ -209,6 +224,9 @@ pip install Pillow
       </ul>
       </li><li>
       <a href="#relief">Relief</a>
+      <ul>
+        <li><a href="#dem-difference">DEM difference</a></li>
+      </ul>
       <ul>
         <li><a href="#dem-filter">DEM filter</a></li>
       </ul>
@@ -228,6 +246,9 @@ pip install Pillow
       </ul>
       <ul>
         <li><a href="#gaussian-random-points">Gaussian random points</a></li>
+      </ul>
+      <ul>
+        <li><a href="#nearest-points">Nearest points</a></li>
       </ul>
       <ul>
         <li><a href="#standard-distance">Standard Distance</a></li>
@@ -270,10 +291,16 @@ pip install Pillow
         <li><a href="#merge-lines-in-direction">Merge lines in direction</a></li>
       </ul>
       <ul>
+        <li><a href="#overlapping-polygons">Overlapping polygons</a></li>
+      </ul>
+      <ul>
         <li><a href="#points-to-polygon">Points to polygon</a></li>
       </ul>
       <ul>
         <li><a href="#reverse-vertex-order">Reverse vertex order</a></li>
+      </ul>
+      <ul>
+        <li><a href="#sequence-points">Sequence points</a></li>
       </ul>
       </li>
   </ol>
@@ -309,6 +336,9 @@ pip install Pillow
         <li><a href="#conectar-feições">Conectar feições</a></li>
       </ul>
       <ul>
+        <li><a href="#linhas-de-confrontantes">Linhas de Confrontantes</a></li>
+      </ul>
+      <ul>
         <li><a href="#linhas-de-testada">Linhas de Testada</a></li>
       </ul>
       <ul>
@@ -316,9 +346,6 @@ pip install Pillow
       </ul>
       <ul>
         <li><a href="#orientar-polígonos">Orientar polígonos</a></li>
-      </ul>
-      <ul>
-        <li><a href="#sequenciar-pontos">Sequenciar pontos</a></li>
       </ul>
       </li><li>
       <a href="#cartografia">Cartografia</a>
@@ -360,6 +387,9 @@ pip install Pillow
         <li><a href="#ajuste-do-georreferenciamento">Ajuste do Georreferenciamento</a></li>
       </ul>
       <ul>
+        <li><a href="#casar-histogramas-de-fotos">Casar histogramas de fotos</a></li>
+      </ul>
+      <ul>
         <li><a href="#copiar-arquivos-selecionados">Copiar arquivos selecionados</a></li>
       </ul>
       <ul>
@@ -390,6 +420,9 @@ pip install Pillow
       </ul>
       <ul>
         <li><a href="#pontos-aleatórios-gaussiano">Pontos aleatórios gaussiano</a></li>
+      </ul>
+      <ul>
+        <li><a href="#pontos-mais-próximos">Pontos mais próximos</a></li>
       </ul>
       <ul>
         <li><a href="#tendência-central">Tendência central</a></li>
@@ -451,6 +484,9 @@ pip install Pillow
         <li><a href="#carregar-raster-pela-localização">Carregar raster pela localização</a></li>
       </ul>
       <ul>
+        <li><a href="#casamento-de-histograma">Casamento de Histograma</a></li>
+      </ul>
+      <ul>
         <li><a href="#classificação-supervisionada">Classificação supervisionada</a></li>
       </ul>
       <ul>
@@ -463,7 +499,13 @@ pip install Pillow
         <li><a href="#definir-pixel-nulo">Definir pixel nulo</a></li>
       </ul>
       <ul>
+        <li><a href="#dividir-raster">Dividir raster</a></li>
+      </ul>
+      <ul>
         <li><a href="#esburacar-raster">Esburacar raster</a></li>
+      </ul>
+      <ul>
+        <li><a href="#estatísticas-zonais">Estatísticas zonais</a></li>
       </ul>
       <ul>
         <li><a href="#estimar-valor-de-ponto-a-partir-de-raster">Estimar valor de ponto a partir de Raster</a></li>
@@ -495,10 +537,16 @@ pip install Pillow
         <li><a href="#fotos-com-geotag">Fotos com geotag</a></li>
       </ul>
       <ul>
+        <li><a href="#kml-com-fotos">KML com fotos</a></li>
+      </ul>
+      <ul>
         <li><a href="#redimensionar-fotos">Redimensionar fotos</a></li>
       </ul>
       </li><li>
       <a href="#relevo">Relevo</a>
+      <ul>
+        <li><a href="#diferença-de-mde">Diferença de MDE</a></li>
+      </ul>
       <ul>
         <li><a href="#exportar-mde-como-texto">Exportar MDE como Texto</a></li>
       </ul>
@@ -529,7 +577,13 @@ pip install Pillow
         <li><a href="#pontos-para-polígono">Pontos para polígono</a></li>
       </ul>
       <ul>
-        <li><a href="#sequência-de-linhas">Sequência de linhas</a></li>
+        <li><a href="#sequenciar-linhas">Sequenciar linhas</a></li>
+      </ul>
+      <ul>
+        <li><a href="#sequenciar-pontos">Sequenciar pontos</a></li>
+      </ul>
+      <ul>
+        <li><a href="#sobreposição-de-polígonos">Sobreposição de polígonos</a></li>
       </ul>
       </li>
   </ol>
@@ -540,6 +594,18 @@ pip install Pillow
 
 ## Cadastre
 
+
+### Adjoiner Lines
+Generates adjoiner lines from a polygon layer of parcels.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/cadastre_adjoiners.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 ### Connect features
 Creates new vertices between adjacent polygons to ensure perfect connectivity (topology) between them.
@@ -584,18 +650,6 @@ This tool orients the geometry of polygon-like features clockwise or countercloc
   <tbody>
     <tr>
       <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/vect_orient_polygon.jpg"></td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-### Sequence points
-This script fills a certain attribute of the features of a layer of points according to its sequence in relation to the polygon of another layer.
-<div align="center">
-<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
-  <tbody>
-    <tr>
-      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/vect_sequence_points.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -772,6 +826,18 @@ This tool aims to create an Overviews file (.ovr). This algorithm has the advant
 </table>
 </div>
 
+### Photos Histogram Matching
+This tool performs histogram matching of the JPEG photo files of one input photo layer relative to another reference photo layer.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/drone_histogram.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
 ### Photos by blocks
 This tool separates drone photographs into new folders to be processed by blocks, from a layer of polygons (blocks) and from layers of geotagged photographs.
 <div align="center">
@@ -915,7 +981,7 @@ Performs base RTK correction using post-process coordinates, for example by PPP,
 </div>
 
 ### Stop and Go
-It finds the central points (vertices) of the concentrations of points surveyed by the Kinematic method (stop and go) from the processing of GNSS data.</br>Input data:</br>◼️ GNSS point layer from RTKLIB or IBGE-PPP from .pos file</br>◼️ Minimum time to survey the point in minutes</br>◼️ Tolerance in cm to consider the static point
+It finds the central points (vertices) of the concentrations of points surveyed by the Kinematic method (stop and go) from the processing of GNSS data.</br>Input data:</br>◼️ GNSS point layer from RTKLIB or IBGE-PPP from .pos file</br>◼️ Minimum time to survey the point in minutes</br>◼️ Tolerance in centimeters to consider the static point
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
@@ -1104,6 +1170,18 @@ Fills Raster null pixels (no data) with data obtained from other smaller raster 
 </table>
 </div>
 
+### Histogram matching
+This tool matches the histogram of a raster layer in relation to another reference raster layer.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/raster_histogrammatching.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
 ### JPEG compression
 JPEG compression is a lossy method to reduce the raster file size (about to 10%). The compression level can be adjusted, allowing a selectable tradeoff between storage size and image quality.
 <div align="center">
@@ -1188,6 +1266,18 @@ Rescales the values of the raster pixels with radiometric resolution of 16 bits 
 </table>
 </div>
 
+### Split raster
+Splits a raster dataset into smaller pieces, by horizontal and vertical tiles.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/raster_split.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
 ### Supervised classification
 Performs the supervised classification of a raster layer with two or more bands.
 <div align="center">
@@ -1200,10 +1290,34 @@ Performs the supervised classification of a raster layer with two or more bands.
 </table>
 </div>
 
+### Zonal Statistics
+This algorithm calculates statistics for the bands of a raster layer, categorized by zones defined in a polygon type vector layer.</br>The values of the raster cells where the pixel center is exactly inside the polygon are considered in the statistics.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/raster_zonalstatistics.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
 
 
 ## Reambulation
 
+
+### KML with photos
+Creates a KML file embedding in that single file all photographs in base64 textual format to be viewed in Google Earth.</br>    Images are resized to a new size corresponding to the image's largest side.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/reamb_kml_photos.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 ### Photos with geotag
 Imports photos with geotag to a Point Layer.
@@ -1233,6 +1347,18 @@ The largest width or height value of the original image is resized to the user-d
 
 ## Relief
 
+
+### DEM difference
+This tool performs the difference between two Digital Elevation Models (DEM).</br>Minuend is the raster to be subtracted.</br>Subtrahend is the rastar that is subtracting.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/relief_difference.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 ### DEM filter
 This tool applies the filtering technique in the Raster pixel by pixel, based on the gray level values of neighboring pixels.</br>The filtering process is done using matrices called masks (or kernel), which are applied to the image.
@@ -1276,7 +1402,7 @@ This tool generates a layer of points with <b>Spot Elevations</b> from a <b>Digi
 
 
 ### Central Tendency
-RThis tool returns the central tendency point(s) for clustering points of entry points.</br>The following statistics can be obtained by grouping:</br>◼️ <b>Mean Center</b>: calculation of the average in X and Y</br>◼️ <b>Median Center</b>: calculation of the median in X and Y (less influenced by outliers)</br>◼️ <b>Central Feature</b>: identification of the central feature (smallest Euclidean distance)</br>Note: Layer in a projected SRC gets more accurate results.
+This tool returns the central tendency point(s) for clustering points of entry points.</br>The following statistics can be obtained by grouping:</br>◼️ <b>Mean Center</b>: calculation of the average in X and Y</br>◼️ <b>Median Center</b>: calculation of the median in X and Y (less influenced by outliers)</br>◼️ <b>Central Feature</b>: identification of the central feature (smallest Euclidean distance)</br>Note: Layer in a projected SRC gets more accurate results.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
@@ -1306,6 +1432,18 @@ Generate gaussian (normal) random points in 2D space with a given mean position 
   <tbody>
     <tr>
       <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/stat_random_points.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Nearest points
+Calculates the sigmax, sigmay and sigmaz precisions (when available) of the closest points to each reference point considering a maximum distance or a minimum number of closest points.</br>Output: Multipoint layer with positional accuracies in meters and other statistics.</br>1) Max distance: get all points within the distance.</br>2) Minimum quantity: get all the closest points, regardless of the maximum distance.</br>3) Maximum distance and minimum quantity: get only the closest points that are within the maximum distance.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/stat_nearestPoints.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1465,6 +1603,18 @@ This algorithm merges lines that touch at their starting or ending points and ha
 </table>
 </div>
 
+### Overlapping polygons
+Identifies the overlap between features of a polygon type layer.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/vect_overlapping.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
 ### Points to polygon
 This tool generates a polygon layer from a point layer and its filled order (sequence) attributes.
 <div align="center">
@@ -1484,6 +1634,18 @@ Inverts vertex order for polygons and lines.
   <tbody>
     <tr>
       <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/vect_reverse_vertex_sequence.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Sequence points
+This script fills a certain attribute of the features of a layer of points according to its sequence in relation to the polygon of another layer.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/vect_sequence_points.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1586,6 +1748,18 @@ Gera novos vértices entre polígonos adjacentes para garantir a perfeita conect
 </table>
 </div>
 
+### Linhas de Confrontantes
+Gera as linhas de confrontantes das parcelas a partir dos polígonos dos lotes.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/cadastre_adjoiners.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
 ### Linhas de Testada
 Gera as linhas de testada das parcelas a partir dos polígonos dos lotes.
 <div align="center">
@@ -1617,18 +1791,6 @@ Esta ferramenta orienta a geometria de feições do tipo polígono no sentido ho
   <tbody>
     <tr>
       <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/vect_orient_polygon.jpg"></td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-### Sequenciar pontos
-Este script preenche um determinado atributo das feições de uma camada de pontos de acordo com sua sequência em relação ao polígono de outra camada.
-<div align="center">
-<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
-  <tbody>
-    <tr>
-      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/vect_sequence_points.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1781,6 +1943,18 @@ Esta ferramenta realiza o ajuste do georreferenciamento de qualquer imagem raste
 </table>
 </div>
 
+### Casar histogramas de fotos
+Esta ferramenta realiza o casamento do histograma dos arquivos de fotos JPEG de uma camada de fotografias de entrada em relação a outra camada de fotografias de referência.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/drone_histogram.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
 ### Copiar arquivos selecionados
 Esta ferramenta possibilita copiar ou mover arquivos para uma nova pasta a partir de uma camada de pontos com os caminhos dos arquivos.
 <div align="center">
@@ -1906,6 +2080,18 @@ Gera pontos aleatórios no espaço 2D a partir de um ponto central (X0, Y0), des
 </table>
 </div>
 
+### Pontos mais próximos
+Calcula as precisões sigmax, sigmay e sigmaz (quando existir) dos pontos mais próximos de cada ponto de referência considerando uma distância máxima ou uma quantidade mínima de pontos mais próximos.</br>Saída: Camada de multipoint com precisões posicionais em metros e outras estatísticas.</br>1) Distância máxima: busca todos os pontos dentro da distância.</br>2) Quantidade mínima: busca todos os pontos mais próximos, independente de distância máxima.</br>3) Distância máxima e quantidade mínima: busca apenas os pontos mais próximos que estão dentro da distância máxima.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/stat_nearestPoints.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
 ### Tendência central
 Esta ferramenta retorna o(s) ponto(s) de tendência central para agrupamento de pontos dos pontos de entrada.</br>As seguintes estatísticas pode ser obtidas por agrupamento:</br>◼️ <b>Centro Médio</b>: cálculo da média em X e Y</br>◼️ <b>Centro Mediano</b>: cálculo da mediana em X e Y (menos influenciado por outliers)</br>◼️ <b>Feição Central</b>: identificação da feição central (menor distância euclidiana)</br>Observação: Camada em um SRC projetado obtém resultado mais acurados.
 <div align="center">
@@ -1960,7 +2146,7 @@ Carrega um arquivo POS resultante do processamento de dados GNSS como uma camada
 </div>
 
 ### Semicinemático
-Encontra os pontos centrais (vértices) das concentrações de pontos levantados pelo método Seminemático (stop and go) provenientes do processamento de dados GNSS.</br>Dados de entrada:</br>◼️ Camada do tipo ponto gerada do arquivo .pos do RTKLIB ou IBGE-PPP</br>◼️ Tempo mínimo de levantamento do ponto em minutos</br>◼️ Tolerância em cm para considerar o ponto estático
+Encontra os pontos centrais (vértices) das concentrações de pontos levantados pelo método Seminemático (stop and go) provenientes do processamento de dados GNSS.</br>Dados de entrada:</br>◼️ Camada do tipo ponto gerada do arquivo .pos do RTKLIB ou IBGE-PPP</br>◼️ Tempo mínimo de levantamento do ponto em minutos</br>◼️ Tolerância em centímetros para considerar o ponto estático
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
@@ -2130,6 +2316,18 @@ Carrega um conjunto de arquivos raster que interceptam as geometrias de uma cama
 </table>
 </div>
 
+### Casamento de Histograma
+Esta ferramenta realiza o casamento do histograma de uma camada raster em relação a outra camada raster de referência.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/raster_histogrammatching.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
 ### Classificação supervisionada
 Realize a classificação supervisionada de camada raster com duas ou mais bandas.
 <div align="center">
@@ -2178,6 +2376,18 @@ As células do raster com valores fora do intervalo (mínimo e máximo) são def
 </table>
 </div>
 
+### Dividir raster
+Divide um raster em pedaços menores, por blocos horizontais e verticais
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/raster_split.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
 ### Esburacar raster
 Cria buracos em Raster definindo pixels nulos (transparentes) a partir de Camada de Polígonos.
 <div align="center">
@@ -2185,6 +2395,18 @@ Cria buracos em Raster definindo pixels nulos (transparentes) a partir de Camada
   <tbody>
     <tr>
       <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/raster_create_holes.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Estatísticas zonais
+Este algoritmo calcula estatísticas para as bandas de uma camada raster, categorizados por zonas definidas em camada vetorial do tipo polígono.</br>Os valores das células do raster onde o centro do pixel se encontra exatamente dentro do polígonos são considerados nas estatísticas.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/raster_zonalstatistics.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -2303,6 +2525,18 @@ Importa fotos com geotag para uma camada de pontos.
 </table>
 </div>
 
+### KML com fotos
+Cria um arquivo KML incorporando nesse único arquivo todas as fotografias em formato textual base64 para ser visualizado no Google Earth.</br>    As imagens são redimensionadas para um novo tamanho correspondente ao maior lado da imagem.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/reamb_kml_photos.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
 ### Redimensionar fotos
 O maior valor de largura ou altura da imagem original é redimensionado para o valor definido pelo usuário. O lado menor é redimensionado proporcionalmente.</br>    Obs.: Os metadados são preservados.
 <div align="center">
@@ -2319,6 +2553,18 @@ O maior valor de largura ou altura da imagem original é redimensionado para o v
 
 ## Relevo
 
+
+### Diferença de MDE
+Esta ferramenta executa a diferença entre dois Modelos Digitais de Elevação (MDE).</br>Minuendo é o raster a ser subtraído.</br>Subtraendo é o rastar que está subtraindo.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/relief_difference.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 ### Exportar MDE como Texto
 Esta ferramenta exporta um Modelo Digital de Elevação (MDE) como um arquivo de texto (txt) para posterior transformação em nuvem de pontos.</br>Opcionalmente, as cores RGB associadas do Ortomosaico podem ser levadas para o arquivo de texto.
@@ -2433,13 +2679,37 @@ Esta ferramenta gera uma camada de polígono a partir de uma camada de pontos e 
 </table>
 </div>
 
-### Sequência de linhas
+### Sequenciar linhas
 Este script preenche um determinado atributo das feições de uma camada do tipo linha de acordo com sua sequência de conectividade entre as linhas.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
       <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/vect_line_sequence.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Sequenciar pontos
+Este script preenche um determinado atributo das feições de uma camada de pontos de acordo com sua sequência em relação ao polígono de outra camada.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/vect_sequence_points.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Sobreposição de polígonos
+Identifica a sobreposição entre feições de uma camada do tipo polígono.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/vect_overlapping.jpg"></td>
     </tr>
   </tbody>
 </table>
