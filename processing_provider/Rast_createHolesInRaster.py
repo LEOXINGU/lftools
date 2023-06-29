@@ -190,12 +190,16 @@ class CreateHolesInRaster(QgsProcessingAlgorithm):
         origem = (ulx, uly)
         resol_X = abs(xres)
         resol_Y = abs(yres)
-        feedback.pushInfo(self.tr('Opening Band R...', 'Abrindo Banda R...'))
-        band1 = image.GetRasterBand(1).ReadAsArray()
-        feedback.pushInfo(self.tr('Opening Band G...', 'Abrindo Banda G...'))
-        band2 = image.GetRasterBand(2).ReadAsArray()
-        feedback.pushInfo(self.tr('Opening Band B...', 'Abrindo Banda B...'))
-        band3 = image.GetRasterBand(3).ReadAsArray()
+        if n_bands > 1:
+            feedback.pushInfo(self.tr('Opening Band R...', 'Abrindo Banda R...'))
+            band1 = image.GetRasterBand(1).ReadAsArray()
+            feedback.pushInfo(self.tr('Opening Band G...', 'Abrindo Banda G...'))
+            band2 = image.GetRasterBand(2).ReadAsArray()
+            feedback.pushInfo(self.tr('Opening Band B...', 'Abrindo Banda B...'))
+            band3 = image.GetRasterBand(3).ReadAsArray()
+        else:
+            feedback.pushInfo(self.tr('Opening band...', 'Abrindo banda...'))
+            band1 = image.GetRasterBand(1).ReadAsArray()
         # Transparência
         if n_bands == 4:
             feedback.pushInfo(self.tr('Opening Band Alpha...', 'Abrindo Banda Alfa...'))
@@ -247,7 +251,7 @@ class CreateHolesInRaster(QgsProcessingAlgorithm):
                         pixel = (lin+0.5, col+0.5)
                         if p.contains_points([pixel]):
                             band4[lin][col] = 0
-            else:
+            elif n_bands == 3:
                 for lin in range(row_ini, row_fim):
                     for col in range(col_ini, col_fim):
                         pixel = (lin+0.5, col+0.5)
@@ -255,6 +259,13 @@ class CreateHolesInRaster(QgsProcessingAlgorithm):
                             band1[lin][col] = Pixel_Nulo
                             band2[lin][col] = Pixel_Nulo
                             band3[lin][col] = Pixel_Nulo
+            elif n_bands == 1:
+                for lin in range(row_ini, row_fim):
+                    for col in range(col_ini, col_fim):
+                        pixel = (lin+0.5, col+0.5)
+                        if p.contains_points([pixel]):
+                            band1[lin][col] = Pixel_Nulo
+
             feedback.setProgress(int(cont * total))
 
         # Criar imagem RGB
@@ -262,27 +273,35 @@ class CreateHolesInRaster(QgsProcessingAlgorithm):
         GDT = gdal_array.NumericTypeCodeToGDALTypeCode(band1.dtype)
         if n_bands == 4:
             RGB = gdal.GetDriverByName('GTiff').Create(RGB_Output, cols, rows, 4, GDT)
-        else:
+        elif n_bands == 3:
             RGB = gdal.GetDriverByName('GTiff').Create(RGB_Output, cols, rows, 3, GDT)
+        elif n_bands == 1:
+            RGB = gdal.GetDriverByName('GTiff').Create(RGB_Output, cols, rows, 1, GDT)
         RGB.SetGeoTransform(geotransform)    # specify coords
         RGB.SetProjection(CRS.ExportToWkt()) # export coords to file
-        feedback.pushInfo(self.tr('Writing Band R...', 'Escrevendo Banda R...'))
-        bandaR = RGB.GetRasterBand(1)
-        bandaR.WriteArray(band1)
-        feedback.pushInfo(self.tr('Writing Band G...', 'Escrevendo Banda G...'))
-        bandaG = RGB.GetRasterBand(2)
-        bandaG.WriteArray(band2)
-        feedback.pushInfo(self.tr('Writing Band B...', 'Escrevendo Banda B...'))
-        bandaB = RGB.GetRasterBand(3)
-        bandaB.WriteArray(band3)
-        if n_bands == 4:
-            feedback.pushInfo(self.tr('Writing Alpha Band...', 'Escrevendo Banda Alfa...'))
-            bandaAlpha = RGB.GetRasterBand(4)
-            bandaAlpha.WriteArray(band4)
-        else:
+        if n_bands >= 3:
+            feedback.pushInfo(self.tr('Writing Band R...', 'Escrevendo Banda R...'))
+            bandaR = RGB.GetRasterBand(1)
+            bandaR.WriteArray(band1)
+            feedback.pushInfo(self.tr('Writing Band G...', 'Escrevendo Banda G...'))
+            bandaG = RGB.GetRasterBand(2)
+            bandaG.WriteArray(band2)
+            feedback.pushInfo(self.tr('Writing Band B...', 'Escrevendo Banda B...'))
+            bandaB = RGB.GetRasterBand(3)
+            bandaB.WriteArray(band3)
+            if n_bands == 4:
+                feedback.pushInfo(self.tr('Writing Alpha Band...', 'Escrevendo Banda Alfa...'))
+                bandaAlpha = RGB.GetRasterBand(4)
+                bandaAlpha.WriteArray(band4)
+            else:
+                bandaR.SetNoDataValue(Pixel_Nulo)
+                bandaG.SetNoDataValue(Pixel_Nulo)
+                bandaB.SetNoDataValue(Pixel_Nulo)
+        elif n_bands == 1:
+            feedback.pushInfo(self.tr('Writing raster band...', 'Escrevendo banda do raster...'))
+            bandaR = RGB.GetRasterBand(1)
+            bandaR.WriteArray(band1)
             bandaR.SetNoDataValue(Pixel_Nulo)
-            bandaG.SetNoDataValue(Pixel_Nulo)
-            bandaB.SetNoDataValue(Pixel_Nulo)
         RGB.FlushCache()   # Escrever no disco
         RGB = None   # Salvar e fechar
 
