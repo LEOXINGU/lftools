@@ -21,7 +21,7 @@ repository=https://github.com/LEOXINGU/lftools
 hasProcessingProvider=yes
 # Uncomment the following line and add your changelog:
 # changelog=
-  1.11.0 - New tools for Cadastre, Vector, Raster and GNSS
+  1.11.0 - New tools for Cadastre, Vector, Raster and Statistics
   1.10.0 - New tools for GNSS, Vector and Statistics
 	1.9.4 - Tooltip and action for geotag photos tool
 	1.9.3 - Bug fix in NMEA to layer tool
