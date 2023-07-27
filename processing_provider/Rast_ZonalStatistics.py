@@ -299,7 +299,9 @@ Os valores das células do raster onde o centro do pixel se encontra exatamente 
                 for x in range(tam[0]):
                     for y in range(tam[1]):
                         if recorte[x][y]:
-                            valores += [float(recorte_img[x][y])]
+                            valor = recorte_img[x][y]
+                            if valor != Pixel_Nulo:
+                                valores += [float(valor)]
                 # Calcular estatísticas da lista de valores
                 valores = np.array(valores)
                 lista_stats = []
