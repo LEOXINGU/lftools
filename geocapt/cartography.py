@@ -345,7 +345,7 @@ def main_azimuth(geometry):
     pnts = geom2PointList(geometry)
     pnts = np.hstack(pnts)
     a = []
-    for pnt in pnts:
+    for pnt in pnts[:-1] if geometry.type() == 2 else pnts:
         a += [(pnt.x(), pnt.y())]
     if len(a) < 2:
         return 0
