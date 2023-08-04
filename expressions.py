@@ -446,55 +446,6 @@ def cusum (layer_name, sequence_field, value_field, group_field, feature, parent
         return dic[feature[sequence_field]]
 
 
-@qgsfunction(args='auto', group='LF Tools')
-def inter_area (this_layer, other_layer, calc_CRS, filter, feature, parent):
-    """
-    Calculates for each feature the sum of the intersection areas considering other layer's features, the projected CRS for calculation and a expression filter (optional).
-    <h2>Examples:</h2>
-    <ul>
-      <li>inter_area (this_layer, other_layer, calc_CRS, filter) -> intersection area </li>
-      <li>inter_area ('this_layer', 'other_layer', @project_crs, '"classe" = \\\'V\\\'') -> 18409.37 </li>
-      <li>inter_area ('this_layer', 'other_layer', 'EPSG:31985', '"type" < 4') -> 658.12 </li>
-      <li>inter_area ('this_layer', 'other_layer', 'EPSG:31984', '') -> 1048.432 </li>
-    </ul>
-    """
-    if len(QgsProject.instance().mapLayersByName(this_layer)) == 1:
-        layer1 = QgsProject.instance().mapLayersByName(this_layer)[0]
-    else:
-        layer1 = QgsProject.instance().mapLayer(this_layer)
-
-    if len(QgsProject.instance().mapLayersByName(other_layer)) == 1:
-        layer2 = QgsProject.instance().mapLayersByName(other_layer)[0]
-    else:
-        layer2 = QgsProject.instance().mapLayer(other_layer)
-
-    exp = QgsExpression(filter)
-    request = QgsFeatureRequest(exp)
-
-    crs1 = QgsCoordinateReferenceSystem(layer1.crs())
-    crs2 = QgsCoordinateReferenceSystem(layer2.crs())
-    transf1 = QgsCoordinateTransform()
-    transf1.setDestinationCrs(crs1)
-    transf1.setSourceCrs(crs2)
-
-    calc_CRS = QgsCoordinateReferenceSystem(calc_CRS)
-    transf2 = QgsCoordinateTransform()
-    transf2.setDestinationCrs(calc_CRS)
-    transf2.setSourceCrs(crs1)
-
-    area = 0
-    iterLayer2 = layer2.getFeatures(request) if filter else layer2.getFeatures()
-    geom1 = feature.geometry()
-    for feat2 in iterLayer2:
-        geom2 = feat2.geometry()
-        geom2.transform(transf1)
-        if geom1.intersects(geom2):
-            inter = geom1.intersection(geom2)
-            if inter.type() == 2: #Polygon
-                inter.transform(transf2)
-                area += inter.area()
-    return float(area)
-
 # Area no SGL
 def areaParteSGL(coordsGeo, coords, crsGeo):
     centroide = QgsGeometry.fromPolygonXY([coordsGeo]).centroid().asPoint()
@@ -574,6 +525,179 @@ def areaLTP (layer_name, feature, parent):
         areaSGL = areaParteSGL(coordsGeo, coords, crsGeo)
 
     return areaSGL
+
+
+
+@qgsfunction(args='auto', group='LF Tools')
+def inter_area (this_layer, other_layer, calc_CRS, filter, feature, parent):
+    """
+    Calculates for each feature the sum of the intersection areas considering other layer's features, the projected CRS for calculation and a expression filter (optional).
+    <h2>Examples:</h2>
+    <ul>
+      <li>inter_area (this_layer, other_layer, calc_CRS, filter) -> intersection area </li>
+      <li>inter_area ('this_layer', 'other_layer', @project_crs, '"classe" = \\\'V\\\'' ) -> 18409.37 </li>
+      <li>inter_area ('this_layer', 'other_layer', 'EPSG:31985', '"type" &lt; 4' ) -> 658.12 </li>
+      <li>inter_area ('this_layer', 'other_layer', 'EPSG:31984', '' ) -> 1048.432 </li>
+    </ul>
+    """
+    if len(QgsProject.instance().mapLayersByName(this_layer)) == 1:
+        layer1 = QgsProject.instance().mapLayersByName(this_layer)[0]
+    else:
+        layer1 = QgsProject.instance().mapLayer(this_layer)
+
+    if len(QgsProject.instance().mapLayersByName(other_layer)) == 1:
+        layer2 = QgsProject.instance().mapLayersByName(other_layer)[0]
+    else:
+        layer2 = QgsProject.instance().mapLayer(other_layer)
+
+    exp = QgsExpression(filter)
+    request = QgsFeatureRequest(exp)
+
+    crs1 = QgsCoordinateReferenceSystem(layer1.crs())
+    crs2 = QgsCoordinateReferenceSystem(layer2.crs())
+    transf1 = QgsCoordinateTransform()
+    transf1.setDestinationCrs(crs1)
+    transf1.setSourceCrs(crs2)
+
+    calc_CRS = QgsCoordinateReferenceSystem(calc_CRS)
+    transf2 = QgsCoordinateTransform()
+    transf2.setDestinationCrs(calc_CRS)
+    transf2.setSourceCrs(crs1)
+
+    area = 0
+    iterLayer2 = layer2.getFeatures(request) if filter else layer2.getFeatures()
+    geom1 = feature.geometry()
+    for feat2 in iterLayer2:
+        geom2 = feat2.geometry()
+        geom2.transform(transf1)
+        if geom1.intersects(geom2):
+            inter = geom1.intersection(geom2)
+            if inter.type() == 2: #Polygon
+                inter.transform(transf2)
+                area += inter.area()
+    return float(area)
+
+@qgsfunction(args='auto', group='LF Tools')
+def dinamictable(titulo, campos, apelidos, decimal, fator, feature, parent):
+    """
+    Generates a dynamic HTML table from a list of numeric fields with the sum of their values for each feature.
+    <p>Note: Values equal to zero are ignored.</p>
+    <h2>Examples:</h2>
+    <ul>
+      <li>dinamictable(title, fields, alias, precision, factor) -> HTML</li>
+      <li>dinamictable('Table 1', 'field1,field2,field3', 'Field 1,Field 2,Field 3',2, 1) -> HTML</li>
+      <li>dinamictable('Report', 'a,b,c', '',2, 0.0001) -> HTML</li>
+    </ul>
+    """
+    campos = campos.replace(' ', '').split(',')
+    if apelidos == '':
+        apelidos = campos
+    else:
+        apelidos = apelidos.split(',')
+
+    format_num = '{:,.Xf}'.replace('X', str(decimal))
+
+    tabela = '''
+    <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+    <html>
+    <head>
+    </head>
+    <body>
+    <table class="MsoTableGrid"
+     style="border: medium none ; margin-left: 14.2pt; border-collapse: collapse;"
+     border="1" cellpadding="0" cellspacing="0">
+      <tbody>
+        <tr style="height: 10.9pt;">
+          <td colspan="2"
+     style="border: 1pt solid windowtext; padding: 0cm 5.4pt; width: 212.35pt; height: 10.9pt;"
+     width="283">
+          <p class="MsoBodyText" style="text-align: center;"
+     align="center"><span class="eop"><b><span
+     style="background: white none repeat scroll 0% 50%; -moz-background-clip: initial; -moz-background-origin: initial; -moz-background-inline-policy: initial; font-size: 8pt; color: black;"
+     lang="PT">[TITULO]<o:p></o:p></span></b></span></p>
+          </td>
+        </tr>
+        <tr style="height: 10.95pt;">
+          <td
+     style="border-style: none solid solid; border-color: -moz-use-text-color windowtext windowtext; border-width: medium 1pt 1pt; padding: 0cm 5.4pt; width: 106.15pt; height: 10.95pt;"
+     width="142">
+          <p class="MsoBodyText" style="text-align: center;"
+     align="center"><span class="eop"><span
+     style="background: white none repeat scroll 0% 50%; -moz-background-clip: initial; -moz-background-origin: initial; -moz-background-inline-policy: initial; font-size: 8pt; color: black;"
+     lang="PT">''' + tr('CLASS', 'CLASSE') + '''<o:p></o:p></span></span></p>
+          </td>
+          <td
+     style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0cm 5.4pt; width: 106.2pt; height: 10.95pt;"
+     width="142">
+          <p class="MsoBodyText" style="text-align: center;"
+     align="center"><span class="eop"><span
+     style="background: white none repeat scroll 0% 50%; -moz-background-clip: initial; -moz-background-origin: initial; -moz-background-inline-policy: initial; font-size: 8pt; color: black;"
+     lang="PT">''' + tr('VALUE', 'VALOR') + '''<o:p></o:p></span></span></p>
+          </td>
+        </tr>
+    [LINHAS]
+        <tr style="height: 10.95pt;">
+          <td
+     style="border-style: none solid solid; border-color: -moz-use-text-color windowtext windowtext; border-width: medium 1pt 1pt; padding: 0cm 5.4pt; width: 106.15pt; height: 10.95pt;"
+     width="142">
+          <p class="MsoBodyText" style="text-align: center;"
+     align="center"><span class="eop"><span
+     style="background: white none repeat scroll 0% 50%; -moz-background-clip: initial; -moz-background-origin: initial; -moz-background-inline-policy: initial; font-size: 8pt; color: black;"
+     lang="PT">''' + tr('SUM', 'TOTAL') + ''':<o:p></o:p></span></span></p>
+          </td>
+          <td
+     style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0cm 5.4pt; width: 106.2pt; height: 10.95pt;"
+     width="142">
+          <p class="MsoBodyText" style="text-align: center;"
+     align="center"><span class="eop"><span
+     style="background: white none repeat scroll 0% 50%; -moz-background-clip: initial; -moz-background-origin: initial; -moz-background-inline-policy: initial; font-size: 8pt; color: black;"
+     lang="PT">[TOTAL]</span></span></p>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    </body>
+    </html>'''
+
+    linha = '''<tr style="height: 10.9pt;">
+          <td
+     style="border-style: none solid solid; border-color: -moz-use-text-color windowtext windowtext; border-width: medium 1pt 1pt; padding: 0cm 5.4pt; width: 106.15pt; height: 10.9pt;"
+     width="142">
+          <p class="MsoBodyText" style="text-align: center;"
+     align="center"><span class="eop"><span
+     style="background: white none repeat scroll 0% 50%; -moz-background-clip: initial; -moz-background-origin: initial; -moz-background-inline-policy: initial; font-size: 8pt; color: black;"
+     lang="PT">[NOME]<o:p></o:p></span></span></p>
+          </td>
+          <td
+     style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0cm 5.4pt; width: 106.2pt; height: 10.9pt;"
+     width="142">
+          <p class="MsoBodyText" style="text-align: center;"
+     align="center"><span class="eop"><span
+     style="background: white none repeat scroll 0% 50%; -moz-background-clip: initial; -moz-background-origin: initial; -moz-background-inline-policy: initial; font-size: 8pt; color: black;"
+     lang="PT"><o:p>[VALOR]&nbsp;</o:p></span></span></p>
+          </td>
+        </tr>
+    '''
+
+    soma = 0
+    dic = {}
+    for k, campo in enumerate(campos):
+        valor = feature[campo]*fator
+        if valor > 0:
+            soma = soma + valor
+            if valor > 10**(-1*decimal):
+                dic[apelidos[k]] = valor
+    lista = list(dic.keys())
+    lista.sort()
+    linhas =''
+    for item in lista:
+        linha0 = linha
+        linha0 = linha0.replace('[NOME]', item).replace('[VALOR]', format_num.format(dic[item]).replace(',', 'X').replace('.', ',').replace('X', '.'))
+        linhas += linha0
+    texto = tabela
+    texto = texto.replace('[LINHAS]', linhas).replace('[TITULO]', str2HTML(titulo)).replace('[TOTAL]', format_num.format(soma).replace(',', 'X').replace('.', ',').replace('X', '.'))
+
+    return texto
 
 
 
@@ -1151,8 +1275,8 @@ def deedtable3(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
         <head>
           <title>''' + tr('Synthetic deed description', str2HTML('Memorial Sintético')) + '''</title>    </head>
         <body>
-        <table
-        style="text-align: center; width: 100%; font-size: [FONTSIZE]px; font-family: Arial;"
+        <table class="MsoTableGrid"
+        style="text-align: center; width: 100%; font-size: [FONTSIZE]px; font-family: Arial; border: medium none ; margin-left: 14.2pt; border-collapse: collapse;"
         border="1" cellpadding="0" cellspacing="0">
         <tbody>
         [CABECALHO]
@@ -1345,7 +1469,6 @@ def deedtable3(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
                 linha0 = linha0.replace(item, itens[item])
             LINHAS += linha0
         resultado = texto.replace('[CABECALHO]', cabec).replace('[LINHAS]', LINHAS).replace('[TITULO]', str2HTML(titulo.upper())).replace('[FONTSIZE]', str(fontsize))
-
         return resultado
 
     else:
@@ -1358,7 +1481,6 @@ def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature
     """
     Generates a description of a property with coordinates as text.
     <p>Note 1: A layer or QGIS Project with a projected SRC is required.</p>
-    <p>Note 2: Coordinates styles: 'E,N,h', 'N,E,h', 'E,N' (default) or 'N,E'.</p>
     <p>Note 2: Coordinates styles: 'E,N,h', 'N,E,h', 'E,N' (default) or 'N,E'.</p>
 
     <h2>Exemples:</h2>
