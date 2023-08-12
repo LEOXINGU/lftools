@@ -144,7 +144,7 @@ class LinesToPolygon(QgsProcessingAlgorithm):
             layer.sourceCrs()
         )
         if sink is None:
-            raise QgsProcessingException(self.invalidSinkError(parameters, self.ANGLES))
+            raise QgsProcessingException(self.invalidSinkError(parameters, self.POLYGON))
 
         # Sequencia de Linhas
         linhas = {}
