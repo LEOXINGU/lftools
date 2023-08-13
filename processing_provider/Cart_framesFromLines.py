@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Vect_framesFromLines.py
+Cart_framesFromLines.py
 ***************************************************************************
 *                                                                         *
 *   This program is free software; you can redistribute it and/or modify  *
@@ -40,6 +40,8 @@ from qgis.core import (QgsApplication,
                        QgsProcessingParameterFeatureSink)
 from lftools.geocapt.imgs import Imgs
 import os
+from numpy import array, arange, sqrt, floor, ceil
+from numpy.linalg import norm
 from qgis.PyQt.QtGui import QIcon
 from lftools.geocapt.cartography import geom2PointList
 
@@ -67,23 +69,23 @@ class FramesFromLines(QgsProcessingAlgorithm):
         return 'FramesFromLines'.lower()
 
     def displayName(self):
-        return self.tr('Lines to polygon', 'Linhas para polígono')
+        return self.tr('Frames from lines', 'Molduras a partir de linhas')
 
     def group(self):
-        return self.tr('Vector', 'Vetor')
+        return self.tr('Cartography', 'Cartografia')
 
     def groupId(self):
-        return 'vector'
+        return 'cartography'
 
     def tags(self):
-        return self.tr('sequence,lines,order,ordenar,orientar,polygon,polígono').split(',')
+        return self.tr('sequence,frames,molduras,lines,order,ordenar,orientar,polygon,polígono').split(',')
 
     def icon(self):
-        return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/vetor.png'))
+        return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/cart_frames2.png'))
 
-    txt_en = 'This tool generates a polygon layer from a connected line layer.'
-    txt_pt = 'Esta ferramenta gera uma camada de polígono a partir de uma camada de linhas conectadas.'
-    figure = 'images/tutorial/vect_lines2polygon.jpg'
+    txt_en = 'This tool generates frames in the direction of lines, given the measurements of longitudinal distance, transverse distance and overlapping percentage between frames.'
+    txt_pt = 'Esta ferramenta gera molduras na direção de linhas, dada as medidas de distância longitudinal, distância transversal e percentual de sobreposição entre os quadros.'
+    figure = 'images/tutorial/grid_lines_frames.jpg'
 
     def shortHelpString(self):
         social_BW = Imgs().social_BW
@@ -98,21 +100,66 @@ class FramesFromLines(QgsProcessingAlgorithm):
         return self.tr(self.txt_en, self.txt_pt) + footer
 
     LINES = 'LINES'
-    POLYGON = 'POLYGON'
+    LONGITUDINAL = 'LONGITUDINAL'
+    TRANVERSE = 'TRANVERSE'
+    OVERLAP = 'OVERLAP'
+    OUTPUT = 'OUTPUT'
+    NFRAMES = 'NFRAMES'
 
     def initAlgorithm(self, config=None):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.LINES,
-                self.tr('Lines layer (connected)', 'Camada de linhas conectadas'),
+                self.tr('Line layer', 'Camada de linhas'),
                 [QgsProcessing.TypeVectorLine]
             )
         )
 
         self.addParameter(
+            QgsProcessingParameterNumber(
+                self.LONGITUDINAL,
+                self.tr('Longitudinal distance in meters', 'Distância longitudinal (metros)'),
+                type = 1,
+                defaultValue = 500,
+                minValue = 0
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterNumber(
+                self.TRANVERSE,
+                self.tr('Transverse distance in meters', 'Distância transversal (metros)'),
+                type = 1,
+                defaultValue = 250,
+                minValue = 0
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterNumber(
+                self.OVERLAP,
+                self.tr('Overlap between frames (%)', 'Sobreposição entre molduras (%)'),
+                type = 1,
+                defaultValue = 10,
+                minValue = 0,
+                maxValue = 99
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterNumber(
+                self.NFRAMES,
+                self.tr('Number of frames per page', 'Número de molduras por página'),
+                type = 0,
+                defaultValue = 1,
+                minValue = 1
+            )
+        )
+
+        self.addParameter(
             QgsProcessingParameterFeatureSink(
-                self.POLYGON,
-                self.tr('Polygon from lines', 'Polígono a partir de linhas')
+                self.OUTPUT,
+                self.tr('Frames', 'Camada de molduras')
             )
         )
 
@@ -125,98 +172,155 @@ class FramesFromLines(QgsProcessingAlgorithm):
         )
         if layer is None:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.LINES))
+        SRC = layer.sourceCrs()
 
         # OUTPUT
         Fields = QgsFields()
 
         itens  = {
-                     'id' : QVariant.Int,
+                     self.tr('feat_id'): QVariant.Int,
+                     self.tr('page','folha'): QVariant.Int,
+                     self.tr('sequence','ordem'): QVariant.Int,
                      }
         for item in itens:
             Fields.append(QgsField(item, itens[item]))
 
         (sink, dest_id) = self.parameterAsSink(
             parameters,
-            self.POLYGON,
+            self.OUTPUT,
             context,
             Fields,
-            QgsWkbTypes.PolygonZ if layer.wkbType() not in (2,5) else QgsWkbTypes.Polygon,
-            layer.sourceCrs()
+            QgsWkbTypes.Polygon,
+            SRC
         )
         if sink is None:
-            raise QgsProcessingException(self.invalidSinkError(parameters, self.POLYGON))
+            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT))
 
-        # Sequencia de Linhas
-        linhas = {}
-        for featA in layer.getFeatures():
-            mont = None
-            jus = None
-            geomA = featA.geometry()
-            if geomA.isMultipart():
-                coordsA = geomA.asMultiPolyline()[0]
-                coords = geom2PointList(geomA)[0]
-            else:
-                coordsA = geomA.asPolyline()
-                coords = geom2PointList(geomA)
-            pnt_iniA = QgsGeometry().fromPointXY(coordsA[0])
-            pnt_fimA = QgsGeometry().fromPointXY(coordsA[-1])
+        distSec = self.parameterAsDouble(
+            parameters,
+            self.LONGITUDINAL,
+            context
+        )
 
-            for featB in layer.getFeatures():
-                geomB = featB.geometry()
-                if geomB.isMultipart():
-                    coordsB = geomB.asMultiPolyline()[0]
-                else:
-                    coordsB = geomB.asPolyline()
-                pnt_iniB = QgsGeometry().fromPointXY(coordsB[0])
-                pnt_fimB = QgsGeometry().fromPointXY(coordsB[-1])
+        tamSec = self.parameterAsDouble(
+            parameters,
+            self.TRANVERSE,
+            context
+        )
 
-                if pnt_iniA.intersects(pnt_fimB):
-                    mont = featB.id()
-                elif pnt_fimA.intersects(pnt_iniB):
-                    jus = featB.id()
+        Sobrep = self.parameterAsDouble(
+            parameters,
+            self.OVERLAP,
+            context
+        )
 
-                if mont != None and jus != None:
-                    break
+        n_frames = self.parameterAsDouble(
+            parameters,
+            self.NFRAMES,
+            context
+        )
 
-            linhas[featA.id()] = {'mont': mont, 'jus': jus, 'coords': coords}
+        Sobrep /= 100
+        Yo = distSec/2 - Sobrep*distSec/2 if Sobrep < 0.5 else 0 # distância da primeira moldura
+        deltaY = distSec*(1-Sobrep) # intervalo entre as molduras
 
-        # Validando atributos dos dados de entrada
-        feedback.pushInfo(self.tr('Validating connected features...', 'Validando feições conectadas...' ))
-        sentinela = False
-        for linha in linhas:
-            if linhas[linha]['mont'] == None:
-                pnt = linhas[linha]['coords'][0]
-                sentinela = True
-            if linhas[linha]['jus'] == None:
-                pnt = linhas[linha]['coords'][-1]
-                sentinela = True
-            if sentinela:
-                raise QgsProcessingException(self.tr('Unconnected line at coordinate point ({} , {})!'.format(pnt.x(), pnt.y()),
-                                                 'Linha não conectada no ponto de coordenadas ({} , {})!'.format(pnt.x(), pnt.y())))
+        # Se a camada de linhas for Geográfica, obter medidas em graus decimais
+        if SRC.isGeographic():
+            distSec /= 111000
+            tamSec /= 111000
 
-        # ID da primeira feição
+        def distancia(P1, P2):
+            return sqrt((P1.x() - P2.x())**2 + (P1.y() - P2.y())**2)
+
         for feat in layer.getFeatures():
-            seq = [feat.id()]
-            COORDS = linhas[feat.id()]['coords'][:-1]
-            proximo = linhas[feat.id()]['jus']
-            break
+            geom = feat.geometry()
+            comprimento = geom.length()
+            coord = geom.asPolyline()
+            LIST_COORD = []
+            LIST_ATT = []
 
-        for k in range(len(linhas)-1):
-            seq += [proximo]
-            COORDS += linhas[proximo]['coords'][:-1]
-            proximo = linhas[proximo]['jus']
+            # Numero de molduras e Distancia para Centro médio
+            if Yo < comprimento:
+                # Criar lista de pontos e distancias
+                ListaDist = [0]
+                soma = 0
+                for i in range(len(coord)-1):
+                    point1 = coord[i]
+                    point2 = coord[i+1]
+                    m = distancia(point1, point2)
+                    soma += m
+                    ListaDist += [soma]
 
-        COORDS = COORDS + [COORDS[0]]
-        anel = QgsLineString(COORDS)
-        pol = QgsPolygon(anel)
-        Poligono = QgsGeometry(pol)
+                valor = Yo
+                dist = []
+                while valor < comprimento:
+                    dist += [valor]
+                    valor += deltaY
 
-        feature = QgsFeature()
-        feature.setGeometry(Poligono)
-        feature.setAttributes([1])
-        sink.addFeature(feature, QgsFeatureSink.FastInsert)
+                # Algoritmo para pegar secoes transversais
+                cont = 0
+                for k in range(len(coord)-1):
+                    while ListaDist[k] <= dist[cont] and dist[cont] < ListaDist[k+1]:
+                        point1 = array([coord[k].x(), coord[k].y()])
+                        point2 = array([coord[k+1].x(), coord[k+1].y()])
+                        vetor = point2 - point1
+                        vetor/= norm(vetor)
+                        MultDist = dist[cont]-ListaDist[k]
+                        centro = point1 + vetor*MultDist
+                        # Pontos extremos do retângulo
+                        v1 = array([vetor[1], -1*vetor[0]])
+                        v2 = vetor
+                        v3 = -1*v1
+                        v4 = -1*v2
+                        p1 = centro + v1*tamSec/2.0 + v2*distSec/2
+                        p2 = centro + v3*tamSec/2.0 + v2*distSec/2
+                        p3 = centro + v3*tamSec/2.0 + v4*distSec/2
+                        p4 = centro + v1*tamSec/2.0 + v4*distSec/2
+                        LIST_COORD += [[[QgsPointXY(float(p1[0]), float(p1[1])),
+                                         QgsPointXY(float(p2[0]), float(p2[1])),
+                                         QgsPointXY(float(p3[0]), float(p3[1])),
+                                         QgsPointXY(float(p4[0]), float(p4[1])),
+                                         QgsPointXY(float(p1[0]), float(p1[1]))]]]
+                        folha = floor(cont/n_frames) + 1
+                        ordem = (cont)%n_frames + 1
+                        LIST_ATT += [[feat.id(), int(folha), int(ordem)]]
+                        cont += 1
+                        if cont == len(dist):
+                            break
+                    if cont == len(dist):
+                        break
+            else: # gerar moldura do centro médio
+                point1 = array([coord[0].x(), coord[0].y()])
+                point2 = array([coord[-1].x(), coord[-1].y()])
+                vetor = point2 - point1
+                vetor/= norm(vetor)
+                centro = 0.5*(point1 + point2)
+                # Pontos extremos do retângulo
+                v1 = array([vetor[1], -1*vetor[0]])
+                v2 = vetor
+                v3 = -1*v1
+                v4 = -1*v2
+                p1 = centro + v1*tamSec/2.0 + v2*distSec/2
+                p2 = centro + v3*tamSec/2.0 + v2*distSec/2
+                p3 = centro + v3*tamSec/2.0 + v4*distSec/2
+                p4 = centro + v1*tamSec/2.0 + v4*distSec/2
+                LIST_COORD += [[[QgsPointXY(float(p1[0]), float(p1[1])),
+                                 QgsPointXY(float(p2[0]), float(p2[1])),
+                                 QgsPointXY(float(p3[0]), float(p3[1])),
+                                 QgsPointXY(float(p4[0]), float(p4[1])),
+                                 QgsPointXY(float(p1[0]), float(p1[1]))]]]
+                LIST_ATT += [[feat.id(), 1, 1]]
+
+            # Salvando a feições
+            feature = QgsFeature()
+            for index, COORD in enumerate(LIST_COORD):
+                geom = QgsGeometry.fromPolygonXY(COORD)
+                att = LIST_ATT[index]
+                feature.setGeometry(geom)
+                feature.setAttributes(att)
+                sink.addFeature(feature, QgsFeatureSink.FastInsert)
 
         feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
         feedback.pushInfo(self.tr('Leandro Franca - Cartographic Engineer', 'Leandro França - Eng Cart'))
 
-        return {self.POLYGON: dest_id}
+        return {self.OUTPUT: dest_id}
