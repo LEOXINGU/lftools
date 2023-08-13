@@ -104,7 +104,7 @@ class LinesToPolygon(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.LINES,
-                self.tr('Lines layer (connected)', 'Camada de linhas conectadas'),
+                self.tr('Line layer (connected)', 'Camada de linhas conectadas'),
                 [QgsProcessing.TypeVectorLine]
             )
         )
