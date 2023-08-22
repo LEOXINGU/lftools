@@ -120,6 +120,8 @@ from .processing_provider.Stat_nearestPoints import NearestPoints
 from .processing_provider.Vect_ConnectLayers import ConnectLayers
 from .processing_provider.Cart_framesFromLines import FramesFromLines
 from .processing_provider.Vect_CrossSections import CrossSections
+from .processing_provider.Easy_exportASCII import ExportASCII
+from .processing_provider.Doc_ValidateTopology import ValidateTopology
 
 
 class LFToolsProvider(QgsProcessingProvider):
@@ -225,6 +227,8 @@ class LFToolsProvider(QgsProcessingProvider):
         self.addAlgorithm(ConnectLayers())
         self.addAlgorithm(FramesFromLines())
         self.addAlgorithm(CrossSections())
+        self.addAlgorithm(ExportASCII())
+        self.addAlgorithm(ValidateTopology())
 
     def id(self):
         return 'lftools'
