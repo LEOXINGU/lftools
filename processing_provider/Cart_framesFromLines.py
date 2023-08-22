@@ -232,7 +232,8 @@ class FramesFromLines(QgsProcessingAlgorithm):
         def distancia(P1, P2):
             return sqrt((P1.x() - P2.x())**2 + (P1.y() - P2.y())**2)
 
-        for feat in layer.getFeatures():
+        Percent = 100.0/layer.featureCount() if layer.featureCount()>0 else 0
+        for current, feat in enumerate(layer.getFeatures()):
             geom = feat.geometry()
             comprimento = geom.length()
             coord = geom.asPolyline()
@@ -311,7 +312,7 @@ class FramesFromLines(QgsProcessingAlgorithm):
                                  QgsPointXY(float(p1[0]), float(p1[1]))]]]
                 LIST_ATT += [[feat.id(), 1, 1]]
 
-            # Salvando a feições
+            # Salvando as feições
             feature = QgsFeature()
             for index, COORD in enumerate(LIST_COORD):
                 geom = QgsGeometry.fromPolygonXY(COORD)
@@ -319,6 +320,10 @@ class FramesFromLines(QgsProcessingAlgorithm):
                 feature.setGeometry(geom)
                 feature.setAttributes(att)
                 sink.addFeature(feature, QgsFeatureSink.FastInsert)
+
+            if feedback.isCanceled():
+                break
+            feedback.setProgress(int((current+1) * Percent))
 
         feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
         feedback.pushInfo(self.tr('Leandro Franca - Cartographic Engineer', 'Leandro França - Eng Cart'))
