@@ -26,6 +26,8 @@ from qgis.core import (QgsApplication,
                        QgsCoordinateReferenceSystem,
                        QgsProcessingParameterFileDestination,
                        QgsProcessingUtils,
+                       QgsCoordinateTransform,
+                       QgsProject,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
                        QgsProcessingParameterFeatureSource,
@@ -300,7 +302,9 @@ class KmlPhotos(QgsProcessingAlgorithm):
         lugares = ''
         for feat in layer.getFeatures():
             if transf_SRC:
-                pnt = feat.geometry().transform(coordTransf).asPoint()
+                geom = feat.geometry()
+                geom.transform(coordTransf)
+                pnt = geom.asPoint()
             else:
                 pnt = feat.geometry().asPoint()
             lon = pnt.x()
