@@ -119,6 +119,7 @@ from .processing_provider.Rast_SplitRaster import SplitRaster
 from .processing_provider.Stat_nearestPoints import NearestPoints
 from .processing_provider.Vect_ConnectLayers import ConnectLayers
 from .processing_provider.Cart_framesFromLines import FramesFromLines
+from .processing_provider.Vect_CrossSections import CrossSections
 
 
 class LFToolsProvider(QgsProcessingProvider):
@@ -223,6 +224,7 @@ class LFToolsProvider(QgsProcessingProvider):
         self.addAlgorithm(NearestPoints())
         self.addAlgorithm(ConnectLayers())
         self.addAlgorithm(FramesFromLines())
+        self.addAlgorithm(CrossSections())
 
     def id(self):
         return 'lftools'
