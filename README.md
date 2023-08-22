@@ -53,6 +53,9 @@ pip install Pillow
         <li><a href="#extent-to-utm-grids">Extent to UTM grids</a></li>
       </ul>
       <ul>
+        <li><a href="#frames-from-lines">Frames from lines</a></li>
+      </ul>
+      <ul>
         <li><a href="#name-to-utm-grid">Name to UTM grid</a></li>
       </ul>
       </li><li>
@@ -71,6 +74,9 @@ pip install Pillow
       </ul>
       <ul>
         <li><a href="#synthetic-deed-description">Synthetic deed description</a></li>
+      </ul>
+      <ul>
+        <li><a href="#validate-topology">Validate topology</a></li>
       </ul>
       </li><li>
       <a href="#drones">Drones</a>
@@ -109,6 +115,9 @@ pip install Pillow
       </ul>
       </li><li>
       <a href="#easy">Easy</a>
+      <ul>
+        <li><a href="#export-expression-as-ascii">Export expression as ASCII</a></li>
+      </ul>
       <ul>
         <li><a href="#get-attribute-by-location">Get attribute by location</a></li>
       </ul>
@@ -279,6 +288,12 @@ pip install Pillow
         <li><a href="#calculate-polygon-angles">Calculate polygon angles</a></li>
       </ul>
       <ul>
+        <li><a href="#connect-layers">Connect layers</a></li>
+      </ul>
+      <ul>
+        <li><a href="#cross-sections">Cross Sections</a></li>
+      </ul>
+      <ul>
         <li><a href="#extend-lines">Extend lines</a></li>
       </ul>
       <ul>
@@ -356,6 +371,9 @@ pip install Pillow
         <li><a href="#extensão-para-molduras-utm">Extensão para molduras UTM</a></li>
       </ul>
       <ul>
+        <li><a href="#molduras-a-partir-de-linhas">Molduras a partir de linhas</a></li>
+      </ul>
+      <ul>
         <li><a href="#nome-para-moldura-utm">Nome para moldura UTM</a></li>
       </ul>
       </li><li>
@@ -374,6 +392,9 @@ pip install Pillow
       </ul>
       <ul>
         <li><a href="#reconstituição-de-memorial">Reconstituição de Memorial</a></li>
+      </ul>
+      <ul>
+        <li><a href="#validar-topologia">Validar topologia</a></li>
       </ul>
       </li><li>
       <a href="#drones">Drones</a>
@@ -451,6 +472,11 @@ pip install Pillow
       </ul>
       <ul>
         <li><a href="#planilha-para-camada-de-pontos">Planilha para camada de pontos</a></li>
+      </ul>
+      </li><li>
+      <a href="#mão-na-roda">Mão na roda</a>
+      <ul>
+        <li><a href="#exportar-expressão-como-ascii">Exportar expressão como ASCII</a></li>
       </ul>
       </li><li>
       <a href="#postgis">PostGIS</a>
@@ -562,6 +588,9 @@ pip install Pillow
         <li><a href="#calcular-ângulos-de-polígono">Calcular ângulos de polígono</a></li>
       </ul>
       <ul>
+        <li><a href="#conectar-camadas">Conectar camadas</a></li>
+      </ul>
+      <ul>
         <li><a href="#estender-linhas">Estender linhas</a></li>
       </ul>
       <ul>
@@ -581,6 +610,9 @@ pip install Pillow
       </ul>
       <ul>
         <li><a href="#sequenciar-pontos">Sequenciar pontos</a></li>
+      </ul>
+      <ul>
+        <li><a href="#seções-transversais">Seções transversais</a></li>
       </ul>
       <ul>
         <li><a href="#sobreposição-de-polígonos">Sobreposição de polígonos</a></li>
@@ -684,6 +716,18 @@ This algorithm returns the polygons correspondent to the <b>frames</b> related t
 </table>
 </div>
 
+### Frames from lines
+This tool generates frames in the direction of lines, given the measurements of longitudinal distance, transverse distance and overlapping percentage between frames.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/grid_lines_frames.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
 ### Name to UTM grid
 This algorithm returns the polygon correspondent to the frame related to a scale of the Brazilian Mapping System based on the Map Index (MI). Example: MI = 1214-1
 <div align="center">
@@ -756,6 +800,18 @@ This tool generates the Vertices and Sides Descriptive Table, also known as Synt
   <tbody>
     <tr>
       <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/doc_descriptive_table.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Validate topology
+This tool performs a series of topological validations to ensure the correct generation of survey plans and deed description based on GeoOne's <b>TopoGeo</b> and <b>GeoRural</b> models.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/doc_validation.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -902,6 +958,18 @@ This tool performs the vertical adjustment of Digital Elevation Models (DEM) fro
 
 ## Easy
 
+
+### Export expression as ASCII
+This tool exports one or several files in standard text file (ASCII) based on an expression considering the attributes of a layer.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/easy_expr_ascii.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 ### Get attribute by location
 This algorithm fills in the attributes of a specific field from another layer, in such a way that the feature's centroid intercepts the corresponding feature from the other layer.</br>The source and destination fields must be indicated to fill in the attributes.
@@ -1555,6 +1623,30 @@ This algorithm calculates the inner and outer angles of the polygon vertices of 
 </table>
 </div>
 
+### Connect layers
+Creates new vertices into polygons to ensure perfect connectivity (topology) between two layers.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/vect_connectLayers.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Cross Sections
+Generates cross sections from a line-type layer.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/vect_cross_sections.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
 ### Extend lines
 Extends lines at their <b>start</b> and/or <b>end</b> points.
 <div align="center">
@@ -1825,6 +1917,18 @@ Este algoritmo retorna os polígonos correspondentes às molduras relacionadas a
 </table>
 </div>
 
+### Molduras a partir de linhas
+Esta ferramenta gera molduras na direção de linhas, dada as medidas de distância longitudinal, distância transversal e percentual de sobreposição entre os quadros.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/grid_lines_frames.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
 ### Nome para moldura UTM
 Este algoritmo retorna o polígono correspondente à <b>moldura</b> relativa a uma escala do <b>Mapeamento Sistemático Brasileiro</b>. Esta moldura é calculada a partir do Índice de Nomenclatura <b>INOM</b> ou Mapa Índice <b>MI</b> válido, que deve ser dado pelo usuário.
 <div align="center">
@@ -1897,6 +2001,18 @@ Realiza a reconstituição de Memorial descritivo utilizando Expressões Regular
   <tbody>
     <tr>
       <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/doc_pointsFromText.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Validar topologia
+Esta ferramenta executa uma série de validações topológicas para garantir a correta geração de plantas topográficas e memoriais descritivos baseado nos modelos <b>TopoGeo</b> e <b>GeoRural</b> da GeoOne.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/doc_validation.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -2193,6 +2309,23 @@ Geração de uma camada de pontos a partir das coordenadas preenchidas em uma pl
   <tbody>
     <tr>
       <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/easy_coord_layer.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+## Mão na roda
+
+
+### Exportar expressão como ASCII
+Esta ferramenta exporta um ou vários arquivos no padrão de arquivo texto (ASCII) baseada em uma expressão considerando os atributos de uma camada.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/easy_expr_ascii.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -2619,6 +2752,18 @@ Este algoritmo calcula os ângulos internos e externos dos vértices de uma cama
 </table>
 </div>
 
+### Conectar camadas
+Gera novos vértices em polígonos para garantir a perfeita conectividade (topologia) entre duas camadas.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/vect_connectLayers.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
 ### Estender linhas
 Estende linhas nos seus pontos inicial e/ou final.
 <div align="center">
@@ -2698,6 +2843,18 @@ Este script preenche um determinado atributo das feições de uma camada de pont
   <tbody>
     <tr>
       <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/vect_sequence_points.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Seções transversais
+Gera seções transversais a partir de uma camada do tipo linha.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/vect_cross_sections.jpg"></td>
     </tr>
   </tbody>
 </table>
