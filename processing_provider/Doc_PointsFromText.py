@@ -303,9 +303,7 @@ class PointsFromText(QgsProcessingAlgorithm):
                 break
             feedback.setProgress(int((k+1) * total))
 
-        return {self.OUTPUT: dest_id}
-
         feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
         feedback.pushInfo('Leandro França - Eng Cart')
 
-        return {self.HTML: output}
+        return {self.OUTPUT: dest_id}
