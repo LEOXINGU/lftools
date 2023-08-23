@@ -147,7 +147,7 @@ class ConfidenceEllipse(QgsProcessingAlgorithm):
             QgsProcessingParameterField(
                 self.CAMPO_AGRUPAR,
                 self.tr('Group Field', 'Campo de Agrupamento'),
-                parentLayerParameterName=self.INPUT,
+                parentLayerParameterName = self.INPUT,
                 type = QgsProcessingParameterField.Any,
                 optional = True
             )
