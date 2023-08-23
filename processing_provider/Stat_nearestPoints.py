@@ -104,6 +104,9 @@ Saída: Camada de multipoint com precisões posicionais em metros e outras estat
 
     REF = 'REF'
     PNTS = 'PNTS'
+    FIELD = 'FIELD'
+    STATS = 'STATS'
+    OPTIONS = ['count','sum','mean','median', 'std', 'min', 'max']
     DIST = 'DIST'
     QNT = 'QNT'
     COND = 'COND'
@@ -158,6 +161,26 @@ Saída: Camada de multipoint com precisões posicionais em metros e outras estat
             )
         )
 
+        self.addParameter(
+            QgsProcessingParameterField(
+                self.FIELD,
+                self.tr('Attribute stats', 'Estatísticas de atributo'),
+                parentLayerParameterName = self.PNTS,
+                type = QgsProcessingParameterField.Numeric,
+                optional = True
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterEnum(
+                self.STATS,
+                self.tr('Statistics', 'Estatísticas'),
+				options = self.OPTIONS,
+                allowMultiple = True,
+                defaultValue = [2,4]
+            )
+        )
+
         # OUTPUT
         self.addParameter(
             QgsProcessingParameterFeatureSink(
@@ -187,6 +210,19 @@ Saída: Camada de multipoint com precisões posicionais em metros e outras estat
         if pnts is None:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.PNTS))
         possuiZ = True if pnts.wkbType() == QgsWkbTypes.PointZ else False
+
+        campo = self.parameterAsFields(
+            parameters,
+            self.FIELD,
+            context
+        )
+        nome_campo = campo[0]
+
+        stats = self.parameterAsEnums(
+            parameters,
+            self.STATS,
+            context
+        )
 
         # Condição
         cond = self.parameterAsEnum(
@@ -221,6 +257,10 @@ Saída: Camada de multipoint com precisões posicionais em metros e outras estat
         Fields = ref.fields()
         for item in itens:
             Fields.append(QgsField(item, itens[item]))
+
+        if campo:
+            for st in stats:
+                Fields.append(QgsField(nome_campo + '_' + self.OPTIONS[st], QVariant.Double))
 
         (sink, dest_id) = self.parameterAsSink(
             parameters,
@@ -261,7 +301,6 @@ Saída: Camada de multipoint com precisões posicionais em metros e outras estat
             return np.sqrt((pnt1.x() - pnt2.x())**2 + (pnt1.y() - pnt2.y())**2)
 
         dtype = [('id', int),('dist',float)]
-        valores = []
 
         # Colocar camada de pontos em dicionário
         dic = {}
@@ -274,6 +313,7 @@ Saída: Camada de multipoint com precisões posicionais em metros e outras estat
         for cont, feat1 in enumerate(ref.getFeatures()):
             geom1 = feat1.geometry()
             pnt1 = geom1.asPoint()
+            valores = []
             # Calculando distâncias
             for feat2 in pnts.getFeatures():
                 geom2 = feat2.geometry()
@@ -312,6 +352,7 @@ Saída: Camada de multipoint com precisões posicionais em metros e outras estat
             if len(IDS) > 0:
                 # Calcular estatísticas
                 X, Y, Z = [],[],[]
+                atributos = []
                 for ID in IDS:
                     pnt = dic[ID].geometry().constGet()
                     if possuiZ:
@@ -323,6 +364,8 @@ Saída: Camada de multipoint com precisões posicionais em metros e outras estat
                         x, y = pnt.x(), pnt.y()
                         X.append(x)
                         Y.append(y)
+                    atributos.append(dic[ID][nome_campo])
+
                 sigmaX = np.std(np.array(X))
                 sigmaY = np.std(np.array(Y))
                 if SRC.isGeographic():
@@ -330,6 +373,25 @@ Saída: Camada de multipoint com precisões posicionais em metros e outras estat
                     sigmaY = degrees2meters(sigmaY, lat, SRC)
                 if possuiZ:
                    sigmaZ = np.std(np.array(Z))
+
+                atributos = np.array(atributos)
+                lista_stats = []
+                if campo:
+                    for st in stats:
+                        if self.OPTIONS[st] == 'count':
+                            lista_stats += [int(len(atributos))]
+                        if self.OPTIONS[st] == 'sum':
+                            lista_stats += [float(atributos.sum())]
+                        if self.OPTIONS[st] == 'mean':
+                            lista_stats += [float(atributos.mean())]
+                        if self.OPTIONS[st] == 'median':
+                            lista_stats += [float(np.median(atributos))]
+                        if self.OPTIONS[st] == 'std':
+                            lista_stats += [float(atributos.std())]
+                        if self.OPTIONS[st] == 'min':
+                            lista_stats += [float(atributos.min())]
+                        if self.OPTIONS[st] == 'max':
+                            lista_stats += [float(atributos.max())]
 
                 # Criar feição multiponto
                 geom = QgsGeometry(dic[IDS[0]].geometry())
@@ -339,7 +401,9 @@ Saída: Camada de multipoint com precisões posicionais em metros e outras estat
 
                 feat = QgsFeature(Fields)
                 feat.setGeometry(geom)
+
                 att = feat1.attributes() + [len(IDS), float(sigmaX), float(sigmaY)] + [float(sigmaZ)] if possuiZ else []
+                att += lista_stats
                 feat.setAttributes(att)
                 sink.addFeature(feat, QgsFeatureSink.FastInsert)
             if feedback.isCanceled():
