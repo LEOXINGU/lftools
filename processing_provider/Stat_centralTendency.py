@@ -147,9 +147,9 @@ Observação: Camada em um SRC projetado obtém resultado mais acurados.'''
             QgsProcessingParameterField(
                 self.CAMPO_AGRUPAR,
                 self.tr('Group Field', 'Campo de Agrupamento'),
-                parentLayerParameterName=self.INPUT,
-                type=QgsProcessingParameterField.Any,
-                optional=True
+                parentLayerParameterName = self.INPUT,
+                type = QgsProcessingParameterField.Any,
+                optional = True
             )
         )
 
@@ -157,9 +157,9 @@ Observação: Camada em um SRC projetado obtém resultado mais acurados.'''
             QgsProcessingParameterField(
                 self.CAMPO_PESO,
                 self.tr('Weight Field', 'Campo de Peso'),
-                parentLayerParameterName=self.INPUT,
-                type=QgsProcessingParameterField.Numeric,
-                optional=True
+                parentLayerParameterName = self.INPUT,
+                type = QgsProcessingParameterField.Numeric,
+                optional = True
             )
         )
 
