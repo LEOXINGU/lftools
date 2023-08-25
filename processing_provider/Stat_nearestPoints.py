@@ -133,7 +133,7 @@ Saída: Camada de multipoint com precisões posicionais em metros e outras estat
         self.addParameter(
             QgsProcessingParameterNumber(
                 self.DIST,
-                self.tr('Maximum distance', 'Distância máxima'),
+                self.tr('Maximum distance (meters)', 'Distância máxima (metros)'),
                 type = 1,
                 defaultValue = 0.5
                 )
