@@ -21,7 +21,7 @@ repository=https://github.com/LEOXINGU/lftools
 hasProcessingProvider=yes
 # Uncomment the following line and add your changelog:
 # changelog=
-  1.12.1 - Bug fix in Nearest points tool
+  1.12.1 - Bug fix in Nearest points and Adjoiner Lines tools
   1.12.0 - New tools for Cartography, Vector and Easy
   1.11.0 - New tools for Cadastre, Vector, Raster and Statistics
   1.10.0 - New tools for GNSS, Vector and Statistics
