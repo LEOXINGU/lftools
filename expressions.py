@@ -682,7 +682,7 @@ def dinamictable(titulo, campos, apelidos, decimal, fator, feature, parent):
     soma = 0
     dic = {}
     for k, campo in enumerate(campos):
-        valor = feature[campo]*fator
+        valor = round(feature[campo]*fator, decimal)
         if valor > 0:
             soma = soma + valor
             if valor > 10**(-1*decimal):
