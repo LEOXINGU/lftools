@@ -953,7 +953,7 @@ def deedtable2(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
           <title>''' + tr('Synthetic deed description', str2HTML('Memorial Sintético')) + '''</title>    </head>
         <body>
         <table
-        style="text-align: center; width: 100%; font-size: [FONTSIZE]px; font-family: Arial;"
+        style="text-align: center; width: 100%; font-size: [FONTSIZE]px; font-family: Arial; border: medium none; border-collapse: collapse;"
         border="1" cellpadding="0" cellspacing="0">
         <tbody>
         [CABECALHO]
@@ -1276,7 +1276,7 @@ def deedtable3(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
           <title>''' + tr('Synthetic deed description', str2HTML('Memorial Sintético')) + '''</title>    </head>
         <body>
         <table class="MsoTableGrid"
-        style="text-align: center; width: 100%; font-size: [FONTSIZE]px; font-family: Arial; border: medium none ; margin-left: 14.2pt; border-collapse: collapse;"
+        style="text-align: center; width: 100%; font-size: [FONTSIZE]px; font-family: Arial; border: medium none ; border-collapse: collapse;"
         border="1" cellpadding="0" cellspacing="0">
         <tbody>
         [CABECALHO]
