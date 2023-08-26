@@ -719,7 +719,7 @@ def deedtable(layer_name, ini, fim, titulo, fontsize, feature, parent):
       <title>''' + tr('Synthetic deed description', str2HTML('Memorial Sintético')) + '''</title>    </head>
     <body>
     <table
-    style="text-align: center; width: 100%; font-size: [FONTSIZE]px; font-family: Arial;"
+    style="text-align: center; width: 100%; font-size: [FONTSIZE]px; font-family: Arial; border: medium none; border-collapse: collapse;"
     border="1" cellpadding="0" cellspacing="0">
     <tbody>
     [CABECALHO]
