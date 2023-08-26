@@ -173,8 +173,7 @@ class AdjoinerLine(QgsProcessingAlgorithm):
                     if geom1.intersects(geom2):
                         inter = geom1.intersection(geom2)
                         if inter.type() == 1: # linha
-                            # Mesclando linhas quebradas
-                            if inter.isMultipart():
+                            if inter.isMultipart(): # Mesclando linhas quebradas na direção
                                 linhas = inter.asMultiPolyline()
                                 linha = []
                                 for k in range(len(linhas)-1):
