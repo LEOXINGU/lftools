@@ -1829,7 +1829,7 @@ def geoneighbors(layer_name, street, borderer_field, prefix, decimal, fontsize, 
 
     <h2>Exemples:</h2>
     <ul>
-      <li>geoneighbors('layer_name', 'borderer_field', 'preffix', precision, fontsize) = HTML</li>
+      <li>geoneighbors('layer_name', 'street_field', 'borderer_field', 'preffix', precision, fontsize) = HTML</li>
       <li>geoneighbors('layer_name', street, borderer_field , 'V-', 2, 12) = HTML</li>
     </ul>
     """
