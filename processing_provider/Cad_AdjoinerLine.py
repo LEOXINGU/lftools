@@ -173,18 +173,70 @@ class AdjoinerLine(QgsProcessingAlgorithm):
                     if geom1.intersects(geom2):
                         inter = geom1.intersection(geom2)
                         if inter.type() == 1: # linha
-                            # Mesclando linhas quebradas
                             if inter.isMultipart():
-                                linhas = inter.asMultiPolyline()
-                                linha = []
-                                for k in range(len(linhas)-1):
-                                    linha += linhas[k][:-1]
-                                linha += linhas[-1]
-                                inter = QgsGeometry.fromPolylineXY(linha)
-                            feature = QgsFeature()
-                            feature.setGeometry(inter)
-                            feature.setAttributes([feat1.id(), feat2.id()])
-                            lista_inter += [feature]
+                                lista = inter.asMultiPolyline()
+                                nova_lista = []
+                                while len(lista)>1: # mesclar linhas na direção
+                                    tam = len(lista)
+                                    for i in range(0,tam-1):
+                                        mergeou = False
+                                        # Ponto inicial e final da feicao A
+                                        coord_A = lista[i]
+                                        P_ini_A = lista[i][0]
+                                        P_fim_A = lista[i][-1]
+                                        for j in range(i+1,tam):
+                                            # Ponto inicial e final da feicao B
+                                            coord_B = lista[j]
+                                            P_ini_B = lista[j][0]
+                                            P_fim_B = lista[j][-1]
+                                            # 4 possibilidades
+                                            # 1 - Ponto final de A igual ao ponto inicial de B
+                                            if P_fim_A == P_ini_B:
+                                                mergeou = True
+                                                break
+                                            # 2 - Ponto inicial de A igual ao ponto final de B
+                                            elif P_ini_A == P_fim_B:
+                                                mergeou = True
+                                                break
+                                            # 3 - Ponto incial de A igual ao ponto inicial de B
+                                            elif P_ini_A == P_ini_B:
+                                                mergeou = True
+                                                break
+                                            # 4 - Ponto final de A igual ao ponto final de B
+                                            elif P_fim_A == P_fim_B:
+                                                mergeou = True
+                                                break
+                                        if mergeou:
+                                            geom_A = QgsGeometry.fromPolylineXY(coord_A)
+                                            geom_B = QgsGeometry.fromPolylineXY(coord_B)
+                                            new_geom = geom_A.combine(geom_B)
+
+                                            if new_geom.isMultipart():
+                                                nova_lista += [coord_A, coord_B]
+                                                del lista[i], lista[j-1]
+                                                break
+                                            else:
+                                                del lista[i], lista[j-1]
+                                                lista = [new_geom.asPolyline()]+lista
+                                                break
+                                        else:
+                                            # Tirar a geometria que nao se conecta com nada da lista
+                                            nova_lista += [coord_A]
+                                            del lista[i]
+                                            break
+                                    if len(lista)==1:
+                                        nova_lista += lista
+                                for item in nova_lista:
+                                    feature = QgsFeature()
+                                    inter = QgsGeometry.fromPolylineXY(item)
+                                    feature.setGeometry(inter)
+                                    feature.setAttributes([feat1.id(), feat2.id()])
+                                    lista_inter += [feature]
+                            else:
+                                feature = QgsFeature()
+                                feature.setGeometry(inter)
+                                feature.setAttributes([feat1.id(), feat2.id()])
+                                lista_inter += [feature]
 
                     # Linhas de testada dos polígonos
                     bbox_linha1 = linha1.boundingBox()

@@ -202,37 +202,61 @@ Os campos de origem e de destino devem ser indicadas para preenchimento dos atri
                 coordinateTransformer.setDestinationCrs(edif.crs())
                 coordinateTransformer.setSourceCrs(lotes.crs())
 
-        produto = edif.featureCount()*lotes.featureCount()
-        total = 100.0 /produto if produto else 0
-        cont = 0
+        # Criar índice espacial
+        feedback.pushInfo(self.tr('Creating spatial index...', 'Criando índice espacial...'))
         if topologia == 0:
+            index = QgsSpatialIndex(lotes.getFeatures())
+            total = 100.0 /edif.featureCount() if edif.featureCount() else 0
+        else:
+            index = QgsSpatialIndex(edif.getFeatures())
+            total = 100.0 /lotes.featureCount() if lotes.featureCount() else 0
+        cont = 0
+
+        # Preenchendo atributos
+        feedback.pushInfo(self.tr('Filling attributes...', 'Preenchendo atributos...'))
+        if topologia == 0:
+            feicoes = {}
+            for feat in lotes.getFeatures():
+                feicoes[feat.id()] = feat
+
             for feat1 in edif.getFeatures():
                 centroide = feat1.geometry().centroid()
                 if not mesmoSRC:
                     centroide = reprojectPoints(centroide, coordinateTransformer)
-                for feat2 in lotes.getFeatures():
+                bbox = centroide.boundingBox()
+                feat_ids = index.intersects(bbox)
+                for feat_id in feat_ids:
+                    feat2 = feicoes[feat_id]
                     if centroide.intersects(feat2.geometry()):
                         valor = feat2[att]
                         edif.changeAttributeValue(feat1.id(), columnIndex, valor)
                         break
-                    cont += 1
                     if feedback.isCanceled():
                         break
-                    feedback.setProgress(int(cont * total))
+                cont += 1
+                feedback.setProgress(int(cont * total))
         elif topologia == 1:
+            feicoes = {}
+            for feat in edif.getFeatures():
+                feicoes[feat.id()] = feat
+
             for feat1 in lotes.getFeatures():
                 centroide = feat1.geometry().centroid()
                 if not mesmoSRC:
                     centroide = reprojectPoints(centroide, coordinateTransformer)
+                bbox = centroide.boundingBox()
+                feat_ids = index.intersects(bbox)
+
                 valor = feat1[att]
-                for feat2 in edif.getFeatures():
+                for feat_id in feat_ids:
+                    feat2 = feicoes[feat_id]
                     if centroide.intersects(feat2.geometry()):
                         edif.changeAttributeValue(feat2.id(), columnIndex, valor)
                         break
-                    cont += 1
                     if feedback.isCanceled():
                         break
-                    feedback.setProgress(int(cont * total))
+                cont += 1
+                feedback.setProgress(int(cont * total))
 
         salvar = self.parameterAsBool(
             parameters,
