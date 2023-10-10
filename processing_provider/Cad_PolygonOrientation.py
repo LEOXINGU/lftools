@@ -30,6 +30,7 @@ class PolygonOrientation(QgsProcessingAlgorithm):
     FIRST = 'FIRST'
     SAVE = 'SAVE'
     STREET = 'STREET'
+    SELECTED = 'SELECTED'
     LOC = QgsApplication.locale()[:2]
 
     def translate(self, string):
@@ -93,6 +94,14 @@ class PolygonOrientation(QgsProcessingAlgorithm):
             )
         )
 
+        self.addParameter(
+            QgsProcessingParameterBoolean(
+                self.SELECTED,
+                self.tr('Only selected', 'Apenas selecionados'),
+                defaultValue= False
+            )
+        )
+
         orient = [self.tr('Clockwise','Horário'),
 				  self.tr('Counterclockwise','Anti-horário'),
 				  self.tr('Do not change','Não alterar')
@@ -150,6 +159,12 @@ class PolygonOrientation(QgsProcessingAlgorithm):
         if camada is None:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.POLYGONS))
 
+        selecionados = self.parameterAsBool(
+            parameters,
+            self.SELECTED,
+            context
+        )
+
         sentido = self.parameterAsEnum(
             parameters,
             self.ORIENTATION,
@@ -186,7 +201,7 @@ class PolygonOrientation(QgsProcessingAlgorithm):
 
         total = 100.0 / camada.featureCount() if camada.featureCount() else 0
 
-        for current, feat in enumerate(camada.getFeatures()):
+        for current, feat in enumerate(camada.getSelectedFeatures() if selecionados else camada.getFeatures()):
             geom = feat.geometry()
             if geom.isMultipart():
                 poligonos = geom2PointList(geom)
@@ -215,7 +230,7 @@ class PolygonOrientation(QgsProcessingAlgorithm):
 
         if rua:
             feedback.pushInfo(self.tr('Identifying the first forward point for road access...', 'Identificando primeiro ponto com vante para o acesso viário...'))
-            for feat1 in camada.getFeatures():
+            for feat1 in camada.getSelectedFeatures() if selecionados else camada.getFeatures():
                 # Pegar vizinhos
                 geom1 = feat1.geometry()
                 if not geom1.isMultipart():
@@ -224,12 +239,17 @@ class PolygonOrientation(QgsProcessingAlgorithm):
                     coords = geom1.asPolygon()[0]
                     coords = coords[:-1]
                     confront = {}
-                    for feat2 in camada.getFeatures():
+                    for feat2 in camada.getSelectedFeatures() if selecionados else camada.getFeatures():
                         geom2 = feat2.geometry()
                         cd_lote2 = feat2.id()
                         if feat1 != feat2:
                             if geom1.intersects(geom2):
                                 inters = geom1.intersection(geom2)
+                                if inters.isMultipart():
+                                    partes = inters.asMultiPolyline()
+                                    parte1 = QgsGeometry.fromPolylineXY(partes[0])
+                                    parte2 = QgsGeometry.fromPolylineXY(partes[-1])
+                                    inters = parte1.combine(parte2)
                                 confront[feat2.id()] = [cd_lote2, inters]
 
                     lista = []
