@@ -248,8 +248,21 @@ class PolygonOrientation(QgsProcessingAlgorithm):
                                 if inters.isMultipart():
                                     partes = inters.asMultiPolyline()
                                     parte1 = QgsGeometry.fromPolylineXY(partes[0])
-                                    parte2 = QgsGeometry.fromPolylineXY(partes[-1])
-                                    inters = parte1.combine(parte2)
+                                    k = 1
+                                    cont = 1
+                                    while len(partes) > 1:
+                                        # print(k, cont, len(partes), parte1)
+                                        parte2 = QgsGeometry.fromPolylineXY(partes[k])
+                                        if  parte1.intersects(parte2):
+                                            parte1 = parte1.combine(parte2)
+                                            del partes[k]
+                                        else:
+                                            k += 1
+                                        cont +=1
+                                        if cont > 10:
+                                            # print('erro no loop',cont)
+                                            break
+                                    inters = parte1
                                 confront[feat2.id()] = [cd_lote2, inters]
 
                     lista = []
