@@ -280,7 +280,6 @@ class PolygonOrientation(QgsProcessingAlgorithm):
                         else:
                             vante += [False]
                     
-                    # Se um ponto não tiver confrontante e seu anterior tiver, então esse será o primeiro ponto
                     for k in range(len(vante)):
                         anterior = vante[k-1 if k-1 > 0 else -1]
                         posterior = vante[k]
