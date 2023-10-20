@@ -1775,14 +1775,26 @@ def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature
                 for feat in layer.getFeatures(QgsFeatureRequest(exp)):
                     # Identificar linha de confrontação
                     geom_lin = feat.geometry()
-                    if geom_lin.intersects(geom):
-                        inter = geom_lin.intersection(geom)
+                    if geom.intersects(geom_lin):
+                        inter = geom.intersection(geom_lin)
                         if inter.type() == 1: # linha
                             if inter.isMultipart():
-                                lin_coords = inter.asMultiPolyline()
-                                lin_coords = sum(lin_coords, [])
-                            else:
-                                lin_coords = inter.asPolyline()
+                                partes = inter.asMultiPolyline()
+                                parte1 = QgsGeometry.fromPolylineXY(partes[0])
+                                k = 1
+                                cont = 1
+                                while len(partes) > 1:
+                                    parte2 = QgsGeometry.fromPolylineXY(partes[k])
+                                    if  parte1.intersects(parte2):
+                                        parte1 = parte1.combine(parte2)
+                                        del partes[k]
+                                    else:
+                                        k += 1
+                                    cont +=1
+                                    if cont > 10:
+                                        break
+                                inter = parte1
+                            lin_coords = inter.asPolyline()
                             if ponto in lin_coords[1:]:
                                 if feat[nome] != Confrontante:
                                     linha0 = text_meio1
@@ -1805,7 +1817,12 @@ def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature
                                        format_num.format(pnts_UTM[indice][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.'))
 
                 for item in itens:
-                    linha0 = linha0.replace(item, itens[item])
+                    try:
+                        linha0 = linha0.replace(item, itens[item])
+                    except:
+                        return(tr('Invalid adjoiner line in [X] and [Y] coordinates! Perform layers topological validation!',
+                                  'Linha de confrontante inválida nas coordenadas [X] e [Y]! Execute a validação topológica das camadas!').replace('[X]',itens['[Xn]']).replace('[Y]',itens['[Yn]']))
+
                 LINHAS += linha0
 
             # Texto final
