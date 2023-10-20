@@ -266,20 +266,26 @@ class PolygonOrientation(QgsProcessingAlgorithm):
                                 confront[feat2.id()] = [cd_lote2, inters]
 
                     lista = []
+                    # Fazer um teste para todos os pontos (sim ou não)
+                    vante = []
                     for pnt in coords:
-                        vante = -1
                         geom1 = QgsGeometry.fromPointXY(pnt)
                         for item in confront:
                             geom2 = confront[item][1]
                             if geom2.type() == 1 and geom1.intersects(geom2): #Line
                                 coord_lin = geom2.asPolyline()
                                 if pnt != coord_lin[-1]:
-                                    vante = confront[item][0]
+                                    vante += [True]
                                     break
-                        lista += [[pnt, vante]]
-
-                    for ind, item in enumerate(lista):
-                        if item[-1] == -1:
+                        else:
+                            vante += [False]
+                    
+                    # Se um ponto não tiver confrontante e seu anterior tiver, então esse será o primeiro ponto
+                    for k in range(len(vante)):
+                        anterior = vante[k-1 if k-1 > 0 else -1]
+                        posterior = vante[k]
+                        if anterior and not posterior:
+                            ind = k
                             COORDS = COORDS[ind :] + COORDS[0 : ind]
                             break
 
