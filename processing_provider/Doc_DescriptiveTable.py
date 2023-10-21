@@ -272,6 +272,9 @@ class DescriptiveTable(QgsProcessingAlgorithm):
         ordem_list = list(range(1,vertices.featureCount()+1))
         ordem_comp = []
         for feat in vertices.getFeatures():
+            pnt = feat.geometry().asPoint()
+            if pnt.x() < -180 or pnt.x() > 180 or pnt.y() < -90 or pnt.y() > 90:
+                raise QgsProcessingException(self.tr('Input coordinates must be geodetic (longitude and latitude)!', 'As coordenadas de entrada devem ser geodésicas (longitude e latitude)!'))
             try:
                 ordem_comp += [feat['sequence']]
                 codigo_item = feat['code']
