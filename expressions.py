@@ -1481,7 +1481,7 @@ def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature
     """
     Generates a description of a property with coordinates as text.
     <p>Note 1: A layer or QGIS Project with a projected SRC is required.</p>
-    <p>Note 2: Coordinates styles: 'E,N,h', 'N,E,h', 'E,N' (default) or 'N,E'.</p>
+    <p>Note 2: Coordinates styles: 'E,N' (default), 'N,E', 'E,N,h', 'N,E,h', 'lat,lon', 'lon,lat', 'lat,lon,h'  or 'lon,lat,h'.</p>
 
     <h2>Exemples:</h2>
     <ul>
@@ -1627,8 +1627,26 @@ def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature
             estilo_vertices = '<b>E [Xn]m</b> ' + tr('and', 'e') +  ' <b>N [Yn]m</b>'
         elif estilo =='N,E'.lower():
             estilo_vertices = '<b>N [Yn]m</b> ' + tr('and', 'e') +  ' <b>E [Xn]m</b>'
+        elif estilo =='lon,lat'.lower():
+            estilo_vertices = '<b> [Xn]</b> ' + tr('and', 'e') +  ' <b> [Yn]</b>'
+        elif estilo =='lon,lat,h'.lower():
+            estilo_vertices = '<b> [Xn]</b>,  <b> [Yn]</b> ' + tr('and', 'e') + ' <b>h [hn]m</b>'
+        elif estilo =='lat,lon'.lower():
+            estilo_vertices = '<b> [Yn]</b> ' + tr('and', 'e') +  ' <b> [Xn]</b>'
+        elif estilo =='lat,lon,h'.lower():
+            estilo_vertices = '<b> [Yn]</b>,  <b> [Xn]</b> ' + tr('and', 'e') + ' <b>h [hn]m</b>'
         else: # default
             estilo_vertices = '<b>E [Xn]m</b> ' + tr('and', 'e') +  ' <b>N [Yn]m</b>'
+
+        def CoordenadaN (PtsUTM, PtsGEO, estilo, decimal):
+            if 'e' in estilo: # coordenadas projetadas
+                Xn = tr(format_num.format(PtsUTM[0].x()), format_num.format(PtsUTM[0].x()).replace(',', 'X').replace('.', ',').replace('X', '.'))
+                Yn = tr(format_num.format(PtsUTM[0].y()), format_num.format(PtsUTM[0].y()).replace(',', 'X').replace('.', ',').replace('X', '.'))
+            else: # coordenadas geodesicas
+                Xn = str2HTML(tr(DD2DMS(PtsGEO[0].x(),decimal+3), DD2DMS(PtsGEO[0].x(),decimal+3).replace('.', ','))).replace('-','') + 'W' if PtsGEO[0].x() < 0 else 'E'
+                Yn = str2HTML(tr(DD2DMS(PtsGEO[0].y(),decimal+3), DD2DMS(PtsGEO[0].y(),decimal+3).replace('.', ','))).replace('-','') + 'S' if PtsGEO[0].y() < 0 else 'N'
+            return (Xn, Yn)
+
 
         # Descrição
         try:
@@ -1676,8 +1694,8 @@ def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature
 
             # Texto inicial
             itens = {'[Vn]': pnts_UTM[1][2],
-                     '[Xn]': tr(format_num.format(pnts_UTM[1][0].x()), format_num.format(pnts_UTM[1][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                     '[Yn]': tr(format_num.format(pnts_UTM[1][0].y()), format_num.format(pnts_UTM[1][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                     '[Xn]': CoordenadaN (pnts_UTM[1], pnts_GEO[1], estilo, decimal)[0],
+                     '[Yn]': CoordenadaN (pnts_UTM[1], pnts_GEO[1], estilo, decimal)[1],
                      '[descr_pnt_ini]': descr_pnt_ini + ', ' if descr_pnt_ini else ''
                         }
             if 'h' in estilo:
@@ -1692,10 +1710,8 @@ def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature
                     linha0 = text_meio
                     indice = k+2 if k+2 <= tam else 1
                     itens = {'[Vn]': pnts_UTM[indice][2],
-                             '[Xn]': tr(format_num.format(pnts_UTM[indice][0].x()),
-                                      format_num.format(pnts_UTM[indice][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                             '[Yn]': tr(format_num.format(pnts_UTM[indice][0].y()),
-                                      format_num.format(pnts_UTM[indice][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                             '[Xn]': CoordenadaN (pnts_UTM[indice], pnts_GEO[indice], estilo, decimal)[0],
+                             '[Yn]': CoordenadaN (pnts_UTM[indice], pnts_GEO[indice], estilo, decimal)[1],
                              '[Azn]': tr(DD2DMS(Az_lista[k],1), DD2DMS(Az_lista[k],1).replace('.', ',')),
                              '[Dn]': tr(format_num.format(Dist[k]), format_num.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'))
                                 }
@@ -1711,10 +1727,8 @@ def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature
                     linha0 = text_meio
                     indice = k+2
                     itens = {'[Vn]': pnts_UTM[indice][2],
-                             '[Xn]': tr(format_num.format(pnts_UTM[indice][0].x()),
-                                      format_num.format(pnts_UTM[indice][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                             '[Yn]': tr(format_num.format(pnts_UTM[indice][0].y()),
-                                      format_num.format(pnts_UTM[indice][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                             '[Xn]': CoordenadaN (pnts_UTM[indice], pnts_GEO[indice], estilo, decimal)[0],
+                             '[Yn]': CoordenadaN (pnts_UTM[indice], pnts_GEO[indice], estilo, decimal)[1],
                              '[Azn]': tr(DD2DMS(Az_lista[k],1), DD2DMS(Az_lista[k],1).replace('.', ',')),
                              '[Dn]': tr(format_num.format(Dist[k]), format_num.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'))
                                 }
@@ -1757,8 +1771,8 @@ def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature
 
             # Texto inicial
             itens = {'[Vn]': pnts_UTM[1][2],
-                     '[Xn]': tr(format_num.format(pnts_UTM[1][0].x()), format_num.format(pnts_UTM[1][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                     '[Yn]': tr(format_num.format(pnts_UTM[1][0].y()), format_num.format(pnts_UTM[1][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.'))
+                     '[Xn]': CoordenadaN (pnts_UTM[1], pnts_GEO[1], estilo, decimal)[0],
+                     '[Yn]': CoordenadaN (pnts_UTM[1], pnts_GEO[1], estilo, decimal)[1]
                         }
             if 'h' in estilo:
                 itens['[hn]'] = tr(format_num.format(pnts_UTM[1][0].z()), format_num.format(pnts_UTM[1][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.'))
@@ -1804,10 +1818,8 @@ def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature
                                 break
 
                 itens = {'[Vn]': pnts_UTM[indice][2],
-                         '[Xn]': tr(format_num.format(pnts_UTM[indice][0].x()),
-                                  format_num.format(pnts_UTM[indice][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                         '[Yn]': tr(format_num.format(pnts_UTM[indice][0].y()),
-                                  format_num.format(pnts_UTM[indice][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                         '[Xn]': CoordenadaN (pnts_UTM[indice], pnts_GEO[indice], estilo, decimal)[0],
+                         '[Yn]': CoordenadaN (pnts_UTM[indice], pnts_GEO[indice], estilo, decimal)[1],
                          '[Azn]': tr(DD2DMS(Az_lista[k],1), DD2DMS(Az_lista[k],1).replace('.', ',')),
                          '[Dn]': tr(format_num.format(Dist[k]), format_num.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.')),
                          '[ADJOINER]': Confrontante,
