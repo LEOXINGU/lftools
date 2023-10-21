@@ -294,6 +294,14 @@ class DescriptiveMemorial(QgisAlgorithm):
 
         meses = {1: 'janeiro', 2:'fevereiro', 3: 'março', 4:'abril', 5:'maio', 6:'junho', 7:'julho', 8:'agosto', 9:'setembro', 10:'outubro', 11:'novembro', 12:'dezembro'}
 
+        # VALIDAÇÕES
+
+        # Validando coordenadas geodésicas da camada de entrada
+        for feat in vertices.getFeatures():
+            pnt = feat.geometry().asPoint()
+            if pnt.x() < -180 or pnt.x() > 180 or pnt.y() < -90 or pnt.y() > 90:
+                raise QgsProcessingException(self.tr('Input coordinates must be geodetic (longitude and latitude)!', 'As coordenadas de entrada devem ser geodésicas (longitude e latitude)!'))
+
         # Validando atributos dos dados de entrada
         if atributos:
             feedback.pushInfo(self.tr('Validating layer attributes...', 'Validando atributos das camadas...' ))
@@ -563,8 +571,8 @@ class DescriptiveMemorial(QgisAlgorithm):
                 Xn = self.tr(format_num.format(x), format_num.format(x).replace(',', 'X').replace('.', ',').replace('X', '.'))
                 Yn = self.tr(format_num.format(y), format_num.format(y).replace(',', 'X').replace('.', ',').replace('X', '.'))
             if coordenadas in (4,5,6,7):
-                Xn = str2HTML(self.tr(dd2dms(x,4), dd2dms(x,4).replace('.', ','))).replace('-','') + 'W' if x < 0 else 'E'
-                Yn = str2HTML(self.tr(dd2dms(y,4), dd2dms(y,4).replace('.', ','))).replace('-','') + 'S' if y < 0 else 'N'
+                Xn = str2HTML(self.tr(dd2dms(x,decimal+3), dd2dms(x,decimal+3).replace('.', ','))).replace('-','') + 'W' if x < 0 else 'E'
+                Yn = str2HTML(self.tr(dd2dms(y,decimal+3), dd2dms(y,decimal+3).replace('.', ','))).replace('-','') + 'S' if y < 0 else 'N'
             Zn = self.tr(format_num.format(z), format_num.format(z).replace(',', 'X').replace('.', ',').replace('X', '.'))
 
             if coordenadas == 0:
