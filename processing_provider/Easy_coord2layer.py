@@ -201,12 +201,11 @@ class CoordinatesToLayer(QgsProcessingAlgorithm):
                     Y = float(Y.replace(',','.'))
                 except:
                     try:
-                        X = dms2dd(X)
-                        Y = dms2dd(Y)
+                        X = dms2dd(X.replace(',','.'))
+                        Y = dms2dd(Y.replace(',','.'))
                     except:
                         valido = False
-                        feedback.pushInfo(self.tr('Feature id {} has attributes X={} and Y={} incompatible for point geometry!'.format(feat.id(), X, Y),
-                                                  'Feição de id {} tem atributos X={} e Y={} incompatíveis para geometria ponto!'.format(feat.id(), X, Y) ))
+
             if Z_field:
                 Z = att[Z_id]
                 if isinstance(Z, str):
@@ -214,9 +213,9 @@ class CoordinatesToLayer(QgsProcessingAlgorithm):
                         Z = float(Z.replace(',','.'))
                     except:
                         valido = False
-                        feedback.pushInfo(self.tr('Feature id {} has attributes Z={} incompatible for point geometry!'.format(feat.id(), Z),
-                                                  'Feição de id {} tem atributos Z={} incompatível para geometria ponto!'.format(feat.id(),Z) ))
-            if valido:
+                        feedback.pushInfo(self.tr('Feature id {} has attributes Z={} incompatible for point geometry!'.format(feat.id(), att[Z_id]),
+                                                  'Feição de id {} tem atributos Z={} incompatível para geometria ponto!'.format(feat.id(),att[Z_id]) ))
+            if valido and X and Y:
                 if Z_field:
                     geom = QgsGeometry(QgsPoint(float(X), float(Y), float(Z)))
                 else:
@@ -224,6 +223,9 @@ class CoordinatesToLayer(QgsProcessingAlgorithm):
                 feature.setGeometry(geom)
                 feature.setAttributes(att)
                 sink.addFeature(feature, QgsFeatureSink.FastInsert)
+            else:
+                feedback.pushInfo(self.tr('Feature id {} has attributes X={} and Y={} incompatible for point geometry!'.format(feat.id(), att[X_id], att[Y_id]),
+                                          'Feição de id {} tem atributos X={} e Y={} incompatíveis para geometria ponto!'.format(feat.id(), att[X_id], att[Y_id]) ))
 
             if feedback.isCanceled():
                 break
