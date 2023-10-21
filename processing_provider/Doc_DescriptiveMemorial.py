@@ -294,6 +294,42 @@ class DescriptiveMemorial(QgisAlgorithm):
 
         meses = {1: 'janeiro', 2:'fevereiro', 3: 'março', 4:'abril', 5:'maio', 6:'junho', 7:'julho', 8:'agosto', 9:'setembro', 10:'outubro', 11:'novembro', 12:'dezembro'}
 
+        # IDENTIFICAR MODELO DE BANCO DE DADOS
+        modeloBD = None
+        def TestModelo(campos_vertices, campos_limites, campos_area):
+            sentinela = True
+            for campo in campos_vertices:
+                if campo not in [field.name() for field in vertices.fields()]:
+                    sentinela = False
+                    break
+            for campo in campos_limites:
+                if campo not in [field.name() for field in limites.fields()]:
+                    sentinela = False
+                    break
+            for campo in campos_area:
+                if campo not in [field.name() for field in area.fields()]:
+                    sentinela = False
+                    break
+            return sentinela
+
+        # Teste para o modelo TopoGeo
+        campos_vertices = ['type', 'code', 'sequence']
+        campos_limites = ['borderer', 'borderer_registry']
+        campos_area = ['property', 'registry', 'transcript', 'owner', 'county', 'state', 'survey_date']
+        if TestModelo(campos_vertices, campos_limites, campos_area):
+            modeloBD = 'TG' # TopoGeo
+            feedback.pushInfo(self.tr('Database in the TopoGeo model...', 'Banco de dados no modelo TopoGeo...' ))
+
+        campos_vertices = ['tipo_verti', 'vertice', 'indice']
+        campos_limites = ['confrontan', 'matricula']
+        campos_area = ['denominacao', 'sncr', 'matricula', 'nome', 'municipio', 'uf', 'data']
+        if TestModelo(campos_vertices, campos_limites, campos_area):
+            modeloBD = 'GR' # GeoRural
+            feedback.pushInfo('Banco de dados no modelo GeoRural...' )
+
+        if not modeloBD:
+            raise QgsProcessingException(self.tr('Check that your layers have the correct field names for the TopoGeo model! More information: https://bit.ly/3FDNQGC', 'Verifique se suas camadas estão com os nomes dos campos corretos para o modelo de banco de dados (TopoGeo ou GeoRural)! Mais informações: https://geoone.com.br/ebook_gratis/'))
+
         # VALIDAÇÕES
 
         # Validando coordenadas geodésicas da camada de entrada
@@ -309,11 +345,12 @@ class DescriptiveMemorial(QgisAlgorithm):
             ordem_list = list(range(1,vertices.featureCount()+1))
             ordem_comp = []
             for feat in vertices.getFeatures():
-                try:
+                if modeloBD == 'GR':
+                    ordem_comp += [feat['indice']]
+                    codigo_item = feat['vertice']
+                else:
                     ordem_comp += [feat['sequence']]
                     codigo_item = feat['code']
-                except:
-                    raise QgsProcessingException(self.tr('Check that your layer "limit_point_p" has the correct field names for the TopoGeo model! More information: https://bit.ly/3FDNQGC', 'Verifique se sua camada "Ponto Limite" está com os nomes dos campos corretos para o modelo TopoGeo! Mais informações: https://geoone.com.br/ebook_gratis/'))
                 if not codigo_item or codigo_item in ['', ' ']:
                     raise QgsProcessingException(self.tr('The code attribute must be filled in for all features!', 'O atributo código deve ser preenchido para todas as feições!'))
             ordem_comp.sort()
@@ -322,13 +359,10 @@ class DescriptiveMemorial(QgisAlgorithm):
 
             # elemento_confrontante
             for feat in limites.getFeatures():
-                try:
-                    att1 = feat['start_pnt_descr']
+                if modeloBD == 'GR':
+                    att2 = feat['confrontan']
+                else:
                     att2 = feat['borderer']
-                except:
-                    raise QgsProcessingException(self.tr('Check that your layer "boundary_element_l" has the correct field names for the TopoGeo model! More information: https://bit.ly/3FDNQGC', 'Verifique se sua camada "Elemento confrontante" está com os nomes dos campos corretos para o modelo TopoGeo! Mais informações: https://geoone.com.br/ebook_gratis/'))
-                if not att1 or att1 in ['', ' ']:
-                    raise QgsProcessingException(self.tr('The attribute of the starting point description must be filled in for all features!', 'O atributo de descrição do ponto inicial deve ser preenchido para todas as feições!'))
                 if not att2 or att2 in ['', ' ']:
                     raise QgsProcessingException(self.tr("The confrontant's name must be filled in for all features!", 'O nome do confrontante deve ser preenchido para todas as feições!'))
 
@@ -428,7 +462,10 @@ class DescriptiveMemorial(QgisAlgorithm):
         feedback.pushInfo(self.tr('Sequencing "boundary_element_l" features...', 'Ordenando a sequência dos confrontantes...' ))
         # Pegando ponto inicial
         for feat1 in vertices.getFeatures():
-            ordem_pnt = feat1['sequence']
+            if modeloBD == 'GR':
+                ordem_pnt = feat1['indice']
+            else:
+                ordem_pnt = feat1['sequence']
             if ordem_pnt == 1:
                 ponto_ini = feat1.geometry().asPoint()
         # listando confrontantes
@@ -493,7 +530,13 @@ class DescriptiveMemorial(QgisAlgorithm):
                 Lin_coord = geom.asMultiPolyline()[0]
             else:
                 Lin_coord = geom.asPolyline()
-            ListaDescr += [[str2HTML(linha['start_pnt_descr']), str2HTML(linha['borderer'])]]
+            if modeloBD == 'GR':
+                start_pnt_descr = ''
+                borderer = str2HTML(linha['confrontan'])
+            else:
+                start_pnt_descr = str2HTML(linha['start_pnt_descr'])
+                borderer = str2HTML(linha['borderer'])
+            ListaDescr += [[start_pnt_descr, borderer]]
             cont = len(Lin_coord)
             ListaCont += [(soma, cont-1)]
             soma += cont-1
@@ -540,7 +583,7 @@ class DescriptiveMemorial(QgisAlgorithm):
                 if 'auxiliary' not in fieldname:
                     att = feat1[fieldname]
                     if not att or att in ['', ' ']:
-                        raise QgsProcessingException(self.tr('The attribute {} of the class "area_imovel" must be filled!', 'O atributo {} da classe "area_imovel" deve ser preenchido!').format(fieldname))
+                        raise QgsProcessingException(self.tr('The attribute {} of the polygon layer must be filled!', 'O atributo {} da camada polígono do imóvel deve ser preenchido!').format(fieldname))
 
         # Transformar Coordenadas de Geográficas para o sistema UTM
         coordinateTransformer = QgsCoordinateTransform()
@@ -551,10 +594,18 @@ class DescriptiveMemorial(QgisAlgorithm):
 
         for feat in vertices.getFeatures():
             geom = feat.geometry()
-            if geom.isMultipart():
-                pnts[feat['sequence']] = [coordinateTransformer.transform(geom.asMultiPoint()[0]), feat['type'], feat['code'], (geom.constGet()[0].x(), geom.constGet()[0].y(), geom.constGet()[0].z())]
+            if modeloBD == 'GR':
+                sequence = feat['indice']
+                type = feat['tipo_verti']
+                code = feat['vertice']
             else:
-                pnts[feat['sequence']] = [coordinateTransformer.transform(geom.asPoint()), feat['type'], feat['code'], (geom.constGet().x(), geom.constGet().y(), geom.constGet().z())]
+                sequence = feat['sequence']
+                type = feat['type']
+                code = feat['code']
+            if geom.isMultipart():
+                pnts[sequence] = [coordinateTransformer.transform(geom.asMultiPoint()[0]), type, code, (geom.constGet()[0].x(), geom.constGet()[0].y(), geom.constGet()[0].z())]
+            else:
+                pnts[sequence] = [coordinateTransformer.transform(geom.asPoint()), type, code, (geom.constGet().x(), geom.constGet().y(), geom.constGet().z())]
 
         # Cálculo dos Azimutes e Distâncias
         tam = len(pnts)
@@ -686,7 +737,7 @@ class DescriptiveMemorial(QgisAlgorithm):
      style="margin-bottom: 0.0001pt; text-align: justify;">'''+ self.tr('The description of this perimeter begins ', str2HTML('Inicia-se a descrição deste perímetro n'))
 
         texto_var1 = self.tr('at the vertex ', str2HTML('o vértice ')) + '''<b>[Vn]</b>, '''+ self.tr('with coordinates ', 'de coordenadas ') + '''[Coordn],
-    [Descr_k], '''+ self.tr('from this, it continues to confront [Confront_k], with the following flat azimuths and distances: [Az_n] and [Dist_n]m up to ',
+    [Descr_k]'''+ self.tr('from this, it continues to confront [Confront_k], with the following flat azimuths and distances: [Az_n] and [Dist_n]m up to ',
                    str2HTML('deste, segue confrontando com [Confront_k], com os seguintes azimutes planos e distâncias: [Az_n] e [Dist_n]m até '))
 
         texto_var2 = self.tr('the vertex ', str2HTML('o vértice ')) + '''<span> </span><b>[Vn]</b>, '''+ self.tr('with coordinates ', 'de coordenadas ') + '''[Coordn]; '''+ self.tr('[Az_n] and [Dist_n]m up to ', str2HTML('[Az_n] e [Dist_n]m até '))
@@ -718,19 +769,42 @@ class DescriptiveMemorial(QgisAlgorithm):
     </html>
     '''
         # Inserindo dados iniciais do levantamento
-        try:
-            itens = {'[IMOVEL]': str2HTML(feat1['property']),
-                    '[PROPRIETARIO]': str2HTML(feat1['owner']),
-                    '[UF]': feat1['state'],
-                    '[MATRICULAS]': str2HTML(feat1['transcript']),
-                    '[AREA]': self.tr(format_num.format(feat1['area']), format_num.format(feat1['area']).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                    '[SRC]': self.tr(SRC, SRC.replace('zone', 'fuso')),
-                    '[REGISTRO]': str2HTML(feat1['registry']),
-                    '[MUNICIPIO]': str2HTML(feat1['county']),
-                    '[PERIMETRO]': self.tr(format_num.format(feat1['perimeter']), format_num.format(feat1['perimeter']).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                        }
-        except:
-            raise QgsProcessingException(self.tr('Check that your layer "property_area_a" has the correct field names for the TopoGeo model! More information: https://bit.ly/3FDNQGC', 'Verifique se sua camada "Área do imóvel" está com os nomes dos campos corretos para o modelo TopoGeo! Mais informações: https://geoone.com.br/ebook_gratis/'))
+        if modeloBD == 'GR':
+            property = feat1['denominacao']
+            owner = feat1['nome']
+            state = feat1['uf']
+            transcript = feat1['matricula']
+            registry = feat1['sncr']
+            county = feat1['municipio']
+            survey_date = feat1['data']
+            tech_manager = 'NOME COMPLETO'
+            prof_id = 'REGISTRO PROFISSIONAL'
+        else:
+            property = feat1['property']
+            owner = feat1['owner']
+            state = feat1['state']
+            transcript = feat1['transcript']
+            registry = feat1['registry']
+            county = feat1['county']
+            survey_date = feat1['survey_date']
+            tech_manager = feat1['tech_manager']
+            prof_id = feat1['prof_id']
+
+        geom1 = feat1.geometry()
+        geom1.transform(coordinateTransformer)
+        area1 = geom1.area()
+        perimeter1 = geom1.length()
+
+        itens = {'[IMOVEL]': str2HTML(property),
+                '[PROPRIETARIO]': str2HTML(owner),
+                '[UF]': str2HTML(state),
+                '[MATRICULAS]': str2HTML(transcript),
+                '[AREA]': self.tr(format_num.format(area1), format_num.format(area1).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                '[SRC]': self.tr(SRC, SRC.replace('zone', 'fuso')),
+                '[REGISTRO]': str2HTML(registry),
+                '[MUNICIPIO]': str2HTML(county),
+                '[PERIMETRO]': self.tr(format_num.format(perimeter1), format_num.format(perimeter1).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                    }
         for item in itens:
                 texto_inicial = texto_inicial.replace(item, itens[item])
 
@@ -741,7 +815,7 @@ class DescriptiveMemorial(QgisAlgorithm):
                         '[Coordn]': CoordN(pnts[t[0]+1][0].x(), pnts[t[0]+1][0].y(), pnts[t[0]+1][3][2]) if coordenadas in (0,1,2,3) else CoordN(pnts[t[0]+1][3][0], pnts[t[0]+1][3][1], pnts[t[0]+1][3][2]),
                         '[Az_n]': str2HTML(self.tr(dd2dms(Az_lista[t[0]],1), dd2dms(Az_lista[t[0]],1).replace('.', ','))),
                         '[Dist_n]': self.tr(format_num.format(Dist[t[0]]), format_num.format(Dist[t[0]]).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                        '[Descr_k]': ListaDescr[w][0],
+                        '[Descr_k]': ListaDescr[w][0] + ', ' if ListaDescr[w][0] else '',
                         '[Confront_k]': ListaDescr[w][1]
                         }
             for item in itens:
@@ -766,11 +840,11 @@ class DescriptiveMemorial(QgisAlgorithm):
                     '[GRS]': SRC.split(' /')[0],
                     '[FUSO]': str(FusoHemisf(centroideG)[0]),
                     '[HEMISFERIO]': FusoHemisf(centroideG)[1],
-                    '[RESP_TEC]': str2HTML(feat1['tech_manager'].upper()),
-                    '[CREA]': str2HTML(feat1['prof_id']),
-                    '[LOCAL]': str2HTML((feat1['county']) +' - ' + (feat1['state']).upper()),
-                    '[DATA]': self.tr((feat1['survey_date'].toPyDate()).strftime("%b %d, %Y"),
-                                       (feat1['survey_date'].toPyDate()).strftime("%d de {} de %Y").format(str2HTML(meses[feat1['survey_date'].month()])))
+                    '[RESP_TEC]': str2HTML(tech_manager.upper()),
+                    '[CREA]': str2HTML(prof_id),
+                    '[LOCAL]': str2HTML((county) +' - ' + (state).upper()),
+                    '[DATA]': self.tr((survey_date.toPyDate()).strftime("%b %d, %Y"),
+                                       (survey_date.toPyDate()).strftime("%d de {} de %Y").format(str2HTML(meses[survey_date.month()])))
                     }
 
         for item in itens:
