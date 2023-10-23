@@ -64,6 +64,25 @@ def tr(*string):
     else:
         return string[0]
 
+
+def proportion(values, total):
+    sum_values = np.sum(values)
+    new_values = []
+    acc = 0
+    for v in values:
+        q, r = divmod(v * total, sum_values)
+        if acc + r < sum_values:
+            acc += r
+        else:
+            if acc > r:
+                new_values[-1] += 1
+            else:
+                q += 1
+            acc -= sum_values - r
+        new_values.append(q)
+    return new_values
+
+
 @qgsfunction(args='auto', group='LF Tools')
 def fieldstat(layer_name, field_name, type, feature, parent):
     ''' Returns the Aggregate function of a layer's field.
@@ -578,15 +597,17 @@ def inter_area (this_layer, other_layer, calc_CRS, filter, feature, parent):
     return float(area)
 
 @qgsfunction(args='auto', group='LF Tools')
-def dinamictable(titulo, campos, apelidos, decimal, fator, feature, parent):
+def dinamictable(titulo, campos, apelidos, decimal, fator, compensador, feature, parent):
     """
     Generates a dynamic HTML table from a list of numeric fields with the sum of their values for each feature.
-    <p>Note: Values equal to zero are ignored.</p>
+    <p>Note 1: Values equal to zero are ignored.</p>
+    <p>Note 2: Values are multiplied by the factor.</p>
+    <p>Note 3: Values are proportionally compensating for rounding errors by the compensator value. If you wish to ignore, fill in as -1.</p>
     <h2>Examples:</h2>
     <ul>
-      <li>dinamictable(title, fields, alias, precision, factor) -> HTML</li>
-      <li>dinamictable('Table 1', 'field1,field2,field3', 'Field 1,Field 2,Field 3',2, 1) -> HTML</li>
-      <li>dinamictable('Report', 'a,b,c', '',2, 0.0001) -> HTML</li>
+      <li>dinamictable(title, fields, alias, precision, factor, compensator) -> HTML</li>
+      <li>dinamictable('Table 1', 'field1,field2,field3', 'Field 1,Field 2,Field 3',2, 1, -1) -> HTML</li>
+      <li>dinamictable('Report', 'a,b,c', '',2, 0.0001, 100) -> HTML</li>
     </ul>
     """
     campos = campos.replace(' ', '').split(',')
@@ -613,7 +634,7 @@ def dinamictable(titulo, campos, apelidos, decimal, fator, feature, parent):
      width="283">
           <p class="MsoBodyText" style="text-align: center;"
      align="center"><span class="eop"><b><span
-     style="background: white none repeat scroll 0% 50%; -moz-background-clip: initial; -moz-background-origin: initial; -moz-background-inline-policy: initial; font-size: 8pt; color: black;"
+     style="font-size: 8pt; color: black;"
      lang="PT">[TITULO]<o:p></o:p></span></b></span></p>
           </td>
         </tr>
@@ -623,7 +644,7 @@ def dinamictable(titulo, campos, apelidos, decimal, fator, feature, parent):
      width="142">
           <p class="MsoBodyText" style="text-align: center;"
      align="center"><span class="eop"><span
-     style="background: white none repeat scroll 0% 50%; -moz-background-clip: initial; -moz-background-origin: initial; -moz-background-inline-policy: initial; font-size: 8pt; color: black;"
+     style="font-size: 8pt; color: black;"
      lang="PT">''' + tr('CLASS', 'CLASSE') + '''<o:p></o:p></span></span></p>
           </td>
           <td
@@ -631,7 +652,7 @@ def dinamictable(titulo, campos, apelidos, decimal, fator, feature, parent):
      width="142">
           <p class="MsoBodyText" style="text-align: center;"
      align="center"><span class="eop"><span
-     style="background: white none repeat scroll 0% 50%; -moz-background-clip: initial; -moz-background-origin: initial; -moz-background-inline-policy: initial; font-size: 8pt; color: black;"
+     style="font-size: 8pt; color: black;"
      lang="PT">''' + tr('VALUE', 'VALOR') + '''<o:p></o:p></span></span></p>
           </td>
         </tr>
@@ -642,7 +663,7 @@ def dinamictable(titulo, campos, apelidos, decimal, fator, feature, parent):
      width="142">
           <p class="MsoBodyText" style="text-align: center;"
      align="center"><span class="eop"><span
-     style="background: white none repeat scroll 0% 50%; -moz-background-clip: initial; -moz-background-origin: initial; -moz-background-inline-policy: initial; font-size: 8pt; color: black;"
+     style="font-size: 8pt; color: black;"
      lang="PT">''' + tr('SUM', 'TOTAL') + ''':<o:p></o:p></span></span></p>
           </td>
           <td
@@ -650,7 +671,7 @@ def dinamictable(titulo, campos, apelidos, decimal, fator, feature, parent):
      width="142">
           <p class="MsoBodyText" style="text-align: center;"
      align="center"><span class="eop"><span
-     style="background: white none repeat scroll 0% 50%; -moz-background-clip: initial; -moz-background-origin: initial; -moz-background-inline-policy: initial; font-size: 8pt; color: black;"
+     style="font-size: 8pt; color: black;"
      lang="PT">[TOTAL]</span></span></p>
           </td>
         </tr>
@@ -665,7 +686,7 @@ def dinamictable(titulo, campos, apelidos, decimal, fator, feature, parent):
      width="142">
           <p class="MsoBodyText" style="text-align: center;"
      align="center"><span class="eop"><span
-     style="background: white none repeat scroll 0% 50%; -moz-background-clip: initial; -moz-background-origin: initial; -moz-background-inline-policy: initial; font-size: 8pt; color: black;"
+     style="font-size: 8pt; color: black;"
      lang="PT">[NOME]<o:p></o:p></span></span></p>
           </td>
           <td
@@ -673,7 +694,7 @@ def dinamictable(titulo, campos, apelidos, decimal, fator, feature, parent):
      width="142">
           <p class="MsoBodyText" style="text-align: center;"
      align="center"><span class="eop"><span
-     style="background: white none repeat scroll 0% 50%; -moz-background-clip: initial; -moz-background-origin: initial; -moz-background-inline-policy: initial; font-size: 8pt; color: black;"
+     style="font-size: 8pt; color: black;"
      lang="PT"><o:p>[VALOR]&nbsp;</o:p></span></span></p>
           </td>
         </tr>
@@ -684,11 +705,25 @@ def dinamictable(titulo, campos, apelidos, decimal, fator, feature, parent):
     for k, campo in enumerate(campos):
         valor = round(feature[campo]*fator, decimal)
         if valor > 0:
-            soma = soma + valor
+            soma += valor
             if valor > 10**(-1*decimal):
                 dic[apelidos[k]] = valor
+
     lista = list(dic.keys())
     lista.sort()
+
+    if compensador > 0:
+        soma = 0
+        compensador = int(round(round(compensador, decimal)*(10**(decimal))))
+        valores = []
+        for item in lista:
+            valores += [int(dic[item]*10**(decimal))]
+        compensados = proportion(valores, compensador)
+        for k, item in enumerate(lista):
+            valor = compensados[k]/10**(decimal)
+            dic[item] = valor
+            soma += valor
+
     linhas =''
     for item in lista:
         linha0 = linha
