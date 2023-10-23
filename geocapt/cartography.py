@@ -376,6 +376,29 @@ def main_azimuth(geometry):
             direcao = np.degrees(azimute(QgsPointXY(0,0), vetor)[0])
         return direcao
 
+def Mesclar_Multilinhas(inters):
+    if inters.type() == 1 and inters.isMultipart():
+        partes = inters.asMultiPolyline()
+        parte1 = QgsGeometry.fromPolylineXY(partes[0])
+        k = 1
+        cont = 1
+        while len(partes) > 1:
+            # print(k, cont, len(partes), parte1)
+            parte2 = QgsGeometry.fromPolylineXY(partes[k])
+            if  parte1.intersects(parte2):
+                parte1 = parte1.combine(parte2)
+                del partes[k]
+            else:
+                k += 1
+            cont +=1
+            if cont > 10:
+                # print('erro no loop',cont)
+                break
+        inters = parte1
+        return inters
+    else:
+        return inters
+
 def map_sistem(lon, lat, ScaleD=1e6):
     # Escala 1:1.000.000
     nome = ''
