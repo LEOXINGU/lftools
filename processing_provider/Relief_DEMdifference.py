@@ -167,7 +167,7 @@ Subtraendo é o rastar que está subtraindo.'''
         self.addParameter(
             QgsProcessingParameterBoolean(
                 self.NEGATIVE,
-                self.tr('Multiply by -1', 'Multiplicar por -1'),
+                self.tr('Multiply the result by -1', 'Multiplicar o resultado por -1'),
                 defaultValue = False
             )
         )
