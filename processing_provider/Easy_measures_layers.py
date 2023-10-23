@@ -54,7 +54,7 @@ class MeasureLayers(QgsProcessingAlgorithm):
         return 'easy'
 
     def tags(self):
-        return self.tr('measure,layer,area,perimeter,length,multiple,feet,meters,km,square').split(',')
+        return self.tr('measure,layer,area,perimeter,length,multiple,feet,meters,km,square,SGL,LTP,units').split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/easy.png'))
@@ -129,7 +129,8 @@ class MeasureLayers(QgsProcessingAlgorithm):
         )
 
         tipo = [self.tr('Ellipsoid', 'Elipsoidal'),
-                 self.tr('Cartesian', 'Cartesiano')]
+                 self.tr('Cartesian / Projected', 'Cartesiano / Projetado'),
+                 self.tr('Local Tangent Plane - LTP', 'Sistema Geodésico Local - SGL')]
 
         self.addParameter(
             QgsProcessingParameterEnum(
@@ -166,10 +167,6 @@ class MeasureLayers(QgsProcessingAlgorithm):
             context
         )
 
-        formula_length = ['$length', 'length($geometry)'][formula]
-        formula_perimeter = ['$perimeter', 'perimeter($geometry)'][formula]
-        formula_area = ['$area', 'area($geometry)'][formula]
-
         # Transformação de unidades
         unid_transf_dist = [1, 0.3048, 0.9144, 1000, 621.4]
         unid_abb_dist = ['m', 'ft', 'yd', 'Km', 'mi']
@@ -178,7 +175,7 @@ class MeasureLayers(QgsProcessingAlgorithm):
         unidade_dist = unid_transf_dist[units_dist]
         unidade_area = unid_transf_area[units_area]
 
-        formula_tipo = ['ellip', 'cart'][formula]
+        formula_tipo = [self.tr('ellip', 'elip'), self.tr('cart'), self.tr('LTP', 'SGL')][formula]
 
         field_length = QgsField( self.tr('length', 'comprimento')+ '_' + formula_tipo + '_' + unid_abb_dist[units_dist], QVariant.Double, "numeric", 14, precisao)
         field_perimeter = QgsField( self.tr('perimeter', 'perímetro') + '_'  + formula_tipo + '_' + unid_abb_dist[units_dist], QVariant.Double, "numeric", 14, precisao)
@@ -196,17 +193,30 @@ class MeasureLayers(QgsProcessingAlgorithm):
         )
 
         for current, layer in enumerate(layers):
+
+            if layer.type() == 0:# VectorLayer
+                if formula in [0,1]: # Elipsoidal e Cartográfica
+                    formula_length = ['$length', 'length($geometry)'][formula]
+                    formula_perimeter = ['$perimeter', 'perimeter($geometry)'][formula]
+                    formula_area = ['$area', 'area($geometry)'][formula]
+
+                    if layer.geometryType() == QgsWkbTypes.LineGeometry:
+                        layer.addExpressionField(formula_length + '/' + str(unidade_dist), field_length)
+                    if layer.geometryType() == QgsWkbTypes.PolygonGeometry:
+                        layer.addExpressionField(formula_perimeter + '/' + str(unidade_dist), field_perimeter)
+                        layer.addExpressionField(formula_area + '/' + str(unidade_area), field_area)
+
+                elif formula == 2: # SGL
+                    formula_area = "areaLTP('{}')".format(layer.name())
+                    print(formula_area)
+                    print(field_area)
+
+                    if layer.geometryType() == QgsWkbTypes.PolygonGeometry:
+                        layer.addExpressionField(formula_area + '/' + str(unidade_area), field_area)
+
             if feedback.isCanceled():
                 break
-            # check the layer type
-            if layer.type() == 0:# VectorLayer
-                # check the layer geometry type
-                if layer.geometryType() == QgsWkbTypes.LineGeometry:
-                    layer.addExpressionField(formula_length + '/' + str(unidade_dist), field_length)
-                if layer.geometryType() == QgsWkbTypes.PolygonGeometry:
-                    layer.addExpressionField(formula_perimeter + '/' + str(unidade_dist), field_perimeter)
-                    layer.addExpressionField(formula_area + '/' + str(unidade_area), field_area)
-            feedback.setProgress(int(current * total))
+            feedback.setProgress(int((current+1) * total))
 
         feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
         feedback.pushInfo(self.tr('Leandro Franca - Cartographic Engineer', 'Leandro França - Eng Cart'))
