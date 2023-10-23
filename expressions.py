@@ -35,6 +35,7 @@ from lftools.geocapt.cartography import (map_sistem,
                                          ScaleFactor,
                                          geom2PointList,
                                          reprojectPoints,
+                                         Mesclar_Multilinhas,
                                          areaGauss,
                                          main_azimuth,
                                          inom2mi as INOM2MI)
@@ -1827,22 +1828,7 @@ def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature
                     if geom.intersects(geom_lin):
                         inter = geom.intersection(geom_lin)
                         if inter.type() == 1: # linha
-                            if inter.isMultipart():
-                                partes = inter.asMultiPolyline()
-                                parte1 = QgsGeometry.fromPolylineXY(partes[0])
-                                k = 1
-                                cont = 1
-                                while len(partes) > 1:
-                                    parte2 = QgsGeometry.fromPolylineXY(partes[k])
-                                    if  parte1.intersects(parte2):
-                                        parte1 = parte1.combine(parte2)
-                                        del partes[k]
-                                    else:
-                                        k += 1
-                                    cont +=1
-                                    if cont > 10:
-                                        break
-                                inter = parte1
+                            inter = Mesclar_Multilinhas(inter)
                             lin_coords = inter.asPolyline()
                             if ponto in lin_coords[1:]:
                                 if feat[nome] != Confrontante:
@@ -1886,15 +1872,15 @@ def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature
 
 
 @qgsfunction(args='auto', group='LF Tools')
-def geoneighbors(layer_name, street, borderer_field, prefix, decimal, fontsize, feature, parent):
+def geoneighbors(layer_name, testada, borderer_field, prefix, decimal, fontsize, feature, parent):
     """
     Generates a table of coordinates with neighbors (boundaries) and a polygon and distances.
     <p>Note: A layer or QGIS Project with a projected CRS is required.</p>
 
     <h2>Exemples:</h2>
     <ul>
-      <li>geoneighbors('layer_name', 'street_field', 'borderer_field', 'preffix', precision, fontsize) = HTML</li>
-      <li>geoneighbors('layer_name', street, borderer_field , 'V-', 2, 12) = HTML</li>
+      <li>geoneighbors('layer_name', 'front_lot_layer', 'borderer_name_field', 'preffix', precision, fontsize) = HTML</li>
+      <li>geoneighbors('layer_name', 'front_line', 'name' , 'V-', 2, 12) = HTML</li>
     </ul>
     """
     if len(QgsProject.instance().mapLayersByName(layer_name)) == 1:
@@ -1909,23 +1895,40 @@ def geoneighbors(layer_name, street, borderer_field, prefix, decimal, fontsize, 
 
     geom = feature.geometry()
     if geom.type() == 2 and geom:
-
         # Pegar vizinhos
-        geom1 = feature.geometry()
         feat1 = feature
+        geom1 = feat1.geometry()
+        index = QgsSpatialIndex(layer.getFeatures())
+        bbox1 = geom1.boundingBox()
+        feat_ids = index.intersects(bbox1)
         confront = {}
-        for feat2 in layer.getFeatures():
+        for feat2 in layer.getFeatures(QgsFeatureRequest(feat_ids)):
             geom2 = feat2.geometry()
             cd_lote2 = str(feat2[borderer_field])
             if feat1 != feat2:
                 if geom1.intersects(geom2):
                     inters = geom1.intersection(geom2)
+                    inters = Mesclar_Multilinhas(inters)
                     confront[feat2.id()] = [cd_lote2, inters]
 
         if geom1.isMultipart():
             coords = geom1.asMultiPolygon()[0][0]
         else:
             coords = geom1.asPolygon()[0]
+
+        # Testada
+        try:
+            descricao, id, nome = testada.replace(' ', '').split(',') #nome da camada, ID, atributo
+            if len(QgsProject.instance().mapLayersByName(descricao)) == 1:
+                layer = QgsProject.instance().mapLayersByName(descricao)[0]
+            campos = [field.name() for field in layer.fields()]
+            # Camadas de polígono e confrontantes deve estar com o mesmo SRC
+            filter = '"{}" = {}'.format(id, feature.id())
+            exp = QgsExpression(filter)
+            if id not in campos or nome not in campos:
+                frontLot = str(testada)
+        except:
+            frontLot = str(testada)
 
         vizinhos = []
         for pnt in coords[:-1]:
@@ -1935,14 +1938,24 @@ def geoneighbors(layer_name, street, borderer_field, prefix, decimal, fontsize, 
             for item in confront:
                 geom2 = confront[item][1]
                 if geom2.type() == 1 and geom1.intersects(geom2): #Line
-                    try:
-                        coord_lin = geom2.asPolyline()
-                    except:
-                        coord_lin = geom2.asMultiPolyline()[-1]
+                    coord_lin = geom2.asPolyline()
                     if pnt != coord_lin[-1]:
                         vante = confront[item][0]
                 elif geom2.type() == 0 and geom1.intersects(geom2): #Point
                     compl = confront[item][0]
+            # Se não foi encontrado vante, buscar na camada de testada
+            if not vante:
+                if 'frontLot' in locals():
+                    vante = frontLot
+                else:
+                    for feat in layer.getFeatures(QgsFeatureRequest(exp)):
+                        geom = feat.geometry()
+                        coords = geom.asPolyline()
+                        if geom1.intersects(geom) and pnt != coords[-1]:
+                            vante = feat[nome]
+                            break
+                    else:
+                        vante = testada
             vizinhos += [(vante, compl)]
 
         if geom.isMultipart():
@@ -2150,27 +2163,18 @@ def geoneighbors(layer_name, street, borderer_field, prefix, decimal, fontsize, 
 
         # Texto do meio
         LINHAS = ''
-        ruas = str(street).split(',')
-        n_ruas = 0
         for k in range(tam):
             linha0 = linha
-
-            if not vizinhos[k][0]:
-                try:
-                    rua = ruas[n_ruas].strip()
-                    n_ruas += 1
-                except:
-                    rua = street
-
             LAT = tr(DD2DMS(pnts_GEO[k+1][0].y(),decimal + 3), DD2DMS(pnts_GEO[k+1][0].y(),decimal + 3).replace('.', ','))
             LON = tr(DD2DMS(pnts_GEO[k+1][0].x(),decimal + 3), DD2DMS(pnts_GEO[k+1][0].x(),decimal + 3).replace('.', ','))
             LAT = LAT + 'N' if LAT[0] != '-' else LAT[1:] + 'S'
             LON = LON + 'E' if LON[0] != '-' else LON[1:] + 'W'
+
             itens = {'[Vn]': pnts_UTM[k+1][2],
                      '[LON]': LON,
                      '[LAT]': LAT,
                      '[h]': tr(format_num.format(pnts_GEO[k+1][0].z()), format_num.format(pnts_GEO[k+1][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                     '[confr]': vizinhos[k][0] if vizinhos[k][0] else rua,
+                     '[confr]': vizinhos[k][0],
                      '[dist]': tr(format_num.format(Dist[k]), format_num.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.')),
                      '[comp]': tr('Punctual neighbor with ' + vizinhos[k][1], 'Confrontação pontual com ' + vizinhos[k][1]) if vizinhos[k][1] else '-',
                         }
