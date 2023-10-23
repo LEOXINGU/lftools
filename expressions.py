@@ -1879,8 +1879,18 @@ def geoneighbors(layer_name, testada, borderer_field, prefix, decimal, fontsize,
 
     <h2>Exemples:</h2>
     <ul>
-      <li>geoneighbors('layer_name', 'front_lot_layer', 'borderer_name_field', 'preffix', precision, fontsize) = HTML</li>
-      <li>geoneighbors('layer_name', 'front_line', 'name' , 'V-', 2, 12) = HTML</li>
+      <li>geoneighbors('layer_name', 'front_lot_name', 'borderer_name_field', 'preffix', precision, fontsize) = HTML</li>
+      <li>geoneighbors('layer_name', 'street', 'name' , 'V-', 2, 12) = HTML</li>
+    </ul>
+    <h2>Exemples with vertex layer:</h2>
+    <ul>
+      <li>geoneighbors('layer_name', 'front_lot_name', 'borderer_name_field', 'vertex_point_layer,ID,name', precision, fontsize) = HTML</li>
+      <li>geoneighbors('layer_name', 'street', 'name' , 'Vertex,id,name', 2, 12) = HTML</li>
+    </ul>
+    <h2>Exemples with a line Front Lot layer:</h2>
+    <ul>
+      <li>geoneighbors('layer_name', 'front_line_layer,id,name', 'borderer_name_field', 'preffix', precision, fontsize) = HTML</li>
+      <li>geoneighbors('layer_name', 'FrontLot,featID,name', 'name' , 'V-', 2, 12) = HTML</li>
     </ul>
     """
     if len(QgsProject.instance().mapLayersByName(layer_name)) == 1:
@@ -1949,9 +1959,9 @@ def geoneighbors(layer_name, testada, borderer_field, prefix, decimal, fontsize,
                     vante = frontLot
                 else:
                     for feat in layer.getFeatures(QgsFeatureRequest(exp)):
-                        geom = feat.geometry()
-                        coords = geom.asPolyline()
-                        if geom1.intersects(geom) and pnt != coords[-1]:
+                        geom2 = feat.geometry()
+                        coords = geom2.asPolyline()
+                        if geom1.intersects(geom2) and pnt != coords[-1]:
                             vante = feat[nome]
                             break
                     else:
