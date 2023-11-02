@@ -1705,8 +1705,8 @@ def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature
             descr_pnt_ini = str(descr_pnt_ini)
 
             # conteudo do memorial
-            text_ini = tr('<div style="text-align: justify; font-size: [FONTSIZE]px; font-family: Arial;">The description of this perimeter begins at the vertex <b>[Vn]</b>, with coordinates ' + estilo_vertices + ', [descr_pnt_ini] from this, with the following flat azimuths and distances: ',
-                          '<div style="text-align: justify; font-size: [FONTSIZE]px; font-family: Arial;">Inicia-se a descrição deste perímetro no vértice <b>[Vn]</b>, de coordenadas ' + estilo_vertices + ', [descr_pnt_ini] deste, segue com os seguintes azimutes planos e distâncias: ')
+            text_ini = tr('<p style="text-align: justify; font-size: [FONTSIZE]px; font-family: Arial;">The description of this perimeter begins at the vertex <b>[Vn]</b>, with coordinates ' + estilo_vertices + ', [descr_pnt_ini] from this, with the following flat azimuths and distances: ',
+                          '<p style="text-align: justify; font-size: [FONTSIZE]px; font-family: Arial;">Inicia-se a descrição deste perímetro no vértice <b>[Vn]</b>, de coordenadas ' + estilo_vertices + ', [descr_pnt_ini] deste, segue com os seguintes azimutes planos e distâncias: ')
 
             text_meio = tr('[Azn] and [Dn]m up to the vertex <b>[Vn]</b>, with coordinates ' + estilo_vertices + ', ',
                            '[Azn] e [Dn]m até o vértice <b>[Vn]</b>, de coordenadas ' + estilo_vertices + ', ')
@@ -1714,19 +1714,17 @@ def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature
             if TipoGeometria == 2:
                 text_fim = tr('''the starting point for the description of this perimeter.
                 All coordinates described here are georeferenced to the Geodetic Reference System (GRS) (SGR) <b>[SGR]</b>, and are projected in the system <b>[PROJ]</b>,
-                from which all azimuths and distances, area and perimeter were calculated.''',
+                from which all azimuths and distances, area and perimeter were calculated.</p>''',
                 '''ponto inicial da descrição deste perímetro.
                 Todas as coordenadas aqui descritas estão georreferenciadas ao Sistema Geodésico de Referência (SGR) <b>[SGR]</b>, sendo projetadas no sistema <b>[PROJ]</b>,
-                a partir das quais todos os azimutes e distâncias foram calculados.</div>
-                ''')
+                a partir das quais todos os azimutes e distâncias foram calculados.</p>''')
             else:
                 text_fim = tr('''the last point of this perimeter.
                 All coordinates described here are georeferenced to the Geodetic Reference System (GRS) (SGR) <b>[SGR]</b>, and are projected in the system <b>[PROJ]</b>,
-                from which all azimuths and distances, area and perimeter were calculated.''',
+                from which all azimuths and distances, area and perimeter were calculated.</p>''',
                 '''último ponto deste perímetro.
                 Todas as coordenadas aqui descritas estão georreferenciadas ao Sistema Geodésico de Referência (SGR) <b>[SGR]</b>, sendo projetadas no sistema <b>[PROJ]</b>,
-                a partir das quais todos os azimutes e distâncias foram calculados.</div>
-                ''')
+                a partir das quais todos os azimutes e distâncias foram calculados.</p>''')
 
             # Texto inicial
             itens = {'[Vn]': pnts_UTM[1][2],
@@ -1788,8 +1786,8 @@ def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature
         except: # >>>>>>>>>>>>>>>>> puxar nome dos confrontantes
 
             # conteudo do memorial
-            text_ini = tr('<div style="text-align: justify; font-size: [FONTSIZE]px; font-family: Arial;">The description of this perimeter begins at the vertex <b>[Vn]</b>, with coordinates ' + estilo_vertices + ', ',
-                          '<div style="text-align: justify; font-size: [FONTSIZE]px; font-family: Arial;">Inicia-se a descrição deste perímetro no vértice <b>[Vn]</b>, de coordenadas ' + estilo_vertices + ', ')
+            text_ini = tr('<p style="text-align: justify; font-size: [FONTSIZE]px; font-family: Arial;">The description of this perimeter begins at the vertex <b>[Vn]</b>, with coordinates ' + estilo_vertices + ', ',
+                          '<p style="text-align: justify; font-size: [FONTSIZE]px; font-family: Arial;">Inicia-se a descrição deste perímetro no vértice <b>[Vn]</b>, de coordenadas ' + estilo_vertices + ', ')
 
             text_meio1 = tr('from this, it continues adjoining with [ADJOINER], with the following flat azimuths and distances: [Azn] and [Dn]m up to the vertex <b>[Vn]</b>, with coordinates ' + estilo_vertices + ', ',
                             'deste, segue confrontando com [ADJOINER], com os seguintes azimutes planos e distâncias: [Azn] e [Dn]m até o vértice <b>[Vn]</b>, de coordenadas ' + estilo_vertices + ', ')
@@ -1799,11 +1797,10 @@ def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature
 
             text_fim = tr('''the starting point for the description of this perimeter.
             All coordinates described here are georeferenced to the Geodetic Reference System (GRS) (SGR) <b>[SGR]</b>, and are projected in the system <b>[PROJ]</b>,
-            from which all azimuths and distances, area and perimeter were calculated.''',
+            from which all azimuths and distances, area and perimeter were calculated.</p>''',
             '''ponto inicial da descrição deste perímetro.
             Todas as coordenadas aqui descritas estão georreferenciadas ao Sistema Geodésico de Referência (SGR) <b>[SGR]</b>, sendo projetadas no sistema <b>[PROJ]</b>,
-            a partir das quais todos os azimutes e distâncias foram calculados.</div>
-            ''')
+            a partir das quais todos os azimutes e distâncias foram calculados.</p>''')
 
             # Texto inicial
             itens = {'[Vn]': pnts_UTM[1][2],
