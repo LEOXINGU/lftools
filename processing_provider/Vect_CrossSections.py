@@ -236,6 +236,7 @@ class CrossSections(QgsProcessingAlgorithm):
                 if cont == NumSec +1:
                     break
             # Ultima secao
+            cont +=1
             point1 = array([coord[-2].x(), coord[-2].y()])
             point2 = array([coord[-1].x(), coord[-1].y()])
             vetor = point2 - point1
