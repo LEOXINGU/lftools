@@ -420,14 +420,27 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
                     '[CREA]': str2HTML(ponto['profession']),
                     '[COD_INCRA]': str2HTML(ponto['profession_id']),
                     '[DESCR]': str2HTML(ponto['description']),
-                    '[FOTO_MARCO]': img2html_resized(ponto['mark_photo']) if ponto['mark_photo'] else '',
-                    '[FOTO_PAN]': img2html_resized(ponto['pan_photo']) if ponto['pan_photo'] else '',
-                    '[IMAGEM_AER]': img2html_resized(ponto['aerial_image']) if ponto['aerial_image'] else '',
                     '[OBS]': str2HTML(ponto['observation']),
                     '[SRC]': self.tr(SRC, SRC.replace('zone', 'fuso'))
                         }
         except:
             raise QgsProcessingException(self.tr('Check that your layer "reference_point_p" has the correct field names for the TopoGeo model! More information: https://bit.ly/3FDNQGC', 'Verifique se sua camada "Ponto de Referência Geodésica" está com os nomes dos campos corretos para o modelo TopoGeo! Mais informações: https://geoone.com.br/ebook_gratis/'))
+
+        try:
+            itens['[FOTO_MARCO]'] = img2html_resized(ponto['mark_photo']) if ponto['mark_photo'] else ''
+        except:
+            raise QgsProcessingException(self.tr('Make sure the landmark photo is in JPEG format!', 'Verifique se a foto do marco está no formato JPEG!'))
+
+        try:
+            itens['[FOTO_PAN]'] = img2html_resized(ponto['pan_photo']) if ponto['pan_photo'] else ''
+        except:
+            raise QgsProcessingException(self.tr('Make sure the panoramic photo is in JPEG format!', 'Verifique se a foto panorâmica está no formato JPEG!'))
+
+        try:
+            itens['[IMAGEM_AER]'] = img2html_resized(ponto['aerial_image']) if ponto['aerial_image'] else ''
+        except:
+            raise QgsProcessingException(self.tr('Make sure your aerial sketch is in JPEG format!', 'Verifique se o seu croqui aéreo está no formato JPEG!'))
+
 
         for item in itens:
                 TEXTO = TEXTO.replace(item, itens[item])

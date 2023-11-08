@@ -8,7 +8,7 @@ qgisMinimumVersion=3.10
 description=Tools for cartographic production, surveying, database management, digital image processing and spatial analysis.
 version=1.12.2
 author=Leandro França
-email=geoleandro.franca@gmail.com
+email=suporte@geoone.com.br
 
 about=Processing provider plugin with tools for cartographic production, surveying, database management, digital image processing and scientific spatial analysis.
 
