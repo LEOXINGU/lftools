@@ -113,7 +113,7 @@ class PointsFromText(QgsProcessingAlgorithm):
             QgsProcessingParameterString(
                 self.RE_NAME,
                 self.tr('RegEx for Vertex Code','RegEx do Código do vértice'),
-                defaultValue = r'\w-\d\d'
+                defaultValue = r'\w+[\s-]+\d{2,3}'
             )
         )
 
