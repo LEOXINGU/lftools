@@ -95,7 +95,7 @@ class Backup(QgsProcessingAlgorithm):
     USER = 'USER'
     PORT = 'PORT'
     VERSION = 'VERSION'
-    versions = ['9.5', '9.6', '10', '11', '12', '13', '14', '15']
+    versions = ['9.5', '9.6', '10', '11', '12', '13', '14', '15', '16']
 
     def initAlgorithm(self, config=None):
         # INPUT
@@ -136,7 +136,7 @@ class Backup(QgsProcessingAlgorithm):
                 self.VERSION,
                 self.tr('PostgreSQL version', 'Versão do PostgreSQL'),
 				options = self.versions,
-                defaultValue = 7
+                defaultValue = 8
             )
         )
 
@@ -203,7 +203,7 @@ class Backup(QgsProcessingAlgorithm):
         feedback.pushInfo('\n' + self.tr('Starting DB Backup process...', 'Iniciando processo de Backup do BD...'))
         result = os.system(comando)
 
-        if result==0:
+        if result == 0:
             datahora = datetime.now().strftime("_%Y-%m-%d_%H-%M-%S")
             os.rename(file_path, os.path.join(path, DB + datahora + '.sql'))
             feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
