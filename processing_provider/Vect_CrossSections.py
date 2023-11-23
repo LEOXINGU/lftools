@@ -136,7 +136,7 @@ class CrossSections(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSink(
                 self.OUTPUT,
-                self.tr('Frames', 'Camada de molduras')
+                self.tr('Cross sections', 'Seções Transversais')
             )
         )
 
