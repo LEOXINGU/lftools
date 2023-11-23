@@ -6,7 +6,7 @@
 name=LF Tools
 qgisMinimumVersion=3.10
 description=Tools for cartographic production, surveying, database management, digital image processing and spatial analysis.
-version=1.12.3
+version=1.12.4
 author=Leandro França
 email=suporte@geoone.com.br
 
@@ -21,6 +21,7 @@ repository=https://github.com/LEOXINGU/lftools
 hasProcessingProvider=yes
 # Uncomment the following line and add your changelog:
 # changelog=
+  1.12.4 - Database tools updated to PostgreSQL 16
   1.12.3 - Font type configuration for deedtext
   1.12.2 - Improvements to the Deed description tool
   1.12.1 - Bug fix in Nearest points and Adjoiner Lines tools
