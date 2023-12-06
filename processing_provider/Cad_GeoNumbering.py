@@ -22,6 +22,7 @@ from qgis.core import (QgsApplication,
                        QgsProcessing,
                        QgsProcessingParameterField,
                        QgsProcessingParameterEnum,
+                       QgsProcessingParameterNumber,
                        QgsProcessingParameterBoolean,
                        QgsFeatureSink,
                        QgsProcessingException,
@@ -94,6 +95,7 @@ Obs.: Este algoritmo utiliza o centroide da feição para ordenar geograficament
     FIELD = 'FIELD'
     METHOD = 'METHOD'
     GROUP = 'GROUP'
+    INITIAL = 'INITIAL'
     SAVE = 'SAVE'
 
     def initAlgorithm(self, config=None):
@@ -151,6 +153,16 @@ Obs.: Este algoritmo utiliza o centroide da feição para ordenar geograficament
         )
 
         self.addParameter(
+            QgsProcessingParameterNumber(
+                self.INITIAL,
+                self.tr('Initial count', 'Contagem inicial'),
+                type = 0,
+                defaultValue = 0,
+                minValue = 0
+            )
+        )
+
+        self.addParameter(
             QgsProcessingParameterBoolean(
                 self.SAVE,
                 self.tr('Save Editions', 'Salvar Edições'),
@@ -198,12 +210,18 @@ Obs.: Este algoritmo utiliza o centroide da feição para ordenar geograficament
             context
         )
 
+        contagem = self.parameterAsInt(
+            parameters,
+            self.INITIAL,
+            context
+        )
+
         dtype = [('id', int), ('x', float), ('y', float)]
         valores = []
 
         # Ler feições
         feedback.pushInfo(self.tr('Reading features...', 'Lendo feições...'))
-        if Campo_Agrupar:
+        if Campo_Agrupar != []:
             cont_grupo = {}
             id_grupo = {}
         for feat in layer.getSelectedFeatures() if selecionados else layer.getFeatures():
@@ -212,7 +230,7 @@ Obs.: Este algoritmo utiliza o centroide da feição para ordenar geograficament
             x = geom.asPoint().x() * (1 if metodo in [0,2,3,4] else -1)
             y = geom.asPoint().y() * (1 if metodo in [3,4,5,7] else -1)
             valores += [(id, x, y)]
-            if Campo_Agrupar:
+            if Campo_Agrupar != []:
                 valor_grupo = feat[Campo_Agrupar]
                 id_grupo[id] = valor_grupo
                 if valor_grupo not in cont_grupo:
@@ -226,14 +244,13 @@ Obs.: Este algoritmo utiliza o centroide da feição para ordenar geograficament
             ordenado = np.sort(estr, order=['y', 'x'])
 
         dic = {}
-        if Campo_Agrupar:
+        if Campo_Agrupar != []:
             for k, ord in enumerate(ordenado):
                 cont_grupo[id_grupo[ord[0]]] += 1
-                dic[ord[0]] = cont_grupo[id_grupo[ord[0]]]
+                dic[ord[0]] = cont_grupo[id_grupo[ord[0]]] + contagem
         else:
             for k, ord in enumerate(ordenado):
-                dic[ord[0]] = k+1
-
+                dic[ord[0]] = k+1 + contagem
         layer.startEditing()
 
         # Salvando resultado
