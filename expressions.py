@@ -1815,6 +1815,7 @@ def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature
             # Texto do meio
             LINHAS = ''
             Confrontante = ''
+            confr_list = [Confrontante]
 
             for k in range(tam):
                 indice = k+2 if k+2 <= tam else 1
@@ -1829,11 +1830,15 @@ def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature
                             lin_coords = inter.asPolyline()
                             if ponto in lin_coords[1:]:
                                 if feat[nome] != Confrontante:
-                                    linha0 = text_meio1
                                     Confrontante = feat[nome]
-                                else:
-                                    linha0 = text_meio2
                                 break
+
+                # Verificar se houve mudança de confrontante
+                if Confrontante != confr_list[-1]:
+                    linha0 = text_meio1
+                else:
+                    linha0 = text_meio2
+                confr_list += [Confrontante]
 
                 itens = {'[Vn]': pnts_UTM[indice][2],
                          '[Xn]': CoordenadaN (pnts_UTM[indice], pnts_GEO[indice], estilo, decimal)[0],
@@ -1852,7 +1857,6 @@ def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature
                     except:
                         return(tr('Invalid adjoiner line in [X] and [Y] coordinates! Perform layers topological validation!',
                                   'Linha de confrontante inválida nas coordenadas [X] e [Y]! Execute a validação topológica das camadas!').replace('[X]',itens['[Xn]']).replace('[Y]',itens['[Yn]']))
-
                 LINHAS += linha0
 
             # Texto final
