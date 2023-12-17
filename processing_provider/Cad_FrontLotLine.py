@@ -287,11 +287,11 @@ class FrontLotLine(QgsProcessingAlgorithm):
                         partes_novas = []
                         while len(partes)>1:
                             tam = len(partes)
-                            for i in range(0,tam-1):
+                            for r in range(0,tam-1):
                                 mergeou = False
-                                parte_A = partes[i]
-                                for j in range(i+1,tam):
-                                    parte_B = partes[j]
+                                parte_A = partes[r]
+                                for s in range(r+1,tam):
+                                    parte_B = partes[s]
                                     if parte_A[0] == parte_B[0] or parte_A[0] == parte_B[-1] or parte_A[-1] == parte_B[0] or parte_A[-1] == parte_B[-1]:
                                         mergeou = True
                                         if parte_A[0] == parte_B[0]:
@@ -304,12 +304,12 @@ class FrontLotLine(QgsProcessingAlgorithm):
                                             parte_nova = parte_A + parte_B[::-1][1:]
                                         break
                                 if mergeou:
-                                    del partes[i], partes[j-1]
+                                    del partes[r], partes[s-1]
                                     partes = [parte_nova] + partes
                                     break
                                 else:
                                     partes_novas += [parte_A]
-                                    del partes[i]
+                                    del partes[r]
                                     break
                         if partes:
                             partes_novas += partes
