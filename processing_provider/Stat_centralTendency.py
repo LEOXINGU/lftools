@@ -257,7 +257,7 @@ Observação: Camada em um SRC projetado obtém resultado mais acurados.'''
         if sink is None:
             raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT))
 
-        if Campo_Agrupar:
+        if Campo_Agrupar is not None:
             dic = {}
             for feat in layer.getFeatures():
                 geom = feat.geometry()
