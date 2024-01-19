@@ -2071,7 +2071,7 @@ def geoneighbors(layer_name, testada, borderer_field, prefix, decimal, fontsize,
 <body>
 <div align="center">
 <table class="MsoTableGrid"
- style="border: medium none ; width: 100%; border-collapse: collapse;"
+ style="border: medium none ; width: 100%; font-size: [FONTSIZE]px; border-collapse: collapse;"
  border="1" cellpadding="0" cellspacing="0"
  width="100%">
   <tbody>
@@ -2195,7 +2195,7 @@ def geoneighbors(layer_name, testada, borderer_field, prefix, decimal, fontsize,
             LINHAS += linha0
 
         # Resultado final
-        return texto.replace('[LINHAS]', LINHAS)
+        return texto.replace('[LINHAS]', LINHAS).replace('[FONTSIZE]', str(fontsize))
 
     else:
         return tr('Check if the geometry is null or invalid! Or if Atlas is on!', 'Verifique se a geometria é nula ou inválida! Ou se o Atlas está ligado!')
