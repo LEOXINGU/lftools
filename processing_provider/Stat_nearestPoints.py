@@ -216,7 +216,8 @@ Saída: Camada de multipoint com precisões posicionais em metros e outras estat
             self.FIELD,
             context
         )
-        nome_campo = campo[0]
+        if campo:
+            nome_campo = campo[0]
 
         stats = self.parameterAsEnums(
             parameters,
@@ -364,7 +365,8 @@ Saída: Camada de multipoint com precisões posicionais em metros e outras estat
                         x, y = pnt.x(), pnt.y()
                         X.append(x)
                         Y.append(y)
-                    atributos.append(dic[ID][nome_campo])
+                    if campo:
+                        atributos.append(dic[ID][nome_campo])
 
                 sigmaX = np.std(np.array(X))
                 sigmaY = np.std(np.array(Y))
