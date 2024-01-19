@@ -322,7 +322,7 @@ class DescriptiveMemorial(QgisAlgorithm):
 
         campos_vertices = ['tipo_verti', 'vertice', 'indice']
         campos_limites = ['confrontan', 'matricula']
-        campos_area = ['denominacao', 'sncr', 'matricula', 'nome', 'municipio', 'uf', 'data']
+        campos_area = ['denominacao', 'sncr', 'matricula', 'nome', 'municipio', 'uf', 'data', 'resp_tec', 'reg_prof']
         if TestModelo(campos_vertices, campos_limites, campos_area):
             modeloBD = 'GR' # GeoRural
             feedback.pushInfo('Banco de dados no modelo GeoRural...' )
@@ -777,8 +777,8 @@ class DescriptiveMemorial(QgisAlgorithm):
             registry = feat1['sncr']
             county = feat1['municipio']
             survey_date = feat1['data']
-            tech_manager = 'NOME COMPLETO'
-            prof_id = 'REGISTRO PROFISSIONAL'
+            tech_manager = feat1['resp_tec']
+            prof_id = feat1['reg_prof']
         else:
             property = feat1['property']
             owner = feat1['owner']
