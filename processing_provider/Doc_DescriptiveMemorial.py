@@ -580,7 +580,7 @@ class DescriptiveMemorial(QgisAlgorithm):
         fieldnames = [field.name() for field in Fields]
         if atributos:
             for fieldname in fieldnames:
-                if 'auxiliary' not in fieldname:
+                if 'auxiliary' not in fieldname and fieldname not in ['qrcode']: # campos a ignorar
                     att = feat1[fieldname]
                     if not att or att in ['', ' ']:
                         raise QgsProcessingException(self.tr('The attribute {} of the polygon layer must be filled!', 'O atributo {} da camada polígono do imóvel deve ser preenchido!').format(fieldname))
