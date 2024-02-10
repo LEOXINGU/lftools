@@ -66,7 +66,7 @@ class Extent2UTMGrid(QgsProcessingAlgorithm):
         return 'cartography'
 
     def tags(self):
-        return self.tr('name,extent,extension,frame,utm,grid,system,map,inom,mi,sistemático,índice,nomenclatura,grade,mapeamento,moldura').split(',')
+        return self.tr('name,extent,extension,carta,folha,frame,utm,grid,system,map,inom,mi,sistemático,índice,nomenclatura,grade,mapeamento,moldura').split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/cart_frames.png'))
