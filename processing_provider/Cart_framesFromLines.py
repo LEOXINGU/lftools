@@ -78,7 +78,7 @@ class FramesFromLines(QgsProcessingAlgorithm):
         return 'cartography'
 
     def tags(self):
-        return self.tr('sequence,frames,molduras,lines,order,ordenar,orientar,polygon,polígono').split(',')
+        return self.tr('sequence,frames,molduras,carta,folha,lines,order,ordenar,orientar,polygon,polígono').split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/cart_frames2.png'))
