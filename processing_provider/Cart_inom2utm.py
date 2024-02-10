@@ -65,7 +65,7 @@ class Inom2utmGrid(QgsProcessingAlgorithm):
         return 'cartography'
 
     def tags(self):
-        return self.tr('name,frame,utm,grid,system,map,inom,mi,sistemático,índice,nomenclatura,grade,mapeamento,moldura').split(',')
+        return self.tr('name,frame,utm,grid,carta,folha,system,map,inom,mi,sistemático,índice,nomenclatura,grade,mapeamento,moldura').split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/cart_frame.png'))
