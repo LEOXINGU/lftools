@@ -290,6 +290,74 @@ class ValidateTopology(QgsProcessingAlgorithm):
                     fet.setAttributes([cont, feat1.id(), erro])
                     sink.addFeature(fet, QgsFeatureSink.FastInsert)
 
+        feedback.pushInfo(self.tr('Checking line layer orientation...', 'Verificando orientação da camada linha...'))
+        for feat1 in limites.getFeatures():
+            geom1 =  feat1.geometry()
+            ultimo_pnt = geom1.asPolyline()[-1]
+            for feat2 in limites.getFeatures():
+                if feat1.id() != feat2.id():
+                    geom2 = feat2.geometry()
+                    primeiro_pnt = geom2.asPolyline()[0]
+                    if ultimo_pnt == primeiro_pnt:
+                        break
+            else:
+                X, Y = ultimo_pnt.x(), ultimo_pnt.y()
+                erro = self.tr('Problem with the orientation of the vertices of the line layer!',
+                               'Problema na orientação dos vértices da camada de linhas!')
+                fet = QgsFeature(Fields)
+                fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(X,Y)))
+                fet.setAttributes([cont, feat1.id(), erro])
+                sink.addFeature(fet, QgsFeatureSink.FastInsert)
+
+        # Checar geometrias duplicadas para linhas
+        feedback.pushInfo(self.tr('Checking for duplicate geometry line layer...', 'Verificando geometria duplicada na camada de linhas...'))
+        geoms = []
+        for feat1 in limites.getFeatures():
+            geom = feat1.geometry()
+            if geom.asWkt() not in geoms:
+                geoms += [geom.asWkt()]
+            else:
+                pnt = geom.centroid().asPoint()
+                X, Y = pnt.x(), pnt.y()
+                erro = self.tr('Duplicated line geometry in feature ID {}!'.format(feat1.id()),
+                               'Geometria linha duplicada na feição de ID {}!'.format(feat1.id()))
+                fet = QgsFeature(Fields)
+                fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(X,Y)))
+                fet.setAttributes([cont, feat1.id(), erro])
+                sink.addFeature(fet, QgsFeatureSink.FastInsert)
+
+        # Checar geometrias duplicadas para polígono
+        feedback.pushInfo(self.tr('Checking for duplicate geometry polygon layer...', 'Verificando geometria duplicada na camada de polígonos...'))
+        geoms = []
+        for feat1 in area.getFeatures():
+            geom = feat1.geometry()
+            if geom.asWkt() not in geoms:
+                geoms += [geom.asWkt()]
+            else:
+                pnt = geom.centroid().asPoint()
+                X, Y = pnt.x(), pnt.y()
+                erro = self.tr('Duplicated polygon geometry in feature ID {}!'.format(feat1.id()),
+                               'Geometria polígono duplicada na feição de ID {}!'.format(feat1.id()))
+                fet = QgsFeature(Fields)
+                fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(X,Y)))
+                fet.setAttributes([cont, feat1.id(), erro])
+                sink.addFeature(fet, QgsFeatureSink.FastInsert)
+
+        # Verificar coordenada Z igual a Zero
+        for feat1 in vertices.getFeatures():
+            geom1 =  feat1.geometry()
+            z = float(geom1.constGet().z())
+            pnt = geom1.asPoint()
+            if str(z) == 'nan' or z == 0:
+                X, Y = pnt.x(), pnt.y()
+                erro = self.tr('Z altitude not filled in correctly!',
+                               'Altitude Z não preenchida corretamente!')
+                fet = QgsFeature(Fields)
+                fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(X,Y)))
+                fet.setAttributes([cont, feat1.id(), erro])
+                sink.addFeature(fet, QgsFeatureSink.FastInsert)
+
+
         return {self.OUTPUT: dest_id}
 
         feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
