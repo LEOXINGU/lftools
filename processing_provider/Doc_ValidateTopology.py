@@ -31,9 +31,9 @@ from qgis.core import (QgsProcessing,
                        QgsFeatureSink,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
+                       QgsFeatureRequest,
                        QgsProcessingParameterFeatureSource,
                        QgsProcessingParameterFeatureSink)
-
 import re, os
 from lftools.geocapt.imgs import *
 from lftools.geocapt.topogeo import dd2dms, dd2dms
@@ -136,6 +136,7 @@ class ValidateTopology(QgsProcessingAlgorithm):
 
         vertices = self.parameterAsSource(parameters, self.POINT, context)
         limites = self.parameterAsSource(parameters, self.LINE, context)
+        context.setInvalidGeometryCheck(QgsFeatureRequest.GeometryNoCheck)
         area = self.parameterAsSource(parameters, self.POLYGON, context)
 
         Fields = QgsFields()
