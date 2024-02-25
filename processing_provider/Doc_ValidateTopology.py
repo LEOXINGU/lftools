@@ -344,6 +344,7 @@ class ValidateTopology(QgsProcessingAlgorithm):
                 sink.addFeature(fet, QgsFeatureSink.FastInsert)
 
         # Verificar coordenada Z igual a Zero
+        feedback.pushInfo(self.tr('Checking if any vertex has a dimension-Z equal to Zero...', 'Verificando se algum vértice tem cota Z igual a Zero...'))
         for feat1 in vertices.getFeatures():
             geom1 =  feat1.geometry()
             z = float(geom1.constGet().z())
