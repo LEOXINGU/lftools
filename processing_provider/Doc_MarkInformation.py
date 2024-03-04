@@ -222,14 +222,14 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
             ponto = feat
             break
 
-        # Validando coordenadas geodésicas da camada de entrada
-        if pnt.x() < -180 or pnt.x() > 180 or pnt.y() < -90 or pnt.y() > 90:
-            raise QgsProcessingException(self.tr('Input coordinates must be geodetic (longitude and latitude)!', 'As coordenadas de entrada devem ser geodésicas (longitude e latitude)!'))
-
         # Verificando se o código do marco é válido
         if not pnt:
             erro_txt = self.tr('The survey mark code {} is not valid!', 'O código do marco {} não é válido!').format(codigo)
             raise QgsProcessingException(erro_txt)
+
+        # Validando coordenadas geodésicas da camada de entrada
+        if pnt.x() < -180 or pnt.x() > 180 or pnt.y() < -90 or pnt.y() > 90:
+            raise QgsProcessingException(self.tr('Input coordinates must be geodetic (longitude and latitude)!', 'As coordenadas de entrada devem ser geodésicas (longitude e latitude)!'))
 
         # Validando dados de entrada
         Fields = vertice.fields()
