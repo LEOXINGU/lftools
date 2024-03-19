@@ -294,11 +294,17 @@ class ValidateTopology(QgsProcessingAlgorithm):
         feedback.pushInfo(self.tr('Checking line layer orientation...', 'Verificando orientação da camada linha...'))
         for feat1 in limites.getFeatures():
             geom1 =  feat1.geometry()
-            ultimo_pnt = geom1.asPolyline()[-1]
+            if geom1.isMultipart():
+                ultimo_pnt = geom1.asMultiPolyline()[0][-1]
+            else:
+                ultimo_pnt = geom1.asPolyline()[-1]
             for feat2 in limites.getFeatures():
                 if feat1.id() != feat2.id():
                     geom2 = feat2.geometry()
-                    primeiro_pnt = geom2.asPolyline()[0]
+                    if geom2.isMultipart():
+                        primeiro_pnt = geom2.asMultiPolyline()[0][0]
+                    else:
+                        primeiro_pnt = geom2.asPolyline()[0]
                     if ultimo_pnt == primeiro_pnt:
                         break
             else:
