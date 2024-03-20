@@ -150,7 +150,7 @@ Modos:
             QgsProcessingParameterNumber(
                 self.HEIGHT,
                 self.tr('Antenna height', 'Altura da antena'),
-                type =1,
+                type = QgsProcessingParameterNumber.Type.Double,
                 defaultValue = 0.0,
                 minValue = 0
                 )
