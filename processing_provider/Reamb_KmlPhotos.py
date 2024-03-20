@@ -127,7 +127,7 @@ class KmlPhotos(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.SIZE,
                 self.tr("Size for the image's largest side", 'Tamanho para o lado maior da imagem'),
-                type = 0,
+                type = QgsProcessingParameterNumber.Type.Integer,
                 minValue = 50,
                 defaultValue = 400
                 )
