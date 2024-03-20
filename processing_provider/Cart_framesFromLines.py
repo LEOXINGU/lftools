@@ -119,7 +119,7 @@ class FramesFromLines(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.LONGITUDINAL,
                 self.tr('Longitudinal distance in meters', 'Distância longitudinal (metros)'),
-                type = 1,
+                type = QgsProcessingParameterNumber.Type.Double,
                 defaultValue = 500,
                 minValue = 0
             )
@@ -129,7 +129,7 @@ class FramesFromLines(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.TRANVERSE,
                 self.tr('Transverse distance in meters', 'Distância transversal (metros)'),
-                type = 1,
+                type = QgsProcessingParameterNumber.Type.Double,
                 defaultValue = 250,
                 minValue = 0
             )
@@ -139,7 +139,7 @@ class FramesFromLines(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.OVERLAP,
                 self.tr('Overlap between frames (%)', 'Sobreposição entre molduras (%)'),
-                type = 1,
+                type = QgsProcessingParameterNumber.Type.Double,
                 defaultValue = 10,
                 minValue = 0,
                 maxValue = 99
@@ -150,7 +150,7 @@ class FramesFromLines(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.NFRAMES,
                 self.tr('Number of frames per page', 'Número de molduras por página'),
-                type = 0,
+                type = QgsProcessingParameterNumber.Type.Integer,
                 defaultValue = 1,
                 minValue = 1
             )
