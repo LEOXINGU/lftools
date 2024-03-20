@@ -135,7 +135,7 @@ class RTKCorrection(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.ALTITUDE_INI,
                 self.tr('Initial Z coordinate of the base (m)', 'Coordenada Z inicial da base (m)'),
-                type =1,
+                type = QgsProcessingParameterNumber.Type.Double,
                 )
             )
 
@@ -151,7 +151,7 @@ class RTKCorrection(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.ALTITUDE_END,
                 self.tr('Post-processed Z coordinate of the base (m)', 'Coordenada Z pós-processada da base (m)'),
-                type =1,
+                type = QgsProcessingParameterNumber.Type.Double,
                 )
             )
 
