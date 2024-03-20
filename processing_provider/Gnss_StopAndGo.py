@@ -139,7 +139,7 @@ Dados de entrada:
             QgsProcessingParameterNumber(
                 self.TIME,
                 self.tr('Minimum time for static positioning (minutes)', 'Tempo mínimo para o posicionamento estático (minutos)'),
-                type =1,
+                type = QgsProcessingParameterNumber.Type.Double,
                 defaultValue = 3.0,
                 minValue = 0.10
                 )
@@ -149,7 +149,7 @@ Dados de entrada:
             QgsProcessingParameterNumber(
                 self.DIST,
                 self.tr('Maximum distance to be static (cm)', 'Distância máxima para ser estático (cm)'),
-                type =1,
+                type = QgsProcessingParameterNumber.Type.Double,
                 defaultValue = 2.0,
                 minValue = 0.5
                 )
