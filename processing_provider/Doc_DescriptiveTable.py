@@ -131,7 +131,7 @@ class DescriptiveTable(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.INICIO,
                 self.tr('First vertex', 'Primeiro vértice'),
-                type =0,
+                type = QgsProcessingParameterNumber.Type.Integer,
                 defaultValue = 1
                 )
             )
@@ -140,7 +140,7 @@ class DescriptiveTable(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.FIM,
                 self.tr('Last vertex', 'Último vértice'),
-                type =0,
+                type = QgsProcessingParameterNumber.Type.Integer,
                 defaultValue = -1
                 )
             )
@@ -157,7 +157,7 @@ class DescriptiveTable(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.FONTSIZE,
                 self.tr('Font size', 'Tamanho da fonte'),
-                type =0,
+                type = QgsProcessingParameterNumber.Type.Integer,
                 defaultValue = 12
                 )
             )
@@ -166,7 +166,7 @@ class DescriptiveTable(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.DECIMAL,
                 self.tr('Decimal places', 'Casas decimais'),
-                type =0,
+                type = QgsProcessingParameterNumber.Type.Integer,
                 defaultValue = 2,
                 minValue = 0
                 )
