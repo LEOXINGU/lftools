@@ -129,7 +129,7 @@ class DefineNullCell(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.MIN,
                 self.tr('Minimum Value', 'Valor mínimo'),
-                type = 1,
+                type = QgsProcessingParameterNumber.Type.Double,
                 defaultValue = 1
             )
         )
@@ -138,7 +138,7 @@ class DefineNullCell(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.MAX,
                 self.tr('Maximum Value', 'Valor máximo'),
-                type = 1,
+                type = QgsProcessingParameterNumber.Type.Double,
                 defaultValue = 2**16-1
             )
         )
@@ -147,7 +147,7 @@ class DefineNullCell(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.NULLVALUE,
                 self.tr('Value for defining null cells', 'Valor para definir os pixels nulos'),
-                type = 1,
+                type = QgsProcessingParameterNumber.Type.Double,
                 defaultValue = 0
             )
         )
