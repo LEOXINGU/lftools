@@ -171,7 +171,7 @@ class TraverseAdjustment(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.DIST_PREC,
                 self.tr('Initial distance precision (mm)', 'Precisão linear inicial (mm)'),
-                type = 1,
+                type = QgsProcessingParameterNumber.Type.Double,
                 defaultValue = 3
             )
         )
@@ -180,7 +180,7 @@ class TraverseAdjustment(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.PPM,
                 self.tr('PPM distance precision', 'Precisão linear em PPM'),
-                type = 1,
+                type = QgsProcessingParameterNumber.Type.Double,
                 defaultValue = 3
             )
         )
@@ -189,7 +189,7 @@ class TraverseAdjustment(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.ANGS_PREC,
                 self.tr('Angular precision (seconds)', 'Precisão angular (em segundos)'),
-                type = 1,
+                type = QgsProcessingParameterNumber.Type.Double,
                 defaultValue = 10
             )
         )
