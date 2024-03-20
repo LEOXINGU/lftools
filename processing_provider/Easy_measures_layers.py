@@ -123,7 +123,7 @@ class MeasureLayers(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.PRECISION,
                 self.tr('Precision', 'Precisão'),
-                type = 0, # float = 1 and integer = 0
+                type = QgsProcessingParameterNumber.Type.Integer, # float = 1 and integer = 0
                 defaultValue = 4
             )
         )
