@@ -134,7 +134,7 @@ Saída: Camada de multipoint com precisões posicionais em metros e outras estat
             QgsProcessingParameterNumber(
                 self.DIST,
                 self.tr('Maximum distance (meters)', 'Distância máxima (metros)'),
-                type = 1,
+                type = QgsProcessingParameterNumber.Type.Double,
                 defaultValue = 0.5
                 )
             )
@@ -143,7 +143,7 @@ Saída: Camada de multipoint com precisões posicionais em metros e outras estat
             QgsProcessingParameterNumber(
                 self.QNT,
                 self.tr('Minimum quantity', 'Quantidade mínima'),
-                type = 0,
+                type = QgsProcessingParameterNumber.Type.Integer,
                 defaultValue = 20
                 )
             )
