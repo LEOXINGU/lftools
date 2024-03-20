@@ -116,7 +116,7 @@ class CreateGCPfile(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.DECIMAL,
                 self.tr('Decimal places', 'Casas decimais'),
-                type =0,
+                type = QgsProcessingParameterNumber.Type.Integer,
                 defaultValue = 3
                 )
             )
