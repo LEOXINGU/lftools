@@ -128,7 +128,7 @@ class ExtendLines(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.DISTANCE,
                 self.tr('Distance (m)', 'Distância (m)'),
-                type =1,
+                type = QgsProcessingParameterNumber.Type.Double,
                 defaultValue = 25.0
                 )
             )
