@@ -124,7 +124,7 @@ class LineSequence(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.TOLERANCE,
                 self.tr('Tolerance (m)', 'Tolerância (m)'),
-                type = 1,
+                type = QgsProcessingParameterNumber.Type.Double,
                 defaultValue = 0.25,
                 minValue = 0.001
                 )
