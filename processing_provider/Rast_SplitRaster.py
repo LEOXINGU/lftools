@@ -130,7 +130,7 @@ class SplitRaster(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.HORIZONTAL,
                 self.tr("X axis split", 'Eixo X'),
-                type = 0,
+                type = QgsProcessingParameterNumber.Type.Integer,
                 minValue = 1,
                 defaultValue = 2
                 )
@@ -140,7 +140,7 @@ class SplitRaster(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.VERTICAL,
                 self.tr("Y axis split", 'Eixo Y'),
-                type = 0,
+                type = QgsProcessingParameterNumber.Type.Integer,
                 minValue = 1,
                 defaultValue = 2
                 )
