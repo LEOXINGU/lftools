@@ -187,7 +187,7 @@ Saiba mais:'''
             QgsProcessingParameterNumber(
                 self.H_0,
                 self.tr('Origin Elipsoid Height (h)', 'Altitude (h) da Origem'),
-                type=1, #Double = 1 and Integer = 0
+                type = QgsProcessingParameterNumber.Type.Double, #Double = 1 and Integer = 0
                 defaultValue = 4.217
             )
         )
