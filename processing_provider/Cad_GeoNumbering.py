@@ -156,7 +156,7 @@ Obs.: Este algoritmo utiliza o centroide da feição para ordenar geograficament
             QgsProcessingParameterNumber(
                 self.INITIAL,
                 self.tr('Initial count', 'Contagem inicial'),
-                type = 0,
+                type = QgsProcessingParameterNumber.Type.Integer,
                 defaultValue = 0,
                 minValue = 0
             )
