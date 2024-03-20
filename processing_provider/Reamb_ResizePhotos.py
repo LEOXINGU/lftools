@@ -119,7 +119,7 @@ class ResizePhotos(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.SIZE,
                 self.tr('Size for the larger side', 'Tamanho para o lado maior'),
-                type =0,
+                type = QgsProcessingParameterNumber.Type.Integer,
                 minValue = 10,
                 defaultValue = 800
                 )
