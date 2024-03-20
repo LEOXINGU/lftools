@@ -124,7 +124,7 @@ class ConnectLayers(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.TOLERANCE,
                 self.tr('Tolerance for snapping in meters', 'Tolerância para a aderência (metros)'),
-                type = 1,
+                type = QgsProcessingParameterNumber.Type.Double,
                 defaultValue = 0.1,
                 minValue = 0.001
             )
