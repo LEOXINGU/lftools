@@ -135,7 +135,7 @@ class MosaicRaster(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.RESOLUTION,
                 self.tr('New Resolution (meters)', 'Nova resolução espacial (metros)'),
-                type =1, #Double = 1 and Integer = 0
+                type = QgsProcessingParameterNumber.Type.Double, #Double = 1 and Integer = 0
                 defaultValue = None,
                 minValue = 0.01,
                 optional = True
@@ -174,7 +174,7 @@ class MosaicRaster(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.NULLVALUE,
                 self.tr('Null value', 'Valor nulo'),
-                type =0, #Double = 1 and Integer = 0
+                type = QgsProcessingParameterNumber.Type.Integer, #Double = 1 and Integer = 0
                 defaultValue = 0
             )
         )
