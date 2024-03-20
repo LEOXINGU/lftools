@@ -117,7 +117,7 @@ class CrossSections(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.LONGITUDINAL,
                 self.tr('Longitudinal distance in meters', 'Distância longitudinal (metros)'),
-                type = 1,
+                type = QgsProcessingParameterNumber.Type.Double,
                 defaultValue = 50,
                 minValue = 0
             )
@@ -127,7 +127,7 @@ class CrossSections(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.TRANVERSE,
                 self.tr('Transverse distance in meters', 'Distância transversal (metros)'),
-                type = 1,
+                type = QgsProcessingParameterNumber.Type.Double,
                 defaultValue = 150,
                 minValue = 0
             )
