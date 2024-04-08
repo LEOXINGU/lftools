@@ -84,6 +84,7 @@ class AzimuthDistance(QgsProcessingAlgorithm):
     DISTANCES = 'DISTANCES'
     CRS = 'CRS'
     TYPE = 'TYPE'
+    CLOSED = 'CLOSED'
     OUTPUT = 'OUTPUT'
 
     def initAlgorithm(self, config=None):
@@ -128,6 +129,14 @@ class AzimuthDistance(QgsProcessingAlgorithm):
                 self.tr('Output geometry type', 'Tipo de geometria de saída'),
 				options = [self.tr('Point', 'Ponto'), self.tr('Line', 'Linha')],
                 defaultValue= 1
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterBoolean(
+                self.CLOSED,
+                self.tr('Solve misclosure', 'Resolva o erro de fechamento'),
+                defaultValue = False
             )
         )
 
@@ -188,6 +197,41 @@ class AzimuthDistance(QgsProcessingAlgorithm):
             self.TYPE,
             context
         )
+
+        fechamento = self.parameterAsBool(
+            parameters,
+            self.CLOSED,
+            context
+        )
+
+        if fechamento:
+            # Calcular Distâncias
+            DIST = []
+            soma = 0
+            Deltas_E = []
+            Deltas_N = []
+            for k in range(len(pnts)-1):
+                deltaE = pnts[k+1].x()-pnts[k].x()
+                Deltas_E += [deltaE]
+                deltaN = pnts[k+1].y()-pnts[k].y()
+                Deltas_N += [deltaN]
+                dist = sqrt((deltaE)**2 + (deltaN)**2)
+                DIST += [dist]
+                soma += dist
+            # Calcular erro por comprimento
+            dE = (pnts[-1].x() - pnts[0].x())
+            dN = (pnts[-1].y() - pnts[0].y())
+            Erro = sqrt(dE**2 + dN**2)
+            feedback.pushInfo(self.tr('Misclosure error: {} m', 'Erro de fechamento: {} m').format(round(Erro,3)))
+            dE /= soma
+            dN /= soma
+
+            # Novas coordenadas
+            p0 = pnts[0]
+            for k in range(1, len(pnts)):
+                p0 = QgsPointXY(p0.x() + Deltas_E[k-1] - dE*DIST[k-1], p0.y() + Deltas_N[k-1] - dN*DIST[k-1])
+                pnts[k] = p0
+            pnts[-1] = pnts[0]
 
         # Camada de Saída
         if tipo == 0:
