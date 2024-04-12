@@ -38,6 +38,7 @@ import re, os
 from lftools.geocapt.imgs import *
 from lftools.geocapt.topogeo import dd2dms, dd2dms
 from qgis.PyQt.QtGui import QIcon
+import numpy as np
 
 class ValidateTopology(QgsProcessingAlgorithm):
 
@@ -161,7 +162,7 @@ class ValidateTopology(QgsProcessingAlgorithm):
 
         feedback.pushInfo(self.tr('Validating topology of geometries...', 'Validando topologia das geometrias...' ))
         cont = 0
-        # Verificar se cada vértice da camada limite (linha) tem o correspondente da camada vétice (ponto)
+
         feedback.pushInfo(self.tr('Checking if each vertex of the Limit layer (line) has the corresponding one of the Vertex layer (point)...', 'Verificando se cada vértice da camada Limite (linha) tem o correspondente da camada Vértice (ponto)...'))
         for feat1 in limites.getFeatures():
             geom1 = feat1.geometry()
@@ -210,6 +211,34 @@ class ValidateTopology(QgsProcessingAlgorithm):
                         fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(X,Y)))
                         fet.setAttributes([cont, feat1.id(), erro])
                         sink.addFeature(fet, QgsFeatureSink.FastInsert)
+
+        feedback.pushInfo(self.tr('Checking if each vertex of the Vertex layer (point) has the corresponding one of the Area layer (polygon)...', 'Verificando se cada vértice da camada Vértice (ponto) tem o correspondente da camada Área (polígono)...'))
+
+        for feat1 in vertices.getFeatures():
+            vert = feat1.geometry().asPoint()
+            corresp = False
+            for feat2 in area.getFeatures():
+                geom2 = feat2.geometry()
+                if geom2.isMultipart():
+                    pols = geom2.asMultiPolygon()
+                else:
+                    pols = [geom2.asPolygon()]
+                for pol in pols:
+                    for pnt in pol[0]:
+                        if vert == pnt:
+                            corresp = True
+                            break
+                    if corresp:
+                        break
+            if not corresp:
+                cont += 1
+                X, Y = vert.x(), vert.y()
+                erro = self.tr('Point of the "point" layer has no correspondent in the "area" layer!',
+                               'Ponto da camada "ponto" não possui correspondente na camada "área"!')
+                fet = QgsFeature(Fields)
+                fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(X,Y)))
+                fet.setAttributes([cont, feat1.id(), erro])
+                sink.addFeature(fet, QgsFeatureSink.FastInsert)
 
         feedback.pushInfo(self.tr('Checking if each vertex of the Vertex layer (point) has the corresponding one of the limit layer (line)...', 'Verificando se cada vértice da camada Vértice (ponto) tem o correspondente da camada Limite (linha)...'))
         for feat1 in vertices.getFeatures():
