@@ -232,6 +232,7 @@ O processo de filtragem é feito utilizando matrizes denominadas máscaras (ou k
         RESULT = np.zeros((y,x))
         Percent = 100.0/y
         current = 0
+        feedback.pushInfo(self.tr('Raster filtering...', 'Executando filtro em raster...'))
         if tipo in [0,1]: #Filtro da média
             for i in range(y):
                 for j in range(x):
