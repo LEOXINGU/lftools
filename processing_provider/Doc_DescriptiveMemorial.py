@@ -385,7 +385,7 @@ class DescriptiveMemorial(QgisAlgorithm):
                             continue
                     if not corresp:
                         raise QgsProcessingException(self.tr('Coordinate point ({}, {}) of the "boundary_element_l" layer has no correspondent in the "limit_point_p" layer!',
-                                                             'Ponto de coordenadas ({}, {}) da camada "Elemento Confrontante" não possui correspondente na camada "Ponto Limite"!').format(pnt.x(), pnt.y()))
+                                                             'Ponto de coordenadas ({}, {}) da camada "Elemento Confrontante" não possui correspondente na camada "Ponto Limite"!').format(pnt.y(), pnt.x()))
 
     		# Verificar se cada vértice da camada parcela (polígono) tem o correspondente da camada vétice (ponto)
             for feat1 in area.getFeatures():
@@ -404,7 +404,7 @@ class DescriptiveMemorial(QgisAlgorithm):
                                 continue
                         if not corresp:
                             raise QgsProcessingException(self.tr('Coordinate point ({}, {}) of the "property_area_a" layer has no correspondent in the "limit_point_p" layer!',
-                                                                 'Ponto de coordenadas ({}, {}) da camada "Área do imóvel" não possui correspondente na camada "Ponto Limite"!').format(pnt.x(), pnt.y()))
+                                                                 'Ponto de coordenadas ({}, {}) da camada "Área do imóvel" não possui correspondente na camada "Ponto Limite"!').format(pnt.y(), pnt.x()))
 
             # Verificar se cada vértice da camada Ponto Limite tem o correspondente da camada Elemento confrontante
             for feat1 in vertices.getFeatures():
@@ -419,7 +419,7 @@ class DescriptiveMemorial(QgisAlgorithm):
                         break
                 if not corresp:
                     raise QgsProcessingException(self.tr('Coordinate point ({}, {}) of the "limit_point_p" layer has no correspondent in the "boundary_element_l" layer!',
-                                                         'Ponto de coordenadas ({}, {}) da camada "Ponto Limite" não possui correspondente na camada "Elemento confrontante"!').format(vert.x(), vert.y()))
+                                                         'Ponto de coordenadas ({}, {}) da camada "Ponto Limite" não possui correspondente na camada "Elemento confrontante"!').format(vert.y(), vert.x()))
 
             # Geometrias duplicadas na camada limit_point_p
             pontos = []
@@ -429,7 +429,7 @@ class DescriptiveMemorial(QgisAlgorithm):
                     pontos += [vert]
                 else:
                     raise QgsProcessingException(self.tr('Coordinate point ({}, {}) of the "limit_point_p" layer is duplicated!',
-                                                         'Ponto de coordenadas ({}, {}) da camada "Ponto Limite" está duplicado!').format(vert.x(), vert.y()))
+                                                         'Ponto de coordenadas ({}, {}) da camada "Ponto Limite" está duplicado!').format(vert.y(), vert.x()))
             # Nós duplicados dentro da camada boundary_element_l
             for feat1 in limites.getFeatures():
                 geom1 = feat1.geometry()
@@ -443,7 +443,7 @@ class DescriptiveMemorial(QgisAlgorithm):
                         pontos += [pnt]
                     else:
                         raise QgsProcessingException(self.tr('Coordinate point ({}, {}) of the "boundary_element_l" layer is duplicated!',
-                                                             'Ponto de coordenadas ({}, {}) da camada "Elemento confrontante" está duplicado!').format(pnt.x(), pnt.y()))
+                                                             'Ponto de coordenadas ({}, {}) da camada "Elemento confrontante" está duplicado!').format(pnt.y(), pnt.x()))
             # Nós duplicados dentro da camada property_area_a
             for feat1 in area.getFeatures():
                 geom1 = feat1.geometry()
@@ -457,7 +457,7 @@ class DescriptiveMemorial(QgisAlgorithm):
                         pontos += [pnt]
                     else:
                         raise QgsProcessingException(self.tr('Coordinate point ({}, {}) of the "property_area_a" layer is duplicated!',
-                                                             'Ponto de coordenadas ({}, {}) da camada "Área do imóvel" está duplicado!').format(pnt.x(), pnt.y()))
+                                                             'Ponto de coordenadas ({}, {}) da camada "Área do imóvel" está duplicado!').format(pnt.y(), pnt.x()))
 
         feedback.pushInfo(self.tr('Sequencing "boundary_element_l" features...', 'Ordenando a sequência dos confrontantes...' ))
         # Pegando ponto inicial
@@ -517,7 +517,7 @@ class DescriptiveMemorial(QgisAlgorithm):
                         break
             if not encontrou:
                 raise QgsProcessingException(self.tr('Coordinate point ({}, {}) of the "boundary_element_l" layer is not connected!',
-                                                     'Ponto de coordenadas ({}, {}) da camada "Elemento confrontante" não está conectado!').format(ponto_fim.x(), ponto_fim.y()))
+                                                     'Ponto de coordenadas ({}, {}) da camada "Elemento confrontante" não está conectado!').format(ponto_fim.y(), ponto_fim.x()))
 
         # Pegando informações dos confrontantes (limites)
         ListaDescr = []
