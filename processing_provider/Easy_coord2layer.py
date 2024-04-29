@@ -216,6 +216,14 @@ class CoordinatesToLayer(QgsProcessingAlgorithm):
                         feedback.pushInfo(self.tr('Feature id {} has attributes Z={} incompatible for point geometry!'.format(feat.id(), att[Z_id]),
                                                   'Feição de id {} tem atributos Z={} incompatível para geometria ponto!'.format(feat.id(),att[Z_id]) ))
             if valido and X and Y:
+                # Verificando se o SRC é compatível com as coordenadas
+                if CRS.isGeographic():
+                    if X < -180 or X > 180 or Y < -90 or Y > 90:
+                        raise QgsProcessingException(self.tr('CRS incompatible with input coordinates!', 'SRC incompatível com as coordenadas de entrada!'))
+                elif 'UTM' in CRS.description():
+                    if X < 0 or Y < 0:
+                        raise QgsProcessingException(self.tr('CRS incompatible with input coordinates!', 'SRC incompatível com as coordenadas de entrada!'))
+
                 if Z_field:
                     geom = QgsGeometry(QgsPoint(float(X), float(Y), float(Z)))
                 else:
