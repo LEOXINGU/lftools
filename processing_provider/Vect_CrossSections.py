@@ -209,9 +209,13 @@ class CrossSections(QgsProcessingAlgorithm):
                 soma += m
                 ListaDist += [soma]
             # Numero de Secoes e Nova Distancia
-            NumSec = floor(comprimento/distSec)
-            DistSecNova = comprimento/NumSec
-            dist = arange(0, comprimento+DistSecNova, DistSecNova)
+            if distSec < comprimento:
+                NumSec = floor(comprimento/distSec)
+                DistSecNova = comprimento/NumSec
+                dist = arange(0, comprimento+DistSecNova, DistSecNova)
+            else:
+                NumSec, DistSecNova = 1, comprimento
+                dist = arange(0, comprimento+DistSecNova, DistSecNova)
             # Algoritmo para pegar secoes transversais
             cont = 0
             for k in range(len(coord)-1):
