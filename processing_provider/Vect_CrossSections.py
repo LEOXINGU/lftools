@@ -152,14 +152,26 @@ class CrossSections(QgsProcessingAlgorithm):
         SRC = layer.sourceCrs()
 
         # OUTPUT
-        Fields = QgsFields()
+        Fields = layer.fields()
+        fieldnames = [field.name() for field in Fields]
 
         itens  = {
                      self.tr('feat_id'): QVariant.Int,
                      self.tr('sequence','ordem'): QVariant.Int,
+                     self.tr('length','distância'): QVariant.Double
                      }
+
         for item in itens:
-            Fields.append(QgsField(item, itens[item]))
+            adicionou = False
+            cont = 0
+            fieldname = item
+            while not adicionou:
+                if fieldname not in fieldnames:
+                    Fields.append(QgsField(fieldname, itens[item]))
+                    adicionou = True
+                else:
+                    cont += 1
+                    fieldname = item + '_' + str(cont)
 
         (sink, dest_id) = self.parameterAsSink(
             parameters,
@@ -234,7 +246,7 @@ class CrossSections(QgsProcessingAlgorithm):
                                     QgsPointXY(float(centro[0]), float(centro[1])),
                                     QgsPointXY(float(p2[0]), float(p2[1]))]]
                     cont +=1
-                    LIST_ATT += [[feat.id(), cont]]
+                    LIST_ATT += [feat.attributes() + [feat.id(), cont, float(dist[cont-1])]]
                     if cont == NumSec +1:
                         break
                 if cont == NumSec +1:
@@ -251,7 +263,7 @@ class CrossSections(QgsProcessingAlgorithm):
             LIST_COORD += [[QgsPointXY(float(p1[0]), float(p1[1])),
                             QgsPointXY(float(centro[0]), float(centro[1])),
                             QgsPointXY(float(p2[0]), float(p2[1]))]]
-            LIST_ATT += [[feat.id(), cont]]
+            LIST_ATT += [feat.attributes() + [feat.id(), cont, float(comprimento)]]
 
             # Salvando as feições
             feature = QgsFeature()
