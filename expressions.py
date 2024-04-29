@@ -863,6 +863,11 @@ def deedtable2(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
       <li>deedtable2('V-', ' - Area X', 3, 12, 'layer_name', 'geo', 0) = HTML</li>
       <li>deedtable2('V-', ' - Area X', 3, 12, 'layer_name', 'both', 1) = HTML</li>
     </ul>
+    <h2>Exemples with vertex layer:</h2>
+    <ul>
+      <li>deedtable2('vertex_point_layer,ID,name', 'title', precision, fontsize, layer_name, type, azimuth_dist) = HTML</li>
+      <li>deedtable2('Vertex,id,name', ' - Area Z', 3, 12, 'layer_name', 'both', 1) = HTML</li>
+    </ul>
     """
     if len(QgsProject.instance().mapLayersByName(layer_name)) == 1:
         layer = QgsProject.instance().mapLayersByName(layer_name)[0]
@@ -1192,6 +1197,11 @@ def deedtable3(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
       <li>deedtable3('V-', ' - Area X', 3, 12, 'layer_name', 'proj', 1) = HTML</li>
       <li>deedtable3('V-', ' - Area X', 3, 12, 'layer_name', 'geo', 0) = HTML</li>
       <li>deedtable3('V-', ' - Area X', 3, 12, 'layer_name', 'both', 1) = HTML</li>
+    </ul>
+    <h2>Exemples with vertex layer:</h2>
+    <ul>
+      <li>deedtable3('vertex_point_layer,ID,name', 'title', precision, fontsize, layer_name, type, azimuth_dist) = HTML</li>
+      <li>deedtable3('Vertex,id,name', ' - Area Z', 3, 12, 'layer_name', 'both', 1) = HTML</li>
     </ul>
     """
     if len(QgsProject.instance().mapLayersByName(layer_name)) == 1:
