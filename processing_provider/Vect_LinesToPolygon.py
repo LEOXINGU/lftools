@@ -172,7 +172,7 @@ class LinesToPolygon(QgsProcessingAlgorithm):
 
                 if pnt_iniA.intersects(pnt_fimB):
                     mont = featB.id()
-                elif pnt_fimA.intersects(pnt_iniB):
+                if pnt_fimA.intersects(pnt_iniB):
                     jus = featB.id()
 
                 if mont != None and jus != None:
@@ -191,8 +191,8 @@ class LinesToPolygon(QgsProcessingAlgorithm):
                 pnt = linhas[linha]['coords'][-1]
                 sentinela = True
             if sentinela:
-                raise QgsProcessingException(self.tr('Unconnected line at coordinate point ({} , {})!'.format(pnt.x(), pnt.y()),
-                                                 'Linha não conectada no ponto de coordenadas ({} , {})!'.format(pnt.x(), pnt.y())))
+                raise QgsProcessingException(self.tr('Unconnected line at coordinate point (N,E)=({} , {})!'.format(pnt.y(), pnt.x()),
+                                                 'Linha não conectada no ponto de coordenadas (N,E)=({} , {})!'.format(pnt.y(), pnt.x())))
 
         # ID da primeira feição
         for feat in layer.getFeatures():
