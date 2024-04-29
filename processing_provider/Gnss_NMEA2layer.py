@@ -218,6 +218,7 @@ Modos:
                     PDOP = float(partes[-4])
                     HDOP = float(partes[-3])
                     VDOP = float(partes[-2])
+                    
                 if line[3:6] == 'GGA': # global position system fix data
                     partes = line.split(',')
                     hora = int(partes[1][0:2])
