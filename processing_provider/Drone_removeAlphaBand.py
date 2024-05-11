@@ -198,22 +198,27 @@ class RemoveAlphaBand(QgsProcessingAlgorithm):
             Driver.SetProjection(CRS.ExportToWkt()) # export coords to file
 
             # Alpha band
-            feedback.pushInfo(self.tr('Reading alpha band...', 'Lendo banda alfa...'))
-            alpha = image.GetRasterBand(4).ReadAsArray()
+            if definirNulo:
+                feedback.pushInfo(self.tr('Reading alpha band...', 'Lendo banda alfa...'))
+                alpha = image.GetRasterBand(4).ReadAsArray()
+                alpha = alpha != 0
 
             for k in range(n_bands-1):
                 band = image.GetRasterBand(k+1).ReadAsArray()
-                # Defining cell 0 to 1 value
-                if band.min() == 0:
-                    band = (band == 0)*1 + band
-                # Defining null cells
-                band = ((alpha != 0)*band).astype('byte')
-                outband = Driver.GetRasterBand(k+1)
                 feedback.pushInfo(self.tr('Writing the band {}...'.format(k+1), 'Escrevendo a banda {}...'.format(k+1)))
-                outband.WriteArray(band) # write band to the raster
                 if definirNulo:
+                    # Defining cell 0 to 1 value
+                    if band.min() == 0:
+                        band =  (band == 0)*1 + band
+                    # Defining null cells
+                    band = (alpha*band)
+                    outband = Driver.GetRasterBand(k+1)
+                    outband.WriteArray(band) # write band to the raster
                     Pixel_Nulo = 0
                     outband.SetNoDataValue(Pixel_Nulo)
+                else:
+                    outband = Driver.GetRasterBand(k+1)
+                    outband.WriteArray(band) # write band to the raster
 
             image=None # Close dataset
             Driver.FlushCache()                     # write to disk
