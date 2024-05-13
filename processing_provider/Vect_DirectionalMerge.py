@@ -185,9 +185,9 @@ class DirectionalMerge(QgsProcessingAlgorithm):
         while ind < len(lista)-1:
             P_ini = lista[ind][1]
             P_fim = lista[ind][2]
-            if P_ini==P_fim:
-                nova_lista+= [lista[ind][0]]
-                del  lista[ind]
+            if P_ini == P_fim:
+                nova_lista += [lista[ind][0]]
+                del lista[ind]
             else:
                 ind +=1
 

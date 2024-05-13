@@ -115,6 +115,7 @@ Opcionalmente, as cores RGB associadas do Ortomosaico podem ser levadas para o a
     DEM ='DEM'
     ORTO = 'ORTO'
     TXT = 'TXT'
+    DECIMAL = 'DECIMAL'
 
     def initAlgorithm(self, config=None):
 
@@ -135,6 +136,15 @@ Opcionalmente, as cores RGB associadas do Ortomosaico podem ser levadas para o a
                 optional = True
             )
         )
+
+        self.addParameter(
+            QgsProcessingParameterNumber(
+                self.DECIMAL,
+                self.tr('Decimal places', 'Casas decimais'),
+                type = QgsProcessingParameterNumber.Type.Integer,
+                defaultValue = 2
+                )
+            )
 
         # OUTPUT
         self.addParameter(
@@ -164,6 +174,16 @@ Opcionalmente, as cores RGB associadas do Ortomosaico podem ser levadas para o a
             self.ORTO,
             context
         )
+
+        decimal = self.parameterAsInt(
+            parameters,
+            self.DECIMAL,
+            context
+        )
+        if decimal is None or decimal<1:
+            raise QgsProcessingException(self.invalidSourceError(parameters, self.DECIMAL))
+
+        format_num = '{:.Xf}'.replace('X', str(decimal))
 
         # output
         arquivo_saida = self.parameterAsFile(
@@ -233,9 +253,9 @@ Opcionalmente, as cores RGB associadas do Ortomosaico podem ser levadas para o a
                         blue  = Interpolar(X, Y, B, orto_origem, orto_resol_X, orto_resol_Y, 'nearest', orto_nulo)
 
                         if red != orto_nulo and green != orto_nulo and blue != orto_nulo:
-                            arq_out.write('{:.2f} {:.2f} {:.2f} {} {} {}\n'.format(X, Y, Z, int(red), int(green), int(blue)))
+                            arq_out.write('{} {} {} {} {} {}\n'.format(format_num.format(X), format_num.format(Y), format_num.format(Z), int(red), int(green), int(blue)))
                     else:
-                        arq_out.write('{:.2f} {:.2f} {:.2f}\n'.format(X, Y, Z))
+                        arq_out.write('{} {} {}\n'.format(format_num.format(X), format_num.format(Y), format_num.format(Z)))
 
             if feedback.isCanceled():
                 break
