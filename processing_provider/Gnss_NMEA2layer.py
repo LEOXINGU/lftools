@@ -239,20 +239,12 @@ Modos:
                     mes = int(partes[3])
                     ano = int(partes[4])
 
-                if line[3:6] == 'RMC': # Position, Time & Date – UTC, Day, Month, Year
+                if line[3:6] == 'RMC': # Position, Time & Date – UTC, Day, Month, Year -- (Get only date)
                     partes = line.split(',')
                     if partes[2] == 'A':            # Only parse if is valid
-                        hora = int(partes[1][0:2])
-                        min = int(partes[1][2:4])
-                        seg = float(partes[1][4:10])
-                        
-                        lat = (-1 if partes[4] == 'S' else 1)*( float(partes[3][0:2]) + float(partes[3][2:-1])/60)
-                        lon = (-1 if partes[6] == 'W' else 1)*( float(partes[5][0:3]) + float(partes[5][3:-1])/60)                    
-                        
                         dia = int(partes[9][0:2])
                         mes = int(partes[9][2:4])
-                        ano = int(partes[9][4:6])+2000        
-                        lista += [[lat, lon, h, H, N, HDOP, VDOP, PDOP, hora, min, seg, quality, num_sat]]            
+                        ano = int(partes[9][4:6])+2000             
             except:
                 pass
 
