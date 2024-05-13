@@ -239,6 +239,13 @@ Modos:
                     dia = int(partes[2])
                     mes = int(partes[3])
                     ano = int(partes[4])
+
+                if line[3:6] == 'RMC': # Position, Time & Date – UTC, Day, Month, Year -- (Get only date)
+                    partes = line.split(',')
+                    if partes[2] == 'A':            # Only parse if is valid
+                        dia = int(partes[9][0:2])
+                        mes = int(partes[9][2:4])
+                        ano = int(partes[9][4:6])+2000             
             except:
                 pass
 
