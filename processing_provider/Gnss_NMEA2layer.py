@@ -218,7 +218,7 @@ Modos:
                     PDOP = float(partes[-4])
                     HDOP = float(partes[-3])
                     VDOP = float(partes[-2])
-                    
+
                 if line[3:6] == 'GGA': # global position system fix data
                     partes = line.split(',')
                     hora = int(partes[1][0:2])
@@ -245,7 +245,7 @@ Modos:
                     if partes[2] == 'A':            # Only parse if is valid
                         dia = int(partes[9][0:2])
                         mes = int(partes[9][2:4])
-                        ano = int(partes[9][4:6])+2000             
+                        ano = int(partes[9][4:6])+2000
             except:
                 pass
 
