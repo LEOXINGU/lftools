@@ -151,7 +151,7 @@ class DescriptiveMemorial(QgisAlgorithm):
                   self.tr('(lon,lat)'),
                   self.tr('(lat,lon,h)'),
                   self.tr('(lon,lat,h)'),
-                  '(lon,lat,h)' + self.tr('without suffix', 'sem sufixo')
+                  '(lon,lat,h)' + self.tr(' without suffix', ' sem sufixo')
                ]
 
         self.addParameter(
@@ -625,7 +625,7 @@ class DescriptiveMemorial(QgisAlgorithm):
             if coordenadas in (4,5,6,7):
                 Xn = str2HTML(self.tr(dd2dms(x,decimal+3), dd2dms(x,decimal+3).replace('.', ','))).replace('-','') + 'W' if x < 0 else 'E'
                 Yn = str2HTML(self.tr(dd2dms(y,decimal+3), dd2dms(y,decimal+3).replace('.', ','))).replace('-','') + 'S' if y < 0 else 'N'
-            if coordenadas in (8):
+            if coordenadas == 8:
                 Xn = str2HTML(self.tr(dd2dms(x,decimal+3), dd2dms(x,decimal+3).replace('.', ',')))
                 Yn = str2HTML(self.tr(dd2dms(y,decimal+3), dd2dms(y,decimal+3).replace('.', ',')))
             Zn = self.tr(format_num.format(z), format_num.format(z).replace(',', 'X').replace('.', ',').replace('X', '.'))
