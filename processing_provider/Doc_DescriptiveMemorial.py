@@ -151,7 +151,10 @@ class DescriptiveMemorial(QgisAlgorithm):
                   self.tr('(lon,lat)'),
                   self.tr('(lat,lon,h)'),
                   self.tr('(lon,lat,h)'),
-                  '(lon,lat,h)' + self.tr(' without suffix', ' sem sufixo')
+                  '(lon,lat)' + self.tr(' without suffix', ' sem sufixo'),
+                  '(lat,lon)' + self.tr(' without suffix', ' sem sufixo'),
+                  '(lon,lat,h)' + self.tr(' without suffix', ' sem sufixo'),
+                  '(lat,lon,h)' + self.tr(' without suffix', ' sem sufixo'),
                ]
 
         self.addParameter(
@@ -313,7 +316,7 @@ class DescriptiveMemorial(QgisAlgorithm):
                     break
             return sentinela
 
-        # Teste para o modelo TopoGeo
+        # Teste para o modelo de BD
         campos_vertices = ['type', 'code', 'sequence']
         campos_limites = ['borderer', 'borderer_registry']
         campos_area = ['property', 'registry', 'transcript', 'owner', 'county', 'state', 'survey_date']
@@ -625,39 +628,35 @@ class DescriptiveMemorial(QgisAlgorithm):
             if coordenadas in (4,5,6,7):
                 Xn = str2HTML(self.tr(dd2dms(x,decimal+3), dd2dms(x,decimal+3).replace('.', ','))).replace('-','') + 'W' if x < 0 else 'E'
                 Yn = str2HTML(self.tr(dd2dms(y,decimal+3), dd2dms(y,decimal+3).replace('.', ','))).replace('-','') + 'S' if y < 0 else 'N'
-            if coordenadas == 8:
+            if coordenadas in (8,9,10,11):
                 Xn = str2HTML(self.tr(dd2dms(x,decimal+3), dd2dms(x,decimal+3).replace('.', ',')))
                 Yn = str2HTML(self.tr(dd2dms(y,decimal+3), dd2dms(y,decimal+3).replace('.', ',')))
             Zn = self.tr(format_num.format(z), format_num.format(z).replace(',', 'X').replace('.', ',').replace('X', '.'))
-
             if coordenadas == 0:
                 txt = '''<b>N [Yn]m </b>''' + self.tr('and','e') +''' <b>E [Xn]m</b>'''
-                return txt.replace('[Yn]', Yn).replace('[Xn]', Xn)
             elif coordenadas == 1:
                 txt = '''<b>E [Xn]m </b>''' + self.tr('and','e') +''' <b>N [Yn]m</b>'''
-                return txt.replace('[Yn]', Yn).replace('[Xn]', Xn)
             elif coordenadas == 2:
                 txt = '''<b>N [Yn]m</b>, <b>E [Xn]m</b> ''' + self.tr('and','e') +''' <b>h [Zn]m</b>'''
-                return txt.replace('[Yn]', Yn).replace('[Xn]', Xn).replace('[Zn]', Zn)
             elif coordenadas == 3:
                 txt = '''<b>E [Xn]m</b>, <b>N [Yn]m</b> ''' + self.tr('and','e') +''' <b>h [Zn]m</b>'''
-                return txt.replace('[Yn]', Yn).replace('[Xn]', Xn).replace('[Zn]', Zn)
             elif coordenadas == 4:
                 txt = '''<b> [Yn] </b>''' + self.tr('and','e') +''' <b> [Xn]</b>'''
-                return txt.replace('[Yn]', Yn).replace('[Xn]', Xn)
             elif coordenadas == 5:
                 txt = '''<b> [Xn] </b>''' + self.tr('and','e') +''' <b> [Yn]</b>'''
-                return txt.replace('[Yn]', Yn).replace('[Xn]', Xn)
             elif coordenadas == 6:
                 txt = '''<b> [Yn]</b>, <b> [Xn]</b> ''' + self.tr('and','e') +''' <b>h [Zn]m</b>'''
-                return txt.replace('[Yn]', Yn).replace('[Xn]', Xn).replace('[Zn]', Zn)
             elif coordenadas == 7:
                 txt = '''<b> [Xn]</b>, <b> [Yn]</b> ''' + self.tr('and','e') +''' <b>h [Zn]m</b>'''
-                return txt.replace('[Yn]', Yn).replace('[Xn]', Xn).replace('[Zn]', Zn)
             elif coordenadas == 8:
+                txt = '''<b>longitude  [Xn]</b> ''' + self.tr('and','e') + ''' <b>latitude  [Yn]</b>'''
+            elif coordenadas == 9:
+                txt = '''<b>latitude  [Yn]</b> ''' + self.tr('and','e') + ''' <b>longitude  [Xn]</b>'''
+            elif coordenadas == 10:
                 txt = '''<b>longitude  [Xn]</b>, <b>latitude  [Yn]</b> ''' + self.tr('and','e') +''' <b>h [Zn]m</b>'''
-                return txt.replace('[Yn]', Yn).replace('[Xn]', Xn).replace('[Zn]', Zn)
-
+            elif coordenadas == 11:
+                txt = '''<b>latitude  [Yn]</b>, <b>longitude  [Xn]</b> ''' + self.tr('and','e') +''' <b>h [Zn]m</b>'''
+            return txt.replace('[Yn]', Yn).replace('[Xn]', Xn).replace('[Zn]', Zn)
 
         texto_inicial = '''
     <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
