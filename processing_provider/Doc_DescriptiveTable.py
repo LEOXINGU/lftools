@@ -172,13 +172,18 @@ class DescriptiveTable(QgsProcessingAlgorithm):
                 )
             )
 
-        tipos = [self.tr('Planimetric (E,N)','Planimétrico'),
+        tipos = [self.tr('Planimetric (E,N)','Planimétrico (E,N)'),
+                  self.tr('Planimetric (N,E)','Planimétrico (N,E)'),
 				  self.tr('E, N, h, azimuth, distance', 'E, N, h, azimute, distância'),
                   self.tr('E, N, h'),
                   self.tr('Lon, Lat, h, azimuth, distance', 'Lon, Lat, h, azimute, distância'),
                   self.tr('Lon, Lat, h'),
                   self.tr('Lon, Lat, E, N, h, azimuth, distance', 'Lon, Lat, h, azimute, distância'),
-                  self.tr('Lon, Lat, E, N, h')
+                  self.tr('Lon, Lat, E, N, h'),
+                  self.tr('Lon and Lat (without suffix), h, azimuth, distance', 'Lon e Lat (sem sufixo), h, azimute, distância'),
+                  self.tr('Lon and Lat (without suffix), h', 'Lon e Lat (sem sufixo), h'),
+                  self.tr('Lon and Lat (without suffix), E, N, h, azimuth, distance', 'Lon e Lat (sem sufixo), h, azimute, distância'),
+                  self.tr('Lon and Lat (without suffix), E, N, h', 'Lon e Lat (sem sufixo), E, N, h')
                ]
 
         self.addParameter(
@@ -268,6 +273,30 @@ class DescriptiveTable(QgsProcessingAlgorithm):
         feedback.pushInfo(self.tr('Project CRS is {}.', 'SRC do Projeto é {}.').format(SRC))
 
         # Validando dados de entrada
+
+        # Teste para o modelo de BD
+        modeloBD = None
+        def TestModelo(campos_vertices):
+            sentinela = True
+            for campo in campos_vertices:
+                if campo not in [field.name() for field in vertices.fields()]:
+                    sentinela = False
+                    break
+            return sentinela
+
+        if TestModelo(['code', 'sequence', 'type']):
+            modeloBD = 'TG' # TopoGeo
+            codigo, sequencia, tipo = ('code', 'sequence', 'type')
+            feedback.pushInfo(self.tr('Layer in the TopoGeo model...', 'Camada no modelo TopoGeo...' ))
+
+        if TestModelo(['vertice', 'indice', 'tipo_verti']):
+            modeloBD = 'GR' # GeoRural
+            codigo, sequencia, tipo = ('vertice', 'indice', 'tipo_verti')
+            feedback.pushInfo('Camada no modelo GeoRural...' )
+
+        if not modeloBD:
+            raise QgsProcessingException(self.tr('Check that your layers have the correct field names for the TopoGeo model! More information: https://bit.ly/3FDNQGC', 'Verifique se suas camadas estão com os nomes dos campos corretos para o modelo de banco de dados (TopoGeo ou GeoRural)! Mais informações: https://geoone.com.br/ebook_gratis/'))
+
         # ponto_limite
         ordem_list = list(range(1,vertices.featureCount()+1))
         ordem_comp = []
@@ -276,8 +305,8 @@ class DescriptiveTable(QgsProcessingAlgorithm):
             if pnt.x() < -180 or pnt.x() > 180 or pnt.y() < -90 or pnt.y() > 90:
                 raise QgsProcessingException(self.tr('Input coordinates must be geodetic (longitude and latitude)!', 'As coordenadas de entrada devem ser geodésicas (longitude e latitude)!'))
             try:
-                ordem_comp += [feat['sequence']]
-                codigo_item = feat['code']
+                ordem_comp += [feat[sequencia]]
+                codigo_item = feat[codigo]
             except:
                 raise QgsProcessingException(self.tr('Check that your layer "limit_point_p" has the correct field names for the TopoGeo model! More information: https://bit.ly/3FDNQGC', 'Verifique se sua camada "Ponto Limite" está com os nomes dos campos corretos para o modelo TopoGeo! Mais informações: https://geoone.com.br/ebook_gratis/'))
             if not codigo_item or codigo_item in ['', ' ']:
@@ -298,8 +327,8 @@ class DescriptiveTable(QgsProcessingAlgorithm):
         for feat in vertices.getFeatures():
             pnt = feat.geometry().asPoint()
             coord = geom2PointList(feat.geometry())
-            pnts_UTM[feat['sequence']] = [coordinateTransformer.transform(pnt), feat['type'], feat['code'], MeridianConvergence(pnt.x(), pnt.y(), crsDest) ]
-            pnts_GEO[feat['sequence']] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), feat['type'], feat['code'] ]
+            pnts_UTM[feat[sequencia]] = [coordinateTransformer.transform(pnt), feat[tipo], feat[codigo], MeridianConvergence(pnt.x(), pnt.y(), crsDest) ]
+            pnts_GEO[feat[sequencia]] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), feat[tipo], feat[codigo] ]
 
         # Calculo dos Azimutes e Distancias
         tam = len(pnts_UTM)
@@ -313,17 +342,18 @@ class DescriptiveTable(QgsProcessingAlgorithm):
             Dist += [sqrt((pntA.x() - pntB.x())**2 + (pntA.y() - pntB.y())**2)]
 
         # Templates HTML
-        if modelo == 0:
+        if modelo in (0,1):
+            coords = '<td>En</td> <td>Nn</td>' if modelo == 0 else '<td>Nn</td> <td>En</td>'
             linha = '''<tr>
               <td>Vn</td>
-              <td>En</td>
-              <td>Nn</td>
+              [COORDS]
               <td>Ln</td>
               <td>Az_n</td>
               <td>AzG_n</td>
               <td>Dn</td>
             </tr>
             '''
+            linha = linha.replace('[COORDS]', coords)
 
             texto = '''<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
             <html>
@@ -348,8 +378,7 @@ class DescriptiveTable(QgsProcessingAlgorithm):
             (m)</td>
             </tr>
             <tr>
-              <td>E</td>
-              <td>N</td>
+            [COORDS]
               <td>''' + self.tr('FLAT', str2HTML('PLANO')) + '''</td>
               <td>''' + self.tr('TRUE', str2HTML('VERDADEIRO')) + '''</td>
             </tr>
@@ -360,6 +389,8 @@ class DescriptiveTable(QgsProcessingAlgorithm):
             </body>
             </html>
             '''
+            coords = '<td>E</td> <td>N</td>' if modelo == 0 else '<td>N</td> <td>E</td>'
+            texto = texto.replace('[COORDS]', coords)
 
             LINHAS = ''
             if fim == -1 or fim > tam:
@@ -401,7 +432,7 @@ class DescriptiveTable(QgsProcessingAlgorithm):
             #Tipos de cabeçalhos
 
             # UTM
-            if modelo == 1:
+            if modelo == 2:
                 linha = '''<tr>
               <td>Vn</td>
               <td>En</td>
@@ -430,7 +461,7 @@ class DescriptiveTable(QgsProcessingAlgorithm):
                 </tr>'''
 
             # UTM sem Az e d
-            if modelo == 2:
+            if modelo == 3:
                 linha = '''<tr>
               <td>Vn</td>
               <td>En</td>
@@ -453,7 +484,7 @@ class DescriptiveTable(QgsProcessingAlgorithm):
                 </tr>'''
 
             # GEO
-            if modelo == 3:
+            if modelo in (4,8):
                 linha = '''<tr>
                   <td>Vn</td>
                   <td>lonn</td>
@@ -482,7 +513,7 @@ class DescriptiveTable(QgsProcessingAlgorithm):
                 </tr>'''
 
             # GEO sem Az e d
-            if modelo == 4:
+            if modelo in (5,9):
                 linha = '''<tr>
                   <td>Vn</td>
                   <td>lonn</td>
@@ -506,7 +537,7 @@ class DescriptiveTable(QgsProcessingAlgorithm):
                 </tr>'''
 
             # UTM e GEO
-            if modelo == 5:
+            if modelo in (6,10):
                 linha = '''<tr>
                   <td>Vn</td>
                   <td>lonn</td>
@@ -540,7 +571,7 @@ class DescriptiveTable(QgsProcessingAlgorithm):
                 </tr>'''
 
             # UTM e GEO sem Az e d
-            if modelo == 6:
+            if modelo in (7, 11):
                 linha = '''<tr>
                   <td>Vn</td>
                   <td>lonn</td>
@@ -571,12 +602,21 @@ class DescriptiveTable(QgsProcessingAlgorithm):
                 fim = tam
             for k in range(ini-1,fim):
                 linha0 = linha
+                longitude = pnts_GEO[k+1][0].x()
+                latitude = pnts_GEO[k+1][0].y()
+                if modelo not in (8,9,10,11): # sem sufixo
+                    longitude = self.tr(dd2dms(longitude,decimal + 3), dd2dms(longitude,decimal + 3).replace('.', ',')).replace('-','') + 'W' if longitude < 0 else 'E'
+                    latitude = self.tr(dd2dms(latitude,decimal + 3), dd2dms(latitude,decimal + 3).replace('.', ',')).replace('-','') + 'S' if latitude < 0 else 'N'
+                else:
+                    longitude = self.tr(dd2dms(longitude,decimal + 3), dd2dms(longitude,decimal + 3).replace('.', ','))
+                    latitude = self.tr(dd2dms(latitude,decimal + 3), dd2dms(latitude,decimal + 3).replace('.', ','))
+
                 itens = {'Vn': pnts_UTM[k+1][2],
                             'En': self.tr(format_num.format(pnts_UTM[k+1][0].x()), format_num.format(pnts_UTM[k+1][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
                             'Nn': self.tr(format_num.format(pnts_UTM[k+1][0].y()), format_num.format(pnts_UTM[k+1][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.')),
                             'hn': self.tr(format_num.format(pnts_GEO[k+1][0].z()), format_num.format(pnts_GEO[k+1][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                            'lonn': self.tr(dd2dms(pnts_GEO[k+1][0].x(),decimal + 3), dd2dms(pnts_GEO[k+1][0].x(),decimal + 3).replace('.', ',')),
-                            'latn': self.tr(dd2dms(pnts_GEO[k+1][0].y(),decimal + 3), dd2dms(pnts_GEO[k+1][0].y(),decimal + 3).replace('.', ',')),
+                            'lonn': longitude,
+                            'latn': latitude,
                             'Ln': pnts_UTM[k+1][2] + '/' + pnts_UTM[1 if k+2 > tam else k+2][2],
                             'Az_n': self.tr(dd2dms(Az_lista[k],1), dd2dms(Az_lista[k],1).replace('.', ',')),
                             'Dn': self.tr(format_num.format(Dist[k]), format_num.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'))
