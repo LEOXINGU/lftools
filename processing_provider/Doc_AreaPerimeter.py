@@ -257,6 +257,36 @@ class AreaPerimterReport(QgsProcessingAlgorithm):
                 raise QgsProcessingException(self.tr('Warning: Make sure your projection is correct!'.upper(), 'Aviso: Verifique se sua projeção está correta!'.upper()))
 
         # Validando dados de entrada
+        modeloBD = None
+        def TestModelo(campos_vertices, campos_area):
+            sentinela = True
+            for campo in campos_vertices:
+                if campo not in [field.name() for field in vertices.fields()]:
+                    sentinela = False
+                    break
+            for campo in campos_area:
+                if campo not in [field.name() for field in area.fields()]:
+                    sentinela = False
+                    break
+            return sentinela
+
+        # Teste para o modelo de BD
+        campos_vertices = ['type', 'code', 'sequence']
+        campos_area = ['property', 'registry', 'transcript', 'owner', 'county', 'state', 'survey_date']
+        if TestModelo(campos_vertices, campos_area):
+            modeloBD = 'TG' # TopoGeo
+            codigo, sequencia, tipo = ('code', 'sequence', 'type')
+            feedback.pushInfo(self.tr('Database in the TopoGeo model...', 'Banco de dados no modelo TopoGeo...' ))
+
+        campos_vertices = ['tipo_verti', 'vertice', 'indice']
+        campos_area = ['denominacao', 'sncr', 'matricula', 'nome', 'municipio', 'uf', 'data', 'resp_tec', 'reg_prof']
+        if TestModelo(campos_vertices, campos_area):
+            modeloBD = 'GR' # GeoRural
+            codigo, sequencia, tipo = ('vertice', 'indice', 'tipo_verti')
+            feedback.pushInfo('Banco de dados no modelo GeoRural...' )
+
+        if not modeloBD:
+            raise QgsProcessingException(self.tr('Check that your layers have the correct field names for the TopoGeo model! More information: https://bit.ly/3FDNQGC', 'Verifique se suas camadas estão com os nomes dos campos corretos para o modelo de banco de dados (TopoGeo ou GeoRural)! Mais informações: https://geoone.com.br/ebook_gratis/'))
 
         # ponto_limite
         ordem_list = list(range(1,vertices.featureCount()+1))
@@ -266,8 +296,8 @@ class AreaPerimterReport(QgsProcessingAlgorithm):
             if pnt.x() < -180 or pnt.x() > 180 or pnt.y() < -90 or pnt.y() > 90:
                 raise QgsProcessingException(self.tr('Input coordinates must be geodetic (longitude and latitude)!', 'As coordenadas de entrada devem ser geodésicas (longitude e latitude)!'))
             try:
-                ordem_comp += [feat['sequence']]
-                codigo_item = feat['code']
+                ordem_comp += [feat[sequencia]]
+                codigo_item = feat[codigo]
             except:
                 raise QgsProcessingException(self.tr('Check that your layer "limit_point_p" has the correct field names for the TopoGeo model! More information: https://bit.ly/3FDNQGC', 'Verifique se sua camada "Ponto Limite" está com os nomes dos campos corretos para o modelo TopoGeo! Mais informações: https://geoone.com.br/ebook_gratis/'))
             if not codigo_item or codigo_item in ['', ' ']:
@@ -278,7 +308,7 @@ class AreaPerimterReport(QgsProcessingAlgorithm):
 
         # area_imovel
         Fields = area.fields()
-        fieldnames = [field.name() for field in Fields]
+        fieldnames = ['property', 'county', 'state'] if modeloBD == 'TG' else ['denominacao', 'municipio', 'uf']
         for fieldname in fieldnames:
             att = feat1[fieldname]
             if not att or att in ['', ' ']:
@@ -353,19 +383,27 @@ SIRGAS2000<br>
 '''
 
         # Inserindo dados iniciais do levantamento
+        property = 'property' if modeloBD == 'TG' else 'denominacao'
+        state = 'state' if modeloBD == 'TG' else 'uf'
+        county = 'county' if modeloBD == 'TG' else 'municipio'
         try:
-            itens = {'[IMOVEL]': str2HTML(feat1['property']),
-                        '[UF]': feat1['state'],
+            itens = {'[IMOVEL]': str2HTML(feat1[property]),
+                        '[UF]': feat1[state],
                         '[UTM]': (SRC.split('/')[-1]).replace('zone', 'fuso'),
-                        '[MUNICIPIO]': str2HTML(feat1['county']),
+                        '[MUNICIPIO]': str2HTML(feat1[county]),
                         }
             for item in itens:
                     INICIO = INICIO.replace(item, itens[item])
 
             # Inserindo dados finais do levantamento
-            itens = {   '[AREA]': self.tr(format_num.format(feat1['area']), format_num.format(feat1['area']).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                        '[AREA_HA]': self.tr('{:,.4f}'.format(feat1['area']/1e4), '{:,.4f}'.format(feat1['area']/1e4).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                        '[PERIMETRO]': self.tr(format_num.format(feat1['perimeter']), format_num.format(feat1['perimeter']).replace(',', 'X').replace('.', ',').replace('X', '.'))
+            geom1 = feat1.geometry()
+            geom1.transform(coordinateTransformer)
+            área = feat1['area'] if modeloBD == 'TG' else geom1.area()
+            perímetro = feat1['perimeter'] if modeloBD == 'TG' else geom1.length()
+
+            itens = {   '[AREA]': self.tr(format_num.format(área), format_num.format(área).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                        '[AREA_HA]': self.tr('{:,.4f}'.format(área/1e4), '{:,.4f}'.format(área/1e4).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                        '[PERIMETRO]': self.tr(format_num.format(perímetro), format_num.format(perímetro).replace(',', 'X').replace('.', ',').replace('X', '.'))
                         }
             for item in itens:
                     FIM = FIM.replace(item, itens[item])
@@ -377,7 +415,7 @@ SIRGAS2000<br>
         pnts_UTM = {}
         for feat in vertices.getFeatures():
             pnt = feat.geometry().asPoint()
-            pnts_UTM[feat['sequence']] = [coordinateTransformer.transform(pnt), feat['code'], pnt]
+            pnts_UTM[feat[sequencia]] = [coordinateTransformer.transform(pnt), feat[codigo], pnt]
 
         # Cálculo dos Azimutes e Distâncias
         tam = len(pnts_UTM)
