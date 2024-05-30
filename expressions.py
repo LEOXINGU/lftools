@@ -38,6 +38,7 @@ from lftools.geocapt.cartography import (map_sistem,
                                          Mesclar_Multilinhas,
                                          areaGauss,
                                          main_azimuth,
+                                         areaSGL, perimetroSGL,
                                          inom2mi as INOM2MI)
 from lftools.geocapt.topogeo import (dd2dms as DD2DMS,
                                      dms2dd as DMS2DD,
@@ -466,37 +467,6 @@ def cusum (layer_name, sequence_field, value_field, group_field, feature, parent
         return dic[feature[sequence_field]]
 
 
-# Area no SGL
-def areaParteSGL(coordsGeo, coords, crsGeo):
-    centroide = QgsGeometry.fromPolygonXY([coordsGeo]).centroid().asPoint()
-    alt = []
-    for pnt in coords[:-1]:
-        if str(pnt.z()) != 'nan':
-            alt += [pnt.z()]
-        else:
-            alt += [0]
-    h0 = np.array(alt).mean()
-    lon0 = centroide.x()
-    lat0 = centroide.y()
-    EPSG = int(crsGeo.authid().split(':')[-1]) # pegando o EPGS do SRC do QGIS
-    proj_crs = CRS.from_epsg(EPSG) # transformando para SRC do pyproj
-    a=proj_crs.ellipsoid.semi_major_metre
-    f_inv = proj_crs.ellipsoid.inverse_flattening
-    f=1/f_inv
-    # CENTRO DE ROTAÇÃO
-    Xo, Yo, Zo = geod2geoc(lon0, lat0, h0, a, f)
-    # CONVERSÃO DAS COORDENADAS
-    coordsSGL = []
-    for k, coord in enumerate(coordsGeo):
-        lon = coord.x()
-        lat = coord.y()
-        h = coords[k].z() if str(coords[k].z()) != 'nan' else 0
-        X, Y, Z = geod2geoc(lon, lat, h, a, f)
-        E, N, U = geoc2enu(X, Y, Z, lon0, lat0, Xo, Yo, Zo)
-        coordsSGL += [QgsPointXY(E, N)]
-    return abs(areaGauss(coordsSGL))
-
-
 @qgsfunction(args='auto', group='LF Tools')
 def areaLTP (layer_name, feature, parent):
     """
@@ -517,9 +487,7 @@ def areaLTP (layer_name, feature, parent):
         layer = QgsProject.instance().mapLayersByName(layer_name)[0]
     else:
         layer = QgsProject.instance().mapLayer(layer_name)
-
     geom = feature.geometry()
-
     if not layer.crs().isGeographic():
         crsProj = layer.crs()
         crsGeo = QgsCoordinateReferenceSystem(crsProj.geographicCrsAuthId())
@@ -530,22 +498,41 @@ def areaLTP (layer_name, feature, parent):
     else:
         geomGeo = geom
         crsGeo = layer.crs()
+    return areaSGL(geomGeo, crsGeo)
 
-    if geom.isMultipart():
-        coordsM = geom2PointList(geom)
-        coordsGeoM = geomGeo.asMultiPolygon()
-        areaSGL = 0
-        for k, coords in enumerate(coordsM):
-            coordsGeo = coordsGeoM[k]
-            areaSGL += areaParteSGL(coordsGeo[0], coords[0], crsGeo)
 
+@qgsfunction(args='auto', group='LF Tools')
+def perimeterLTP (layer_name, feature, parent):
+    """
+    Calculates the perimeter on the Local Tangent Plane (LTP), also known as Local Geodetic Coordinate System, which is a spatial reference system based on the tangent plane on the feature centroid defined by the local vertical direction.
+    <p>Note: PolygonZ or MultiPoligonZ should be used to obtain the most accurate result.</p>
+    <h2>Examplo:</h2>
+    <ul>
+      <li>perimeterLTP('layer_name') -> 456.48 </li>
+    </ul>
+    <div>
+    <p><b>About the LTP:</b></p>
+    <p>
+    <b><a href="https://geoone.com.br/sistema-geodesico-local/" target="_blank">França, L. Local Geodetic Coordinate System. GeoOne. 2022.</a></b>
+    </p>
+  </div>
+    """
+    if len(QgsProject.instance().mapLayersByName(layer_name)) == 1:
+        layer = QgsProject.instance().mapLayersByName(layer_name)[0]
     else:
-        coords = geom2PointList(geom)[0]
-        coordsGeo = geomGeo.asPolygon()[0]
-        areaSGL = areaParteSGL(coordsGeo, coords, crsGeo)
-
-    return areaSGL
-
+        layer = QgsProject.instance().mapLayer(layer_name)
+    geom = feature.geometry()
+    if not layer.crs().isGeographic():
+        crsProj = layer.crs()
+        crsGeo = QgsCoordinateReferenceSystem(crsProj.geographicCrsAuthId())
+        coordinateTransformer = QgsCoordinateTransform()
+        coordinateTransformer.setDestinationCrs(crsGeo)
+        coordinateTransformer.setSourceCrs(crsProj)
+        geomGeo = reprojectPoints(geom, coordinateTransformer)
+    else:
+        geomGeo = geom
+        crsGeo = layer.crs()
+    return perimetroSGL(geomGeo, crsGeo)
 
 
 @qgsfunction(args='auto', group='LF Tools')
@@ -596,6 +583,7 @@ def inter_area (this_layer, other_layer, calc_CRS, filter, feature, parent):
                 inter.transform(transf2)
                 area += inter.area()
     return float(area)
+
 
 @qgsfunction(args='auto', group='LF Tools')
 def dinamictable(titulo, campos, apelidos, decimal, fator, compensador, feature, parent):
