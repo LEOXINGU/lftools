@@ -208,11 +208,11 @@ class MeasureLayers(QgsProcessingAlgorithm):
 
                 elif formula == 2: # SGL
                     formula_area = "areaLTP('{}')".format(layer.name())
-                    print(formula_area)
-                    print(field_area)
+                    formula_perimeter = "perimeterLTP('{}')".format(layer.name())
 
                     if layer.geometryType() == QgsWkbTypes.PolygonGeometry:
                         layer.addExpressionField(formula_area + '/' + str(unidade_area), field_area)
+                        layer.addExpressionField(formula_perimeter + '/' + str(unidade_dist), field_perimeter)
 
             if feedback.isCanceled():
                 break
