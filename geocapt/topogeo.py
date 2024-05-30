@@ -14,7 +14,7 @@ __author__ = 'Leandro França'
 __date__ = '2021-03-01'
 __copyright__ = '(C) 2021, Leandro França'
 
-from numpy import radians, arctan, pi, sin, cos, matrix, sqrt, degrees, array, diag, ones, zeros, floor
+from numpy import radians, arctan, pi, sin, cos, sqrt, degrees, array, diag, ones, zeros, floor
 from numpy.linalg import norm, pinv, inv
 from pyproj.crs import CRS
 import datetime as dt
@@ -164,6 +164,7 @@ def geod2geoc(lon, lat, h, a, f):
     Z = (N*(1-e2)+h)*sin(lat)
     return (X,Y,Z)
 
+
 # Conversão de coordenadas geocêntricas para geodésicas
 def geoc2geod(X, Y, Z, a, f):
     b = a*(1-f)
@@ -180,12 +181,13 @@ def geoc2geod(X, Y, Z, a, f):
     lat = lat/pi*180
     return (lon, lat, h)
 
+
 # Conversão de Coordenadas Geocêntrica para Topocêntricas
 def geoc2enu(X, Y, Z, lon0, lat0, Xo, Yo, Zo):
     lon = radians(lon0)
     lat = radians(lat0)
 
-    M = matrix(
+    M = array(
     [
     [  -sin(lon),                     cos(lon),                 0 ],
     [  -sin(lat)*cos(lon),   -sin(lat)*sin(lon),          cos(lat)],
@@ -193,13 +195,13 @@ def geoc2enu(X, Y, Z, lon0, lat0, Xo, Yo, Zo):
     ]
     )
 
-    T = matrix(
+    T = array(
     [[X - Xo], [Y-Yo], [Z-Zo]]
     )
 
-    Fo = matrix([[15e4],[25e4],[0]]) # False E and N
+    Fo = array([[15e4],[25e4],[0]]) # False E and N
 
-    R = M*T + Fo
+    R = M@T + Fo
     return (R[0,0], R[1,0], R[2,0])
 
 
@@ -208,9 +210,9 @@ def enu2geoc(E, N, U, lon0, lat0, Xo, Yo, Zo):
     lon = radians(lon0)
     lat = radians(lat0)
 
-    Fo = matrix([[15e4],[25e4],[0]]) # False E and N
+    Fo = array([[15e4],[25e4],[0]]) # False E and N
 
-    M = matrix(
+    M = array(
     [
     [  -sin(lon),     -sin(lat)*cos(lon),          cos(lat)*cos(lon)],
     [  cos(lon),      -sin(lat)*sin(lon),          cos(lat)*sin(lon)],
@@ -218,12 +220,13 @@ def enu2geoc(E, N, U, lon0, lat0, Xo, Yo, Zo):
     ]
     )
 
-    T = matrix(
+    T = array(
     [[E], [N], [U]]
     )
 
-    R = M*(T-Fo) + [[Xo], [Yo], [Zo]]
+    R = M@(T-Fo) + [[Xo], [Yo], [Zo]]
     return (R[0,0], R[1,0], R[2,0])
+
 
 # Transformar distancia em metros para graus
 def meters2degrees(dist, lat, SRC):
@@ -238,6 +241,7 @@ def meters2degrees(dist, lat, SRC):
     theta = dist/R
     theta = np.degrees(theta) # Radianos para graus
     return theta
+
 
 # Transformar de graus para metros
 def degrees2meters(theta, lat, SRC):
