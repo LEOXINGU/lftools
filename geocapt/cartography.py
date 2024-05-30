@@ -20,7 +20,7 @@ import numpy as np
 from math import floor, modf
 import math
 from pyproj.crs import CRS
-from lftools.geocapt.topogeo import azimute
+from lftools.geocapt.topogeo import azimute, geod2geoc, geoc2enu
 from qgis.core import (QgsGeometry,
                        QgsPointXY,
                        QgsCoordinateTransform,
@@ -94,15 +94,24 @@ def SRC_Projeto(output_type):
         return b.description()
 
 
-def areaGauss(coord):
+def areaGauss(coords):
     soma = 0
-    tam = len(coord)
+    tam = len(coords)
     for k in range(tam):
-        P1 = coord[ -1 if k==0 else k-1]
-        P2 = coord[k]
-        P3 = coord[ 0 if k==(tam-1) else (k+1)]
+        P1 = coords[ -1 if k==0 else k-1]
+        P2 = coords[k]
+        P3 = coords[ 0 if k==(tam-1) else (k+1)]
         soma += P2.x()*(P1.y() - P3.y())
     return soma/2
+
+def Perimetro(coords):
+    soma = 0
+    tam = len(coords)
+    for k in range(tam):
+        P1 = coords[k]
+        P2 = coords[ 0 if k==(tam-1) else (k+1)]
+        soma += np.sqrt((P1.x()-P2.x())**2+(P1.y()-P2.y())**2)
+    return soma
 
 
 def raioMedioGauss(lat, EPSG):
@@ -376,6 +385,7 @@ def main_azimuth(geometry):
             direcao = np.degrees(azimute(QgsPointXY(0,0), vetor)[0])
         return direcao
 
+
 def Mesclar_Multilinhas(inters):
     if inters.type() == 1 and inters.isMultipart():
         partes = inters.asMultiPolyline()
@@ -398,6 +408,75 @@ def Mesclar_Multilinhas(inters):
         return inters
     else:
         return inters
+
+
+# Area no SGL
+def AreaPerimetroParteSGL(coordsXYZ, coordsXY, crsGeo):
+    centroide = QgsGeometry.fromPolygonXY([coordsXY]).centroid().asPoint()
+    alt = []
+    for pnt in coordsXYZ[:-1]:
+        if str(pnt.z()) != 'nan':
+            alt += [pnt.z()]
+        else:
+            alt += [0]
+    h0 = np.array(alt).mean()
+    lon0 = centroide.x()
+    lat0 = centroide.y()
+    EPSG = int(crsGeo.authid().split(':')[-1]) # pegando o EPGS do SRC do QGIS
+    proj_crs = CRS.from_epsg(EPSG) # transformando para SRC do pyproj
+    a = proj_crs.ellipsoid.semi_major_metre
+    f_inv = proj_crs.ellipsoid.inverse_flattening
+    f = 1/f_inv
+    # CENTRO DE ROTAÇÃO
+    Xo, Yo, Zo = geod2geoc(lon0, lat0, h0, a, f)
+    # CONVERSÃO DAS COORDENADAS
+    coordsSGL = []
+    for coord in coordsXYZ:
+        lon = coord.x()
+        lat = coord.y()
+        h = coord.z() if str(coord.z()) != 'nan' else 0
+        X, Y, Z = geod2geoc(lon, lat, h, a, f)
+        E, N, U = geoc2enu(X, Y, Z, lon0, lat0, Xo, Yo, Zo)
+        coordsSGL += [QgsPointXY(E, N)]
+    return (abs(areaGauss(coordsSGL)), Perimetro(coordsSGL))
+
+def areaSGL(geomGeo, crsGeo):
+    if geomGeo.isMultipart():
+        coordsXYZ = geom2PointList(geomGeo)
+        coordsXY = geomGeo.asMultiPolygon()
+        areaSGL = 0
+        for k, coords in enumerate(coordsXY):
+            coordsGeo = coordsXYZ[k]
+            areaSGL += AreaPerimetroParteSGL(coordsGeo[0], coords[0], crsGeo)[0]
+    else:
+        coordsGeo = geom2PointList(geomGeo)
+        coords = geomGeo.asPolygon()
+        areaSGL = AreaPerimetroParteSGL(coordsGeo[0], coords[0], crsGeo)[0]
+    return areaSGL
+
+def perimetroSGL(geomGeo, crsGeo):
+    if geomGeo.isMultipart():
+        coordsXYZ = geom2PointList(geomGeo)
+        coordsXY = geomGeo.asMultiPolygon()
+        perimetroSGL = 0
+        for k, coords in enumerate(coordsXY):
+            coordsGeo = coordsXYZ[k]
+            perimetroSGL += AreaPerimetroParteSGL(coordsGeo[0], coords[0], crsGeo)[1]
+    else:
+        coordsGeo = geom2PointList(geomGeo)
+        coords = geomGeo.asPolygon()
+        perimetroSGL = AreaPerimetroParteSGL(coordsGeo[0], coords[0], crsGeo)[1]
+    return float(perimetroSGL)
+
+# # Azimute e Distância no SGL
+# def AzimuteDistanciaSGL(pntA, pntB, geomGeo, crsGeo):
+
+# # Comprimento no SGL para linhas
+# def Comprimento(geomGeo, lon0, lat0, h0)
+
+# Comprimento Real 3D no SGL para Linhas 3D
+
+
 
 def map_sistem(lon, lat, ScaleD=1e6):
     # Escala 1:1.000.000
