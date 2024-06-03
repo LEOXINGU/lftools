@@ -34,11 +34,10 @@ from lftools.geocapt.cartography import (map_sistem,
                                          SRC_Projeto,
                                          ScaleFactor,
                                          geom2PointList,
-                                         reprojectPoints,
                                          Mesclar_Multilinhas,
                                          areaGauss,
                                          main_azimuth,
-                                         areaSGL, perimetroSGL,
+                                         areaSGL, perimetroSGL, comprimentoSGL,
                                          inom2mi as INOM2MI)
 from lftools.geocapt.topogeo import (dd2dms as DD2DMS,
                                      dms2dd as DMS2DD,
@@ -472,7 +471,7 @@ def areaLTP (layer_name, feature, parent):
     """
     Calculates the area on the Local Tangent Plane (LTP), also known as Local Geodetic Coordinate System, which is a spatial reference system based on the tangent plane on the feature centroid defined by the local vertical direction.
     <p>Note: PolygonZ or MultiPoligonZ should be used to obtain the most accurate result.</p>
-    <h2>Examplo:</h2>
+    <h2>Example:</h2>
     <ul>
       <li>areaLTP('layer_name') -> 607503.4825 </li>
     </ul>
@@ -494,11 +493,14 @@ def areaLTP (layer_name, feature, parent):
         coordinateTransformer = QgsCoordinateTransform()
         coordinateTransformer.setDestinationCrs(crsGeo)
         coordinateTransformer.setSourceCrs(crsProj)
-        geomGeo = reprojectPoints(geom, coordinateTransformer)
+        geom.transform(coordinateTransformer)
     else:
-        geomGeo = geom
         crsGeo = layer.crs()
-    return areaSGL(geomGeo, crsGeo)
+    geomGeo = geom
+    try:
+        return areaSGL(geomGeo, crsGeo)
+    except:
+        return tr('Check the geometry type!', 'Verifique o tipo de geometria!')
 
 
 @qgsfunction(args='auto', group='LF Tools')
@@ -506,7 +508,7 @@ def perimeterLTP (layer_name, feature, parent):
     """
     Calculates the perimeter on the Local Tangent Plane (LTP), also known as Local Geodetic Coordinate System, which is a spatial reference system based on the tangent plane on the feature centroid defined by the local vertical direction.
     <p>Note: PolygonZ or MultiPoligonZ should be used to obtain the most accurate result.</p>
-    <h2>Examplo:</h2>
+    <h2>Example:</h2>
     <ul>
       <li>perimeterLTP('layer_name') -> 456.48 </li>
     </ul>
@@ -528,11 +530,53 @@ def perimeterLTP (layer_name, feature, parent):
         coordinateTransformer = QgsCoordinateTransform()
         coordinateTransformer.setDestinationCrs(crsGeo)
         coordinateTransformer.setSourceCrs(crsProj)
-        geomGeo = reprojectPoints(geom, coordinateTransformer)
+        geom.transform(coordinateTransformer)
     else:
-        geomGeo = geom
         crsGeo = layer.crs()
-    return perimetroSGL(geomGeo, crsGeo)
+    geomGeo = geom
+    try:
+        return perimetroSGL(geomGeo, crsGeo)
+    except:
+        return tr('Check the geometry type!', 'Verifique o tipo de geometria!')
+
+
+@qgsfunction(args='auto', group='LF Tools')
+def lengthLTP (layer_name, dimension, feature, parent):
+    """
+    Calculates the 2D or 3D length on the Local Tangent Plane (LTP), also known as Local Geodetic Coordinate System, which is a spatial reference system based on the tangent plane on the feature centroid defined by the local vertical direction.
+    <p>Note: LineStringZ or MultiLineStringZ should be used to obtain the most accurate result.</p>
+    <h2>Examples:</h2>
+    <ul>
+      <li>lengthLTP(layer_name, dimension) -> length </li>
+      <li>lengthLTP('road', '2d') -> 12.45 </li>
+      <li>lengthLTP('road', '3d') -> 12.59 </li>
+    </ul>
+    <div>
+    <p><b>About the LTP:</b></p>
+    <p>
+    <b><a href="https://geoone.com.br/sistema-geodesico-local/" target="_blank">França, L. Local Geodetic Coordinate System. GeoOne. 2022.</a></b>
+    </p>
+  </div>
+    """
+    if len(QgsProject.instance().mapLayersByName(layer_name)) == 1:
+        layer = QgsProject.instance().mapLayersByName(layer_name)[0]
+    else:
+        layer = QgsProject.instance().mapLayer(layer_name)
+    geom = feature.geometry()
+    if not layer.crs().isGeographic():
+        crsProj = layer.crs()
+        crsGeo = QgsCoordinateReferenceSystem(crsProj.geographicCrsAuthId())
+        coordinateTransformer = QgsCoordinateTransform()
+        coordinateTransformer.setDestinationCrs(crsGeo)
+        coordinateTransformer.setSourceCrs(crsProj)
+        geom.transform(coordinateTransformer)
+    else:
+        crsGeo = layer.crs()
+    geomGeo = geom
+    try:
+        return comprimentoSGL(geomGeo, crsGeo, dimension)
+    except:
+        return tr('Check the geometry type', 'Verifique o tipo de geometria')
 
 
 @qgsfunction(args='auto', group='LF Tools')
