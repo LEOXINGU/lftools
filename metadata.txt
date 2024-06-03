@@ -64,7 +64,7 @@ hasProcessingProvider=yes
 	1.0.1 - Improvement in tools' translation and description
 	1.0   - Initial version
 # Tags are comma separated with spaces allowed
-tags=cartography, surveying, topography, raster, vector, postgis, cadastre, processing, reambulation, geotag, expressions, document, memorial, description, drones, GNSS, NMEA, RTKLIB, magnetic, ellipses, lftools, brazil
+tags=cartography, surveying, topography, raster, vector, postgis, cadastre, processing, reambulation, geotag, expressions, document, memorial, description, drones, GNSS, NMEA, RTKLIB, magnetic, ellipses, lftools, brazil, GeoOne
 
 homepage=https://github.com/LEOXINGU/lftools/wiki/LF-Tools-for-QGIS
 category=cartography
