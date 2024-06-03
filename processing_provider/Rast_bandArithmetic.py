@@ -91,7 +91,7 @@ class BandArithmetic(QgsProcessingAlgorithm):
     txt_en = '''Performs an arithmetic operation on the bands of a raster. The predefined formula is used to calculate the Green Leaf Index (GLI) for a RGB raster. However you can enter your own formula.
 Examples:
 NDVI with RGN raster: ( b3 - b1) / (b3 + b1)
-NDWI with RGN raster: ( b3 - b2) / (b3 + b2)
+NDWI with RGN raster: ( b2 - b3) / (b2 + b3)
 GLI with RGB raster: (2*b2 - b1 - b3) / (2*b2 + b1 + b3)
 VARI with RGB raster: (b2 - b1) / (b2 + b1 - b3)
 VIgreen with RGB raster: (b2 - b1) / (b2 + b1)
