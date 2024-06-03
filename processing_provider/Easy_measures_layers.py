@@ -200,19 +200,16 @@ class MeasureLayers(QgsProcessingAlgorithm):
                     formula_perimeter = ['$perimeter', 'perimeter($geometry)'][formula]
                     formula_area = ['$area', 'area($geometry)'][formula]
 
-                    if layer.geometryType() == QgsWkbTypes.LineGeometry:
-                        layer.addExpressionField(formula_length + '/' + str(unidade_dist), field_length)
-                    if layer.geometryType() == QgsWkbTypes.PolygonGeometry:
-                        layer.addExpressionField(formula_perimeter + '/' + str(unidade_dist), field_perimeter)
-                        layer.addExpressionField(formula_area + '/' + str(unidade_area), field_area)
-
                 elif formula == 2: # SGL
-                    formula_area = "areaLTP('{}')".format(layer.name())
-                    formula_perimeter = "perimeterLTP('{}')".format(layer.name())
+                    formula_length = "lengthLTP('{}', '2d')".format(layer.id())
+                    formula_area = "areaLTP('{}')".format(layer.id())
+                    formula_perimeter = "perimeterLTP('{}')".format(layer.id())
 
-                    if layer.geometryType() == QgsWkbTypes.PolygonGeometry:
-                        layer.addExpressionField(formula_area + '/' + str(unidade_area), field_area)
-                        layer.addExpressionField(formula_perimeter + '/' + str(unidade_dist), field_perimeter)
+                if layer.geometryType() == QgsWkbTypes.LineGeometry:
+                    layer.addExpressionField(formula_length + '/' + str(unidade_dist), field_length)
+                if layer.geometryType() == QgsWkbTypes.PolygonGeometry:
+                    layer.addExpressionField(formula_perimeter + '/' + str(unidade_dist), field_perimeter)
+                    layer.addExpressionField(formula_area + '/' + str(unidade_area), field_area)
 
             if feedback.isCanceled():
                 break
