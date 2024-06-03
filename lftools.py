@@ -44,7 +44,7 @@ from .expressions import *
 exprs = (coord2inom, fieldstat, dd2dms, projectCRS, layerCRS, magneticdec, mainAzimuth,
          dms2dd, scalefactor, zonehemisf, deedtable, inom2mi, meridianconv, cusum, inter_area,
          removespetialchar, deedtable2, deedtable3, areaLTP, deedtext, geoneighbors, gpsdate,
-         str2html, img2html, dinamictable, perimeterLTP)
+         str2html, img2html, dinamictable, perimeterLTP, lengthLTP)
 
 cmd_folder = os.path.split(inspect.getfile(inspect.currentframe()))[0]
 
