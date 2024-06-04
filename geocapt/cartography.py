@@ -135,12 +135,12 @@ def AzimutePuissant(pntA, pntB): # Pontos em graus
     # Fórmula de Puissant
     y = math.sin(d_lon) * math.cos(lat2)
     x = math.cos(lat1) * math.sin(lat2) - math.sin(lat1) * math.cos(lat2) * math.cos(d_lon)
-    azimute = math.atan2(y, x)
+    Azimute = math.atan2(y, x)
     # Converter radianos para graus
-    azimute = math.degrees(azimute)
+    Azimute = math.degrees(Azimute)
     # Normalizar o azimute para o intervalo [0, 360)
-    azimute = (azimute + 360) % 360
-    return azimute
+    Azimute = (Azimute + 360) % 360
+    return Azimute
 
 
 def raioMedioGauss(lat, EPSG):
@@ -152,6 +152,16 @@ def raioMedioGauss(lat, EPSG):
     M = a*(1-e2)/(1-e2*(np.sin(lat))**2)**(3/2.) # Raio de curvatura meridiana
     R = np.sqrt(M*N) # Raio médio de Gauss
     return R
+
+
+def OrigemSGL(lon0, lat0, h0, crsGeo):
+    EPSG = int(crsGeo.authid().split(':')[-1]) # pegando o EPGS do SRC do QGIS
+    proj_crs = CRS.from_epsg(EPSG) # transformando para SRC do pyproj
+    a = proj_crs.ellipsoid.semi_major_metre
+    f_inv = proj_crs.ellipsoid.inverse_flattening
+    f = 1/f_inv
+    X0, Y0, Z0 = geod2geoc(lon0, lat0, h0, a, f)
+    return (X0, Y0, Z0, a, f)
 
 
 # Area no SGL
@@ -166,13 +176,7 @@ def AreaPerimetroParteSGL(coordsXYZ, coordsXY, crsGeo):
     h0 = np.array(alt).mean()
     lon0 = centroide.x()
     lat0 = centroide.y()
-    EPSG = int(crsGeo.authid().split(':')[-1]) # pegando o EPGS do SRC do QGIS
-    proj_crs = CRS.from_epsg(EPSG) # transformando para SRC do pyproj
-    a = proj_crs.ellipsoid.semi_major_metre
-    f_inv = proj_crs.ellipsoid.inverse_flattening
-    f = 1/f_inv
-    # CENTRO DE ROTAÇÃO
-    Xo, Yo, Zo = geod2geoc(lon0, lat0, h0, a, f)
+    Xo, Yo, Zo = OrigemSGL(lon0, lat0, h0, crsGeo)
     # CONVERSÃO DAS COORDENADAS
     coordsSGL = []
     for coord in coordsXYZ:
@@ -213,25 +217,44 @@ def perimetroSGL(geomGeo, crsGeo):
     return float(perimetroSGL)
 
 
-# # Azimute e Distância no SGL
-# def AzimuteDistanciaSGL(pntA, pntB, geomGeo, crsGeo):
-#     # Origem do SGL
-#     centroide = geomGeo.centroid()
-#     coordsXYZ = geom2PointList(geomGeo)
-#     # Obter cota média
-#     pnts = np.hstack(coordsXYZ)
-#     cotas = 0
-#     for pnt in pnts:
-#         cotas += pnt.z()
-#     h_m = cotas/len(pnts)
-#     # Transformar geodésicas para geocêntricas
-#
-#     # Transformar geocêntricas para topocêntricas (SGL)
-#
-#     # Calcular azimute
-#     Az = AzimutePuissant(pntA, pntB) # Puissant
-#
-#     # Calcular distância
+def Unicos(pnts):
+    lista = []
+    for pnt in pnts:
+        if pnt not in lista:
+            lista += [pnt]
+    return lista
+
+# Azimute e Distância no SGL
+def AzimuteDistanciaSGL(pntA, pntB, geomGeo, crsGeo):
+    # Origem do SGL
+    centroide = geomGeo.centroid().asPoint()
+    coordsXYZ = geom2PointList(geomGeo)
+    # Obter cota média
+    pnts = np.hstack(coordsXYZ)
+    pnts = Unicos(pnts[0]) # remover duplicados
+    cotas = 0
+    for pnt in pnts:
+        if str(pnt.z()) != 'nan':
+            cotas += pnt.z()
+        else:
+            cotas += 0
+    h0 = cotas/len(pnts)
+    lon0 = centroide.x()
+    lat0 = centroide.y()
+    X0, Y0, Z0, a, f = OrigemSGL(lon0, lat0, h0, crsGeo)
+    # Transformar geodésicas para geocêntricas
+    XA, YA, ZA = geod2geoc(pntA.x(), pntA.y(), pntA.z() if str(pntA.z()) != 'nan' else 0, a, f)
+    XB, YB, ZB = geod2geoc(pntB.x(), pntB.y(), pntB.z() if str(pntB.z()) != 'nan' else 0, a, f)
+    # Transformar geocêntricas para topocêntricas (SGL)
+    Ea, Na, Ua = geoc2enu(XA, YA, ZA, lon0, lat0, X0, Y0, Z0)
+    Eb, Nb, Ub = geoc2enu(XB, YB, ZB, lon0, lat0, X0, Y0, Z0)
+    # Calcular azimute de Puissant
+    Az = AzimutePuissant(pntA, pntB)
+    # Calcular distância
+    dist = distEuclidiana2D(QgsPointXY(Ea, Na), QgsPointXY(Eb, Nb))
+    # # Azimute no SGL
+    # Az = (180/np.pi)*azimute(pntA, pntB)[0]
+    return Az, dist
 
 
 # Comprimento no SGL para linhas 2D e 3D
@@ -500,8 +523,9 @@ def OrientarPoligono(coords, primeiro, sentido):
 def main_azimuth(geometry):
     pnts = geom2PointList(geometry)
     pnts = np.hstack(pnts)
+    pnts = Unicos(pnts[0]) # remover duplicados
     a = []
-    for pnt in pnts[:-1] if geometry.type() == 2 else pnts:
+    for pnt in pnts:
         a += [(pnt.x(), pnt.y())]
     if len(a) < 2:
         return 0
