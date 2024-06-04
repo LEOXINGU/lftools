@@ -56,6 +56,7 @@ class DescriptiveMemorial(QgisAlgorithm):
     INPUT2 = 'INPUT2'
     INPUT3 = 'INPUT3'
     COORD = 'COORD'
+    CALC = 'CALC'
     LOGO = 'LOGO'
     SLOGAN = 'SLOGAN'
     DECIMAL = 'DECIMAL'
@@ -167,6 +168,20 @@ class DescriptiveMemorial(QgisAlgorithm):
             )
         )
 
+        tipos = [self.tr('Project CRS, area in m²', 'SRC projetado, area em m²'),
+                 self.tr('Local Tangent Plane, area in m²', 'Sistema Geodésico Local, área em m²')
+               ]
+
+        self.addParameter(
+            QgsProcessingParameterEnum(
+                self.CALC,
+                self.tr('Calculation of azimuths, distances and area',
+                        'Cálculo de azimutes, distâncias e área'),
+				options = tipos,
+                defaultValue = 0
+            )
+        )
+
         self.addParameter(
             QgsProcessingParameterFile(
                 self.LOGO,
@@ -246,6 +261,12 @@ class DescriptiveMemorial(QgisAlgorithm):
         coordenadas = self.parameterAsEnum(
             parameters,
             self.COORD,
+            context
+        )
+
+        calculo = self.parameterAsEnum(
+            parameters,
+            self.CALC,
             context
         )
 
@@ -613,29 +634,26 @@ class DescriptiveMemorial(QgisAlgorithm):
             else:
                 pnts[sequence] = [coordinateTransformer.transform(geom.asPoint()), type, code, (geom.constGet().x(), geom.constGet().y(), geom.constGet().z())]
 
-        # Cálculo dos Azimutes e Distâncias Projetadas (Ex: UTM)
+        # Cálculo dos Azimutes e Distâncias
         tam = len(pnts)
         Az_lista, Dist = [], []
-        for k in range(tam):
-            pntA = pnts[k+1][0]
-            pntB = pnts[max((k+2)%(tam+1),1)][0]
-            Az_lista += [(180/pi)*azimute(pntA, pntB)[0]]
-            Dist += [sqrt((pntA.x() - pntB.x())**2 + (pntA.y() - pntB.y())**2)]
 
-        # # Cálculo dos Azimutes e Distâncias no SGL
-        # tam = len(pnts)
-        # Az_lista, Dist = [], []
-        # for k in range(tam):
-        #     pntA = QgsPoint(pnts[k+1][3][0], pnts[k+1][3][1], pnts[k+1][3][2])
-        #     ind =  max((k+2)%(tam+1),1)
-        #     pntB = QgsPoint(pnts[ind][3][0], pnts[ind][3][1], pnts[ind][3][2])
-        #     Az, dist = AzimuteDistanciaSGL(pntA, pntB, geomGeo, area.sourceCrs())
-        #     Az_lista += [Az]
-        #     Dist += [dist]
+        if calculo == 0: # Projetadas (Ex: UTM)
+            for k in range(tam):
+                pntA = pnts[k+1][0]
+                pntB = pnts[max((k+2)%(tam+1),1)][0]
+                Az_lista += [(180/pi)*azimute(pntA, pntB)[0]]
+                Dist += [sqrt((pntA.x() - pntB.x())**2 + (pntA.y() - pntB.y())**2)]
+        elif calculo == 1: # SGL
+            for k in range(tam):
+                pntA = QgsPoint(pnts[k+1][3][0], pnts[k+1][3][1], pnts[k+1][3][2])
+                ind =  max((k+2)%(tam+1),1)
+                pntB = QgsPoint(pnts[ind][3][0], pnts[ind][3][1], pnts[ind][3][2])
+                Az, dist = AzimuteDistanciaSGL(pntA, pntB, geomGeo, area.sourceCrs())
+                Az_lista += [Az]
+                Dist += [dist]
 
-        print(Az_lista) #################################################################
-
-
+        # Modelo de coordenadas
         def CoordN (x, y, z):
             if coordenadas in (0,1,2,3):
                 Xn = self.tr(format_num.format(x), format_num.format(x).replace(',', 'X').replace('.', ',').replace('X', '.'))
