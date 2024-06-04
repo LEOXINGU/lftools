@@ -24,6 +24,7 @@ __copyright__ = '(C) 2019, Leandro França'
 from PyQt5.QtCore import QCoreApplication
 from qgis.core import (QgsProcessing,
                        QgsProject,
+                       QgsPoint,
                        QgsCoordinateReferenceSystem,
                        QgsCoordinateTransform,
                        QgsProcessingParameterFeatureSource,
@@ -39,7 +40,7 @@ from processing.algs.qgis.QgisAlgorithm import QgisAlgorithm
 from math import atan, pi, sqrt, floor
 import math
 from lftools.geocapt.imgs import *
-from lftools.geocapt.cartography import FusoHemisf, geom2PointList
+from lftools.geocapt.cartography import FusoHemisf, geom2PointList, AzimuteDistanciaSGL
 from lftools.geocapt.topogeo import str2HTML, dd2dms, azimute
 import os
 from qgis.PyQt.QtGui import QIcon
@@ -93,7 +94,7 @@ class DescriptiveMemorial(QgisAlgorithm):
         return 'documents'
 
     def tags(self):
-        return self.tr('area,perimeter,deed,description,descriptive,memorial,property,topography,survey,real,estate,georreferencing,plan,cadastral,cadastre,documnt').split(',')
+        return self.tr('area,perimeter,deed,description,descriptive,memorial,3 cliques,property,topography,survey,real,estate,georreferencing,plan,cadastral,cadastre,documnt').split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/document.png'))
@@ -123,21 +124,21 @@ class DescriptiveMemorial(QgisAlgorithm):
         # 'INPUTS'
         self.addParameter(
             QgsProcessingParameterFeatureSource(
-                'INPUT1',
+                self.INPUT1,
                 self.tr('Boundary Survey Points', 'Pontos de Limite'),
                 types=[QgsProcessing.TypeVectorPoint]
             )
         )
         self.addParameter(
             QgsProcessingParameterFeatureSource(
-                'INPUT2',
+                self.INPUT2,
                 self.tr('Neighborhood Dividing Lines', 'Elementos Confrontantes'),
                 types=[QgsProcessing.TypeVectorLine]
             )
         )
         self.addParameter(
             QgsProcessingParameterFeatureSource(
-                'INPUT3',
+                self.INPUT3,
                 self.tr('Property Polygon', 'Área do Imóvel'),
                 types=[QgsProcessing.TypeVectorPolygon]
             )
@@ -224,7 +225,7 @@ class DescriptiveMemorial(QgisAlgorithm):
         # 'OUTPUTS'
         self.addParameter(
             QgsProcessingParameterFileDestination(
-                'HTML',
+                self.HTML,
                 self.tr('Deed description', 'Memorial Descritivo'),
                 self.tr('HTML files (*.html)')
             )
@@ -568,6 +569,7 @@ class DescriptiveMemorial(QgisAlgorithm):
         # Dados do levantamento
         for feat in area.getFeatures():
                 feat1 = feat
+                geomGeo = feat1.geometry()
                 break
 
         geom = feat1.geometry()
@@ -611,7 +613,7 @@ class DescriptiveMemorial(QgisAlgorithm):
             else:
                 pnts[sequence] = [coordinateTransformer.transform(geom.asPoint()), type, code, (geom.constGet().x(), geom.constGet().y(), geom.constGet().z())]
 
-        # Cálculo dos Azimutes e Distâncias
+        # Cálculo dos Azimutes e Distâncias Projetadas (Ex: UTM)
         tam = len(pnts)
         Az_lista, Dist = [], []
         for k in range(tam):
@@ -619,6 +621,19 @@ class DescriptiveMemorial(QgisAlgorithm):
             pntB = pnts[max((k+2)%(tam+1),1)][0]
             Az_lista += [(180/pi)*azimute(pntA, pntB)[0]]
             Dist += [sqrt((pntA.x() - pntB.x())**2 + (pntA.y() - pntB.y())**2)]
+
+        # # Cálculo dos Azimutes e Distâncias no SGL
+        # tam = len(pnts)
+        # Az_lista, Dist = [], []
+        # for k in range(tam):
+        #     pntA = QgsPoint(pnts[k+1][3][0], pnts[k+1][3][1], pnts[k+1][3][2])
+        #     ind =  max((k+2)%(tam+1),1)
+        #     pntB = QgsPoint(pnts[ind][3][0], pnts[ind][3][1], pnts[ind][3][2])
+        #     Az, dist = AzimuteDistanciaSGL(pntA, pntB, geomGeo, area.sourceCrs())
+        #     Az_lista += [Az]
+        #     Dist += [dist]
+
+        print(Az_lista) #################################################################
 
 
         def CoordN (x, y, z):
