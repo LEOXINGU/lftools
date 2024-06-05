@@ -40,7 +40,10 @@ from processing.algs.qgis.QgisAlgorithm import QgisAlgorithm
 from math import atan, pi, sqrt, floor
 import math
 from lftools.geocapt.imgs import *
-from lftools.geocapt.cartography import FusoHemisf, geom2PointList, AzimuteDistanciaSGL
+from lftools.geocapt.cartography import (FusoHemisf,
+                                         geom2PointList,
+                                         AzimuteDistanciaSGL,
+                                         areaSGL,perimetroSGL)
 from lftools.geocapt.topogeo import str2HTML, dd2dms, azimute
 import os
 from qgis.PyQt.QtGui import QIcon
@@ -101,7 +104,7 @@ class DescriptiveMemorial(QgisAlgorithm):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/document.png'))
 
     figure = 'images/tutorial/doc_descriptive_memorial.jpg'
-    txt_en = 'Elaboration of Deed Description based on vector layers that define a property.'
+    txt_en = 'Elaboration of Deed Description based on vector layers that define a property survey.'
     txt_pt = 'Elaboração de Memorial Descritivo a partir de camadas vetorias que definem uma propriedade.'
 
     def shortHelpString(self):
@@ -169,7 +172,9 @@ class DescriptiveMemorial(QgisAlgorithm):
         )
 
         tipos = [self.tr('Project CRS, area in m²', 'SRC projetado, area em m²'),
-                 self.tr('Local Tangent Plane, area in m²', 'Sistema Geodésico Local, área em m²')
+                 self.tr('Project CRS, area in ha', 'SRC projetado, area em ha'),
+                 self.tr('Local Tangent Plane, area in m²', 'Sistema Geodésico Local, área em m²'),
+                 self.tr('Local Tangent Plane, area in ha', 'Sistema Geodésico Local, área em ha'),
                ]
 
         self.addParameter(
@@ -258,6 +263,8 @@ class DescriptiveMemorial(QgisAlgorithm):
         area = self.parameterAsSource(parameters,
                                                      'INPUT3',
                                                      context)
+        crsGeo = area.sourceCrs()
+
         coordenadas = self.parameterAsEnum(
             parameters,
             self.COORD,
@@ -638,18 +645,18 @@ class DescriptiveMemorial(QgisAlgorithm):
         tam = len(pnts)
         Az_lista, Dist = [], []
 
-        if calculo == 0: # Projetadas (Ex: UTM)
+        if calculo in (0,1): # Projetadas (Ex: UTM)
             for k in range(tam):
                 pntA = pnts[k+1][0]
                 pntB = pnts[max((k+2)%(tam+1),1)][0]
                 Az_lista += [(180/pi)*azimute(pntA, pntB)[0]]
                 Dist += [sqrt((pntA.x() - pntB.x())**2 + (pntA.y() - pntB.y())**2)]
-        elif calculo == 1: # SGL
+        elif calculo in (2,3): # SGL
             for k in range(tam):
                 pntA = QgsPoint(pnts[k+1][3][0], pnts[k+1][3][1], pnts[k+1][3][2])
                 ind =  max((k+2)%(tam+1),1)
                 pntB = QgsPoint(pnts[ind][3][0], pnts[ind][3][1], pnts[ind][3][2])
-                Az, dist = AzimuteDistanciaSGL(pntA, pntB, geomGeo, area.sourceCrs())
+                Az, dist = AzimuteDistanciaSGL(pntA, pntB, geomGeo, crsGeo)
                 Az_lista += [Az]
                 Dist += [dist]
 
@@ -755,7 +762,7 @@ class DescriptiveMemorial(QgisAlgorithm):
         <tr style="">
           <td style="padding: 0cm 5.4pt; width: 247.85pt;"
      valign="top" width="330">
-          <p class="western" style="margin-bottom: 0.0001pt;"><b>''' + self.tr('Area', str2HTML('Área')) + ''' (m<sup>2</sup>): </b>[AREA]<o:p></o:p></p>
+          <p class="western" style="margin-bottom: 0.0001pt;"><b>''' + str2HTML(self.tr('Area ({})', 'Área ({})').format('m²' if calculo in (0,2) else 'ha') ) + ''': </b>[AREA]<o:p></o:p></p>
           </td>
           <td style="padding: 0cm 5.4pt; width: 176.85pt;"
      valign="top" width="236">
@@ -781,11 +788,24 @@ class DescriptiveMemorial(QgisAlgorithm):
 
         texto_var2 = self.tr('the vertex ', str2HTML('o vértice ')) + '''<span> </span><b>[Vn]</b>, '''+ self.tr('with coordinates ', 'de coordenadas ') + '''[Coordn]; '''+ self.tr('[Az_n] and [Dist_n]m up to ', str2HTML('[Az_n] e [Dist_n]m até '))
 
+        if coordenadas in (0,1,2,3) and calculo in (0,1): # Coordenadas UTM e cálculo em UTM
+            texto_calculo = self.tr(', and are projected in the UTM system, zone [FUSO] and hemisphere [HEMISFERIO], from which all azimuths and distances, area and perimeter were calculated.',
+                                    ', sendo projetadas no Sistema UTM, fuso [FUSO] e hemisfério [HEMISFERIO], a partir das quais todos os azimutes e distâncias, área e perímetro foram calculados.')
+        elif coordenadas in (0,1,2,3) and calculo in (2,3): # Coordenadas UTM e cálculo em SGL:
+            texto_calculo = self.tr(', and are projected in the UTM system, zone [FUSO] and hemisphere [HEMISFERIO]. All azimuths and distances, area and perimeter were calculated in the Local Tangent Plane (LTP), having as origin the centroid and average altitude of the property survey.',
+                                    ', sendo projetadas no Sistema UTM, fuso [FUSO] e hemisfério [HEMISFERIO]. Todos os azimutes e distâncias, área e perímetro foram calculados no Sistema Geodésico Local (SGL) com origem no centroide e altitude média do imóvel.')
+        elif coordenadas not in (0,1,2,3) and calculo in (0,1): # Coordenadas Geo e cálculo em UTM:
+            texto_calculo = self.tr('. All azimuths and distances, area and perimeter were calculated from the projected coordinates in UTM, zone [FUSO] and hemisphere [HEMISPHERE].',
+                                    '. Todos os azimutes e distâncias, área e perímetro foram calculados a partir das coordenadas projetadas no sistema UTM, fuso [FUSO] e hemisfério [HEMISFERIO].')
+        elif coordenadas not in (0,1,2,3) and calculo in (2,3): # Coordenadas Geo e cálculo em SGL:
+            texto_calculo = self.tr('. All azimuths and distances, area and perimeter were calculated in the Local Tangent Plane (LTP), having as origin the centroid and average altitude of the property survey.',
+                                    '. Todos os azimutes e distâncias, área e perímetro foram calculados no Sistema Geodésico Local (SGL) com origem no centroide e altitude média do imóvel.')
+
         texto_final = self.tr('the vertex ', str2HTML('o vértice ')) + '''<b>[P-01]</b>, '''+ self.tr('with coordinates', 'de coordenadas') + ''' [Coord1],
     ''' + self.tr('the starting point for the description of this perimeter. All coordinates described here are georeferenced to the Geodetic Reference System (GRS)',
-         str2HTML('ponto inicial da descrição deste perímetro. Todas as coordenadas aqui descritas estão georreferenciadas ao Sistema Geodésico de Referência (SGR)')) + ''' <b>[GRS]</b>,
-    ''' + self.tr('and are projected in the UTM system, zone [FUSO] and hemisphere [HEMISFERIO], from which all azimuths and distances, area and perimeter were calculated.',
-         str2HTML('sendo projetadas no Sistema UTM, fuso [FUSO] e hemisfério [HEMISFERIO], a partir das quais todos os azimutes e distâncias, área e perímetro foram calculados.')) + '''
+         str2HTML('ponto inicial da descrição deste perímetro. Todas as coordenadas aqui descritas estão georreferenciadas ao Sistema Geodésico de Referência (SGR)')) + ''' <b>[GRS]</b>
+    ''' + self.tr(texto_calculo,
+         str2HTML(texto_calculo)) + '''
      <o:p></o:p></p>
     <p class="western"
      style="margin-bottom: 0.0001pt; text-align: right;"
@@ -830,15 +850,25 @@ class DescriptiveMemorial(QgisAlgorithm):
             prof_id = feat1['prof_id']
 
         geom1 = feat1.geometry()
-        geom1.transform(coordinateTransformer)
-        area1 = geom1.area()
-        perimeter1 = geom1.length()
+        if calculo in (0,1): # Projetadas (Ex: UTM)
+            geom1.transform(coordinateTransformer)
+            area1 = geom1.area()
+            perimeter1 = geom1.length()
+        elif (2,3): # SGL
+            area1 = areaSGL(geom1, crsGeo)
+            perimeter1 = perimetroSGL(geom1, crsGeo)
+
+        if calculo in (1,3): # Transformação para hectares
+            area1 /= 1e4
+            format_num_area = '{:,.Xf}'.replace('X', str(decimal+2))
+        else:
+            format_num_area = format_num
 
         itens = {'[IMOVEL]': str2HTML(property),
                 '[PROPRIETARIO]': str2HTML(owner),
                 '[UF]': str2HTML(state),
                 '[MATRICULAS]': str2HTML(transcript),
-                '[AREA]': self.tr(format_num.format(area1), format_num.format(area1).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                '[AREA]': self.tr(format_num_area.format(area1), format_num_area.format(area1).replace(',', 'X').replace('.', ',').replace('X', '.')),
                 '[SRC]': self.tr(SRC, SRC.replace('zone', 'fuso')),
                 '[REGISTRO]': str2HTML(registry),
                 '[MUNICIPIO]': str2HTML(county),
