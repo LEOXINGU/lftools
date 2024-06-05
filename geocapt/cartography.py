@@ -176,7 +176,7 @@ def AreaPerimetroParteSGL(coordsXYZ, coordsXY, crsGeo):
     h0 = np.array(alt).mean()
     lon0 = centroide.x()
     lat0 = centroide.y()
-    Xo, Yo, Zo = OrigemSGL(lon0, lat0, h0, crsGeo)
+    Xo, Yo, Zo, a, f = OrigemSGL(lon0, lat0, h0, crsGeo)
     # CONVERSÃO DAS COORDENADAS
     coordsSGL = []
     for coord in coordsXYZ:
@@ -521,40 +521,46 @@ def OrientarPoligono(coords, primeiro, sentido):
 
 # Azimute principal das feições
 def main_azimuth(geometry):
-    pnts = geom2PointList(geometry)
-    pnts = np.hstack(pnts)
-    pnts = Unicos(pnts[0]) # remover duplicados
-    a = []
-    for pnt in pnts:
-        a += [(pnt.x(), pnt.y())]
-    if len(a) < 2:
+    if geometry.type() == 0 and not geometry.isMultipart():
         return 0
     else:
-        ca = np.cov(a,y = None,rowvar = 0,bias = 1)
-        v, vect = np.linalg.eig(ca)
-        if v[0] > v[1]:
-            vetor_maior = vect[:,0]
+        pnts = geom2PointList(geometry)
+        pnts = np.hstack(pnts)
+        if geometry.type() == 2 and geometry.isMultipart():
+            pnts = Unicos(pnts[0])
         else:
-            vetor_maior = vect[:,1]
-        # se segundo quadrante levar para o quarto
-        if vetor_maior[0] > 0 and vetor_maior[1] < 0:
-            vetor_maior *= -1
-        # se terceiro quadrante levar para o primeiro
-        if vetor_maior[0] < 0 and vetor_maior[1] < 0:
-            vetor_maior *= -1
-        # se direção X
-        if vetor_maior[0] != 0 and vetor_maior[1] == 0:
-            direcao = -90
-        # se direção Y
-        elif vetor_maior[1] != 0 and vetor_maior[0] == 0:
-            direcao = 0
-        # se Zero
-        elif vetor_maior[0] == 0 and vetor_maior[1] == 0:
-            direcao = 0
+            pnts = Unicos(pnts)
+        a = []
+        for pnt in pnts:
+            a += [(pnt.x(), pnt.y())]
+        if len(a) < 2:
+            return 0
         else:
-            vetor = QgsPointXY(vetor_maior[0], vetor_maior[1])
-            direcao = np.degrees(azimute(QgsPointXY(0,0), vetor)[0])
-        return direcao
+            ca = np.cov(a,y = None,rowvar = 0,bias = 1)
+            v, vect = np.linalg.eig(ca)
+            if v[0] > v[1]:
+                vetor_maior = vect[:,0]
+            else:
+                vetor_maior = vect[:,1]
+            # se segundo quadrante levar para o quarto
+            if vetor_maior[0] > 0 and vetor_maior[1] < 0:
+                vetor_maior *= -1
+            # se terceiro quadrante levar para o primeiro
+            if vetor_maior[0] < 0 and vetor_maior[1] < 0:
+                vetor_maior *= -1
+            # se direção X
+            if vetor_maior[0] != 0 and vetor_maior[1] == 0:
+                direcao = -90
+            # se direção Y
+            elif vetor_maior[1] != 0 and vetor_maior[0] == 0:
+                direcao = 0
+            # se Zero
+            elif vetor_maior[0] == 0 and vetor_maior[1] == 0:
+                direcao = 0
+            else:
+                vetor = QgsPointXY(vetor_maior[0], vetor_maior[1])
+                direcao = np.degrees(azimute(QgsPointXY(0,0), vetor)[0])
+            return direcao
 
 
 def Mesclar_Multilinhas(inters):
