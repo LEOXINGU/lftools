@@ -44,7 +44,10 @@ from lftools.geocapt.cartography import (FusoHemisf,
                                          geom2PointList,
                                          AzimuteDistanciaSGL,
                                          areaSGL,perimetroSGL)
-from lftools.geocapt.topogeo import str2HTML, dd2dms, azimute
+from lftools.geocapt.topogeo import (str2HTML,
+                                     dd2dms,
+                                     azimute,
+                                     validar_precisoes)
 import os
 from qgis.PyQt.QtGui import QIcon
 
@@ -209,12 +212,10 @@ class DescriptiveMemorial(QgisAlgorithm):
         )
 
         self.addParameter(
-            QgsProcessingParameterNumber(
+            QgsProcessingParameterString(
                 self.DECIMAL,
                 self.tr('Decimal places', 'Casas decimais'),
-                type = QgsProcessingParameterNumber.Type.Integer,
-                defaultValue = 2,
-                minValue = 0
+                defaultValue = '2' # 2,1,2,2,2 - Precisões das coordenadas, azimutes, distâncias, área, perímetro
                 )
             )
 
@@ -297,15 +298,33 @@ class DescriptiveMemorial(QgisAlgorithm):
         else:
             SLOGAN = SLOGAN.replace('\n', '<br>')
 
-        decimal = self.parameterAsInt(
+        decimal = self.parameterAsString(
             parameters,
             self.DECIMAL,
             context
         )
-        if decimal is None or decimal < 1:
+        # Validar dado de entrada
+        # Precisões das coordenadas, azimutes, distâncias, área, perímetro
+        decimal = decimal.replace(' ','').split(',')
+        if not validar_precisoes(decimal):
             raise QgsProcessingException(self.invalidSourceError(parameters, self.DECIMAL))
+        format_utm = '{:,.Xf}'.replace('X', decimal[0])
+        decimal_geo = int(decimal[0])+3
+        if len(decimal) == 1:
+            decimal_azim = 1
+            format_dist = '{:,.Xf}'.replace('X', decimal[0])
+            decimal_area = int(decimal[0])
+            format_perim =  '{:,.Xf}'.replace('X', decimal[0])
+        elif len(decimal) == 5:
+            decimal_azim = int(decimal[1])
+            format_dist = '{:,.Xf}'.replace('X', decimal[2])
+            decimal_area = int(decimal[3])
+            format_perim =  '{:,.Xf}'.replace('X', decimal[4])
+        if calculo in (1,3): # Hectares
+            format_area = '{:,.Xf}'.replace('X', str(decimal_area+2))
+        else:
+            format_area = '{:,.Xf}'.replace('X', str(decimal_area))
 
-        format_num = '{:,.Xf}'.replace('X', str(decimal))
 
         projecao = self.parameterAsBool(
             parameters,
@@ -355,7 +374,7 @@ class DescriptiveMemorial(QgisAlgorithm):
 
         campos_vertices = ['tipo_verti', 'vertice', 'indice']
         campos_limites = ['confrontan', 'matricula']
-        campos_area = ['denominacao', 'sncr', 'matricula', 'nome', 'municipio', 'uf', 'data', 'resp_tec', 'reg_prof']
+        campos_area = ['denominacao', 'sncr', 'matricula', 'nome', 'cpf_cnpj', 'municipio', 'uf', 'data', 'resp_tec', 'reg_prof']
         if TestModelo(campos_vertices, campos_limites, campos_area):
             modeloBD = 'GR' # GeoRural
             feedback.pushInfo('Banco de dados no modelo GeoRural...' )
@@ -663,15 +682,15 @@ class DescriptiveMemorial(QgisAlgorithm):
         # Modelo de coordenadas
         def CoordN (x, y, z):
             if coordenadas in (0,1,2,3):
-                Xn = self.tr(format_num.format(x), format_num.format(x).replace(',', 'X').replace('.', ',').replace('X', '.'))
-                Yn = self.tr(format_num.format(y), format_num.format(y).replace(',', 'X').replace('.', ',').replace('X', '.'))
+                Xn = self.tr(format_utm.format(x), format_utm.format(x).replace(',', 'X').replace('.', ',').replace('X', '.'))
+                Yn = self.tr(format_utm.format(y), format_utm.format(y).replace(',', 'X').replace('.', ',').replace('X', '.'))
             if coordenadas in (4,5,6,7):
-                Xn = str2HTML(self.tr(dd2dms(x,decimal+3), dd2dms(x,decimal+3).replace('.', ','))).replace('-','') + 'W' if x < 0 else 'E'
-                Yn = str2HTML(self.tr(dd2dms(y,decimal+3), dd2dms(y,decimal+3).replace('.', ','))).replace('-','') + 'S' if y < 0 else 'N'
+                Xn = str2HTML(self.tr(dd2dms(x,decimal_geo), dd2dms(x,decimal_geo).replace('.', ','))).replace('-','') + 'W' if x < 0 else 'E'
+                Yn = str2HTML(self.tr(dd2dms(y,decimal_geo), dd2dms(y,decimal_geo).replace('.', ','))).replace('-','') + 'S' if y < 0 else 'N'
             if coordenadas in (8,9,10,11):
-                Xn = str2HTML(self.tr(dd2dms(x,decimal+3), dd2dms(x,decimal+3).replace('.', ',')))
-                Yn = str2HTML(self.tr(dd2dms(y,decimal+3), dd2dms(y,decimal+3).replace('.', ',')))
-            Zn = self.tr(format_num.format(z), format_num.format(z).replace(',', 'X').replace('.', ',').replace('X', '.'))
+                Xn = str2HTML(self.tr(dd2dms(x,decimal_geo), dd2dms(x,decimal_geo).replace('.', ',')))
+                Yn = str2HTML(self.tr(dd2dms(y,decimal_geo), dd2dms(y,decimal_geo).replace('.', ',')))
+            Zn = self.tr(format_utm.format(z), format_utm.format(z).replace(',', 'X').replace('.', ',').replace('X', '.'))
             if coordenadas == 0:
                 txt = '''<b>N [Yn]m </b>''' + self.tr('and','e') +''' <b>E [Xn]m</b>'''
             elif coordenadas == 1:
@@ -810,6 +829,21 @@ class DescriptiveMemorial(QgisAlgorithm):
     <p class="western"
      style="margin-bottom: 0.0001pt; text-align: right;"
      align="right">[LOCAL], [DATA].<o:p></o:p></p>
+
+     <p class="western" style="margin-bottom: 0.0001pt;"><o:p>&nbsp;</o:p></p>
+     <p class="western"
+      style="margin: 0cm 0cm 0.0001pt; text-align: center;"
+      align="center">___________________________________________<o:p></o:p></p>
+     <p class="western"
+      style="margin: 0cm 0cm 0.0001pt; text-align: center;"
+      align="center">[OWNER]<o:p></o:p></p>
+     <p class="western"
+      style="margin: 0cm 0cm 0.0001pt; text-align: center;"
+      align="center">[CPF]<o:p></o:p></p>
+     <p class="western"
+      style="margin: 0cm 0cm 0.0001pt; text-align: center;"
+      align="center">''' + self.tr('PROPERTY OWNER', str2HTML('PROPRIETÁRIO DO IMÓVEL')) + '''<o:p></o:p></p>
+
     <p class="western" style="margin-bottom: 0.0001pt;"><o:p>&nbsp;</o:p></p>
     <p class="western"
      style="margin: 0cm 0cm 0.0001pt; text-align: center;"
@@ -831,6 +865,7 @@ class DescriptiveMemorial(QgisAlgorithm):
         if modeloBD == 'GR':
             property = feat1['denominacao']
             owner = feat1['nome']
+            cpf = feat1['cpf_cnpj']
             state = feat1['uf']
             transcript = feat1['matricula']
             registry = feat1['sncr']
@@ -841,6 +876,10 @@ class DescriptiveMemorial(QgisAlgorithm):
         else:
             property = feat1['property']
             owner = feat1['owner']
+            try:
+                cpf = feat1['owner_id']
+            except:
+                cpf = ''
             state = feat1['state']
             transcript = feat1['transcript']
             registry = feat1['registry']
@@ -860,19 +899,16 @@ class DescriptiveMemorial(QgisAlgorithm):
 
         if calculo in (1,3): # Transformação para hectares
             area1 /= 1e4
-            format_num_area = '{:,.Xf}'.replace('X', str(decimal+2))
-        else:
-            format_num_area = format_num
 
         itens = {'[IMOVEL]': str2HTML(property),
                 '[PROPRIETARIO]': str2HTML(owner),
                 '[UF]': str2HTML(state),
                 '[MATRICULAS]': str2HTML(transcript),
-                '[AREA]': self.tr(format_num_area.format(area1), format_num_area.format(area1).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                '[AREA]': self.tr(format_area.format(area1), format_area.format(area1).replace(',', 'X').replace('.', ',').replace('X', '.')),
                 '[SRC]': self.tr(SRC, SRC.replace('zone', 'fuso')),
                 '[REGISTRO]': str2HTML(registry),
                 '[MUNICIPIO]': str2HTML(county),
-                '[PERIMETRO]': self.tr(format_num.format(perimeter1), format_num.format(perimeter1).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                '[PERIMETRO]': self.tr(format_perim.format(perimeter1), format_perim.format(perimeter1).replace(',', 'X').replace('.', ',').replace('X', '.')),
                     }
         for item in itens:
                 texto_inicial = texto_inicial.replace(item, itens[item])
@@ -882,8 +918,8 @@ class DescriptiveMemorial(QgisAlgorithm):
             linha0 = texto_var1
             itens =    {'[Vn]': pnts[t[0]+1][2],
                         '[Coordn]': CoordN(pnts[t[0]+1][0].x(), pnts[t[0]+1][0].y(), pnts[t[0]+1][3][2]) if coordenadas in (0,1,2,3) else CoordN(pnts[t[0]+1][3][0], pnts[t[0]+1][3][1], pnts[t[0]+1][3][2]),
-                        '[Az_n]': str2HTML(self.tr(dd2dms(Az_lista[t[0]],1), dd2dms(Az_lista[t[0]],1).replace('.', ','))),
-                        '[Dist_n]': self.tr(format_num.format(Dist[t[0]]), format_num.format(Dist[t[0]]).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                        '[Az_n]': str2HTML(self.tr(dd2dms(Az_lista[t[0]], decimal_azim), dd2dms(Az_lista[t[0]], decimal_azim).replace('.', ','))),
+                        '[Dist_n]': self.tr(format_dist.format(Dist[t[0]]), format_dist.format(Dist[t[0]]).replace(',', 'X').replace('.', ',').replace('X', '.')),
                         '[Descr_k]': ListaDescr[w][0] + ', ' if ListaDescr[w][0] else '',
                         '[Confront_k]': ListaDescr[w][1]
                         }
@@ -895,8 +931,8 @@ class DescriptiveMemorial(QgisAlgorithm):
                 linha1 = texto_var2
                 itens = {'[Vn]': pnts[k+1][2],
                         '[Coordn]': CoordN(pnts[k+1][0].x(), pnts[k+1][0].y(), pnts[k+1][3][2]) if coordenadas in (0,1,2,3) else CoordN(pnts[k+1][3][0], pnts[k+1][3][1], pnts[k+1][3][2]),
-                        '[Az_n]': str2HTML(self.tr(dd2dms(Az_lista[k],1), dd2dms(Az_lista[k],1).replace('.', ','))),
-                        '[Dist_n]': self.tr(format_num.format(Dist[k]), format_num.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'))
+                        '[Az_n]': str2HTML(self.tr(dd2dms(Az_lista[k], decimal_azim), dd2dms(Az_lista[k], decimal_azim).replace('.', ','))),
+                        '[Dist_n]': self.tr(format_dist.format(Dist[k]), format_dist.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'))
                         }
                 for item in itens:
                     linha1 = linha1.replace(item, itens[item])
@@ -909,6 +945,8 @@ class DescriptiveMemorial(QgisAlgorithm):
                     '[GRS]': SRC.split(' /')[0],
                     '[FUSO]': str(FusoHemisf(centroideG)[0]),
                     '[HEMISFERIO]': FusoHemisf(centroideG)[1],
+                    '[OWNER]': str2HTML(owner.upper()),
+                    '[CPF]': str2HTML(cpf.upper()),
                     '[RESP_TEC]': str2HTML(tech_manager.upper()),
                     '[CREA]': str2HTML(prof_id),
                     '[LOCAL]': str2HTML((county) +' - ' + (state).upper()),
