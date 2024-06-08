@@ -287,3 +287,20 @@ def gpsdate(Y, M, DoM, Hr, Mn, Sc):
     # calculation of second of the GPS Week
     SoGPSW = round((((JD - 2444244.5)/7 - GPSW)*7)*(24*60*60))
     return [Y,M,DoM,DoY,GPSW,DoGPSW,SoGPSW,JD,DecY]
+
+
+# Validar lista de precisões
+def validar_precisoes(lista):
+    # Verifica se a lista tem 1 ou 5 elementos
+    if len(lista) != 1 and len(lista) != 5:
+        return False
+    for item in lista:
+        # Tenta converter o item para um inteiro
+        try:
+            numero = int(item)
+        except ValueError:
+            return False
+        # Verifica se o número é maior ou igual a zero
+        if numero < 0:
+            return False
+    return True
