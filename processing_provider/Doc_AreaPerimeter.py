@@ -29,19 +29,21 @@ from qgis.core import (QgsProcessing,
                        QgsProcessingParameterFeatureSource,
                        QgsProcessingParameterFile,
                        QgsProcessingParameterString,
+                       QgsProcessingParameterEnum,
                        QgsProcessingParameterNumber,
                        QgsProcessingParameterBoolean,
                        QgsProcessingParameterFeatureSink,
                        QgsProcessingParameterFileDestination,
                        QgsApplication,
                        QgsProject,
+                       QgsPoint,
                        QgsCoordinateTransform,
                        QgsCoordinateReferenceSystem)
 from math import atan, pi, sqrt, floor
 import math
 from lftools.geocapt.imgs import *
-from lftools.geocapt.cartography import FusoHemisf
-from lftools.geocapt.topogeo import str2HTML, dd2dms, azimute
+from lftools.geocapt.cartography import FusoHemisf, AzimuteDistanciaSGL, areaSGL, perimetroSGL
+from lftools.geocapt.topogeo import str2HTML, dd2dms, azimute, validar_precisoes
 import os
 from qgis.PyQt.QtGui import QIcon
 
@@ -54,6 +56,7 @@ class AreaPerimterReport(QgsProcessingAlgorithm):
     SLOGAN = 'SLOGAN'
     DECIMAL = 'DECIMAL'
     PROJECTION = 'PROJECTION'
+    CALC = 'CALC'
 
     LOC = QgsApplication.locale()[:2]
 
@@ -131,6 +134,21 @@ class AreaPerimterReport(QgsProcessingAlgorithm):
             )
         )
 
+        tipos = [self.tr('Project CRS', 'SRC do projeto'),
+                 self.tr('Local Tangent Plane (LTP)', 'Sistema Geodésico Local (SGL)'),
+                 self.tr('LTP, Puissant azimuth', 'SGL, azimute de Puissant'),
+               ]
+
+        self.addParameter(
+            QgsProcessingParameterEnum(
+                self.CALC,
+                self.tr('Calculation of azimuths, distances and area',
+                        'Cálculo de azimutes, distâncias e área'),
+				options = tipos,
+                defaultValue = 0
+            )
+        )
+
         self.addParameter(
             QgsProcessingParameterFile(
                 self.LOGO,
@@ -153,12 +171,10 @@ class AreaPerimterReport(QgsProcessingAlgorithm):
         )
 
         self.addParameter(
-            QgsProcessingParameterNumber(
+            QgsProcessingParameterString(
                 self.DECIMAL,
                 self.tr('Decimal places', 'Casas decimais'),
-                type = QgsProcessingParameterNumber.Type.Integer,
-                defaultValue = 2,
-                minValue = 0
+                defaultValue = '2' # 2,1,2,2,2 - Precisões das coordenadas, azimutes, distâncias, área, perímetro
                 )
             )
 
@@ -194,6 +210,29 @@ class AreaPerimterReport(QgsProcessingAlgorithm):
         if area is None:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.AREAIMOVEL))
 
+        for feat in area.getFeatures():
+            feat1 = feat
+            geomGeo = feat1.geometry()
+            break
+        crsGeo = area.sourceCrs()
+
+        calculo = self.parameterAsEnum(
+            parameters,
+            self.CALC,
+            context
+        )
+
+        if calculo == 0:
+            calculo_texto = self.tr('Calculation of azimuths, distances and area considering the Project CRS.',
+                                     str2HTML('Cálculo de azimutes, distâncias e área no SRC do projeto.'))
+        elif calculo == 1:
+            calculo_texto = self.tr('Calculation azimuths, distances and area considering the Local Tangent Plane (LTP).',
+                                     str2HTML('Cálculo de azimutes, distâncias e área no Sistema Geodésico Local (SGL).'))
+        elif calculo == 2:
+            calculo_texto = self.tr('Calculation of distances and area considering the Local Tangent Plane (LTP). Calculation of azimuths carried out according to the Inverse Geodetic Problem formulae according to Puissant.',
+                                     str2HTML('Cálculo de distâncias e área no Sistema Geodésico Local (SGL). Cálculo dos azimutes realizado conforme formulário do Problema Geodésico Inverso segundo Puissant.'))
+
+
         logo = self.parameterAsFile(
             parameters,
             self.LOGO,
@@ -214,21 +253,38 @@ class AreaPerimterReport(QgsProcessingAlgorithm):
         else:
             SLOGAN = SLOGAN.replace('\n', '<br>')
 
-        decimal = self.parameterAsInt(
+
+        decimal = self.parameterAsString(
             parameters,
             self.DECIMAL,
             context
         )
-        if decimal is None or decimal<1:
+        # Validar dado de entrada
+        # Precisões das coordenadas, azimutes, distâncias, área, perímetro
+        decimal = decimal.replace(' ','').split(',')
+        if not validar_precisoes(decimal,[1,5]):
             raise QgsProcessingException(self.invalidSourceError(parameters, self.DECIMAL))
+        format_utm = '{:,.Xf}'.replace('X', decimal[0])
+        decimal_geo = int(decimal[0])+3
+        if len(decimal) == 1:
+            decimal_azim = 1
+            format_dist = '{:,.Xf}'.replace('X', decimal[0])
+            decimal_area = int(decimal[0])
+            format_perim =  '{:,.Xf}'.replace('X', decimal[0])
+        elif len(decimal) == 5:
+            decimal_azim = int(decimal[1])
+            format_dist = '{:,.Xf}'.replace('X', decimal[2])
+            decimal_area = int(decimal[3])
+            format_perim =  '{:,.Xf}'.replace('X', decimal[4])
+        format_area_ha = '{:,.Xf}'.replace('X', str(decimal_area+2))
+        format_area = '{:,.Xf}'.replace('X', str(decimal_area))
+
 
         projecao = self.parameterAsBool(
             parameters,
             self.PROJECTION,
             context
         )
-
-        format_num = '{:,.Xf}'.replace('X', str(decimal))
 
         # Pegando o SRC do Projeto
         SRC = QgsProject.instance().crs().description()
@@ -378,6 +434,9 @@ SIRGAS2000<br>
 &nbsp;[PERIMETRO] m<br>
 <span style="font-weight: bold;">''' + self.tr('Total Area', str2HTML('Área Total')) + ''':</span>
 [AREA] m&sup2; / [AREA_HA] ha
+<br>
+<span style="font-weight: bold;">''' + self.tr('Observation', str2HTML('Observação')) + ''':</span>
+[CALCULO]
 </body>
 </html>
 '''
@@ -386,57 +445,91 @@ SIRGAS2000<br>
         property = 'property' if modeloBD == 'TG' else 'denominacao'
         state = 'state' if modeloBD == 'TG' else 'uf'
         county = 'county' if modeloBD == 'TG' else 'municipio'
-        try:
-            itens = {'[IMOVEL]': str2HTML(feat1[property]),
-                        '[UF]': feat1[state],
-                        '[UTM]': (SRC.split('/')[-1]).replace('zone', 'fuso'),
-                        '[MUNICIPIO]': str2HTML(feat1[county]),
-                        }
-            for item in itens:
-                    INICIO = INICIO.replace(item, itens[item])
+        # try:
+        itens = {'[IMOVEL]': str2HTML(feat1[property]),
+                    '[UF]': feat1[state],
+                    '[UTM]': (SRC.split('/')[-1]).replace('zone', 'fuso'),
+                    '[MUNICIPIO]': str2HTML(feat1[county]),
+                    }
+        for item in itens:
+                INICIO = INICIO.replace(item, itens[item])
 
-            # Inserindo dados finais do levantamento
-            geom1 = feat1.geometry()
+        # Inserindo dados finais do levantamento
+        geom1 = feat1.geometry()
+        if calculo == 0: # Projetadas (Ex: UTM)
             geom1.transform(coordinateTransformer)
-            área = feat1['area'] if modeloBD == 'TG' else geom1.area()
-            perímetro = feat1['perimeter'] if modeloBD == 'TG' else geom1.length()
+            area1 = geom1.area()
+            perimeter1 = geom1.length()
+        else: # SGL
+            area1 = areaSGL(geom1, crsGeo)
+            perimeter1 = perimetroSGL(geom1, crsGeo)
 
-            itens = {   '[AREA]': self.tr(format_num.format(área), format_num.format(área).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                        '[AREA_HA]': self.tr('{:,.4f}'.format(área/1e4), '{:,.4f}'.format(área/1e4).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                        '[PERIMETRO]': self.tr(format_num.format(perímetro), format_num.format(perímetro).replace(',', 'X').replace('.', ',').replace('X', '.'))
-                        }
-            for item in itens:
-                    FIM = FIM.replace(item, itens[item])
-        except:
-            raise QgsProcessingException(self.tr('Check that your layer "property_area_a" has the correct field names for the TopoGeo model! More information: https://bit.ly/3FDNQGC', 'Verifique se sua camada "Área do imóvel" está com os nomes dos campos corretos para o modelo TopoGeo! Mais informações: https://geoone.com.br/ebook_gratis/'))
+        itens = {   '[AREA]': self.tr(format_area.format(area1), format_area.format(area1).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                    '[AREA_HA]': self.tr(format_area_ha.format(area1/1e4), format_area_ha.format(area1/1e4).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                    '[PERIMETRO]': self.tr(format_perim.format(perimeter1), format_perim.format(perimeter1).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                    '[CALCULO]': calculo_texto
+                    }
+        for item in itens:
+                FIM = FIM.replace(item, itens[item])
+        # except:
+        #     raise QgsProcessingException(self.tr('Check that your layer "property_area_a" has the correct field names for the TopoGeo model! More information: https://bit.ly/3FDNQGC', 'Verifique se sua camada "Área do imóvel" está com os nomes dos campos corretos para o modelo TopoGeo! Mais informações: https://geoone.com.br/ebook_gratis/'))
 
         LINHAS = INICIO
 
-        pnts_UTM = {}
+        # Pegar pontos
+        pnts = {}
         for feat in vertices.getFeatures():
-            pnt = feat.geometry().asPoint()
-            pnts_UTM[feat[sequencia]] = [coordinateTransformer.transform(pnt), feat[codigo], pnt]
+            geom = feat.geometry()
+            if modeloBD == 'GR':
+                sequence = feat['indice']
+                type = feat['tipo_verti']
+                code = feat['vertice']
+            else:
+                sequence = feat['sequence']
+                type = feat['type']
+                code = feat['code']
+            if geom.isMultipart():
+                pnts[sequence] = [coordinateTransformer.transform(geom.asMultiPoint()[0]), type, code, (geom.constGet()[0].x(), geom.constGet()[0].y(), geom.constGet()[0].z())]
+            else:
+                pnts[sequence] = [coordinateTransformer.transform(geom.asPoint()), type, code, (geom.constGet().x(), geom.constGet().y(), geom.constGet().z())]
 
         # Cálculo dos Azimutes e Distâncias
-        tam = len(pnts_UTM)
+        tam = len(pnts)
         Az_lista, Dist = [], []
-        for k in range(tam):
-            pntA = pnts_UTM[k+1][0]
-            pntB = pnts_UTM[1 if k+2 > tam else k+2][0]
-            Az_lista += [(180/pi)*azimute(pntA, pntB)[0]]
-            Dist += [sqrt((pntA.x() - pntB.x())**2 + (pntA.y() - pntB.y())**2)]
+        if calculo == 0: # Projetadas (Ex: UTM)
+            for k in range(tam):
+                pntA = pnts[k+1][0]
+                pntB = pnts[max((k+2)%(tam+1),1)][0]
+                Az_lista += [(180/pi)*azimute(pntA, pntB)[0]]
+                Dist += [sqrt((pntA.x() - pntB.x())**2 + (pntA.y() - pntB.y())**2)]
+        elif calculo == 1: # SGL
+            for k in range(tam):
+                pntA = QgsPoint(pnts[k+1][3][0], pnts[k+1][3][1], pnts[k+1][3][2])
+                ind =  max((k+2)%(tam+1),1)
+                pntB = QgsPoint(pnts[ind][3][0], pnts[ind][3][1], pnts[ind][3][2])
+                Az, dist = AzimuteDistanciaSGL(pntA, pntB, geomGeo, crsGeo, 'SGL')
+                Az_lista += [Az]
+                Dist += [dist]
+        elif calculo == 2: # SGL e Puissant
+            for k in range(tam):
+                pntA = QgsPoint(pnts[k+1][3][0], pnts[k+1][3][1], pnts[k+1][3][2])
+                ind =  max((k+2)%(tam+1),1)
+                pntB = QgsPoint(pnts[ind][3][0], pnts[ind][3][1], pnts[ind][3][2])
+                Az, dist = AzimuteDistanciaSGL(pntA, pntB, geomGeo, crsGeo, 'puissant')
+                Az_lista += [Az]
+                Dist += [dist]
 
         for k in range(tam):
             linha0 = linha
             itens = {
-                  '[EST1]': pnts_UTM[k+1][1],
-                  '[EST2]': pnts_UTM[1 if k+2 > tam else k+2][1],
-                  '[E]': self.tr(format_num.format(pnts_UTM[k+1][0].x()), format_num.format(pnts_UTM[k+1][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                  '[N]': self.tr(format_num.format(pnts_UTM[k+1][0].y()), format_num.format(pnts_UTM[k+1][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                  '[AZ]': str2HTML(self.tr(dd2dms(Az_lista[k],1), dd2dms(Az_lista[k],1).replace('.', ','))),
-                  '[D]': format_num.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'),
-                  '[LON]': str2HTML(self.tr(dd2dms(pnts_UTM[k+1][2].x(),4), dd2dms(pnts_UTM[k+1][2].x(),4).replace('.', ','))),
-                  '[LAT]': str2HTML(self.tr(dd2dms(pnts_UTM[k+1][2].y(),4), dd2dms(pnts_UTM[k+1][2].y(),4).replace('.', ','))),
+                  '[EST1]': pnts[k+1][2],
+                  '[EST2]': pnts[1 if k+2 > tam else k+2][2],
+                  '[E]': self.tr(format_utm.format(pnts[k+1][0].x()), format_utm.format(pnts[k+1][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                  '[N]': self.tr(format_utm.format(pnts[k+1][0].y()), format_utm.format(pnts[k+1][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                  '[AZ]': str2HTML(self.tr(dd2dms(Az_lista[k],decimal_azim), dd2dms(Az_lista[k],decimal_azim).replace('.', ','))),
+                  '[D]': format_dist.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'),
+                  '[LON]': str2HTML(self.tr(dd2dms(pnts[k+1][3][0],decimal_geo), dd2dms(pnts[k+1][3][0],decimal_geo).replace('.', ','))),
+                  '[LAT]': str2HTML(self.tr(dd2dms(pnts[k+1][3][1],decimal_geo), dd2dms(pnts[k+1][3][1],decimal_geo).replace('.', ','))),
                         }
             for item in itens:
                 linha0 = linha0.replace(item, itens[item])
