@@ -445,34 +445,34 @@ SIRGAS2000<br>
         property = 'property' if modeloBD == 'TG' else 'denominacao'
         state = 'state' if modeloBD == 'TG' else 'uf'
         county = 'county' if modeloBD == 'TG' else 'municipio'
-        # try:
-        itens = {'[IMOVEL]': str2HTML(feat1[property]),
-                    '[UF]': feat1[state],
-                    '[UTM]': (SRC.split('/')[-1]).replace('zone', 'fuso'),
-                    '[MUNICIPIO]': str2HTML(feat1[county]),
-                    }
-        for item in itens:
-                INICIO = INICIO.replace(item, itens[item])
+        try:
+            itens = {'[IMOVEL]': str2HTML(feat1[property]),
+                        '[UF]': feat1[state],
+                        '[UTM]': (SRC.split('/')[-1]).replace('zone', 'fuso'),
+                        '[MUNICIPIO]': str2HTML(feat1[county]),
+                        }
+            for item in itens:
+                    INICIO = INICIO.replace(item, itens[item])
 
-        # Inserindo dados finais do levantamento
-        geom1 = feat1.geometry()
-        if calculo == 0: # Projetadas (Ex: UTM)
-            geom1.transform(coordinateTransformer)
-            area1 = geom1.area()
-            perimeter1 = geom1.length()
-        else: # SGL
-            area1 = areaSGL(geom1, crsGeo)
-            perimeter1 = perimetroSGL(geom1, crsGeo)
+            # Inserindo dados finais do levantamento
+            geom1 = feat1.geometry()
+            if calculo == 0: # Projetadas (Ex: UTM)
+                geom1.transform(coordinateTransformer)
+                area1 = geom1.area()
+                perimeter1 = geom1.length()
+            else: # SGL
+                area1 = areaSGL(geom1, crsGeo)
+                perimeter1 = perimetroSGL(geom1, crsGeo)
 
-        itens = {   '[AREA]': self.tr(format_area.format(area1), format_area.format(area1).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                    '[AREA_HA]': self.tr(format_area_ha.format(area1/1e4), format_area_ha.format(area1/1e4).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                    '[PERIMETRO]': self.tr(format_perim.format(perimeter1), format_perim.format(perimeter1).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                    '[CALCULO]': calculo_texto
-                    }
-        for item in itens:
-                FIM = FIM.replace(item, itens[item])
-        # except:
-        #     raise QgsProcessingException(self.tr('Check that your layer "property_area_a" has the correct field names for the TopoGeo model! More information: https://bit.ly/3FDNQGC', 'Verifique se sua camada "Área do imóvel" está com os nomes dos campos corretos para o modelo TopoGeo! Mais informações: https://geoone.com.br/ebook_gratis/'))
+            itens = {   '[AREA]': self.tr(format_area.format(area1), format_area.format(area1).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                        '[AREA_HA]': self.tr(format_area_ha.format(area1/1e4), format_area_ha.format(area1/1e4).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                        '[PERIMETRO]': self.tr(format_perim.format(perimeter1), format_perim.format(perimeter1).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                        '[CALCULO]': calculo_texto
+                        }
+            for item in itens:
+                    FIM = FIM.replace(item, itens[item])
+        except:
+            raise QgsProcessingException(self.tr('Check that your layer "property_area_a" has the correct field names for the TopoGeo model! More information: https://bit.ly/3FDNQGC', 'Verifique se sua camada "Área do imóvel" está com os nomes dos campos corretos para o modelo TopoGeo! Mais informações: https://geoone.com.br/ebook_gratis/'))
 
         LINHAS = INICIO
 
