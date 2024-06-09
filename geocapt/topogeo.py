@@ -290,9 +290,9 @@ def gpsdate(Y, M, DoM, Hr, Mn, Sc):
 
 
 # Validar lista de precisões
-def validar_precisoes(lista):
+def validar_precisoes(lista, val = [1,5]):
     # Verifica se a lista tem 1 ou 5 elementos
-    if len(lista) != 1 and len(lista) != 5:
+    if len(lista) != val[0] and len(lista) != val[1]:
         return False
     for item in lista:
         # Tenta converter o item para um inteiro
