@@ -176,8 +176,10 @@ class DescriptiveMemorial(QgisAlgorithm):
 
         tipos = [self.tr('Project CRS, area in m²', 'SRC projetado, area em m²'),
                  self.tr('Project CRS, area in ha', 'SRC projetado, area em ha'),
-                 self.tr('Local Tangent Plane, area in m²', 'Sistema Geodésico Local, área em m²'),
-                 self.tr('Local Tangent Plane, area in ha', 'Sistema Geodésico Local, área em ha'),
+                 self.tr('Local Tangent Plane (LTP), area in m²', 'Sistema Geodésico Local (SGL), área em m²'),
+                 self.tr('Local Tangent Plane (LTP), area in ha', 'Sistema Geodésico Local (SGL), área em ha'),
+                 self.tr('LTP, Puissant azimuth, area in m²', 'SGL, azimute de Poissant, área em m²'),
+                 self.tr('LTP, Puissant azimuth, area in ha', 'SGL, azimute de Poissant, área em ha'),
                ]
 
         self.addParameter(
@@ -320,7 +322,7 @@ class DescriptiveMemorial(QgisAlgorithm):
             format_dist = '{:,.Xf}'.replace('X', decimal[2])
             decimal_area = int(decimal[3])
             format_perim =  '{:,.Xf}'.replace('X', decimal[4])
-        if calculo in (1,3): # Hectares
+        if calculo in (1,3,5): # Hectares
             format_area = '{:,.Xf}'.replace('X', str(decimal_area+2))
         else:
             format_area = '{:,.Xf}'.replace('X', str(decimal_area))
@@ -675,7 +677,15 @@ class DescriptiveMemorial(QgisAlgorithm):
                 pntA = QgsPoint(pnts[k+1][3][0], pnts[k+1][3][1], pnts[k+1][3][2])
                 ind =  max((k+2)%(tam+1),1)
                 pntB = QgsPoint(pnts[ind][3][0], pnts[ind][3][1], pnts[ind][3][2])
-                Az, dist = AzimuteDistanciaSGL(pntA, pntB, geomGeo, crsGeo)
+                Az, dist = AzimuteDistanciaSGL(pntA, pntB, geomGeo, crsGeo, 'SGL')
+                Az_lista += [Az]
+                Dist += [dist]
+        elif calculo in (4,5): # SGL e Puissant
+            for k in range(tam):
+                pntA = QgsPoint(pnts[k+1][3][0], pnts[k+1][3][1], pnts[k+1][3][2])
+                ind =  max((k+2)%(tam+1),1)
+                pntB = QgsPoint(pnts[ind][3][0], pnts[ind][3][1], pnts[ind][3][2])
+                Az, dist = AzimuteDistanciaSGL(pntA, pntB, geomGeo, crsGeo, 'puissant')
                 Az_lista += [Az]
                 Dist += [dist]
 
@@ -781,7 +791,7 @@ class DescriptiveMemorial(QgisAlgorithm):
         <tr style="">
           <td style="padding: 0cm 5.4pt; width: 247.85pt;"
      valign="top" width="330">
-          <p class="western" style="margin-bottom: 0.0001pt;"><b>''' + str2HTML(self.tr('Area ({})', 'Área ({})').format('m²' if calculo in (0,2) else 'ha') ) + ''': </b>[AREA]<o:p></o:p></p>
+          <p class="western" style="margin-bottom: 0.0001pt;"><b>''' + str2HTML(self.tr('Area ({})', 'Área ({})').format('m²' if calculo in (0,2,4) else 'ha') ) + ''': </b>[AREA]<o:p></o:p></p>
           </td>
           <td style="padding: 0cm 5.4pt; width: 176.85pt;"
      valign="top" width="236">
@@ -819,6 +829,12 @@ class DescriptiveMemorial(QgisAlgorithm):
         elif coordenadas not in (0,1,2,3) and calculo in (2,3): # Coordenadas Geo e cálculo em SGL:
             texto_calculo = self.tr('. All azimuths and distances, area and perimeter were calculated in the Local Tangent Plane (LTP), having as origin the centroid and average altitude of the property survey.',
                                     '. Todos os azimutes e distâncias, área e perímetro foram calculados no Sistema Geodésico Local (SGL) com origem no centroide e altitude média do imóvel.')
+        elif coordenadas in (0,1,2,3) and calculo in (4,5): # Coordenadas UTM, cálculo em SGL e Azimute Puissant:
+            texto_calculo = self.tr(', and are projected in the UTM system, zone [FUSO] and hemisphere [HEMISFERIO]. The azimuths were calculated using the Inverse Geodetic Problem formula according to Puissant. The distances, area and perimeter were calculated in the Local Tangent Plane (LTP), having as origin the centroid and average altitude of the property survey.',
+                                    ', sendo projetadas no Sistema UTM, fuso [FUSO] e hemisfério [HEMISFERIO]. Os azimutes foram calculados pela fórmula do Problema Geodésico Inverso segundo Puissant. As distâncias, área e perímetro foram calculados no Sistema Geodésico Local (SGL) com origem no centroide e altitude média do imóvel.')
+        elif coordenadas not in (0,1,2,3) and calculo in (4,5): # Coordenadas Geo, cálculo em SGL e Azimute Puissant:
+            texto_calculo = self.tr('. The azimuths were calculated using the Inverse Geodetic Problem formula according to Puissant. The distances, area and perimeter were calculated in the Local Tangent Plane (LTP), having as origin the centroid and average altitude of the property survey.',
+                                    '. Os azimutes foram calculados pela fórmula do Problema Geodésico Inverso segundo Puissant. As distâncias, área e perímetro foram calculados no Sistema Geodésico Local (SGL) com origem no centroide e altitude média do imóvel.')
 
         texto_final = self.tr('the vertex ', str2HTML('o vértice ')) + '''<b>[P-01]</b>, '''+ self.tr('with coordinates', 'de coordenadas') + ''' [Coord1],
     ''' + self.tr('the starting point for the description of this perimeter. All coordinates described here are georeferenced to the Geodetic Reference System (GRS)',
@@ -893,11 +909,11 @@ class DescriptiveMemorial(QgisAlgorithm):
             geom1.transform(coordinateTransformer)
             area1 = geom1.area()
             perimeter1 = geom1.length()
-        elif (2,3): # SGL
+        else: # SGL
             area1 = areaSGL(geom1, crsGeo)
             perimeter1 = perimetroSGL(geom1, crsGeo)
 
-        if calculo in (1,3): # Transformação para hectares
+        if calculo in (1,3,5): # Transformação para hectares
             area1 /= 1e4
 
         itens = {'[IMOVEL]': str2HTML(property),
