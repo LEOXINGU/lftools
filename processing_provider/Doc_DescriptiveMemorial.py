@@ -174,12 +174,12 @@ class DescriptiveMemorial(QgisAlgorithm):
             )
         )
 
-        tipos = [self.tr('Project CRS, area in m²', 'SRC projetado, area em m²'),
-                 self.tr('Project CRS, area in ha', 'SRC projetado, area em ha'),
+        tipos = [self.tr('Project CRS, area in m²', 'SRC do projeto, area em m²'),
+                 self.tr('Project CRS, area in ha', 'SRC do projeto, area em ha'),
                  self.tr('Local Tangent Plane (LTP), area in m²', 'Sistema Geodésico Local (SGL), área em m²'),
                  self.tr('Local Tangent Plane (LTP), area in ha', 'Sistema Geodésico Local (SGL), área em ha'),
-                 self.tr('LTP, Puissant azimuth, area in m²', 'SGL, azimute de Poissant, área em m²'),
-                 self.tr('LTP, Puissant azimuth, area in ha', 'SGL, azimute de Poissant, área em ha'),
+                 self.tr('LTP, Puissant azimuth, area in m²', 'SGL, azimute de Puissant, área em m²'),
+                 self.tr('LTP, Puissant azimuth, area in ha', 'SGL, azimute de Puissant, área em ha'),
                ]
 
         self.addParameter(
@@ -308,7 +308,7 @@ class DescriptiveMemorial(QgisAlgorithm):
         # Validar dado de entrada
         # Precisões das coordenadas, azimutes, distâncias, área, perímetro
         decimal = decimal.replace(' ','').split(',')
-        if not validar_precisoes(decimal):
+        if not validar_precisoes(decimal,[1,5]):
             raise QgsProcessingException(self.invalidSourceError(parameters, self.DECIMAL))
         format_utm = '{:,.Xf}'.replace('X', decimal[0])
         decimal_geo = int(decimal[0])+3
