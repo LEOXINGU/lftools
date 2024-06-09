@@ -125,21 +125,41 @@ def Distancia(coords, dim):
     return float(soma)
 
 
-def AzimutePuissant(pntA, pntB): # Pontos em graus
-    # Converter graus para radianos
-    lat1 = math.radians(pntA.y())
-    lon1 = math.radians(pntA.x())
-    lat2 = math.radians(pntB.y())
-    lon2 = math.radians(pntB.x())
-    d_lon = lon2 - lon1 # Diferença das longitudes
-    # Fórmula de Puissant
-    y = math.sin(d_lon) * math.cos(lat2)
-    x = math.cos(lat1) * math.sin(lat2) - math.sin(lat1) * math.cos(lat2) * math.cos(d_lon)
-    Azimute = math.atan2(y, x)
-    # Converter radianos para graus
-    Azimute = math.degrees(Azimute)
-    # Normalizar o azimute para o intervalo [0, 360)
-    Azimute = (Azimute + 360) % 360
+def AzimutePuissant(lat1, lon1, lat2, lon2, a = 6378137, f = 1/298.257222101):
+    """
+    Calcula o azimute segundo Puissant entre dois pontos geodésicos.
+
+    Parâmetros:
+    lat1, lon1: Latitude e longitude do ponto inicial em graus.
+    lat2, lon2: Latitude e longitude do ponto final em graus.
+    a: Semi-eixo maior do elipsoide (padrão: 6378137 metros).
+    f: Achatamento do elipsoide (padrão: 1/298.257222101).
+
+    Retorna:
+    Azimute em graus.
+    """
+    e2 = 2*f - f**2 # Calcula a excentricidade quadrada (e^2) a partir do achatamento (f)
+    seno_1segundo = math.sin(math.radians(1/3600))
+
+    lat_media = (math.radians(lat1) + math.radians(lat2)) / 2
+    seno_lat_media = math.sin(lat_media)
+    cos_lat_media = math.cos(lat_media)
+    pow_seno_20 = math.pow(seno_lat_media, 2)
+    Nm = a / (math.pow(1 - (e2 * pow_seno_20), 0.5))
+    delta_lat = (lat2 - lat1) * 3600
+    delta_lon = (lon2 - lon1) * 3600
+
+    Mm = (a * (1 - e2)) / math.pow(1 - (e2 * pow_seno_20), 1.5)
+    Bm = 1 / (Mm * seno_1segundo)
+
+    x = delta_lon * cos_lat_media * Nm * seno_1segundo
+    y = delta_lat * math.cos(math.radians(delta_lon / 7200))/Bm
+
+    F = (1 / 12) * seno_lat_media * cos_lat_media * cos_lat_media * seno_1segundo * seno_1segundo
+    gamma = (delta_lon * seno_lat_media * (1 / math.cos(math.radians(delta_lat / 7200))) + (F * delta_lon * delta_lon * delta_lon))
+    sinal_x = np.sign(x)
+    sinal_y = np.sign(y)
+    Azimute = 180 * (1 - (0.5 * sinal_x) - (0.5 * sinal_x * sinal_y)) + (math.degrees(math.atan2(x, y)) - (gamma / 7200))
     return Azimute
 
 
@@ -225,7 +245,7 @@ def Unicos(pnts):
     return lista
 
 # Azimute e Distância no SGL
-def AzimuteDistanciaSGL(pntA, pntB, geomGeo, crsGeo):
+def AzimuteDistanciaSGL(pntA, pntB, geomGeo, crsGeo, tipoAz):
     # Origem do SGL
     centroide = geomGeo.centroid().asPoint()
     coordsXYZ = geom2PointList(geomGeo)
@@ -248,12 +268,13 @@ def AzimuteDistanciaSGL(pntA, pntB, geomGeo, crsGeo):
     # Transformar geocêntricas para topocêntricas (SGL)
     Ea, Na, Ua = geoc2enu(XA, YA, ZA, lon0, lat0, X0, Y0, Z0)
     Eb, Nb, Ub = geoc2enu(XB, YB, ZB, lon0, lat0, X0, Y0, Z0)
-    # Calcular azimute de Puissant
-    Az = AzimutePuissant(pntA, pntB)
     # Calcular distância
     dist = distEuclidiana2D(QgsPointXY(Ea, Na), QgsPointXY(Eb, Nb))
-    # # Azimute no SGL
-    # Az = (180/np.pi)*azimute(pntA, pntB)[0]
+    # Tipo de Azimute
+    if tipoAz.lower() == 'puissant': # Calcular azimute de Puissant
+        Az = AzimutePuissant(pntA.y(), pntA.x(), pntB.y(), pntB.x(), a, f)
+    elif tipoAz.upper() == 'SGL': # Azimute no SGL
+        Az = (180/np.pi)*azimute(pntA, pntB)[0]
     return Az, dist
 
 
