@@ -279,7 +279,7 @@ class DescriptiveTable(QgsProcessingAlgorithm):
         if len(decimal) == 1:
             decimal_azim = 1
             format_dist = '{:,.Xf}'.replace('X', decimal[0])
-        elif len(decimal) == 5:
+        elif len(decimal) == 3:
             decimal_azim = int(decimal[1])
             format_dist = '{:,.Xf}'.replace('X', decimal[2])
 
