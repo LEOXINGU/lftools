@@ -251,7 +251,10 @@ def AzimuteDistanciaSGL(pntA, pntB, geomGeo, crsGeo, tipoAz):
     coordsXYZ = geom2PointList(geomGeo)
     # Obter cota média
     pnts = np.hstack(coordsXYZ)
-    pnts = Unicos(pnts[0]) # remover duplicados
+    try:
+        pnts = Unicos(pnts[0]) # remover duplicados
+    except:
+        pnts = Unicos(pnts)
     cotas = 0
     for pnt in pnts:
         if str(pnt.z()) != 'nan':
