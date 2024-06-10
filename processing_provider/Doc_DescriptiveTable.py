@@ -31,7 +31,8 @@ from qgis.core import (QgsProcessing,
                        QgsProcessingParameterNumber,
                        QgsProcessingParameterEnum,
                        QgsFeatureRequest,
-                       QgsPoint,
+                       QgsPoint, QgsLineString, QgsPolygon,
+                       QgsGeometry,
                        QgsExpression,
                        QgsProcessingParameterFeatureSource,
                        QgsProcessingParameterFeatureSink,
@@ -44,8 +45,8 @@ from qgis.core import (QgsProcessing,
 import os
 from math import pi, sqrt
 from lftools.geocapt.imgs import Imgs
-from lftools.geocapt.cartography import MeridianConvergence, SRC_Projeto, geom2PointList
-from lftools.geocapt.topogeo import azimute, dd2dms, str2HTML
+from lftools.geocapt.cartography import MeridianConvergence, SRC_Projeto, geom2PointList, AzimuteDistanciaSGL
+from lftools.geocapt.topogeo import azimute, dd2dms, str2HTML, validar_precisoes
 from qgis.PyQt.QtGui import QIcon
 
 class DescriptiveTable(QgsProcessingAlgorithm):
@@ -115,6 +116,7 @@ class DescriptiveTable(QgsProcessingAlgorithm):
     FONTSIZE = 'FONTSIZE'
     DECIMAL = 'DECIMAL'
     MODEL = 'MODEL'
+    CALC = 'CALC'
 
     def initAlgorithm(self, config=None):
 
@@ -163,12 +165,10 @@ class DescriptiveTable(QgsProcessingAlgorithm):
             )
 
         self.addParameter(
-            QgsProcessingParameterNumber(
+            QgsProcessingParameterString(
                 self.DECIMAL,
                 self.tr('Decimal places', 'Casas decimais'),
-                type = QgsProcessingParameterNumber.Type.Integer,
-                defaultValue = 2,
-                minValue = 0
+                defaultValue = '2' # 2,1,2 - Precisões das coordenadas, azimutes, distâncias
                 )
             )
 
@@ -192,6 +192,21 @@ class DescriptiveTable(QgsProcessingAlgorithm):
                 self.tr('Model', 'Modelo'),
 				options = tipos,
                 defaultValue= 0
+            )
+        )
+
+        calc = [self.tr('Project CRS', 'SRC do projeto'),
+                 self.tr('Local Tangent Plane (LTP)', 'Sistema Geodésico Local (SGL)'),
+                 self.tr('LTP, Puissant azimuth', 'SGL, azimute de Puissant'),
+               ]
+
+        self.addParameter(
+            QgsProcessingParameterEnum(
+                self.CALC,
+                self.tr('Calculation of azimuths, distances and area',
+                        'Cálculo de azimutes, distâncias e área'),
+				options = calc,
+                defaultValue = 0
             )
         )
 
@@ -249,19 +264,35 @@ class DescriptiveTable(QgsProcessingAlgorithm):
         if fontsize is None or ini<1:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.FONTSIZE))
 
-        decimal = self.parameterAsInt(
+        decimal = self.parameterAsString(
             parameters,
             self.DECIMAL,
             context
         )
-        if decimal is None or decimal<1:
+        # Validar dado de entrada
+        # Precisões das coordenadas, azimutes, distâncias, área, perímetro
+        decimal = decimal.replace(' ','').split(',')
+        if not validar_precisoes(decimal,[1,3]):
             raise QgsProcessingException(self.invalidSourceError(parameters, self.DECIMAL))
+        format_utm = '{:,.Xf}'.replace('X', decimal[0])
+        decimal_geo = int(decimal[0])+3
+        if len(decimal) == 1:
+            decimal_azim = 1
+            format_dist = '{:,.Xf}'.replace('X', decimal[0])
+        elif len(decimal) == 5:
+            decimal_azim = int(decimal[1])
+            format_dist = '{:,.Xf}'.replace('X', decimal[2])
 
-        format_num = '{:,.Xf}'.replace('X', str(decimal))
 
         modelo = self.parameterAsEnum(
             parameters,
             self.MODEL,
+            context
+        )
+
+        calculo = self.parameterAsEnum(
+            parameters,
+            self.CALC,
             context
         )
 
@@ -341,6 +372,42 @@ class DescriptiveTable(QgsProcessingAlgorithm):
             Az_Geo_lista += [(180/pi)*azimute(pntA, pntB)[0]+ConvMerediana]
             Dist += [sqrt((pntA.x() - pntB.x())**2 + (pntA.y() - pntB.y())**2)]
 
+        if calculo in (1,2):
+            crsGeo = vertices.sourceCrs()
+            # Criar polígono a partir dos pontos
+            COORDS = []
+            for k in range(tam):
+                COORDS += [pnts_GEO[k+1][0]]
+            anel = QgsLineString(COORDS + [COORDS[0]])
+            pol = QgsPolygon(anel)
+            geomGeo = QgsGeometry(pol)
+            Az_lista, Dist = [], []
+            rotulo_SGL = self.tr('LTP ','SLG ')
+            if calculo == 1: # SGL
+                rotulo_azimute = self.tr('LTP','SLG')
+                sufixo_azimute = '<br>' + rotulo_azimute
+                for k in range(tam):
+                    pntA = pnts_GEO[k+1][0]
+                    ind =  max((k+2)%(tam+1),1)
+                    pntB = pnts_GEO[ind][0]
+                    Az, dist = AzimuteDistanciaSGL(pntA, pntB, geomGeo, crsGeo, 'SGL')
+                    Az_lista += [Az]
+                    Dist += [dist]
+            elif calculo == 2: # SGL e Puissant
+                rotulo_azimute = self.tr('Puissant'.upper())
+                sufixo_azimute = '<br>' + rotulo_azimute
+                for k in range(tam):
+                    pntA = pnts_GEO[k+1][0]
+                    ind =  max((k+2)%(tam+1),1)
+                    pntB = pnts_GEO[ind][0]
+                    Az, dist = AzimuteDistanciaSGL(pntA, pntB, geomGeo, crsGeo, 'puissant')
+                    Az_lista += [Az]
+                    Dist += [dist]
+        else:
+            rotulo_azimute = self.tr('FLAT','PLANO')
+            rotulo_SGL = ''
+            sufixo_azimute = ''
+
         # Templates HTML
         if modelo in (0,1):
             coords = '<td>En</td> <td>Nn</td>' if modelo == 0 else '<td>Nn</td> <td>En</td>'
@@ -375,11 +442,11 @@ class DescriptiveTable(QgsProcessingAlgorithm):
               <td colspan="1" rowspan="2">''' + self.tr('SIDE', str2HTML('LADO')) + '''</td>
               <td colspan="2" rowspan="1">''' + self.tr('AZIMUTH', str2HTML('AZIMUTE')) + '''</td>
               <td colspan="1" rowspan="2">''' + self.tr('DISTANCE', str2HTML('DISTÂNCIA')) + '''<br>
-            (m)</td>
+              ''' + rotulo_SGL + '(m)</td>' + '''
             </tr>
             <tr>
             [COORDS]
-              <td>''' + self.tr('FLAT', str2HTML('PLANO')) + '''</td>
+              <td>''' + rotulo_azimute + '''</td>
               <td>''' + self.tr('TRUE', str2HTML('VERDADEIRO')) + '''</td>
             </tr>
             [LINHAS]
@@ -398,12 +465,12 @@ class DescriptiveTable(QgsProcessingAlgorithm):
             for k in range(ini-1,fim):
                 linha0 = linha
                 itens = {'Vn': pnts_UTM[k+1][2],
-                            'En': self.tr(format_num.format(pnts_UTM[k+1][0].x()), format_num.format(pnts_UTM[k+1][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                            'Nn': self.tr(format_num.format(pnts_UTM[k+1][0].y()), format_num.format(pnts_UTM[k+1][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                            'En': self.tr(format_utm.format(pnts_UTM[k+1][0].x()), format_utm.format(pnts_UTM[k+1][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                            'Nn': self.tr(format_utm.format(pnts_UTM[k+1][0].y()), format_utm.format(pnts_UTM[k+1][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.')),
                             'Ln': pnts_UTM[k+1][2] + '/' + pnts_UTM[1 if k+2 > tam else k+2][2],
-                            'Az_n': self.tr(dd2dms(Az_lista[k],1), dd2dms(Az_lista[k],1).replace('.', ',')),
-                            'AzG_n':  self.tr(dd2dms(Az_Geo_lista[k],1), dd2dms(Az_Geo_lista[k],1).replace('.', ',')),
-                            'Dn': self.tr(format_num.format(Dist[k]), format_num.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'))
+                            'Az_n': self.tr(dd2dms(Az_lista[k],decimal_azim), dd2dms(Az_lista[k],decimal_azim).replace('.', ',')),
+                            'AzG_n':  self.tr(dd2dms(Az_Geo_lista[k],decimal_azim), dd2dms(Az_Geo_lista[k],decimal_azim).replace('.', ',')),
+                            'Dn': self.tr(format_dist.format(Dist[k]), format_dist.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'))
                             }
                 for item in itens:
                     linha0 = linha0.replace(item, itens[item])
@@ -450,9 +517,9 @@ class DescriptiveTable(QgsProcessingAlgorithm):
                   <td colspan="1" rowspan="2">''' + self.tr('VERTEX', str2HTML('VÉRTICE')) + '''</td>
                   <td colspan="3" rowspan="1">''' + self.tr('COORDINATE', str2HTML('COORDENADA')) + '''</td>
                   <td colspan="1" rowspan="2">''' + self.tr('SIDE', str2HTML('LADO')) + '''</td>
-                  <td colspan="1" rowspan="2">''' + self.tr('AZIMUTH', str2HTML('AZIMUTE')) + '''</td>
-                  <td colspan="1" rowspan="2">''' + self.tr('DISTANCE', str2HTML('DISTÂNCIA')) + '''
-                (m)</td>
+                  <td colspan="1" rowspan="2">''' + self.tr('AZIMUTH', str2HTML('AZIMUTE')) + sufixo_azimute + '''</td>
+                  <td colspan="1" rowspan="2">''' + self.tr('DISTANCE', str2HTML('DISTÂNCIA')) + '''<br>
+                  ''' + rotulo_SGL + '(m)</td>' + '''
                 </tr>
                 <tr>
                   <td>E</td>
@@ -502,9 +569,9 @@ class DescriptiveTable(QgsProcessingAlgorithm):
                   <td colspan="1" rowspan="2">''' + self.tr('VERTEX', str2HTML('VÉRTICE')) + '''</td>
                   <td colspan="3" rowspan="1">''' + self.tr('COORDINATE', str2HTML('COORDENADA')) + '''</td>
                   <td colspan="1" rowspan="2">''' + self.tr('SIDE', str2HTML('LADO')) + '''</td>
-                  <td colspan="1" rowspan="2">''' + self.tr('AZIMUTH', str2HTML('AZIMUTE')) + '''</td>
-                  <td colspan="1" rowspan="2">''' + self.tr('DISTANCE', str2HTML('DISTÂNCIA')) + '''
-                (m)</td>
+                  <td colspan="1" rowspan="2">''' + self.tr('AZIMUTH', str2HTML('AZIMUTE')) + sufixo_azimute + '''</td>
+                  <td colspan="1" rowspan="2">''' + self.tr('DISTANCE', str2HTML('DISTÂNCIA')) + '''<br>
+                  ''' + rotulo_SGL + '(m)</td>' + '''
                 </tr>
                 <tr>
                   <td>longitude</td>
@@ -558,9 +625,9 @@ class DescriptiveTable(QgsProcessingAlgorithm):
                   <td colspan="1" rowspan="2">''' + self.tr('VERTEX', str2HTML('VÉRTICE')) + '''</td>
                   <td colspan="5" rowspan="1">''' + self.tr('COORDINATE', str2HTML('COORDENADA')) + '''</td>
                   <td colspan="1" rowspan="2">''' + self.tr('SIDE', str2HTML('LADO')) + '''</td>
-                  <td colspan="1" rowspan="2">''' + self.tr('AZIMUTH', str2HTML('AZIMUTE')) + '''</td>
-                  <td colspan="1" rowspan="2">''' + self.tr('DISTANCE', str2HTML('DISTÂNCIA')) + '''
-                (m)</td>
+                  <td colspan="1" rowspan="2">''' + self.tr('AZIMUTH', str2HTML('AZIMUTE')) + sufixo_azimute + '''</td>
+                  <td colspan="1" rowspan="2">''' + self.tr('DISTANCE', str2HTML('DISTÂNCIA')) + '''<br>
+                  ''' + rotulo_SGL + '(m)</td>' + '''
                 </tr>
                 <tr>
                   <td>longitude</td>
@@ -605,21 +672,21 @@ class DescriptiveTable(QgsProcessingAlgorithm):
                 longitude = pnts_GEO[k+1][0].x()
                 latitude = pnts_GEO[k+1][0].y()
                 if modelo not in (8,9,10,11): # sem sufixo
-                    longitude = self.tr(dd2dms(longitude,decimal + 3), dd2dms(longitude,decimal + 3).replace('.', ',')).replace('-','') + 'W' if longitude < 0 else 'E'
-                    latitude = self.tr(dd2dms(latitude,decimal + 3), dd2dms(latitude,decimal + 3).replace('.', ',')).replace('-','') + 'S' if latitude < 0 else 'N'
+                    longitude = self.tr(dd2dms(longitude,decimal_geo), dd2dms(longitude,decimal_geo).replace('.', ',')).replace('-','') + 'W' if longitude < 0 else 'E'
+                    latitude = self.tr(dd2dms(latitude,decimal_geo), dd2dms(latitude,decimal_geo).replace('.', ',')).replace('-','') + 'S' if latitude < 0 else 'N'
                 else:
-                    longitude = self.tr(dd2dms(longitude,decimal + 3), dd2dms(longitude,decimal + 3).replace('.', ','))
-                    latitude = self.tr(dd2dms(latitude,decimal + 3), dd2dms(latitude,decimal + 3).replace('.', ','))
+                    longitude = self.tr(dd2dms(longitude,decimal_geo), dd2dms(longitude,decimal_geo).replace('.', ','))
+                    latitude = self.tr(dd2dms(latitude,decimal_geo), dd2dms(latitude,decimal_geo).replace('.', ','))
 
                 itens = {'Vn': pnts_UTM[k+1][2],
-                            'En': self.tr(format_num.format(pnts_UTM[k+1][0].x()), format_num.format(pnts_UTM[k+1][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                            'Nn': self.tr(format_num.format(pnts_UTM[k+1][0].y()), format_num.format(pnts_UTM[k+1][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                            'hn': self.tr(format_num.format(pnts_GEO[k+1][0].z()), format_num.format(pnts_GEO[k+1][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                            'En': self.tr(format_utm.format(pnts_UTM[k+1][0].x()), format_utm.format(pnts_UTM[k+1][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                            'Nn': self.tr(format_utm.format(pnts_UTM[k+1][0].y()), format_utm.format(pnts_UTM[k+1][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                            'hn': self.tr(format_utm.format(pnts_GEO[k+1][0].z()), format_utm.format(pnts_GEO[k+1][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.')),
                             'lonn': longitude,
                             'latn': latitude,
                             'Ln': pnts_UTM[k+1][2] + '/' + pnts_UTM[1 if k+2 > tam else k+2][2],
-                            'Az_n': self.tr(dd2dms(Az_lista[k],1), dd2dms(Az_lista[k],1).replace('.', ',')),
-                            'Dn': self.tr(format_num.format(Dist[k]), format_num.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'))
+                            'Az_n': self.tr(dd2dms(Az_lista[k],decimal_azim), dd2dms(Az_lista[k],decimal_azim).replace('.', ',')),
+                            'Dn': self.tr(format_dist.format(Dist[k]), format_dist.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'))
                             }
                 for item in itens:
                     linha0 = linha0.replace(item, itens[item])
