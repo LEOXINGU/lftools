@@ -382,9 +382,9 @@ class DescriptiveTable(QgsProcessingAlgorithm):
             pol = QgsPolygon(anel)
             geomGeo = QgsGeometry(pol)
             Az_lista, Dist = [], []
-            rotulo_SGL = self.tr('LTP ','SLG ')
+            rotulo_SGL = self.tr('LTP ','SGL ')
             if calculo == 1: # SGL
-                rotulo_azimute = self.tr('LTP','SLG')
+                rotulo_azimute = self.tr('LTP','SGL')
                 sufixo_azimute = '<br>' + rotulo_azimute
                 for k in range(tam):
                     pntA = pnts_GEO[k+1][0]
