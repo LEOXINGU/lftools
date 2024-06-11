@@ -157,10 +157,8 @@ def AzimutePuissant(lat1, lon1, lat2, lon2, a = 6378137, f = 1/298.257222101):
 
     F = (1 / 12) * seno_lat_media * cos_lat_media * cos_lat_media * seno_1segundo * seno_1segundo
     gamma = (delta_lon * seno_lat_media * (1 / math.cos(math.radians(delta_lat / 7200))) + (F * delta_lon * delta_lon * delta_lon))
-    sinal_x = np.sign(x)
-    sinal_y = np.sign(y)
-    Azimute = 180 * (1 - (0.5 * sinal_x) - (0.5 * sinal_x * sinal_y)) + (math.degrees(math.atan2(x, y)) - (gamma / 7200))
-    return Azimute
+    Azimute = math.degrees(math.atan2(x, y)) - (gamma / 7200)
+    return (Azimute + 360)%360
 
 
 def raioMedioGauss(lat, EPSG):
