@@ -100,7 +100,7 @@ The operators supported are:  + , - , * , /'''
     txt_pt = '''Executa uma operação aritmética entre as bandas de um raster. A fórmula predefinida é usado para calcular o Green Leaf Index (GLI) para um raster RGB. No entanto, você pode inserir sua própria fórmula.
 Exemplos:
 NDVI com raster RGN: ( b3 - b1) / (b3 + b1)
-NDWI com raster RGN: ( b3 - b2) / (b3 + b2)
+NDWI com raster RGN: ( b2 - b3) / (b2 + b3)
 GLI com raster RGB: (2*b2 - b1 - b3) / (2*b2 + b1 + b3)
 VARI com raster RGB: (b2 - b1) / (b2 + b1 - b3)
 VIgreen com raster RGB: (b2 - b1) / (b2 + b1)
