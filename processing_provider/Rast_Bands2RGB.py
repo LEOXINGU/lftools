@@ -192,14 +192,17 @@ class Bands2RGB(QgsProcessingAlgorithm):
         )
 
         # Abrir banda R
+        feedback.pushInfo(self.tr('Opening R band...', 'Abrindo banda R (vermelha)...'))
         image = gdal.Open(Band_R.dataProvider().dataSourceUri())
         bandR = image.GetRasterBand(1).ReadAsArray()
         prj=image.GetProjection()
         geotransform = image.GetGeoTransform()
         # Abrir banda G
+        feedback.pushInfo(self.tr('Opening G band...', 'Abrindo banda G (verde)...'))
         image = gdal.Open(Band_G.dataProvider().dataSourceUri())
         bandG = image.GetRasterBand(1).ReadAsArray()
         # Abrir banda B
+        feedback.pushInfo(self.tr('Opening B band...', 'Abrindo banda B (azul)...'))
         image = gdal.Open(Band_B.dataProvider().dataSourceUri())
         bandB = image.GetRasterBand(1).ReadAsArray()
         # Criar objeto CRS
@@ -213,6 +216,7 @@ class Bands2RGB(QgsProcessingAlgorithm):
         GDT = gdal_array.NumericTypeCodeToGDALTypeCode(bandB.dtype)
 
         # Criar imagem RGB
+        feedback.pushInfo(self.tr('Creating RGB raster...', 'Criando raster RGB...'))
         RGB = gdal.GetDriverByName('GTiff').Create(RGB_Output, n_col, n_lin, 3, GDT)
         RGB.SetGeoTransform(geotransform)    # specify coords
         RGB.SetProjection(CRS.ExportToWkt()) # export coords to file
