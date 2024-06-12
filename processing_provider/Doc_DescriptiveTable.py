@@ -203,8 +203,8 @@ class DescriptiveTable(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterEnum(
                 self.CALC,
-                self.tr('Calculation of azimuths, distances and area',
-                        'Cálculo de azimutes, distâncias e área'),
+                self.tr('Calculation of azimuths and distances',
+                        'Cálculo de azimutes e distâncias'),
 				options = calc,
                 defaultValue = 0
             )
