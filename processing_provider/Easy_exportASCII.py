@@ -83,6 +83,7 @@ class ExportASCII(QgsProcessingAlgorithm):
     ATT = 'ATT' # nome para o arquivo
     EXPR = 'EXPR' # expressão para ser salva
     UNIQUE = 'UNIQUE' # arquivo único
+    ORDER = 'ORDER' # campo de ordenação
     FORMAT = 'FORMAT' # formato de saída
     FOLDER = 'FOLDER' # pasta de saída
 
@@ -122,10 +123,18 @@ class ExportASCII(QgsProcessingAlgorithm):
         )
 
         self.addParameter(
+            QgsProcessingParameterField(
+                self.ORDER,
+                self.tr('Sort field', 'Campo de ordenação'),
+                parentLayerParameterName = self.LAYER
+            )
+        )
+
+        self.addParameter(
             QgsProcessingParameterString(
                 self.FORMAT,
                 self.tr('Output file format', 'Formato do arquivo de saída'),
-                defaultValue = '.txt'
+                defaultValue = '.html'
             )
         )
 
@@ -177,6 +186,7 @@ class ExportASCII(QgsProcessingAlgorithm):
             raise QgsProcessingException(self.invalidSourceError(parameters, self.FORMAT))
         if formato[0] != '.':
             formato = '.' + str(formato)
+        nova_linha = '<br>' if formato == '.html' else '\n'
 
         unico = self.parameterAsBool(
             parameters,
@@ -190,9 +200,22 @@ class ExportASCII(QgsProcessingAlgorithm):
             context
         )
 
+        ordem = self.parameterAsFields(
+            parameters,
+            self.ORDER,
+            context
+        )
+
+        if ordem:
+            ordem = ordem[0]
+            ordem_idx = layer.fields().indexFromName(ordem)
+        else:
+            raise QgsProcessingException(self.invalidSourceError(parameters, self.ORDER))
+
         if unico:
             output = os.path.join(pasta, str(campo) + formato)
             arq = open(output, 'w')
+            dic = {}
 
         Percent = 100.0/layer.featureCount() if layer.featureCount()>0 else 0
         for current, feat in enumerate(layer.getFeatures()):
@@ -204,10 +227,14 @@ class ExportASCII(QgsProcessingAlgorithm):
             if not unico:
                 output = os.path.join(pasta, nome)
                 arq = open(output, 'w')
-                arq.write(str(expr.evaluate(contexto)) + '\n')
+                arq.write(str(expr.evaluate(contexto)))
                 arq.close()
             else:
-                arq.write(str(expr.evaluate(contexto)) + '\n')
+                nome_seq = feat[ordem]
+                if nome_seq not in dic:
+                    dic[nome_seq] = [str(expr.evaluate(contexto)) + nova_linha]
+                else:
+                    dic[nome_seq] = dic[nome_seq] + [str(expr.evaluate(contexto)) + nova_linha]
 
             if feedback.isCanceled():
                 break
@@ -215,6 +242,14 @@ class ExportASCII(QgsProcessingAlgorithm):
 
         # Fechar arquivo
         if unico:
+            # Preencher a partir do dicionário
+            # ordenar a partir do atributo
+            itens = list(dic.keys())
+            itens.sort()
+            for item in itens:
+                lista_txt = dic[item]
+                for texto in lista_txt:
+                    arq.write(texto)
             arq.close()
 
         feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
