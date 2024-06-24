@@ -40,6 +40,7 @@ from processing.algs.qgis.QgisAlgorithm import QgisAlgorithm
 from math import atan, pi, sqrt, floor
 import math
 from lftools.geocapt.imgs import *
+from lftools.translations.translate import translate
 from lftools.geocapt.cartography import (FusoHemisf,
                                          geom2PointList,
                                          AzimuteDistanciaSGL,
@@ -71,19 +72,8 @@ class DescriptiveMemorial(QgisAlgorithm):
     ATTRIBUTES = 'ATTRIBUTES'
     LOC = QgsApplication.locale()[:2]
 
-
-    def translate(self, string):
-        return QCoreApplication.translate('Processing', string)
-
     def tr(self, *string):
-        # Traduzir para o portugês: arg[0] - english (translate), arg[1] - português
-        if self.LOC == 'pt':
-            if len(string) == 2:
-                return string[1]
-            else:
-                return self.translate(string[0])
-        else:
-            return self.translate(string[0])
+        return translate(string, self.LOC)
 
     def createInstance(self):
         return DescriptiveMemorial()
@@ -207,7 +197,7 @@ class DescriptiveMemorial(QgisAlgorithm):
             QgsProcessingParameterString(
                 self.SLOGAN,
                 self.tr('Slogan'),
-                defaultValue = self.tr(str2HTML('CARTOGRAPHY & SURVEYING'), str2HTML('CARTOGRAFIA & AGRIMENSURA')),
+                defaultValue = self.tr('CARTOGRAPHY & SURVEYING','CARTOGRAFIA & AGRIMENSURA'),
                 optional = True,
                 multiLine = True
             )
@@ -733,7 +723,7 @@ class DescriptiveMemorial(QgisAlgorithm):
     <head>
       <meta content="text/html; charset=ISO-8859-1"
      http-equiv="content-type">
-      <title>'''+ self.tr('Descriptive memorial', 'Memorial descritivo') + '''</title>
+      <title>'''+ str2HTML(self.tr('Descriptive memorial', 'Memorial descritivo')) + '''</title>
       <link rel = "icon" href = "https://github.com/LEOXINGU/lftools/blob/main/images/lftools.png?raw=true" type = "image/x-icon">
     </head>
     <body>
@@ -743,7 +733,7 @@ class DescriptiveMemorial(QgisAlgorithm):
     <br></div>
     <p class="western"
      style="margin-bottom: 0.0001pt; text-align: center;"
-     align="center"><b><u><span style="font-size: 12pt;">'''+ self.tr('DESCRIPTIVE MEMORIAL','MEMORIAL DESCRITIVO') + '''</span></u></b><o:p></o:p></p>
+     align="center"><b><u><span style="font-size: 12pt;">'''+ str2HTML(self.tr('DESCRIPTIVE MEMORIAL','MEMORIAL DESCRITIVO')) + '''</span></u></b><o:p></o:p></p>
     <p class="western" style="margin-bottom: 0.0001pt;"><o:p>&nbsp;</o:p></p>
     <table class="MsoTableGrid"
      style="border: medium none ; border-collapse: collapse;"
@@ -752,11 +742,11 @@ class DescriptiveMemorial(QgisAlgorithm):
         <tr style="">
           <td style="padding: 0cm 5.4pt; width: 247.85pt;"
      valign="top" width="330">
-          <p class="western" style="margin-bottom: 0.0001pt;"><b>'''+ self.tr('Property',str2HTML('Imóvel')) + ''': </b>[IMOVEL]<o:p></o:p></p>
+          <p class="western" style="margin-bottom: 0.0001pt;"><b>'''+ str2HTML(self.tr('Property','Imóvel')) + ''': </b>[IMOVEL]<o:p></o:p></p>
           </td>
           <td style="padding: 0cm 5.4pt; width: 176.85pt;"
      valign="top" width="236">
-          <p class="western" style="margin-bottom: 0.0001pt;"><b>''' + self.tr('Real estate registry', 'Registro') + ''':</b>
+          <p class="western" style="margin-bottom: 0.0001pt;"><b>''' + str2HTML(self.tr('Real estate registry', 'Registro')) + ''':</b>
     [REGISTRO]<o:p></o:p></p>
           </td>
         </tr>
@@ -764,19 +754,19 @@ class DescriptiveMemorial(QgisAlgorithm):
           <td colspan="2"
      style="padding: 0cm 5.4pt; width: 424.7pt;" valign="top"
      width="566">
-          <p class="western" style="margin-bottom: 0.0001pt;"><b>''' + self.tr('Owner', str2HTML('Proprietário')) + ''':</b>
+          <p class="western" style="margin-bottom: 0.0001pt;"><b>''' + str2HTML(self.tr('Owner', 'Proprietário')) + ''':</b>
     [PROPRIETARIO]<o:p></o:p></p>
           </td>
         </tr>
         <tr style="">
           <td style="padding: 0cm 5.4pt; width: 247.85pt;"
      valign="top" width="330">
-          <p class="western" style="margin-bottom: 0.0001pt;"><b>''' + self.tr('County', str2HTML('Município')) + ''':</b>
+          <p class="western" style="margin-bottom: 0.0001pt;"><b>''' + str2HTML(self.tr('County', 'Município')) + ''':</b>
     [MUNICIPIO]<b><o:p></o:p></b></p>
           </td>
           <td style="padding: 0cm 5.4pt; width: 176.85pt;"
      valign="top" width="236">
-          <p class="western" style="margin-bottom: 0.0001pt;"><b>''' + self.tr('State', str2HTML('Estado')) + ''':
+          <p class="western" style="margin-bottom: 0.0001pt;"><b>''' + str2HTML(self.tr('State', 'Estado')) + ''':
           </b>[UF]<o:p></o:p></p>
           </td>
         </tr>
@@ -784,7 +774,7 @@ class DescriptiveMemorial(QgisAlgorithm):
           <td colspan="2"
      style="padding: 0cm 5.4pt; width: 424.7pt;" valign="top"
      width="566">
-          <p class="western" style="margin-bottom: 0.0001pt;"><b>''' + self.tr('Registration(s)', str2HTML('Matrícula(s)')) + ''':</b>
+          <p class="western" style="margin-bottom: 0.0001pt;"><b>''' + str2HTML(self.tr('Registration(s)', 'Matrícula(s)')) + ''':</b>
     [MATRICULAS]<o:p></o:p></p>
           </td>
         </tr>
@@ -795,27 +785,27 @@ class DescriptiveMemorial(QgisAlgorithm):
           </td>
           <td style="padding: 0cm 5.4pt; width: 176.85pt;"
      valign="top" width="236">
-          <p class="western" style="margin-bottom: 0.0001pt;"><b>''' + self.tr('Perimeter', str2HTML('Perímetro')) + ''' (m):</b> [PERIMETRO]<o:p></o:p></p>
+          <p class="western" style="margin-bottom: 0.0001pt;"><b>''' + str2HTML(self.tr('Perimeter', 'Perímetro')) + ''' (m):</b> [PERIMETRO]<o:p></o:p></p>
           </td>
         </tr>
         <tr style="">
           <td colspan="2"
      style="padding: 0cm 5.4pt; width: 424.7pt;" valign="top"
      width="566">
-          <p class="western" style="margin-bottom: 0.0001pt;"><b>''' + self.tr('Coordinate Reference System', str2HTML('Sistema de Referência de Coordenadas')) + ''':</b> [SRC]<b><o:p></o:p></b></p>
+          <p class="western" style="margin-bottom: 0.0001pt;"><b>''' + str2HTML(self.tr('Coordinate Reference System', 'Sistema de Referência de Coordenadas')) + ''':</b> [SRC]<b><o:p></o:p></b></p>
           </td>
         </tr>
       </tbody>
     </table>
     <p class="western" style="margin-bottom: 0.0001pt;"><o:p>&nbsp;</o:p></p>
     <p class="western"
-     style="margin-bottom: 0.0001pt; text-align: justify;">'''+ self.tr('The description of this perimeter begins ', str2HTML('Inicia-se a descrição deste perímetro n'))
+     style="margin-bottom: 0.0001pt; text-align: justify;">'''+ str2HTML(self.tr('The description of this perimeter begins ', 'Inicia-se a descrição deste perímetro n'))
 
-        texto_var1 = self.tr('at the vertex ', str2HTML('o vértice ')) + '''<b>[Vn]</b>, '''+ self.tr('with coordinates ', 'de coordenadas ') + '''[Coordn],
-    [Descr_k]'''+ self.tr('from this, it continues to confront [Confront_k], with the following flat azimuths and distances: [Az_n] and [Dist_n]m up to ',
-                   str2HTML('deste, segue confrontando com [Confront_k], com os seguintes azimutes planos e distâncias: [Az_n] e [Dist_n]m até '))
+        texto_var1 = str2HTML(self.tr('at the vertex ', 'o vértice ')) + '''<b>[Vn]</b>, '''+ str2HTML(self.tr('with coordinates ', 'de coordenadas ')) + '''[Coordn],
+    [Descr_k]'''+ str2HTML(self.tr('from this, it continues to confront [Confront_k], with the following flat azimuths and distances: [Az_n] and [Dist_n]m up to ',
+                                   'deste, segue confrontando com [Confront_k], com os seguintes azimutes planos e distâncias: [Az_n] e [Dist_n]m até '))
 
-        texto_var2 = self.tr('the vertex ', str2HTML('o vértice ')) + '''<span> </span><b>[Vn]</b>, '''+ self.tr('with coordinates ', 'de coordenadas ') + '''[Coordn]; '''+ self.tr('[Az_n] and [Dist_n]m up to ', str2HTML('[Az_n] e [Dist_n]m até '))
+        texto_var2 = str2HTML(self.tr('the vertex ', 'o vértice ')) + '''<span> </span><b>[Vn]</b>, '''+ str2HTML(self.tr('with coordinates ', 'de coordenadas ')) + '''[Coordn]; '''+ str2HTML(self.tr('[Az_n] and [Dist_n]m up to ', '[Az_n] e [Dist_n]m até '))
 
         if coordenadas in (0,1,2,3) and calculo in (0,1): # Coordenadas UTM e cálculo em UTM
             texto_calculo = self.tr(', and are projected in the UTM system, zone [FUSO] and hemisphere [HEMISFERIO], from which all azimuths and distances, area and perimeter were calculated.',
@@ -836,11 +826,10 @@ class DescriptiveMemorial(QgisAlgorithm):
             texto_calculo = self.tr('. The azimuths were calculated using the Inverse Geodetic Problem formula according to Puissant. The distances, area and perimeter were calculated in the Local Tangent Plane (LTP), having as origin the centroid and average altitude of the property survey.',
                                     '. Os azimutes foram calculados pela fórmula do Problema Geodésico Inverso segundo Puissant. As distâncias, área e perímetro foram calculados no Sistema Geodésico Local (SGL) com origem no centroide e altitude média do imóvel.')
 
-        texto_final = self.tr('the vertex ', str2HTML('o vértice ')) + '''<b>[P-01]</b>, '''+ self.tr('with coordinates', 'de coordenadas') + ''' [Coord1],
-    ''' + self.tr('the starting point for the description of this perimeter. All coordinates described here are georeferenced to the Geodetic Reference System (GRS)',
-         str2HTML('ponto inicial da descrição deste perímetro. Todas as coordenadas aqui descritas estão georreferenciadas ao Sistema Geodésico de Referência (SGR)')) + ''' <b>[GRS]</b>
-    ''' + self.tr(texto_calculo,
-         str2HTML(texto_calculo)) + '''
+        texto_final = str2HTML(self.tr('the vertex ', 'o vértice ')) + '''<b>[P-01]</b>, '''+ self.tr('with coordinates', 'de coordenadas') + ''' [Coord1],
+    ''' + str2HTML(self.tr('the starting point for the description of this perimeter. All coordinates described here are georeferenced to the Geodetic Reference System (GRS)',
+         'ponto inicial da descrição deste perímetro. Todas as coordenadas aqui descritas estão georreferenciadas ao Sistema Geodésico de Referência (SGR)')) + ''' <b>[GRS]</b>
+    ''' + str2HTML(self.tr(texto_calculo)) + '''
      <o:p></o:p></p>
     <p class="western"
      style="margin-bottom: 0.0001pt; text-align: right;"
@@ -858,7 +847,7 @@ class DescriptiveMemorial(QgisAlgorithm):
       align="center">[CPF]<o:p></o:p></p>
      <p class="western"
       style="margin: 0cm 0cm 0.0001pt; text-align: center;"
-      align="center">''' + self.tr('PROPERTY OWNER', str2HTML('PROPRIETÁRIO DO IMÓVEL')) + '''<o:p></o:p></p>
+      align="center">''' + str2HTML(self.tr('PROPERTY OWNER', 'PROPRIETÁRIO DO IMÓVEL')) + '''<o:p></o:p></p>
 
     <p class="western" style="margin-bottom: 0.0001pt;"><o:p>&nbsp;</o:p></p>
     <p class="western"
@@ -872,7 +861,7 @@ class DescriptiveMemorial(QgisAlgorithm):
      align="center">[CREA]<o:p></o:p></p>
     <p class="western"
      style="margin: 0cm 0cm 0.0001pt; text-align: center;"
-     align="center">''' + self.tr('TECHNICAL MANAGER', str2HTML('RESPONSÁVEL TÉCNICO')) + '''<o:p></o:p></p>
+     align="center">''' + str2HTML(self.tr('TECHNICAL MANAGER', 'RESPONSÁVEL TÉCNICO')) + '''<o:p></o:p></p>
     <p class="MsoNormal"><o:p>&nbsp;</o:p></p>
     </body>
     </html>
@@ -967,7 +956,7 @@ class DescriptiveMemorial(QgisAlgorithm):
                     '[CREA]': str2HTML(prof_id),
                     '[LOCAL]': str2HTML((county) +' - ' + (state).upper()),
                     '[DATA]': self.tr((survey_date.toPyDate()).strftime("%b %d, %Y"),
-                                       (survey_date.toPyDate()).strftime("%d de {} de %Y").format(str2HTML(meses[survey_date.month()])))
+                                       (survey_date.toPyDate()).strftime("%d de {} de %Y").format(str2HTML(self.tr(meses[survey_date.month()]))))
                     }
 
         for item in itens:
