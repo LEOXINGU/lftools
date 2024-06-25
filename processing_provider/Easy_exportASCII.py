@@ -21,6 +21,7 @@ import qgis.utils
 from numpy import radians, array, sin, cos, sqrt, matrix, zeros, floor, identity, diag
 from numpy.linalg import pinv, norm
 from lftools.geocapt.imgs import Imgs
+from lftools.translations.translate import translate
 from lftools.geocapt.topogeo import str2HTML, String2CoordList, String2StringList, dms2dd
 import os, subprocess
 from qgis.PyQt.QtGui import QIcon
@@ -29,18 +30,8 @@ class ExportASCII(QgsProcessingAlgorithm):
 
     LOC = QgsApplication.locale()[:2]
 
-    def translate(self, string):
-        return QCoreApplication.translate('Processing', string)
-
     def tr(self, *string):
-        # Traduzir para o portugês: arg[0] - english (translate), arg[1] - português
-        if self.LOC == 'pt':
-            if len(string) == 2:
-                return string[1]
-            else:
-                return self.translate(string[0])
-        else:
-            return self.translate(string[0])
+        return translate(string, self.LOC)
 
     def createInstance(self):
         return ExportASCII()
