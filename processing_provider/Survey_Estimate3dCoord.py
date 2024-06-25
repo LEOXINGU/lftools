@@ -21,6 +21,7 @@ import qgis.utils
 from numpy import radians, array, sin, cos, sqrt, matrix, zeros, floor, identity, diag
 from numpy.linalg import pinv, norm
 from lftools.geocapt.imgs import Imgs
+from lftools.translations.translate import translate
 from lftools.geocapt.topogeo import str2HTML, String2CoordList, String2StringList, dms2dd
 import os
 from qgis.PyQt.QtGui import QIcon
@@ -38,18 +39,8 @@ class Estimate3dCoord(QgsProcessingAlgorithm):
 
     LOC = QgsApplication.locale()[:2]
 
-    def translate(self, string):
-        return QCoreApplication.translate('Processing', string)
-
     def tr(self, *string):
-        # Traduzir para o portugês: arg[0] - english (translate), arg[1] - português
-        if self.LOC == 'pt':
-            if len(string) == 2:
-                return string[1]
-            else:
-                return self.translate(string[0])
-        else:
-            return self.translate(string[0])
+        return translate(string, self.LOC)
 
     def createInstance(self):
         return Estimate3dCoord()
@@ -293,7 +284,7 @@ Para mais informações sobre a metodologia utilizada, por favor leia o artigo n
 <head>
 
   <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
-  <title>''' + self.tr('Estimate 3D Coordinates', str2HTML('Estimação de Coordenadas 3D')) + '''</title>
+  <title>''' + str2HTML(self.tr('Estimate 3D Coordinates', 'Estimação de Coordenadas 3D')) + '''</title>
   <link rel = "icon" href = "https://github.com/LEOXINGU/lftools/blob/main/images/lftools.png?raw=true" type = "image/x-icon">
 </head>
 <body style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 204);" alink="#000099" link="#000099" vlink="#990099">
@@ -319,7 +310,7 @@ Para mais informações sobre a metodologia utilizada, por favor leia o artigo n
  valign="top" width="52">
             <p class="MsoNormal"
  style="margin-bottom: 0.0001pt; text-align: center; line-height: normal;"
- align="center"><i>'''+self.tr('Station', str2HTML('Estação')) + '''</i><o:p></o:p></p>
+ align="center"><i>'''+ str2HTML(self.tr('Station', 'Estação')) + '''</i><o:p></o:p></p>
             </td>
             <td
  style="border-style: solid solid solid none; border-color: windowtext windowtext windowtext -moz-use-text-color; border-width: 1pt 1pt 1pt medium; padding: 0cm 5.4pt; width: 46.05pt;"
@@ -378,7 +369,7 @@ Para mais informações sobre a metodologia utilizada, por favor leia o artigo n
  valign="top" width="52">
             <p class="MsoNormal"
  style="margin-bottom: 0.0001pt; text-align: center; line-height: normal;"
- align="center"><i>'''+self.tr('Station', str2HTML('Estação')) + '''</i><o:p></o:p></p>
+ align="center"><i>'''+ str2HTML(self.tr('Station', 'Estação')) + '''</i><o:p></o:p></p>
             </td>
             <td
  style="border-style: solid solid solid none; border-color: windowtext windowtext windowtext -moz-use-text-color; border-width: 1pt 1pt 1pt medium; padding: 0cm 5.4pt; width: 46.05pt;"
@@ -406,8 +397,8 @@ Para mais informações sobre a metodologia utilizada, por favor leia o artigo n
         </tbody>
       </table>
       </div>
-      <p class="MsoNormal" style="text-align: center;" align="center"><span style="font-style: italic;">''' + self.tr('Posteriori Variance', 'Vari&acirc;ncia a posteriori') + ''' &nbsp;</span>[VAR]<o:p></o:p></p>
-      <p class="MsoNormal" style="text-align: center;" align="center"><span style="font-style: italic;">''' + self.tr(str2HTML('Adjusted Coordinates, Slant Ranges and Precisions**'), str2HTML('Coordenas Ajustados, Distâncias e Precis&otilde;es**')) + '''</span><o:p></o:p></p>
+      <p class="MsoNormal" style="text-align: center;" align="center"><span style="font-style: italic;">''' + str2HTML(self.tr('Posteriori Variance', 'Variância a posteriori')) + ''' &nbsp;</span>[VAR]<o:p></o:p></p>
+      <p class="MsoNormal" style="text-align: center;" align="center"><span style="font-style: italic;">''' + str2HTML(self.tr('Adjusted Coordinates, Slant Ranges and Precisions**', 'Coordenas Ajustados, Distâncias e Precis&otilde;es**')) + '''</span><o:p></o:p></p>
       <div align="center">
       <table class="MsoTableGrid" style="border: medium none ; width: 100.7pt; border-collapse: collapse;" border="1" cellpadding="0" cellspacing="0" width="134">
         <tbody>
@@ -453,11 +444,11 @@ Para mais informações sobre a metodologia utilizada, por favor leia o artigo n
     </tr>
   </tbody>
 </table>
-<p class="MsoNormal" style="text-align: left;" align="left"><i><span style="font-size: 10pt; line-height: 100%; color: rgb(127, 127, 127);">''' + self.tr(str2HTML('*')+'The inverse of the distances to the diagonal of the Weight Matrix is considered.', str2HTML('*')+'&Eacute; considerado o inverso das dist&acirc;ncias para a diagonal da Matriz Peso.') + '''
-</br>''' + self.tr(str2HTML('**The unit of measurement of the adjusted coordinates is the same as the input coordinates.'), str2HTML('**A unidade de medida das coordenadas ajustadas é a mesma da coordenadas de entrada.')) + '''<o:p></o:p></span></i></p>
+<p class="MsoNormal" style="text-align: left;" align="left"><i><span style="font-size: 10pt; line-height: 100%; color: rgb(127, 127, 127);">''' + str2HTML(self.tr('*The inverse of the distances to the diagonal of the Weight Matrix is considered.', '*Foi considerado o inverso das distâncias para a diagonal da Matriz Peso.')) + '''
+</br>''' + str2HTML(self.tr('**The unit of measurement of the adjusted coordinates is the same as the input coordinates.', '**A unidade de medida das coordenadas ajustadas é a mesma da coordenadas de entrada.')) + '''<o:p></o:p></span></i></p>
 </div>
 <footer">
-<p class="MsoNormal" style="margin-bottom: 0.0001pt; text-align: right;" align="right"><b>''' + self.tr('Leandro Franca', str2HTML('Leandro França')) + '''
+<p class="MsoNormal" style="margin-bottom: 0.0001pt; text-align: right;" align="right"><b>''' + str2HTML(self.tr('Leandro Franca', 'Leandro França')) + '''
 </br>''' + self.tr('Cartographic Engineer', 'Eng. Cart&oacute;grafo') + '''<o:p></o:p></b></p>
 </br>
 <div align="right">'''+ Imgs().social_table_color + '''
@@ -583,7 +574,7 @@ Para mais informações sobre a metodologia utilizada, por favor leia o artigo n
         for azimute in String2StringList(Azimutes):
             tableRowN = template1
             itens  = {
-                         '[SUBS]' : self.tr(str2HTML(azimute), str2HTML(azimute).replace('.', ',')),
+                         '[SUBS]' : str2HTML(self.tr(azimute, azimute.replace('.', ','))),
                          }
             for item in itens:
                 tableRowN = tableRowN.replace(item, itens[item])
@@ -593,7 +584,7 @@ Para mais informações sobre a metodologia utilizada, por favor leia o artigo n
         for zenite_ang in String2StringList(ÂngulosZenitais):
             tableRowN = template1
             itens  = {
-                         '[SUBS]' : self.tr(str2HTML(zenite_ang), str2HTML(zenite_ang).replace('.', ',')),
+                         '[SUBS]' : str2HTML(self.tr(zenite_ang, zenite_ang.replace('.', ','))),
                          }
             for item in itens:
                 tableRowN = tableRowN.replace(item, itens[item])
@@ -616,7 +607,7 @@ Para mais informações sobre a metodologia utilizada, por favor leia o artigo n
             table4 += tableRowN
 
         texto = texto.replace('[tabela 1]', table1).replace('[tabela 2]', table2).replace('[tabela 3]', table3).replace('[tabela 4]', table4)
-        texto = texto.replace('[PESO]', self.tr('Yes', 'Sim') if usar_peso else self.tr('No', str2HTML('Não')))
+        texto = texto.replace('[PESO]', str2HTML(self.tr('Yes', 'Sim')) if usar_peso else str2HTML(self.tr('No', 'Não')))
         texto = texto.replace('[VAR]', VAR)
         strX = self.tr('{:,.3f}'.format(x), '{:,.3f}'.format(x).replace(',', 'X').replace('.', ',').replace('X', '.'))
         strY = self.tr('{:,.3f}'.format(y), '{:,.3f}'.format(y).replace(',', 'X').replace('.', ',').replace('X', '.'))
