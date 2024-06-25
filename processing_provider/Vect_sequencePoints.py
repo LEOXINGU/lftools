@@ -39,9 +39,6 @@ class SequencePoints(QgsProcessingAlgorithm):
 
     LOC = QgsApplication.locale()[:2]
 
-    def translate(self, string):
-        return QCoreApplication.translate('Processing', string)
-
     def tr(self, *string):
         return translate(string, self.LOC)
 
