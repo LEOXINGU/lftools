@@ -40,6 +40,7 @@ from qgis.core import (QgsProcessing,
 
 import os
 from lftools.geocapt.imgs import *
+from lftools.translations.translate import translate
 from lftools.geocapt.cartography import CentralMeridian, FusoHemisf
 from lftools.geocapt.topogeo import dd2dms, str2HTML
 from qgis.PyQt.QtGui import QIcon
@@ -54,18 +55,8 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
 
     LOC = QgsApplication.locale()[:2]
 
-    def translate(self, string):
-        return QCoreApplication.translate('Processing', string)
-
     def tr(self, *string):
-        # Traduzir para o portugês: arg[0] - english (translate), arg[1] - português
-        if self.LOC == 'pt':
-            if len(string) == 2:
-                return string[1]
-            else:
-                return self.translate(string[0])
-        else:
-            return self.translate(string[0])
+        return translate(string, self.LOC)
 
     def createInstance(self):
         return SurveyMarkDoc()
@@ -142,7 +133,7 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
             QgsProcessingParameterString(
                 self.SLOGAN,
                 self.tr('Slogan'),
-                defaultValue = self.tr(str2HTML('CARTOGRAPHY & SURVEYING'), str2HTML('CARTOGRAFIA & AGRIMENSURA')),
+                defaultValue = self.tr('CARTOGRAPHY & SURVEYING', 'CARTOGRAFIA & AGRIMENSURA'),
                 optional = True,
                 multiLine = True
             )
@@ -396,13 +387,13 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
                     '[NI]':  str2HTML(ponto['property']),
                     '[MUN]': str2HTML(ponto['county']),
                     '[UF]':  str2HTML(ponto['state']),
-                    '[LON]': self.tr(str2HTML(dd2dms(pnt.x(),5)), str2HTML(dd2dms(pnt.x(),5)).replace('.',',')),
-                    '[LAT]': self.tr(str2HTML(dd2dms(pnt.y(),5)), str2HTML(dd2dms(pnt.y(),5)).replace('.',',')),
+                    '[LON]': str2HTML(self.tr(dd2dms(pnt.x(),5), dd2dms(pnt.x(),5).replace('.',','))),
+                    '[LAT]': str2HTML(self.tr(dd2dms(pnt.y(),5), dd2dms(pnt.y(),5).replace('.',','))),
                     '[h]': self.tr('{:,.3f}'.format(ponto['ellip_height']), '{:,.3f}'.format(ponto['ellip_height']).replace(',', 'X').replace('.', ',').replace('X', '.')),
                     '[H]': self.tr('{:,.3f}'.format(ponto['ortho_height']), '{:,.3f}'.format(ponto['ortho_height']).replace(',', 'X').replace('.', ',').replace('X', '.')),
                     '[E]': self.tr('{:,.3f}'.format(pnt_UTM.x()), '{:,.3f}'.format(pnt_UTM.x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
                     '[N]': self.tr('{:,.3f}'.format(pnt_UTM.y()), '{:,.3f}'.format(pnt_UTM.y()).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                    '[MC]':  str(CentralMeridian(pnt)),
+                    '[MC]':  str2HTML(str(CentralMeridian(pnt))),
                     '[sigma_x]': self.tr('{:,.3f}'.format(ponto['sigma_x']), '{:,.3f}'.format(ponto['sigma_x']).replace(',', 'X').replace('.', ',').replace('X', '.')),
                     '[sigma_y]': self.tr('{:,.3f}'.format(ponto['sigma_y']), '{:,.3f}'.format(ponto['sigma_y']).replace(',', 'X').replace('.', ',').replace('X', '.')),
                     '[sigma_h]': self.tr('{:,.3f}'.format(ponto['sigma_h']), '{:,.3f}'.format(ponto['sigma_h']).replace(',', 'X').replace('.', ',').replace('X', '.')),
@@ -410,11 +401,11 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
                     '[MET]':  str2HTML(metodo[ponto['survey_method']]),
                     '[BASE]':  str2HTML(ponto['survey_ref_base']),
                     '[SOFT]':  str2HTML(ponto['software']),
-                    '[LEV_DT]': self.tr(str2HTML(((ponto['survey_date']).toPyDate()).isoformat()), str2HTML(((ponto['survey_date']).toPyDate()).strftime("%d/%m/%Y"))),
+                    '[LEV_DT]': str2HTML(self.tr((ponto['survey_date']).toPyDate().isoformat(), (ponto['survey_date']).toPyDate().strftime("%d/%m/%Y"))),
                     '[LEV_RESP]': str2HTML(ponto['survey_resp']),
-                    '[PROC_DT]': self.tr(str2HTML(((ponto['processing_date']).toPyDate()).isoformat()), str2HTML(((ponto['processing_date']).toPyDate()).strftime("%d/%m/%Y"))),
+                    '[PROC_DT]': str2HTML(self.tr((ponto['processing_date']).toPyDate().isoformat(), (ponto['processing_date']).toPyDate().strftime("%d/%m/%Y"))),
                     '[PROC_RESP]': str2HTML(ponto['processing_resp']),
-                    '[MON_DT]': self.tr(str2HTML(((ponto['report_date']).toPyDate()).isoformat()), str2HTML(((ponto['report_date']).toPyDate()).strftime("%d/%m/%Y"))),
+                    '[MON_DT]': str2HTML(self.tr((ponto['report_date']).toPyDate().isoformat(), (ponto['report_date']).toPyDate().strftime("%d/%m/%Y"))),
                     '[MON_RESP]': str2HTML(ponto['report_resp']),
                     '[REP_TEC]':  str2HTML(ponto['tech_manager']),
                     '[CREA]': str2HTML(ponto['profession']),
