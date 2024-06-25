@@ -2,6 +2,8 @@
 
 dic = {
  'Elaboration of Deed Description based on vector layers that define a property survey.': {'es': 'Elaboración de Descripción de Escritura en base a capas vectoriales que definen un levantamiento de propiedad.'},
+ 'This tool works properly only with data in "TopoGeo" modeling.': {'es': 'Esta herramienta funciona correctamente sólo con datos en el modelado "TopoGeo".'},
+ 'Click here for understanding this data model.': {'es': 'Haga clic aquí para comprender este modelo de datos.'},
  'Deed description': {'es': 'Descripción de la escritura'},
  'Documents': {'es': 'Documentos'},
  'Author: Leandro Franca': {'es': 'Autor: Leandro Franca'},
