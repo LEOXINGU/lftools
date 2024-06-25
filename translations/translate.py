@@ -24,7 +24,7 @@ def translate(string, loc):
             return string[0]
     # Espanhol
     elif loc == 'es':
-        if string[0] in dic_ES:
+        if string[0] in dic:
             if loc in dic[string[0]]:
                 return dic[string[0]][loc]
             else:
