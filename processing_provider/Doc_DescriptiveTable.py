@@ -45,6 +45,7 @@ from qgis.core import (QgsProcessing,
 import os
 from math import pi, sqrt
 from lftools.geocapt.imgs import Imgs
+from lftools.translations.translate import translate
 from lftools.geocapt.cartography import MeridianConvergence, SRC_Projeto, geom2PointList, AzimuteDistanciaSGL
 from lftools.geocapt.topogeo import azimute, dd2dms, str2HTML, validar_precisoes
 from qgis.PyQt.QtGui import QIcon
@@ -53,18 +54,8 @@ class DescriptiveTable(QgsProcessingAlgorithm):
 
     LOC = QgsApplication.locale()[:2]
 
-    def translate(self, string):
-        return QCoreApplication.translate('Processing', string)
-
     def tr(self, *string):
-        # Traduzir para o portugês: arg[0] - english (translate), arg[1] - português
-        if self.LOC == 'pt':
-            if len(string) == 2:
-                return string[1]
-            else:
-                return self.translate(string[0])
-        else:
-            return self.translate(string[0])
+        return translate(string, self.LOC)
 
     def createInstance(self):
         return DescriptiveTable()
@@ -425,7 +416,7 @@ class DescriptiveTable(QgsProcessingAlgorithm):
             texto = '''<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
             <html>
             <head>
-              <title>''' + self.tr('Synthetic deed description', str2HTML('Memorial Sintético')) + '''</title>
+              <title>''' + str2HTML(self.tr('Synthetic deed description', 'Memorial Sintético')) + '''</title>
               <link rel = "icon" href = "https://github.com/LEOXINGU/lftools/blob/main/images/lftools.png?raw=true" type = "image/x-icon">
             </head>
             <body>
@@ -434,20 +425,20 @@ class DescriptiveTable(QgsProcessingAlgorithm):
             border="1" cellpadding="0" cellspacing="0">
             <tbody>
             <tr>
-              <td colspan="7" rowspan="1">''' + self.tr('Synthetic deed description'.upper(), str2HTML('Memorial Sintético'.upper())) + '''[TITULO]</td>
+              <td colspan="7" rowspan="1">''' + str2HTML(self.tr('Synthetic deed description'.upper(), 'Memorial Sintético'.upper())) + '''[TITULO]</td>
             </tr>
             <tr>
-              <td colspan="1" rowspan="2">''' + self.tr('VERTEX', str2HTML('VÉRTICE')) + '''</td>
-              <td colspan="2" rowspan="1">''' + self.tr('COORDINATE', str2HTML('COORDENADA')) + '''</td>
-              <td colspan="1" rowspan="2">''' + self.tr('SIDE', str2HTML('LADO')) + '''</td>
-              <td colspan="2" rowspan="1">''' + self.tr('AZIMUTH', str2HTML('AZIMUTE')) + '''</td>
-              <td colspan="1" rowspan="2">''' + self.tr('DISTANCE', str2HTML('DISTÂNCIA')) + '''<br>
+              <td colspan="1" rowspan="2">''' + str2HTML(self.tr('VERTEX', 'VÉRTICE')) + '''</td>
+              <td colspan="2" rowspan="1">''' + str2HTML(self.tr('COORDINATE', 'COORDENADA')) + '''</td>
+              <td colspan="1" rowspan="2">''' + str2HTML(self.tr('SIDE', 'LADO')) + '''</td>
+              <td colspan="2" rowspan="1">''' + str2HTML(self.tr('AZIMUTH', 'AZIMUTE')) + '''</td>
+              <td colspan="1" rowspan="2">''' + str2HTML(self.tr('DISTANCE', 'DISTÂNCIA')) + '''<br>
               ''' + rotulo_SGL + '(m)</td>' + '''
             </tr>
             <tr>
             [COORDS]
               <td>''' + rotulo_azimute + '''</td>
-              <td>''' + self.tr('TRUE', str2HTML('VERDADEIRO')) + '''</td>
+              <td>''' + str2HTML(self.tr('TRUE', 'VERDADEIRO')) + '''</td>
             </tr>
             [LINHAS]
             </tbody>
@@ -481,7 +472,7 @@ class DescriptiveTable(QgsProcessingAlgorithm):
             texto = '''<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
             <html>
             <head>
-              <title>''' + self.tr('Synthetic deed description', str2HTML('Memorial Sintético')) + '''</title>    </head>
+              <title>''' + str2HTML(self.tr('Synthetic deed description', 'Memorial Sintético')) + '''</title>    </head>
             <body>
             <table
             style="text-align: center; width: 100%; font-size: [FONTSIZE]px; font-family: Arial; border: medium none; border-collapse: collapse;"
@@ -511,14 +502,14 @@ class DescriptiveTable(QgsProcessingAlgorithm):
             </tr>
             '''
                 cabec = '''<tr>
-                  <td colspan="7" rowspan="1">''' + self.tr('Synthetic deed description'.upper(), str2HTML('Memorial Sintético'.upper())) + '''[TITULO]</td>
+                  <td colspan="7" rowspan="1">''' + str2HTML(self.tr('Synthetic deed description'.upper(), 'Memorial Sintético'.upper())) + '''[TITULO]</td>
                 </tr>
                 <tr>
-                  <td colspan="1" rowspan="2">''' + self.tr('VERTEX', str2HTML('VÉRTICE')) + '''</td>
-                  <td colspan="3" rowspan="1">''' + self.tr('COORDINATE', str2HTML('COORDENADA')) + '''</td>
-                  <td colspan="1" rowspan="2">''' + self.tr('SIDE', str2HTML('LADO')) + '''</td>
-                  <td colspan="1" rowspan="2">''' + self.tr('AZIMUTH', str2HTML('AZIMUTE')) + sufixo_azimute + '''</td>
-                  <td colspan="1" rowspan="2">''' + self.tr('DISTANCE', str2HTML('DISTÂNCIA')) + '''<br>
+                  <td colspan="1" rowspan="2">''' + str2HTML(self.tr('VERTEX', 'VÉRTICE')) + '''</td>
+                  <td colspan="3" rowspan="1">''' + str2HTML(self.tr('COORDINATE', 'COORDENADA')) + '''</td>
+                  <td colspan="1" rowspan="2">''' + str2HTML(self.tr('SIDE', 'LADO')) + '''</td>
+                  <td colspan="1" rowspan="2">''' + str2HTML(self.tr('AZIMUTH', 'AZIMUTE')) + sufixo_azimute + '''</td>
+                  <td colspan="1" rowspan="2">''' + str2HTML(self.tr('DISTANCE', 'DISTÂNCIA')) + '''<br>
                   ''' + rotulo_SGL + '(m)</td>' + '''
                 </tr>
                 <tr>
@@ -538,11 +529,11 @@ class DescriptiveTable(QgsProcessingAlgorithm):
             '''
 
                 cabec = '''<tr>
-                  <td colspan="4" rowspan="1">''' + self.tr('Synthetic deed description'.upper(), str2HTML('Memorial Sintético'.upper())) + '''[TITULO]</td>
+                  <td colspan="4" rowspan="1">''' + str2HTML(self.tr('Synthetic deed description'.upper(), 'Memorial Sintético'.upper())) + '''[TITULO]</td>
                 </tr>
                 <tr>
-                  <td colspan="1" rowspan="2">''' + self.tr('VERTEX', str2HTML('VÉRTICE')) + '''</td>
-                  <td colspan="3" rowspan="1">''' + self.tr('COORDINATE', str2HTML('COORDENADA')) + '''</td>
+                  <td colspan="1" rowspan="2">''' + str2HTML(self.tr('VERTEX', 'VÉRTICE')) + '''</td>
+                  <td colspan="3" rowspan="1">''' + str2HTML(self.tr('COORDINATE', 'COORDENADA')) + '''</td>
                 </tr>
                 <tr>
                   <td>E</td>
@@ -563,14 +554,14 @@ class DescriptiveTable(QgsProcessingAlgorithm):
                 </tr>
                 '''
                 cabec = '''<tr>
-                  <td colspan="7" rowspan="1">''' + self.tr('Synthetic deed description'.upper(), str2HTML('Memorial Sintético'.upper())) + '''[TITULO]</td>
+                  <td colspan="7" rowspan="1">''' + str2HTML(self.tr('Synthetic deed description'.upper(), 'Memorial Sintético'.upper())) + '''[TITULO]</td>
                 </tr>
                 <tr>
-                  <td colspan="1" rowspan="2">''' + self.tr('VERTEX', str2HTML('VÉRTICE')) + '''</td>
-                  <td colspan="3" rowspan="1">''' + self.tr('COORDINATE', str2HTML('COORDENADA')) + '''</td>
-                  <td colspan="1" rowspan="2">''' + self.tr('SIDE', str2HTML('LADO')) + '''</td>
-                  <td colspan="1" rowspan="2">''' + self.tr('AZIMUTH', str2HTML('AZIMUTE')) + sufixo_azimute + '''</td>
-                  <td colspan="1" rowspan="2">''' + self.tr('DISTANCE', str2HTML('DISTÂNCIA')) + '''<br>
+                  <td colspan="1" rowspan="2">''' + str2HTML(self.tr('VERTEX', 'VÉRTICE')) + '''</td>
+                  <td colspan="3" rowspan="1">''' + str2HTML(self.tr('COORDINATE', 'COORDENADA')) + '''</td>
+                  <td colspan="1" rowspan="2">''' + str2HTML(self.tr('SIDE', 'LADO')) + '''</td>
+                  <td colspan="1" rowspan="2">''' + str2HTML(self.tr('AZIMUTH', 'AZIMUTE')) + sufixo_azimute + '''</td>
+                  <td colspan="1" rowspan="2">''' + str2HTML(self.tr('DISTANCE', 'DISTÂNCIA')) + '''<br>
                   ''' + rotulo_SGL + '(m)</td>' + '''
                 </tr>
                 <tr>
@@ -590,11 +581,11 @@ class DescriptiveTable(QgsProcessingAlgorithm):
                 '''
 
                 cabec = '''<tr>
-                  <td colspan="4" rowspan="1">''' + self.tr('Synthetic deed description'.upper(), str2HTML('Memorial Sintético'.upper())) + '''[TITULO]</td>
+                  <td colspan="4" rowspan="1">''' + str2HTML(self.tr('Synthetic deed description'.upper(), 'Memorial Sintético'.upper())) + '''[TITULO]</td>
                 </tr>
                 <tr>
-                  <td colspan="1" rowspan="2">''' + self.tr('VERTEX', str2HTML('VÉRTICE')) + '''</td>
-                  <td colspan="3" rowspan="1">''' + self.tr('COORDINATE', str2HTML('COORDENADA')) + '''</td>
+                  <td colspan="1" rowspan="2">''' + str2HTML(self.tr('VERTEX', 'VÉRTICE')) + '''</td>
+                  <td colspan="3" rowspan="1">''' + str2HTML(self.tr('COORDINATE', 'COORDENADA')) + '''</td>
                 (m)</td>
                 </tr>
                 <tr>
@@ -619,14 +610,14 @@ class DescriptiveTable(QgsProcessingAlgorithm):
                 '''
 
                 cabec = '''<tr>
-                  <td colspan="9" rowspan="1">''' + self.tr('Synthetic deed description'.upper(), str2HTML('Memorial Sintético'.upper())) + '''[TITULO]</td>
+                  <td colspan="9" rowspan="1">''' + str2HTML(self.tr('Synthetic deed description'.upper(), 'Memorial Sintético'.upper())) + '''[TITULO]</td>
                 </tr>
                 <tr>
-                  <td colspan="1" rowspan="2">''' + self.tr('VERTEX', str2HTML('VÉRTICE')) + '''</td>
-                  <td colspan="5" rowspan="1">''' + self.tr('COORDINATE', str2HTML('COORDENADA')) + '''</td>
-                  <td colspan="1" rowspan="2">''' + self.tr('SIDE', str2HTML('LADO')) + '''</td>
-                  <td colspan="1" rowspan="2">''' + self.tr('AZIMUTH', str2HTML('AZIMUTE')) + sufixo_azimute + '''</td>
-                  <td colspan="1" rowspan="2">''' + self.tr('DISTANCE', str2HTML('DISTÂNCIA')) + '''<br>
+                  <td colspan="1" rowspan="2">''' + str2HTML(self.tr('VERTEX', 'VÉRTICE')) + '''</td>
+                  <td colspan="5" rowspan="1">''' + str2HTML(self.tr('COORDINATE', 'COORDENADA')) + '''</td>
+                  <td colspan="1" rowspan="2">''' + str2HTML(self.tr('SIDE', 'LADO')) + '''</td>
+                  <td colspan="1" rowspan="2">''' + str2HTML(self.tr('AZIMUTH', 'AZIMUTE')) + sufixo_azimute + '''</td>
+                  <td colspan="1" rowspan="2">''' + str2HTML(self.tr('DISTANCE', 'DISTÂNCIA')) + '''<br>
                   ''' + rotulo_SGL + '(m)</td>' + '''
                 </tr>
                 <tr>
@@ -650,11 +641,11 @@ class DescriptiveTable(QgsProcessingAlgorithm):
                 '''
 
                 cabec = '''<tr>
-                  <td colspan="6" rowspan="1">''' + self.tr('Synthetic deed description'.upper(), str2HTML('Memorial Sintético'.upper())) + '''[TITULO]</td>
+                  <td colspan="6" rowspan="1">''' + str2HTML(self.tr('Synthetic deed description'.upper(), 'Memorial Sintético'.upper())) + '''[TITULO]</td>
                 </tr>
                 <tr>
-                  <td colspan="1" rowspan="2">''' + self.tr('VERTEX', str2HTML('VÉRTICE')) + '''</td>
-                  <td colspan="5" rowspan="1">''' + self.tr('COORDINATE', str2HTML('COORDENADA')) + '''</td>
+                  <td colspan="1" rowspan="2">''' + str2HTML(self.tr('VERTEX', 'VÉRTICE')) + '''</td>
+                  <td colspan="5" rowspan="1">''' + str2HTML(self.tr('COORDINATE', 'COORDENADA')) + '''</td>
                 </tr>
                 <tr>
                   <td>longitude</td>
