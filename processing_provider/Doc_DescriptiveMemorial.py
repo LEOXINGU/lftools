@@ -106,8 +106,8 @@ class DescriptiveMemorial(QgisAlgorithm):
                       <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), self.figure) +'''">
                       </div>
                       <div align="right">
-                      <div>''' + self.tr('This tool works properly only with data in "topogeo" modeling.',
-                                         'Esta ferramenta funciona adequadamente com os dados na modelagem "topogeo".') + '''
+                      <div>''' + self.tr('This tool works properly only with data in "TopoGeo" modeling.',
+                                         'Esta ferramenta funciona adequadamente com os dados na modelagem "TopoGeo".') + '''
                       </div>
                       <p align="right">
                       <b><a href="'''+ self.tr('https://www.researchgate.net/publication/356911797_TopoGeo_a_data_model_for_elaboration_of_cadastral_survey_plans_and_land_register_documents',
