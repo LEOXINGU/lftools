@@ -18,6 +18,7 @@ __copyright__ = '(C) 2021, Leandro França'
 from PyQt5.QtCore import *
 from qgis.core import *
 from lftools.geocapt.imgs import Imgs
+from lftools.translations.translate import translate
 from lftools.geocapt.cartography import areaGauss, geom2PointList, OrientarPoligono
 import os
 from qgis.PyQt.QtGui import QIcon
@@ -33,18 +34,8 @@ class PolygonOrientation(QgsProcessingAlgorithm):
     SELECTED = 'SELECTED'
     LOC = QgsApplication.locale()[:2]
 
-    def translate(self, string):
-        return QCoreApplication.translate('Processing', string)
-
     def tr(self, *string):
-        # Traduzir para o portugês: arg[0] - english (translate), arg[1] - português
-        if self.LOC == 'pt':
-            if len(string) == 2:
-                return string[1]
-            else:
-                return self.translate(string[0])
-        else:
-            return self.translate(string[0])
+        return translate(string, self.LOC)
 
     def createInstance(self):
         return PolygonOrientation()
@@ -279,7 +270,7 @@ class PolygonOrientation(QgsProcessingAlgorithm):
                                     break
                         else:
                             vante += [False]
-                    
+
                     for k in range(len(vante)):
                         anterior = vante[k-1 if k-1 > 0 else -1]
                         posterior = vante[k]
