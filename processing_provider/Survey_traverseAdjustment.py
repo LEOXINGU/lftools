@@ -39,6 +39,7 @@ from qgis.core import (QgsProcessing,
 from numpy import radians, arctan, pi, sin, cos, matrix, sqrt, degrees, array, diag, ones, zeros, floor
 from numpy.linalg import norm, pinv, inv
 from lftools.geocapt.imgs import Imgs
+from lftools.translations.translate import translate
 from lftools.geocapt.topogeo import *
 import os
 from qgis.PyQt.QtGui import QIcon
@@ -61,18 +62,8 @@ class TraverseAdjustment(QgsProcessingAlgorithm):
 
     LOC = QgsApplication.locale()[:2]
 
-    def translate(self, string):
-        return QCoreApplication.translate('Processing', string)
-
     def tr(self, *string):
-        # Traduzir para o portugês: arg[0] - english (translate), arg[1] - português
-        if self.LOC == 'pt':
-            if len(string) == 2:
-                return string[1]
-            else:
-                return self.translate(string[0])
-        else:
-            return self.translate(string[0])
+        return translate(string, self.LOC)
 
     def createInstance(self):
         return TraverseAdjustment()
@@ -599,16 +590,16 @@ align="center"><span style="" >[sd]<o:p></o:p></span></p>
  align="center"><b><span
  style="font-size: 12pt; line-height: 107%;">''' + self.tr('TRAVERSE ADJUSTMENT', 'POLIGONAL ENQUADRADA') + '''<o:p></o:p></span></b></p>
 <p class="MsoNormal" style="text-align: center;"
- align="center"><span style="font-style: italic;">''' + self.tr('Method of Least Squares', str2HTML('Método dos Mínimos Quadrados')) + '''</span></p>
+ align="center"><span style="font-style: italic;">''' + str2HTML(self.tr('Method of Least Squares', 'Método dos Mínimos Quadrados')) + '''</span></p>
 <p class="MsoNormal" style="text-align: center;"
- align="center"><b><u>''' + self.tr('REPORT', str2HTML('RELATÓRIO')) + '''<o:p></o:p></u></b></p>
+ align="center"><b><u>''' + str2HTML(self.tr('REPORT', 'RELATÓRIO')) + '''<o:p></o:p></u></b></p>
 <div align="center">
 <table style="text-align: center; width: 100%;" border="1"
  cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
       <td width="50%"><b><span style=""
- >'''+ self.tr('Initial approximation', str2HTML('Aproximação Incial')) + '''</span></b></td>
+ >'''+ str2HTML(self.tr('Initial approximation', 'Aproximação Incial')) + '''</span></b></td>
       <td width="50%"><b><span style=""
  >'''+ self.tr('Adjusted Coordinates', 'Coordenadas Ajustadas') + '''<o:p></o:p></span></b></td>
     </tr>
@@ -685,7 +676,7 @@ str2HTML('Estação')) + '''</i><o:p></o:p></p>
           [TABLE 2]
         </tbody>
       </table>
-      <i><span style="" >''' + self.tr('Posteriori variance', str2HTML('Variância a posteriori')) + '''</span></i><span style="" >:&nbsp;</span><span
+      <i><span style="" >''' + str2HTML(self.tr('Posteriori variance', 'Variância a posteriori')) + '''</span></i><span style="" >:&nbsp;</span><span
  style="" >&nbsp;<span
  style="color: red;">[sigma2]</span></span>
       </div>
@@ -693,7 +684,7 @@ str2HTML('Estação')) + '''</i><o:p></o:p></p>
     </tr>
     <tr>
       <td colspan="2" rowspan="1"><b><span
- style="" >''' + self.tr('Observations', str2HTML('Observações')) + '''<o:p></o:p></span></b></td>
+ style="" >''' + str2HTML(self.tr('Observations', 'Observações')) + '''<o:p></o:p></span></b></td>
     </tr>
     <tr>
       <td colspan="2" rowspan="1"
@@ -710,28 +701,28 @@ str2HTML('Estação')) + '''</i><o:p></o:p></p>
  valign="top" width="113">
             <p class="MsoNormal"
  style="margin-bottom: 0.0001pt; text-align: center; line-height: normal;"
- align="center"><span style="" >''' + self.tr('Observation', str2HTML('Observação')) + '''<o:p></o:p></span></p>
+ align="center"><span style="" >''' + str2HTML(self.tr('Observation', 'Observação')) + '''<o:p></o:p></span></p>
             </td>
             <td
  style="border-style: solid solid solid none; border-color: windowtext windowtext windowtext -moz-use-text-color; border-width: 1pt 1pt 1pt medium; padding: 0cm 5.4pt; width: 84.95pt;"
  valign="top" width="113">
             <p class="MsoNormal"
  style="margin-bottom: 0.0001pt; text-align: center; line-height: normal;"
- align="center"><span style="" >''' + self.tr('Residual', str2HTML('Resíduo')) + '''<o:p></o:p></span></p>
+ align="center"><span style="" >''' + str2HTML(self.tr('Residual', 'Resíduo')) + '''<o:p></o:p></span></p>
             </td>
             <td
  style="border-style: solid solid solid none; border-color: windowtext windowtext windowtext -moz-use-text-color; border-width: 1pt 1pt 1pt medium; padding: 0cm 5.4pt; width: 117.6pt;"
  valign="top" width="157">
             <p class="MsoNormal"
  style="margin-bottom: 0.0001pt; text-align: center; line-height: normal;"
- align="center"><span style="" >''' + self.tr('Adjusted Observation', str2HTML('Observação Ajustada')) + '''<o:p></o:p></span></p>
+ align="center"><span style="" >''' + str2HTML(self.tr('Adjusted Observation', 'Observação Ajustada')) + '''<o:p></o:p></span></p>
             </td>
             <td
  style="border-style: solid solid solid none; border-color: windowtext windowtext windowtext -moz-use-text-color; border-width: 1pt 1pt 1pt medium; padding: 0cm 5.4pt; width: 102.05pt;"
  valign="top" width="136">
             <p class="MsoNormal"
  style="margin-bottom: 0.0001pt; text-align: center; line-height: normal;"
- align="center"><span style="" >''' + self.tr('Standard Deviation', str2HTML('Desvio Padrão')) + '''<o:p></o:p></span></p>
+ align="center"><span style="" >''' + str2HTML(self.tr('Standard Deviation', 'Desvio Padrão')) + '''<o:p></o:p></span></p>
             </td>
           </tr>
           [TABLE 3]
@@ -744,11 +735,11 @@ str2HTML('Estação')) + '''</i><o:p></o:p></p>
 </table>
 <p class="MsoNormal" style="text-align: left;"
  align="left"><i><span
- style="font-size: 10pt; line-height: 100%; color: rgb(127, 127, 127);">''' + self.tr(str2HTML('*The unit of measurement of the adjusted coordinates is the same as the input coordinates.'), str2HTML('*A unidade de medida das coordenadas ajustadas é a mesma da coordenadas de entrada.')) + '''<o:p></o:p></span></i></p>
+ style="font-size: 10pt; line-height: 100%; color: rgb(127, 127, 127);">''' + str2HTML(self.tr('*The unit of measurement of the adjusted coordinates is the same as the input coordinates.', '*A unidade de medida das coordenadas ajustadas é a mesma da coordenadas de entrada.')) + '''<o:p></o:p></span></i></p>
 </div>
 
 <footer">
-<p class="MsoNormal" style="margin-bottom: 0.0001pt; text-align: right;" align="right"><b>''' + self.tr('Leandro Franca', str2HTML('Leandro França')) + '''
+<p class="MsoNormal" style="margin-bottom: 0.0001pt; text-align: right;" align="right"><b>''' + str2HTML(self.tr('Leandro Franca', 'Leandro França')) + '''
 </br>''' + self.tr('Cartographic Engineer', 'Eng. Cart&oacute;grafo') + '''<o:p></o:p></b></p>
 </br>
 <div align="right">'''+ Imgs().social_table_color + '''
