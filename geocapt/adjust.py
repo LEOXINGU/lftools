@@ -18,6 +18,7 @@ from qgis.core import *
 from qgis.gui import *
 from lftools.geocapt.topogeo import str2HTML
 from lftools.geocapt.imgs import Imgs
+from lftools.translations.translate import translate
 from qgis.core import *
 from qgis.gui import *
 import numpy as np
@@ -26,14 +27,7 @@ from numpy.linalg import norm, det, inv, solve
 # Tradução
 LOC = QgsApplication.locale()[:2]
 def tr(*string):
-    # Traduzir para o portugês: arg[0] - english (translate), arg[1] - português
-    if LOC == 'pt':
-        if len(string) == 2:
-            return string[1]
-        else:
-            return string[0]
-    else:
-        return string[0]
+    return translate(string, LOC)
 
 # Validação dos Pontos Homólogos
 def ValidacaoVetores(vetores, metodo):
@@ -429,7 +423,7 @@ align="center"><b><span style="">''' + tr('Transformation Parameters:',str2HTML(
 
 </div>
 <footer">
-<p class="MsoNormal" style="margin-bottom: 0.0001pt; text-align: right;" align="right"><b>''' + tr('Leandro Franca', str2HTML('Leandro França')) + '''
+<p class="MsoNormal" style="margin-bottom: 0.0001pt; text-align: right;" align="right"><b>''' + str2HTML(tr('Leandro Franca', 'Leandro França')) + '''
 </br>''' + tr('Cartographic Engineer', 'Eng. Cart&oacute;grafo') + '''<o:p></o:p></b></p>
 </br>
 <div align="right">'''+ Imgs().social_table_color + '''
@@ -692,7 +686,7 @@ align="center"><b><span style="">''' + tr('Transformation Parameters:',str2HTML(
 
 </div>
 <footer">
-<p class="MsoNormal" style="margin-bottom: 0.0001pt; text-align: right;" align="right"><b>''' + tr('Leandro Franca', str2HTML('Leandro França')) + '''
+<p class="MsoNormal" style="margin-bottom: 0.0001pt; text-align: right;" align="right"><b>''' + str2HTML(tr('Leandro Franca', 'Leandro França')) + '''
 </br>''' + tr('Cartographic Engineer', 'Eng. Cart&oacute;grafo') + '''<o:p></o:p></b></p>
 </br>
 <div align="right">'''+ Imgs().social_table_color + '''
