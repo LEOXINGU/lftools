@@ -42,6 +42,7 @@ from qgis.core import (QgsProcessing,
 from math import atan, pi, sqrt, floor
 import math
 from lftools.geocapt.imgs import *
+from lftools.translations.translate import translate
 from lftools.geocapt.cartography import FusoHemisf, AzimuteDistanciaSGL, areaSGL, perimetroSGL
 from lftools.geocapt.topogeo import str2HTML, dd2dms, azimute, validar_precisoes
 import os
@@ -60,18 +61,8 @@ class AreaPerimterReport(QgsProcessingAlgorithm):
 
     LOC = QgsApplication.locale()[:2]
 
-    def translate(self, string):
-        return QCoreApplication.translate('Processing', string)
-
     def tr(self, *string):
-        # Traduzir para o portugês: arg[0] - english (translate), arg[1] - português
-        if self.LOC == 'pt':
-            if len(string) == 2:
-                return string[1]
-            else:
-                return self.translate(string[0])
-        else:
-            return self.translate(string[0])
+        return translate(string, self.LOC)
 
     def createInstance(self):
         return AreaPerimterReport()
@@ -164,7 +155,7 @@ class AreaPerimterReport(QgsProcessingAlgorithm):
             QgsProcessingParameterString(
                 self.SLOGAN,
                 self.tr('Slogan'),
-                defaultValue = self.tr(str2HTML('CARTOGRAPHY & SURVEYING'), str2HTML('CARTOGRAFIA & AGRIMENSURA')),
+                defaultValue = self.tr('CARTOGRAPHY & SURVEYING', 'CARTOGRAFIA & AGRIMENSURA'),
                 optional = True,
                 multiLine = True
             )
@@ -376,7 +367,7 @@ class AreaPerimterReport(QgsProcessingAlgorithm):
 <head>
   <meta content="text/html; charset=ISO-8859-1"
  http-equiv="content-type">
-  <title>'''+ self.tr('Area and Perimeter Calculation', str2HTML('Cálculo de Área e Perímetro')) + '''</title>
+  <title>'''+ str2HTML(self.tr('Area and Perimeter Calculation', 'Cálculo de Área e Perímetro')) + '''</title>
   <link rel = "icon" href = "https://github.com/LEOXINGU/lftools/blob/main/images/lftools.png?raw=true" type = "image/x-icon">
 </head>
 <body>
@@ -396,7 +387,7 @@ class AreaPerimterReport(QgsProcessingAlgorithm):
 [MUNICIPIO] - [UF]<br style="font-weight: bold;">
 <span style="font-weight: bold;">''' + self.tr('GRS','SGR') + ''':</span>
 SIRGAS2000<br>
-<span style="font-weight: bold;">''' + self.tr('Projection', str2HTML('Projeção')) + ''':</span>
+<span style="font-weight: bold;">''' + str2HTML(self.tr('Projection', 'Projeção')) + ''':</span>
 [UTM] <br><br>
 </div>
 </div>
@@ -404,14 +395,14 @@ SIRGAS2000<br>
  cellpadding="0" cellspacing="0">
   <tbody>
     <tr>
-      <td style="text-align: center; font-weight: bold;">''' + self.tr('Station', str2HTML('Estação') ) + '''</td>
-      <td style="text-align: center; font-weight: bold;">''' + self.tr('Forward', str2HTML('Vante') ) + '''</td>
-      <td style="text-align: center; font-weight: bold;">''' + self.tr('East (m)', str2HTML('Leste (m)') ) + '''</td>
-      <td style="text-align: center; font-weight: bold;">''' + self.tr('North (m)', str2HTML('Norte (m)') ) + '''</td>
-      <td style="text-align: center; font-weight: bold;">''' + self.tr('Azimuth', str2HTML('Azimute') ) + '''</td>
-      <td style="text-align: center; font-weight: bold;">''' + self.tr('Distance (m)', str2HTML('Distância (m)') ) + '''</td>
-      <td style="text-align: center; font-weight: bold;">''' + self.tr('Longitude', str2HTML('Longitude') ) + '''</td>
-      <td style="text-align: center; font-weight: bold;">''' + self.tr('Latitude', str2HTML('Latitude') ) + '''</td>
+      <td style="text-align: center; font-weight: bold;">''' + str2HTML(self.tr('Station', 'Estação') ) + '''</td>
+      <td style="text-align: center; font-weight: bold;">''' + str2HTML(self.tr('Forward', 'Vante') ) + '''</td>
+      <td style="text-align: center; font-weight: bold;">''' + str2HTML(self.tr('East (m)', 'Leste (m)') ) + '''</td>
+      <td style="text-align: center; font-weight: bold;">''' + str2HTML(self.tr('North (m)', 'Norte (m)') ) + '''</td>
+      <td style="text-align: center; font-weight: bold;">''' + str2HTML(self.tr('Azimuth', 'Azimute') ) + '''</td>
+      <td style="text-align: center; font-weight: bold;">''' + str2HTML(self.tr('Distance (m)', 'Distância (m)') ) + '''</td>
+      <td style="text-align: center; font-weight: bold;">''' + str2HTML(self.tr('Longitude', 'Longitude') ) + '''</td>
+      <td style="text-align: center; font-weight: bold;">''' + str2HTML(self.tr('Latitude', 'Latitude') ) + '''</td>
     </tr>
     '''
 
@@ -430,12 +421,12 @@ SIRGAS2000<br>
         FIM = '''</tbody>
 </table>
 <br>
-<span style="font-weight: bold;">'''+ self.tr('Perimeter',str2HTML('Perímetro')) + ''':</span>
+<span style="font-weight: bold;">'''+ str2HTML(self.tr('Perimeter', 'Perímetro')) + ''':</span>
 &nbsp;[PERIMETRO] m<br>
-<span style="font-weight: bold;">''' + self.tr('Total Area', str2HTML('Área Total')) + ''':</span>
+<span style="font-weight: bold;">''' + str2HTML(self.tr('Total Area', 'Área Total')) + ''':</span>
 [AREA] m&sup2; / [AREA_HA] ha
 <br>
-<span style="font-weight: bold;">''' + self.tr('Observation', str2HTML('Observação')) + ''':</span>
+<span style="font-weight: bold;">''' + str2HTML(self.tr('Observation', 'Observação')) + ''':</span>
 [CALCULO]
 </body>
 </html>
