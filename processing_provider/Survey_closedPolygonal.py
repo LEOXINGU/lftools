@@ -20,6 +20,7 @@ from qgis.core import *
 import processing
 from numpy import sin, cos, modf, radians, sqrt, floor
 from lftools.geocapt.imgs import Imgs
+from lftools.translations.translate import translate
 from lftools.geocapt.topogeo import *
 import os
 from qgis.PyQt.QtGui import QIcon
@@ -37,18 +38,8 @@ class ClosedPolygonal(QgsProcessingAlgorithm):
 
     LOC = QgsApplication.locale()[:2]
 
-    def translate(self, string):
-        return QCoreApplication.translate('Processing', string)
-
     def tr(self, *string):
-        # Traduzir para o portugês: arg[0] - english (translate), arg[1] - português
-        if self.LOC == 'pt':
-            if len(string) == 2:
-                return string[1]
-            else:
-                return self.translate(string[0])
-        else:
-            return self.translate(string[0])
+        return translate(string, self.LOC)
 
     def createInstance(self):
         return ClosedPolygonal()
@@ -276,9 +267,9 @@ class ClosedPolygonal(QgsProcessingAlgorithm):
  style="font-size: 12pt; line-height: 107%;"><o:p></o:p></span></b><span
  style="font-weight: bold;">'''+self.tr('CLOSED TRAVERSE', 'POLIGONAL FECHADA')+'''</span></p>
 <p class="MsoNormal" style="text-align: center;"
- align="center"><span style="font-style: italic;">'''+self.tr('Analytical Calculation', str2HTML('Cálculo Analítico'))+'''</span></p>
+ align="center"><span style="font-style: italic;">'''+ str2HTML(self.tr('Analytical Calculation', 'Cálculo Analítico'))+'''</span></p>
 <p class="MsoNormal" style="text-align: center;"
- align="center"><b><u>'''+self.tr('REPORT', str2HTML('RELATÓRIO'))+'''<o:p></o:p></u></b></p>
+ align="center"><b><u>'''+ str2HTML(self.tr('REPORT', 'RELATÓRIO'))+'''<o:p></o:p></u></b></p>
 <div>
 <div align="center">
 <table style="height: 210px; width: 1064.4px;" cellpadding="2"
@@ -287,27 +278,27 @@ class ClosedPolygonal(QgsProcessingAlgorithm):
     <tr valign="top">
       <td
  style="border: 1pt solid rgb(0, 0, 0); padding: 0.05cm; width: 61px;">
-      <p align="center">'''+self.tr('Station', str2HTML('Estação'))+'''</p>
+      <p align="center">'''+ str2HTML(self.tr('Station', 'Estação'))+'''</p>
       </td>
       <td
  style="border-style: solid solid solid none; border-color: rgb(0, 0, 0) rgb(0, 0, 0) rgb(0, 0, 0) -moz-use-text-color; border-width: 1pt 1pt 1pt medium; padding: 0.05cm 0.05cm 0.05cm 0cm; width: 58px;">
-      <p align="center">'''+self.tr('Forward', str2HTML('Vante'))+'''</p>
+      <p align="center">'''+ str2HTML(self.tr('Forward', 'Vante'))+'''</p>
       </td>
       <td
  style="border-style: solid solid solid none; border-color: rgb(0, 0, 0) rgb(0, 0, 0) rgb(0, 0, 0) -moz-use-text-color; border-width: 1pt 1pt 1pt medium; padding: 0.05cm 0.05cm 0.05cm 0cm; width: 108px;">
-      <p align="center">'''+self.tr('Angle', str2HTML('Ângulo'))+'''</p>
+      <p align="center">'''+ str2HTML(self.tr('Angle', 'Ângulo'))+'''</p>
       </td>
       <td
  style="border-style: solid solid solid none; border-color: rgb(0, 0, 0) rgb(0, 0, 0) rgb(0, 0, 0) -moz-use-text-color; border-width: 1pt 1pt 1pt medium; padding: 0.05cm 0.05cm 0.05cm 0cm; width: 80px;">
-      <p align="center">'''+self.tr('Distance', str2HTML('Distância'))+'''</p>
+      <p align="center">'''+ str2HTML(self.tr('Distance', 'Distância'))+'''</p>
       </td>
       <td
  style="border-style: solid solid solid none; border-color: rgb(0, 0, 0) rgb(0, 0, 0) rgb(0, 0, 0) -moz-use-text-color; border-width: 1pt 1pt 1pt medium; padding: 0.05cm 0.05cm 0.05cm 0cm; width: 108px;">
-      <p align="center">'''+self.tr('Corrected Angle', str2HTML('Ângulo Corrigido'))+'''</p>
+      <p align="center">'''+ str2HTML(self.tr('Corrected Angle', 'Ângulo Corrigido'))+'''</p>
       </td>
       <td
  style="border-style: solid solid solid none; border-color: rgb(0, 0, 0) rgb(0, 0, 0) rgb(0, 0, 0) -moz-use-text-color; border-width: 1pt 1pt 1pt medium; padding: 0.05cm 0.05cm 0.05cm 0cm; width: 98px;">
-      <p align="center">'''+self.tr('Azimuth', str2HTML('Azimute'))+'''</p>
+      <p align="center">'''+ str2HTML(self.tr('Azimuth', 'Azimute'))+'''</p>
       </td>
       <td
  style="border-style: solid solid solid none; border-color: rgb(0, 0, 0) rgb(0, 0, 0) rgb(0, 0, 0) -moz-use-text-color; border-width: 1pt 1pt 1pt medium; padding: 0.05cm 0.05cm 0.05cm 0cm; width: 78px;">
@@ -329,11 +320,11 @@ dN</p>
       </td>
       <td
  style="border-style: solid solid solid none; border-color: rgb(0, 0, 0) rgb(0, 0, 0) rgb(0, 0, 0) -moz-use-text-color; border-width: 1pt 1pt 1pt medium; padding: 0.05cm 0.05cm 0.05cm 0cm; width: 97px;">
-      <p align="center">'''+self.tr('Final E', str2HTML('E final'))+'''</p>
+      <p align="center">'''+ str2HTML(self.tr('Final E', 'E final'))+'''</p>
       </td>
       <td
  style="border-style: solid solid solid none; border-color: rgb(0, 0, 0) rgb(0, 0, 0) rgb(0, 0, 0) -moz-use-text-color; border-width: 1pt 1pt 1pt medium; padding: 0.05cm 0.05cm 0.05cm 0cm; width: 85px;">
-      <p align="center">'''+self.tr('Final N', str2HTML('N final'))+'''</p>
+      <p align="center">'''+ str2HTML(self.tr('Final N', 'N final'))+'''</p>
       </td>
     </tr>
 '''
@@ -428,17 +419,17 @@ dN</p>
   </tbody>
 </table>
 </div>
-<p lang="en-US">'''+self.tr('Angular closure error', str2HTML('Erro de fechamento angular'))+''': [Ace]</p>
-<p lang="en-US">'''+self.tr('Linear closure error', str2HTML('Erro de fechamento linear'))+''': [Lce]</p>
-<p lang="en-US">'''+self.tr('Linear relative error', str2HTML('Erro linear relativo'))+''': [Lre]</p>
+<p lang="en-US">'''+ str2HTML(self.tr('Angular closure error', 'Erro de fechamento angular'))+''': [Ace]</p>
+<p lang="en-US">'''+ str2HTML(self.tr('Linear closure error', 'Erro de fechamento linear'))+''': [Lce]</p>
+<p lang="en-US">'''+ str2HTML(self.tr('Linear relative error', 'Erro linear relativo'))+''': [Lre]</p>
 <p class="MsoNormal" style="text-align: left;"
  align="left"><br>
 <i><span
- style="font-size: 10pt; line-height: 100%; color: rgb(127, 127, 127);">''' + self.tr(str2HTML('*The unit of measurement of the adjusted coordinates is the same as the input coordinates.'), str2HTML('*A unidade de medida das coordenadas ajustadas é a mesma da coordenadas de entrada.')) + '''<o:p></o:p></span></i></p>
+ style="font-size: 10pt; line-height: 100%; color: rgb(127, 127, 127);">''' + str2HTML(self.tr('*The unit of measurement of the adjusted coordinates is the same as the input coordinates.', '*A unidade de medida das coordenadas ajustadas é a mesma da coordenadas de entrada.')) + '''<o:p></o:p></span></i></p>
 </div>
 <footer">
-<p class="MsoNormal" style="margin-bottom: 0.0001pt; text-align: right;" align="right"><b>''' + self.tr('Leandro Franca', str2HTML('Leandro França')) + '''
-</br>''' + self.tr('Cartographic Engineer', str2HTML('Eng. Cartógrafo')) + '''<o:p></o:p></b></p>
+<p class="MsoNormal" style="margin-bottom: 0.0001pt; text-align: right;" align="right"><b>''' + str2HTML(self.tr('Leandro Franca', 'Leandro França')) + '''
+</br>''' + str2HTML(self.tr('Cartographic Engineer', 'Eng. Cartógrafo')) + '''<o:p></o:p></b></p>
 </br>
 <div align="right">'''+ Imgs().social_table_color + '''
 </div>
