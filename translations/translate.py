@@ -13,7 +13,7 @@
 __author__ = 'Leandro França'
 __date__ = '2024-06-23'
 
-from lftools.translations.spanish import dic_ES
+from lftools.translations.dictionary import dic
 
 def translate(string, loc):
     # Português
@@ -25,7 +25,10 @@ def translate(string, loc):
     # Espanhol
     elif loc == 'es':
         if string[0] in dic_ES:
-            return dic_ES[string[0]]
+            if loc in dic[string[0]]:
+                return dic[string[0]][loc]
+            else:
+                return string[0]
         elif len(string) == 2:
             return string[1]
         else:
