@@ -48,6 +48,7 @@ from qgis.core import (QgsProcessing,
 
 import numpy as np
 from lftools.geocapt.imgs import Imgs
+from lftools.translations.translate import translate
 from lftools.geocapt.dip import Interpolar
 from lftools.geocapt.adjust import AjustVertical, ValidacaoGCP, Ajust2D, ValidacaoVetores
 from lftools.geocapt.cartography import geom2PointList
@@ -60,18 +61,8 @@ class PhotosHistogramMatch(QgsProcessingAlgorithm):
 
     LOC = QgsApplication.locale()[:2]
 
-    def translate(self, string):
-        return QCoreApplication.translate('Processing', string)
-
     def tr(self, *string):
-        # Traduzir para o portugês: arg[0] - english (translate), arg[1] - português
-        if self.LOC == 'pt':
-            if len(string) == 2:
-                return string[1]
-            else:
-                return self.translate(string[0])
-        else:
-            return self.translate(string[0])
+        return translate(string, self.LOC)
 
     def createInstance(self):
         return PhotosHistogramMatch()
