@@ -46,6 +46,7 @@ from lftools.geocapt.topogeo import (dd2dms as DD2DMS,
                                      gpsdate as GPSDATE)
 from lftools import geomag
 from lftools.geocapt.imgs import img2html_resized
+from lftools.translations.translate import translate
 from numpy import array, pi, sqrt, median
 import numpy as np
 from pyproj.crs import CRS
@@ -56,14 +57,7 @@ import re, os
 
 LOC = QgsApplication.locale()[:2]
 def tr(*string):
-    # Traduzir para o portugês: arg[0] - english (translate), arg[1] - português
-    if LOC == 'pt':
-        if len(string) == 2:
-            return string[1]
-        else:
-            return string[0]
-    else:
-        return string[0]
+    return translate(string, LOC)
 
 
 def proportion(values, total):
@@ -784,7 +778,7 @@ def deedtable(layer_name, ini, fim, titulo, fontsize, feature, parent):
     texto = '''<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
     <html>
     <head>
-      <title>''' + tr('Synthetic deed description', str2HTML('Memorial Sintético')) + '''</title>    </head>
+      <title>''' + str2HTML(tr('Synthetic deed description', 'Memorial Sintético')) + '''</title>    </head>
     <body>
     <table
     style="text-align: center; width: 100%; font-size: [FONTSIZE]px;  border: medium none; border-collapse: collapse;"
@@ -809,14 +803,14 @@ def deedtable(layer_name, ini, fim, titulo, fontsize, feature, parent):
     </tr>
     '''
     cabec = '''<tr>
-      <td colspan="7" rowspan="1">''' + tr('Synthetic deed description'.upper(), str2HTML('Memorial Sintético'.upper())) + '''[TITULO]</td>
+      <td colspan="7" rowspan="1">''' + str2HTML(tr('Synthetic deed description'.upper(), 'Memorial Sintético'.upper())) + '''[TITULO]</td>
     </tr>
     <tr>
-      <td colspan="1" rowspan="2">''' + tr('VERTEX', str2HTML('VÉRTICE')) + '''</td>
-      <td colspan="3" rowspan="1">''' + tr('COORDINATE', str2HTML('COORDENADA')) + '''</td>
-      <td colspan="1" rowspan="2">''' + tr('SIDE', str2HTML('LADO')) + '''</td>
-      <td colspan="1" rowspan="2">''' + tr('AZIMUTH', str2HTML('AZIMUTE')) + '''</td>
-      <td colspan="1" rowspan="2">''' + tr('DISTANCE', str2HTML('DISTÂNCIA')) + ''' (m)</td>
+      <td colspan="1" rowspan="2">''' + str2HTML(tr('VERTEX', 'VÉRTICE')) + '''</td>
+      <td colspan="3" rowspan="1">''' + str2HTML(tr('COORDINATE', 'COORDENADA')) + '''</td>
+      <td colspan="1" rowspan="2">''' + str2HTML(tr('SIDE', 'LADO')) + '''</td>
+      <td colspan="1" rowspan="2">''' + str2HTML(tr('AZIMUTH', 'AZIMUTE')) + '''</td>
+      <td colspan="1" rowspan="2">''' + str2HTML(tr('DISTANCE', 'DISTÂNCIA')) + ''' (m)</td>
     </tr>
     <tr>
       <td>E</td>
@@ -1023,7 +1017,7 @@ def deedtable2(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
         texto = '''<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
         <html>
         <head>
-          <title>''' + tr('Synthetic deed description', str2HTML('Memorial Sintético')) + '''</title>    </head>
+          <title>''' + str2HTML(tr('Synthetic deed description', 'Memorial Sintético')) + '''</title>    </head>
         <body>
         <table
         style="text-align: center; width: 100%; font-size: [FONTSIZE]px;  border: medium none; border-collapse: collapse;"
@@ -1052,14 +1046,14 @@ def deedtable2(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
         </tr>
         '''
             cabec = '''<tr>
-              <td colspan="6" rowspan="1">''' + tr('Synthetic deed description'.upper(), str2HTML('Memorial Sintético'.upper())) + '''[TITULO]</td>
+              <td colspan="6" rowspan="1">''' + str2HTML(tr('Synthetic deed description'.upper(), 'Memorial Sintético'.upper())) + '''[TITULO]</td>
             </tr>
             <tr>
-              <td colspan="1" rowspan="2">''' + tr('VERTEX', str2HTML('VÉRTICE')) + '''</td>
-              <td colspan="2" rowspan="1">''' + tr('COORDINATE', str2HTML('COORDENADA')) + '''</td>
-              <td colspan="1" rowspan="2">''' + tr('SIDE', str2HTML('LADO')) + '''</td>
-              <td colspan="1" rowspan="2">''' + tr('AZIMUTH', str2HTML('AZIMUTE')) + '''</td>
-              <td colspan="1" rowspan="2">''' + tr('DISTANCE', str2HTML('DISTÂNCIA')) + ''' (m)</td>
+              <td colspan="1" rowspan="2">''' + str2HTML(tr('VERTEX', 'VÉRTICE')) + '''</td>
+              <td colspan="2" rowspan="1">''' + str2HTML(tr('COORDINATE', 'COORDENADA')) + '''</td>
+              <td colspan="1" rowspan="2">''' + str2HTML(tr('SIDE', 'LADO')) + '''</td>
+              <td colspan="1" rowspan="2">''' + str2HTML(tr('AZIMUTH', 'AZIMUTE')) + '''</td>
+              <td colspan="1" rowspan="2">''' + str2HTML(tr('DISTANCE', 'DISTÂNCIA')) + ''' (m)</td>
             </tr>
             <tr>
               <td>E</td>
@@ -1076,11 +1070,11 @@ def deedtable2(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
         '''
 
             cabec = '''<tr>
-              <td colspan="3" rowspan="1">''' + tr('Synthetic deed description'.upper(), str2HTML('Memorial Sintético'.upper())) + '''[TITULO]</td>
+              <td colspan="3" rowspan="1">''' + str2HTML(tr('Synthetic deed description'.upper(), 'Memorial Sintético'.upper())) + '''[TITULO]</td>
             </tr>
             <tr>
-              <td colspan="1" rowspan="2">''' + tr('VERTEX', str2HTML('VÉRTICE')) + '''</td>
-              <td colspan="2" rowspan="1">''' + tr('COORDINATE', str2HTML('COORDENADA')) + '''</td>
+              <td colspan="1" rowspan="2">''' + str2HTML(tr('VERTEX', 'VÉRTICE')) + '''</td>
+              <td colspan="2" rowspan="1">''' + str2HTML(tr('COORDINATE', 'COORDENADA')) + '''</td>
             </tr>
             <tr>
               <td>E</td>
@@ -1099,14 +1093,14 @@ def deedtable2(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
             </tr>
             '''
             cabec = '''<tr>
-              <td colspan="6" rowspan="1">''' + tr('Synthetic deed description'.upper(), str2HTML('Memorial Sintético'.upper())) + '''[TITULO]</td>
+              <td colspan="6" rowspan="1">''' + str2HTML(tr('Synthetic deed description'.upper(), 'Memorial Sintético'.upper())) + '''[TITULO]</td>
             </tr>
             <tr>
-              <td colspan="1" rowspan="2">''' + tr('VERTEX', str2HTML('VÉRTICE')) + '''</td>
-              <td colspan="2" rowspan="1">''' + tr('COORDINATE', str2HTML('COORDENADA')) + '''</td>
-              <td colspan="1" rowspan="2">''' + tr('SIDE', str2HTML('LADO')) + '''</td>
-              <td colspan="1" rowspan="2">''' + tr('AZIMUTH', str2HTML('AZIMUTE')) + '''</td>
-              <td colspan="1" rowspan="2">''' + tr('DISTANCE', str2HTML('DISTÂNCIA')) + ''' (m)</td>
+              <td colspan="1" rowspan="2">''' + str2HTML(tr('VERTEX', 'VÉRTICE')) + '''</td>
+              <td colspan="2" rowspan="1">''' + str2HTML(tr('COORDINATE', 'COORDENADA')) + '''</td>
+              <td colspan="1" rowspan="2">''' + str2HTML(tr('SIDE', 'LADO')) + '''</td>
+              <td colspan="1" rowspan="2">''' + str2HTML(tr('AZIMUTH', 'AZIMUTE')) + '''</td>
+              <td colspan="1" rowspan="2">''' + str2HTML(tr('DISTANCE', 'DISTÂNCIA')) + ''' (m)</td>
             </tr>
             <tr>
               <td>longitude</td>
@@ -1123,11 +1117,11 @@ def deedtable2(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
             '''
 
             cabec = '''<tr>
-              <td colspan="3" rowspan="1">''' + tr('Synthetic deed description'.upper(), str2HTML('Memorial Sintético'.upper())) + '''[TITULO]</td>
+              <td colspan="3" rowspan="1">''' + str2HTML(tr('Synthetic deed description'.upper(), 'Memorial Sintético'.upper())) + '''[TITULO]</td>
             </tr>
             <tr>
-              <td colspan="1" rowspan="2">''' + tr('VERTEX', str2HTML('VÉRTICE')) + '''</td>
-              <td colspan="2" rowspan="1">''' + tr('COORDINATE', str2HTML('COORDENADA')) + '''</td>
+              <td colspan="1" rowspan="2">''' + str2HTML(tr('VERTEX', 'VÉRTICE')) + '''</td>
+              <td colspan="2" rowspan="1">''' + str2HTML(tr('COORDINATE', 'COORDENADA')) + '''</td>
             </tr>
             <tr>
               <td>longitude</td>
@@ -1149,14 +1143,14 @@ def deedtable2(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
             '''
 
             cabec = '''<tr>
-              <td colspan="8" rowspan="1">''' + tr('Synthetic deed description'.upper(), str2HTML('Memorial Sintético'.upper())) + '''[TITULO]</td>
+              <td colspan="8" rowspan="1">''' + str2HTML(tr('Synthetic deed description'.upper(), 'Memorial Sintético'.upper())) + '''[TITULO]</td>
             </tr>
             <tr>
-              <td colspan="1" rowspan="2">''' + tr('VERTEX', str2HTML('VÉRTICE')) + '''</td>
-              <td colspan="4" rowspan="1">''' + tr('COORDINATE', str2HTML('COORDENADA')) + '''</td>
-              <td colspan="1" rowspan="2">''' + tr('SIDE', str2HTML('LADO')) + '''</td>
-              <td colspan="1" rowspan="2">''' + tr('AZIMUTH', str2HTML('AZIMUTE')) + '''</td>
-              <td colspan="1" rowspan="2">''' + tr('DISTANCE', str2HTML('DISTÂNCIA')) + ''' (m)</td>
+              <td colspan="1" rowspan="2">''' + str2HTML(tr('VERTEX', 'VÉRTICE')) + '''</td>
+              <td colspan="4" rowspan="1">''' + str2HTML(tr('COORDINATE', 'COORDENADA')) + '''</td>
+              <td colspan="1" rowspan="2">''' + str2HTML(tr('SIDE', 'LADO')) + '''</td>
+              <td colspan="1" rowspan="2">''' + str2HTML(tr('AZIMUTH', 'AZIMUTE')) + '''</td>
+              <td colspan="1" rowspan="2">''' + str2HTML(tr('DISTANCE', 'DISTÂNCIA')) + ''' (m)</td>
             </tr>
             <tr>
               <td>longitude</td>
@@ -1177,11 +1171,11 @@ def deedtable2(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
             '''
 
             cabec = '''<tr>
-              <td colspan="5" rowspan="1">''' + tr('Synthetic deed description'.upper(), str2HTML('Memorial Sintético'.upper())) + '''[TITULO]</td>
+              <td colspan="5" rowspan="1">''' + str2HTML(tr('Synthetic deed description'.upper(), 'Memorial Sintético'.upper())) + '''[TITULO]</td>
             </tr>
             <tr>
-              <td colspan="1" rowspan="2">''' + tr('VERTEX', str2HTML('VÉRTICE')) + '''</td>
-              <td colspan="4" rowspan="1">''' + tr('COORDINATE', str2HTML('COORDENADA')) + '''</td>
+              <td colspan="1" rowspan="2">''' + str2HTML(tr('VERTEX', 'VÉRTICE')) + '''</td>
+              <td colspan="4" rowspan="1">''' + str2HTML(tr('COORDINATE', 'COORDENADA')) + '''</td>
             </tr>
             <tr>
               <td>longitude</td>
@@ -1351,7 +1345,7 @@ def deedtable3(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
         texto = '''<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
         <html>
         <head>
-          <title>''' + tr('Synthetic deed description', str2HTML('Memorial Sintético')) + '''</title>    </head>
+          <title>''' + str2HTML(tr('Synthetic deed description', 'Memorial Sintético')) + '''</title>    </head>
         <body>
         <table class="MsoTableGrid"
         style="text-align: center; width: 100%; font-size: [FONTSIZE]px;  border: medium none ; border-collapse: collapse;"
@@ -1381,14 +1375,14 @@ def deedtable3(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
         </tr>
         '''
             cabec = '''<tr>
-              <td colspan="7" rowspan="1">''' + tr('Synthetic deed description'.upper(), str2HTML('Memorial Sintético'.upper())) + '''[TITULO]</td>
+              <td colspan="7" rowspan="1">''' + str2HTML(tr('Synthetic deed description'.upper(), 'Memorial Sintético'.upper())) + '''[TITULO]</td>
             </tr>
             <tr>
-              <td colspan="1" rowspan="2">''' + tr('VERTEX', str2HTML('VÉRTICE')) + '''</td>
-              <td colspan="3" rowspan="1">''' + tr('COORDINATE', str2HTML('COORDENADA')) + '''</td>
-              <td colspan="1" rowspan="2">''' + tr('SIDE', str2HTML('LADO')) + '''</td>
-              <td colspan="1" rowspan="2">''' + tr('AZIMUTH', str2HTML('AZIMUTE')) + '''</td>
-              <td colspan="1" rowspan="2">''' + tr('DISTANCE', str2HTML('DISTÂNCIA')) + ''' (m)</td>
+              <td colspan="1" rowspan="2">''' + str2HTML(tr('VERTEX', 'VÉRTICE')) + '''</td>
+              <td colspan="3" rowspan="1">''' + str2HTML(tr('COORDINATE', 'COORDENADA')) + '''</td>
+              <td colspan="1" rowspan="2">''' + str2HTML(tr('SIDE', 'LADO')) + '''</td>
+              <td colspan="1" rowspan="2">''' + str2HTML(tr('AZIMUTH', 'AZIMUTE')) + '''</td>
+              <td colspan="1" rowspan="2">''' + str2HTML(tr('DISTANCE', 'DISTÂNCIA')) + ''' (m)</td>
             </tr>
             <tr>
               <td>E</td>
@@ -1407,11 +1401,11 @@ def deedtable3(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
         '''
 
             cabec = '''<tr>
-              <td colspan="4" rowspan="1">''' + tr('Synthetic deed description'.upper(), str2HTML('Memorial Sintético'.upper())) + '''[TITULO]</td>
+              <td colspan="4" rowspan="1">''' + str2HTML(tr('Synthetic deed description'.upper(), 'Memorial Sintético'.upper())) + '''[TITULO]</td>
             </tr>
             <tr>
-              <td colspan="1" rowspan="2">''' + tr('VERTEX', str2HTML('VÉRTICE')) + '''</td>
-              <td colspan="3" rowspan="1">''' + tr('COORDINATE', str2HTML('COORDENADA')) + '''</td>
+              <td colspan="1" rowspan="2">''' + str2HTML(tr('VERTEX', 'VÉRTICE')) + '''</td>
+              <td colspan="3" rowspan="1">''' + str2HTML(tr('COORDINATE', 'COORDENADA')) + '''</td>
             </tr>
             <tr>
               <td>E</td>
@@ -1432,14 +1426,14 @@ def deedtable3(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
             </tr>
             '''
             cabec = '''<tr>
-              <td colspan="7" rowspan="1">''' + tr('Synthetic deed description'.upper(), str2HTML('Memorial Sintético'.upper())) + '''[TITULO]</td>
+              <td colspan="7" rowspan="1">''' + str2HTML(tr('Synthetic deed description'.upper(), 'Memorial Sintético'.upper())) + '''[TITULO]</td>
             </tr>
             <tr>
-              <td colspan="1" rowspan="2">''' + tr('VERTEX', str2HTML('VÉRTICE')) + '''</td>
-              <td colspan="3" rowspan="1">''' + tr('COORDINATE', str2HTML('COORDENADA')) + '''</td>
-              <td colspan="1" rowspan="2">''' + tr('SIDE', str2HTML('LADO')) + '''</td>
-              <td colspan="1" rowspan="2">''' + tr('AZIMUTH', str2HTML('AZIMUTE')) + '''</td>
-              <td colspan="1" rowspan="2">''' + tr('DISTANCE', str2HTML('DISTÂNCIA')) + ''' (m)</td>
+              <td colspan="1" rowspan="2">''' + str2HTML(tr('VERTEX', 'VÉRTICE')) + '''</td>
+              <td colspan="3" rowspan="1">''' + str2HTML(tr('COORDINATE', 'COORDENADA')) + '''</td>
+              <td colspan="1" rowspan="2">''' + str2HTML(tr('SIDE', 'LADO')) + '''</td>
+              <td colspan="1" rowspan="2">''' + str2HTML(tr('AZIMUTH', 'AZIMUTE')) + '''</td>
+              <td colspan="1" rowspan="2">''' + str2HTML(tr('DISTANCE', 'DISTÂNCIA')) + ''' (m)</td>
             </tr>
             <tr>
               <td>longitude</td>
@@ -1458,11 +1452,11 @@ def deedtable3(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
             '''
 
             cabec = '''<tr>
-              <td colspan="4" rowspan="1">''' + tr('Synthetic deed description'.upper(), str2HTML('Memorial Sintético'.upper())) + '''[TITULO]</td>
+              <td colspan="4" rowspan="1">''' + str2HTML(tr('Synthetic deed description'.upper(), 'Memorial Sintético'.upper())) + '''[TITULO]</td>
             </tr>
             <tr>
-              <td colspan="1" rowspan="2">''' + tr('VERTEX', str2HTML('VÉRTICE')) + '''</td>
-              <td colspan="3" rowspan="1">''' + tr('COORDINATE', str2HTML('COORDENADA')) + '''</td>
+              <td colspan="1" rowspan="2">''' + str2HTML(tr('VERTEX', 'VÉRTICE')) + '''</td>
+              <td colspan="3" rowspan="1">''' + str2HTML(tr('COORDINATE', 'COORDENADA')) + '''</td>
             </tr>
             <tr>
               <td>longitude</td>
@@ -1486,14 +1480,14 @@ def deedtable3(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
             '''
 
             cabec = '''<tr>
-              <td colspan="9" rowspan="1">''' + tr('Synthetic deed description'.upper(), str2HTML('Memorial Sintético'.upper())) + '''[TITULO]</td>
+              <td colspan="9" rowspan="1">''' + str2HTML(tr('Synthetic deed description'.upper(), 'Memorial Sintético'.upper())) + '''[TITULO]</td>
             </tr>
             <tr>
-              <td colspan="1" rowspan="2">''' + tr('VERTEX', str2HTML('VÉRTICE')) + '''</td>
-              <td colspan="5" rowspan="1">''' + tr('COORDINATE', str2HTML('COORDENADA')) + '''</td>
-              <td colspan="1" rowspan="2">''' + tr('SIDE', str2HTML('LADO')) + '''</td>
-              <td colspan="1" rowspan="2">''' + tr('AZIMUTH', str2HTML('AZIMUTE')) + '''</td>
-              <td colspan="1" rowspan="2">''' + tr('DISTANCE', str2HTML('DISTÂNCIA')) + ''' (m)</td>
+              <td colspan="1" rowspan="2">''' + str2HTML(tr('VERTEX', 'VÉRTICE')) + '''</td>
+              <td colspan="5" rowspan="1">''' + str2HTML(tr('COORDINATE', 'COORDENADA')) + '''</td>
+              <td colspan="1" rowspan="2">''' + str2HTML(tr('SIDE', 'LADO')) + '''</td>
+              <td colspan="1" rowspan="2">''' + str2HTML(tr('AZIMUTH', 'AZIMUTE')) + '''</td>
+              <td colspan="1" rowspan="2">''' + str2HTML(tr('DISTANCE', 'DISTÂNCIA')) + ''' (m)</td>
             </tr>
             <tr>
               <td>longitude</td>
@@ -1516,11 +1510,11 @@ def deedtable3(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
             '''
 
             cabec = '''<tr>
-              <td colspan="6" rowspan="1">''' + tr('Synthetic deed description'.upper(), str2HTML('Memorial Sintético'.upper())) + '''[TITULO]</td>
+              <td colspan="6" rowspan="1">''' + str2HTML(tr('Synthetic deed description'.upper(), 'Memorial Sintético'.upper())) + '''[TITULO]</td>
             </tr>
             <tr>
-              <td colspan="1" rowspan="2">''' + tr('VERTEX', str2HTML('VÉRTICE')) + '''</td>
-              <td colspan="5" rowspan="1">''' + tr('COORDINATE', str2HTML('COORDENADA')) + '''</td>
+              <td colspan="1" rowspan="2">''' + str2HTML(tr('VERTEX', 'VÉRTICE')) + '''</td>
+              <td colspan="5" rowspan="1">''' + str2HTML(tr('COORDINATE', 'COORDENADA')) + '''</td>
             </tr>
             <tr>
               <td>longitude</td>
