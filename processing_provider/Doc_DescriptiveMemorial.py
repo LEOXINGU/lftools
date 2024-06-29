@@ -618,7 +618,7 @@ class DescriptiveMemorial(QgisAlgorithm):
         if projecao:
             fuso, hemisf = FusoHemisf(centroideG)
             if SRC.split(' ')[-1] != str(fuso)+hemisf :
-                raise QgsProcessingException(self.tr('Warning: Make sure your projection is correct!'.upper(), 'Aviso: Verifique se sua projeção está correta!'.upper()))
+                raise QgsProcessingException(self.tr('Warning: Make sure your projection is correct!', 'Aviso: Verifique se sua projeção está correta!').upper())
 
         # Área do imóvel
         Fields = area.fields()
