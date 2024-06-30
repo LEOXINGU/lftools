@@ -238,7 +238,7 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
 <html>
 <head>
   <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
-  <title>'''+ self.tr('Monograph of Geodetic Landmark',str2HTML('Monografia de Marco Geodésico')) + '''</title>
+  <title>'''+ str2HTML(self.tr('Monograph of Geodetic Landmark','Monografia de Marco Geodésico')) + '''</title>
   <link rel = "icon" href = "https://github.com/LEOXINGU/lftools/blob/main/images/lftools.png?raw=true" type = "image/x-icon">
 </head>
 <body>
@@ -250,14 +250,14 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
 <table style="text-align: left; width: 100%;" border="1" cellpadding="1" cellspacing="0">
   <tbody>
     <tr style="font-weight: bold;" align="center">
-      <td colspan="5" rowspan="1">'''+ self.tr('MONOGRAPH OF GEODETIC LANDMARK',str2HTML('MONOGRAFIA DE MARCO GEODÉSICO')) + '''</td>
+      <td colspan="5" rowspan="1">'''+ str2HTML(self.tr('MONOGRAPH OF GEODETIC LANDMARK','MONOGRAFIA DE MARCO GEODÉSICO')) + '''</td>
     </tr>
     <tr>
-      <td style="text-align: center; font-weight: bold;">'''+ self.tr('CODE',str2HTML('CÓDIGO')) + '''</td>
-      <td style="text-align: center; font-weight: bold;">'''+ self.tr('TYPE',str2HTML('TIPO')) + '''</td>
-      <td style="text-align: center; font-weight: bold;">'''+ self.tr('PROPERTY',str2HTML('IMÓVEL')) + '''</td>
-      <td style="text-align: center; font-weight: bold;">'''+ self.tr('COUNTY',str2HTML('MUNICÍPIO')) + '''</td>
-      <td style="text-align: center; font-weight: bold;">'''+ self.tr('STATE',str2HTML('UF')) + '''</td>
+      <td style="text-align: center; font-weight: bold;">'''+ str2HTML(self.tr('CODE','CÓDIGO')) + '''</td>
+      <td style="text-align: center; font-weight: bold;">'''+ str2HTML(self.tr('TYPE','TIPO')) + '''</td>
+      <td style="text-align: center; font-weight: bold;">'''+ str2HTML(self.tr('PROPERTY','IMÓVEL')) + '''</td>
+      <td style="text-align: center; font-weight: bold;">'''+ str2HTML(self.tr('COUNTY','MUNICÍPIO')) + '''</td>
+      <td style="text-align: center; font-weight: bold;">'''+ str2HTML(self.tr('STATE','UF')) + '''</td>
     </tr>
     <tr>
       <td style="text-align: center;">[CD]</td>
@@ -267,39 +267,39 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
       <td style="text-align: center;">[UF]</td>
     </tr>
     <tr>
-      <td colspan="5" rowspan="1">'''+ self.tr('Description/Location:',str2HTML('Descrição/Localização:')) + ''': [DESCR]</td>
+      <td colspan="5" rowspan="1">'''+ str2HTML(self.tr('Description/Location:','Descrição/Localização:')) + ''': [DESCR]</td>
     </tr>
     <tr>
       <td colspan="5" rowspan="1"></td>
     </tr>
     <tr>
-      <td style="text-align: center; font-weight: bold;" colspan="2" rowspan="1">'''+ self.tr('GEODESIC COORDINATES',str2HTML('COORDENADAS GEODÉSICAS')) + '''</td>
-      <td style="text-align: center; font-weight: bold;" colspan="2" rowspan="1">'''+ self.tr('FLAT COORDINATES (UTM)',str2HTML('COORDENADAS PLANAS (UTM)')) + '''</td>
-      <td style="text-align: center; font-weight: bold;">'''+ self.tr('PRECISIONS (m)',str2HTML('PRECISÕES (m)')) + '''</td>
+      <td style="text-align: center; font-weight: bold;" colspan="2" rowspan="1">'''+ str2HTML(self.tr('GEODESIC COORDINATES','COORDENADAS GEODÉSICAS')) + '''</td>
+      <td style="text-align: center; font-weight: bold;" colspan="2" rowspan="1">'''+ str2HTML(self.tr('FLAT COORDINATES (UTM)','COORDENADAS PLANAS (UTM)')) + '''</td>
+      <td style="text-align: center; font-weight: bold;">'''+ str2HTML(self.tr('PRECISIONS (m)','PRECISÕES (m)')) + '''</td>
     </tr>
     <tr>
       <td>'''+ self.tr('Longitude') + ''' <span style="font-family: &quot;Times New Roman&quot;,serif;">(</span><big><big><span style="font-size: 9pt; font-family: &quot;Times New Roman&quot;,serif;">&lambda;</span></big></big><span style="font-family: &quot;Times New Roman&quot;,serif;">)</span></td>
       <td>[LON]</td>
-      <td>'''+ self.tr('East',str2HTML('Este')) + '''</td>
+      <td>'''+ str2HTML(self.tr('East','Este')) + '''</td>
       <td>[E] m</td>
       <td><span style="font-size: 9pt; font-family: &quot;Times New Roman&quot;,serif;"></span><big><big><span style="font-size: 9pt; font-family: &quot;Times New Roman&quot;,serif;"></span></big></big><span style="font-family: &quot;Times New Roman&quot;,serif;">&sigma;(</span><big><big><span style="font-size: 9pt; font-family: &quot;Times New Roman&quot;,serif;">&lambda;</span></big></big><span style="font-family: &quot;Times New Roman&quot;,serif;">) &nbsp;= &nbsp;[sigma_x]</span><b><span style="font-size: 9pt; font-family: &quot;Times New Roman&quot;,serif;"></span></b><b><span style="font-size: 9pt; font-family: &quot;Times New Roman&quot;,serif;"></span></b></td>
     </tr>
     <tr>
       <td>'''+ self.tr('Latitude') + ''' <span style="font-family: &quot;Times New Roman&quot;,serif;">(&phi;)</span></td>
       <td>[LAT]</td>
-      <td>'''+ self.tr('North',str2HTML('Norte')) + '''</td>
+      <td>'''+ str2HTML(self.tr('North','Norte')) + '''</td>
       <td>[N] m</td>
       <td><b><span style="font-size: 9pt; font-family: &quot;Times New Roman&quot;,serif;"></span></b><b><span style="font-size: 9pt; font-family: &quot;Times New Roman&quot;,serif;"></span></b><b><span style="font-size: 9pt; font-family: &quot;Times New Roman&quot;,serif;"></span></b><span style="font-family: &quot;Times New Roman&quot;,serif;">&sigma;(&phi;) = </span><span style="font-family: &quot;Times New Roman&quot;,serif;">[sigma_y]</span></td>
     </tr>
     <tr>
-      <td>'''+ self.tr('Elipsoidal Altitude',str2HTML('Altitude Elipsoidal')) + ''' (h)</td>
+      <td>'''+ str2HTML(self.tr('Elipsoidal Altitude','Altitude Elipsoidal')) + ''' (h)</td>
       <td>[h] m</td>
-      <td>'''+ self.tr('CM',str2HTML('MC')) + '''</td>
+      <td>'''+ str2HTML(self.tr('CM','MC')) + '''</td>
       <td>[MC]</td>
       <td><b><span style="font-size: 9pt; font-family: &quot;Times New Roman&quot;,serif;"></span></b><b><span style="font-size: 9pt; font-family: &quot;Times New Roman&quot;,serif;"></span></b>&sigma;(h) = <span style="font-family: &quot;Times New Roman&quot;,serif;">[sigma_h]</span></td>
     </tr>
     <tr>
-      <td>'''+ self.tr('Orthometric Altitude',str2HTML('Altitude Ortométrica')) + ''' (H)</td>
+      <td>'''+ str2HTML(self.tr('Orthometric Altitude','Altitude Ortométrica')) + ''' (H)</td>
       <td>[H] m</td>
       <td style="text-align: center;" colspan="3" rowspan="1"><span style="font-weight: bold;">[SRC]</td>
     </tr>
@@ -307,30 +307,30 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
       <td colspan="5" rowspan="1"></td>
     </tr>
     <tr>
-      <td style="font-weight: bold;">'''+ self.tr('EQUIPMENT',str2HTML('EQUIPAMENTO')) + ''':</td>
+      <td style="font-weight: bold;">'''+ str2HTML(self.tr('EQUIPMENT','EQUIPAMENTO')) + ''':</td>
       <td>[EQP]</td>
-      <td style="font-weight: bold; text-align: center;">'''+ self.tr('STEP',str2HTML('ETAPA')) + '''</td>
-      <td style="font-weight: bold; text-align: center;">'''+ self.tr('DATE',str2HTML('DATA')) + '''</td>
-      <td style="font-weight: bold; text-align: center;">'''+ self.tr('RESPONSIBLE',str2HTML('RESPONSÁVEL')) + '''</td>
+      <td style="font-weight: bold; text-align: center;">'''+ str2HTML(self.tr('STEP','ETAPA')) + '''</td>
+      <td style="font-weight: bold; text-align: center;">'''+ str2HTML(self.tr('DATE','DATA')) + '''</td>
+      <td style="font-weight: bold; text-align: center;">'''+ str2HTML(self.tr('RESPONSIBLE','RESPONSÁVEL')) + '''</td>
     </tr>
     <tr>
-      <td style="font-weight: bold;">'''+ self.tr('METHOD',str2HTML('MÉTODO')) + ''':</td>
+      <td style="font-weight: bold;">'''+ str2HTML(self.tr('METHOD','MÉTODO')) + ''':</td>
       <td>[MET]</td>
-      <td>'''+ self.tr('Surveying',str2HTML('Levantamento')) + '''</td>
+      <td>'''+ str2HTML(self.tr('Surveying','Levantamento')) + '''</td>
       <td>[LEV_DT]</td>
       <td>[LEV_RESP]</td>
     </tr>
     <tr>
-      <td style="font-weight: bold;">'''+ self.tr('REF. BASE(S)',str2HTML('BASE(S) DE REF.')) + ''':</td>
+      <td style="font-weight: bold;">'''+ str2HTML(self.tr('REF. BASE(S)','BASE(S) DE REF.')) + ''':</td>
       <td>[BASE]</td>
-      <td>'''+ self.tr('Processing',str2HTML('Processamento')) + '''</td>
+      <td>'''+ str2HTML(self.tr('Processing','Processamento')) + '''</td>
       <td>[PROC_DT]</td>
       <td>[PROC_RESP]</td>
     </tr>
     <tr>
       <td><span style="font-weight: bold;">SOFTWARE:</span></td>
       <td>[SOFT]</td>
-      <td>'''+ self.tr('Monograph',str2HTML('Monografia')) + '''</td>
+      <td>'''+ str2HTML(self.tr('Monograph','Monografia')) + '''</td>
       <td>[MON_DT]</td>
       <td>[MON_RESP]</td>
     </tr>
@@ -338,15 +338,15 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
       <td colspan="5" rowspan="1"></td>
     </tr>
     <tr>
-      <td style="text-align: center;" colspan="2" rowspan="1"><span style="font-weight: bold;">'''+ self.tr('LANDMARK PHOTO',str2HTML('FOTO DO MARCO')) + '''</span></td>
-      <td style="text-align: center;" colspan="3" rowspan="1"><span style="font-weight: bold;">'''+ self.tr('AERIAL IMAGE',str2HTML('IMAGEM AÉREA')) + '''</span></td>
+      <td style="text-align: center;" colspan="2" rowspan="1"><span style="font-weight: bold;">'''+ str2HTML(self.tr('LANDMARK PHOTO','FOTO DO MARCO')) + '''</span></td>
+      <td style="text-align: center;" colspan="3" rowspan="1"><span style="font-weight: bold;">'''+ str2HTML(self.tr('AERIAL IMAGE','IMAGEM AÉREA')) + '''</span></td>
     </tr>
     <tr>
       <td style="text-align: center;" colspan="2" rowspan="1"><img style="width: 200px; height: 150px;" alt="marco" src="data:image/jpg;base64,[FOTO_MARCO]"></td>
       <td style="text-align: center;" colspan="3" rowspan="3"><img style="width: 400px;" alt="imagem" src="data:image/jpg;base64,[IMAGEM_AER]"></td>
     </tr>
     <tr style="font-weight: bold;">
-      <td style="text-align: center;" colspan="2" rowspan="1">'''+ self.tr('PANORAMIC PHOTO',str2HTML('FOTO PANORÂMICA')) + '''</td>
+      <td style="text-align: center;" colspan="2" rowspan="1">'''+ str2HTML(self.tr('PANORAMIC PHOTO','FOTO PANORÂMICA')) + '''</td>
     </tr>
     <tr align="center">
       <td colspan="2" rowspan="1"><img style="width: 200px; height: 150px;" alt="panoramica" src="data:image/jpg;base64,[FOTO_PAN]"></td>
@@ -358,9 +358,9 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
       <td colspan="5" rowspan="1"></td>
     </tr>
     <tr>
-      <td style="text-align: center; font-weight: bold;" colspan="3" rowspan="1">'''+ self.tr('TECHNICAL MANAGER',str2HTML('RESPONSÁVEL TÉCNICO')) + '''</td>
-      <td style="text-align: center; font-weight: bold;">'''+ self.tr('PROFESSION/SPECIALIZATION',str2HTML('CONFEA/CREA')) + '''</td>
-      <td style="text-align: center; font-weight: bold;">'''+ self.tr('PROFESSIONAL REGISTRATION',str2HTML('CÓD. CRED. INCRA')) + '''</td>
+      <td style="text-align: center; font-weight: bold;" colspan="3" rowspan="1">'''+ str2HTML(self.tr('TECHNICAL MANAGER','RESPONSÁVEL TÉCNICO')) + '''</td>
+      <td style="text-align: center; font-weight: bold;">'''+ str2HTML(self.tr('PROFESSION/SPECIALIZATION','CONFEA/CREA')) + '''</td>
+      <td style="text-align: center; font-weight: bold;">'''+ str2HTML(self.tr('PROFESSIONAL REGISTRATION','CÓD. CRED. INCRA')) + '''</td>
     </tr>
     <tr>
       <td style="text-align: center;" colspan="3" rowspan="1">[REP_TEC]</td>
