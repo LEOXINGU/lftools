@@ -79,7 +79,7 @@ class DEMfilter(QgsProcessingAlgorithm):
         return 'relief'
 
     def tags(self):
-        return self.tr('dem,dsm,dtm,filtro,filtrar,smooth,suavizar,passa-baixa,mean,média,convolution,convolução,kernel,median,mde,mdt,mds,terreno,relevo,contour,curva de nível,isoline,isolinha,elevation,height,elevação').split(',')
+        return self.tr('dem,dsm,dtm,filtro,filtrar,smooth,suavizar,passa-baixa,mean,média,mediana,min,max,convolution,convolução,kernel,median,mde,mdt,mds,terreno,relevo,contour,curva de nível,isoline,isolinha,elevation,height,elevação').split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/contours.png'))

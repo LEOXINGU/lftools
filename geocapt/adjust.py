@@ -296,7 +296,7 @@ def Ajust2D(vetores, metodo):
 
     if metodo == 0:
         formula = '''<p class="MsoNormal" style="text-align: center;"
- align="center"><i><span style="">'''+ tr('Translation',str2HTML('Translação')) + '''</span></i></p>
+ align="center"><i><span style="">'''+ str2HTML(tr('Translation','Translação')) + '''</span></i></p>
 <p class="MsoNormal" style="text-align: center;"
  align="center"><i><span style=""></span></i></p>
 <p class="MsoNormal" style="text-align: center;"
@@ -314,7 +314,7 @@ def Ajust2D(vetores, metodo):
 '''
     elif metodo == 1:
         formula = '''<p class="MsoNormal" style="text-align: center;"
- align="center"><i><span style="">'''+ tr('Helmert 2D (Conformal)',str2HTML('Helmert 2D (Conforme)')) + '''</span></i></p>
+ align="center"><i><span style="">'''+ str2HTML(tr('Helmert 2D (Conformal)','Helmert 2D (Conforme)')) + '''</span></i></p>
 <p class="MsoNormal" style="text-align: center;"
  align="center"><i><span style="">X = </span></i><i><span
  style="">ax
@@ -332,7 +332,7 @@ c +</span></i><i><span style=""> Vx<o:p></o:p></span></i></p>
 '''
     elif metodo == 2:
         formula = '''<p class="MsoNormal" style="text-align: center;"
- align="center"><i><span style="">'''+ tr('Affine Transform',str2HTML('Transformação Afim')) + '''</span></i></p>
+ align="center"><i><span style="">'''+ str2HTML(tr('Affine Transform','Transformação Afim')) + '''</span></i></p>
 <p class="MsoNormal" style="text-align: center;"
  align="center"><i><span style="">X = </span></i><i><span
  style="">ax </span></i><i><span
@@ -364,7 +364,7 @@ style=""> [x]<o:p></o:p></span></p>
 <head>
 <meta content="text/html; charset=ISO-8859-1"
 http-equiv="content-type">
-<title>'''+ tr('Coordinate Transformation',str2HTML('Transformação de Coordenadas')) + '''</title>
+<title>'''+ str2HTML(tr('Coordinate Transformation','Transformação de Coordenadas')) + '''</title>
 <link rel = "icon" href = "https://github.com/LEOXINGU/lftools/blob/main/images/lftools.png?raw=true" type = "image/x-icon">
 </head>
 <body
@@ -373,11 +373,11 @@ alink="#000099" link="#000099" vlink="#990099">
 <p class="MsoNormal" style="text-align: center;"
 align="center"><b><span
 style="font-size: 12pt; line-height: 107%;"><o:p></o:p></span></b><span
-style="font-weight: bold; text-decoration: underline;">'''+ tr('COORDINATE TRANSFORMATION',str2HTML('TRANSFORMAÇÃO DE COORDENDAS')) + ''' (2D)</span></p>
+style="font-weight: bold; text-decoration: underline;">'''+ str2HTML(tr('COORDINATE TRANSFORMATION','TRANSFORMAÇÃO DE COORDENDAS')) + ''' (2D)</span></p>
 <p class="MsoNormal" style="text-align: center;"
-align="center"><span style="font-style: italic;">''' + tr('Mathematical Formulation',str2HTML('Formulação Matemática')) + '''
+align="center"><span style="font-style: italic;">''' + str2HTML(tr('Mathematical Formulation','Formulação Matemática')) + '''
 </span></p>''' + formula + '''<p style="text-align: center;" class="MsoNormal"><b><span
-style="">''' + tr('Residual Errors of Control Points',str2HTML('Erro residual dos Pontos de Controle')) + '''<o:p></o:p></span></b></p>
+style="">''' + str2HTML(tr('Residual Errors of Control Points','Erro residual dos Pontos de Controle')) + '''<o:p></o:p></span></b></p>
 <table
 style="border: medium none ; border-collapse: collapse; text-align: left; margin-left: auto; margin-right: auto;"
 class="MsoTableGrid" border="0" cellpadding="0"
@@ -388,7 +388,7 @@ cellspacing="0">
 valign="top" width="113">
   <p class="MsoNormal"
 style="margin-bottom: 0.0001pt; text-align: center; line-height: normal;"
-align="center"><i><span style="">''' + tr('Point',str2HTML('Ponto')) + '''<o:p></o:p></span></i></p>
+align="center"><i><span style="">''' + str2HTML(tr('Point','Ponto')) + '''<o:p></o:p></span></i></p>
   </td>
   <td style="padding: 0cm 5.4pt; width: 84.95pt;"
 valign="top" width="113">
@@ -409,15 +409,15 @@ align="center"><i><span style="">Vy<o:p></o:p></span></i></p>
 <br>
 <div>
 <p class="MsoNormal" style="text-align: center;"
-align="center"><b><span style="">''' + tr('Transformation Parameters:',str2HTML('Parâmetros de Transformação:')) + '''<o:p></o:p></span></b></p>
+align="center"><b><span style="">''' + str2HTML(tr('Transformation Parameters:','Parâmetros de Transformação:')) + '''<o:p></o:p></span></b></p>
 ''' + parametros + '''
 <div style="text-align: center;"><b><span style=""
->''' + tr('Adjustment&rsquo;s Reference Variance',str2HTML('Variância a posteriori')) + '''</span></b><span style=""
+>''' + str2HTML(tr('Adjustment&rsquo;s Reference Variance','Variância a posteriori')) + '''</span></b><span style=""
 > <span style="">&nbsp;</span>=
 </span><span style="">''' + str(round(sigma2[0,0] if not min_pnts_homo else 0, 4)) + '''</span></div>
 <br>
 <div style="text-align: center;"><b><span style=""
->''' + tr('Root Mean Square Error (RMSE)',str2HTML('Raiz do Erro Médio Quadrático (REMQ)')) + '''</span></b><span style=""
+>''' + str2HTML(tr('Root Mean Square Error (RMSE)','Raiz do Erro Médio Quadrático (REMQ)')) + '''</span></b><span style=""
 > <span style="">&nbsp;</span>=
 </span><span style="">''' + str(round(RMSE,4)) + '''</span></div>
 
@@ -608,7 +608,7 @@ def AjustVertical(lista, metodo):
 '''
     elif metodo == 1:
         formula = '''<p class="MsoNormal" style="text-align: center;"
- align="center"><i><span style="">''' + tr('Plan as a function of X and Y',str2HTML('Plano em função de X e Y')) + '''</span></i></p>
+ align="center"><i><span style="">''' + str2HTML(tr('Plan as a function of X and Y','Plano em função de X e Y')) + '''</span></i></p>
 <p class="MsoNormal" style="text-align: center;"
  align="center"><i><span style=""></span></i></p>
 <p class="MsoNormal" style="text-align: center;"
@@ -633,7 +633,7 @@ style=""> [x]<o:p></o:p></span></p>
 <head>
 <meta content="text/html; charset=ISO-8859-1"
 http-equiv="content-type">
-<title>'''+ tr('Vertical Adjustment',str2HTML('Ajuste Vertical')) + '''</title>
+<title>'''+ str2HTML(tr('Vertical Adjustment','Ajuste Vertical')) + '''</title>
 <link rel = "icon" href = "https://github.com/LEOXINGU/lftools/blob/main/images/lftools.png?raw=true" type = "image/x-icon">
 </head>
 <body
@@ -642,11 +642,11 @@ alink="#000099" link="#000099" vlink="#990099">
 <p class="MsoNormal" style="text-align: center;"
 align="center"><b><span
 style="font-size: 12pt; line-height: 107%;"><o:p></o:p></span></b><span
-style="font-weight: bold; text-decoration: underline;">'''+ tr('VERTICAL ADJUSTMENT',str2HTML('AJUSTE VERTICAL')) + ''' </span></p>
+style="font-weight: bold; text-decoration: underline;">'''+ str2HTML(tr('VERTICAL ADJUSTMENT','AJUSTE VERTICAL')) + ''' </span></p>
 <p class="MsoNormal" style="text-align: center;"
-align="center"><span style="font-style: italic;">''' + tr('Mathematical Formulation',str2HTML('Formulação Matemática')) + '''
+align="center"><span style="font-style: italic;">''' + str2HTML(tr('Mathematical Formulation','Formulação Matemática')) + '''
 </span></p>''' + formula + '''<p style="text-align: center;" class="MsoNormal"><b><span
-style="">''' + tr('Residual Errors of Control Points',str2HTML('Erro residual dos Pontos de Controle')) + '''<o:p></o:p></span></b></p>
+style="">''' + str2HTML(tr('Residual Errors of Control Points','Erro residual dos Pontos de Controle')) + '''<o:p></o:p></span></b></p>
 <table
 style="border: medium none ; border-collapse: collapse; text-align: left; margin-left: auto; margin-right: auto;"
 class="MsoTableGrid" border="0" cellpadding="0"
@@ -657,7 +657,7 @@ cellspacing="0">
 valign="top" width="113">
   <p class="MsoNormal"
 style="margin-bottom: 0.0001pt; text-align: center; line-height: normal;"
-align="center"><i><span style="">''' + tr('Point',str2HTML('Ponto')) + '''<o:p></o:p></span></i></p>
+align="center"><i><span style="">''' + str2HTML(tr('Point','Ponto')) + '''<o:p></o:p></span></i></p>
   </td>
   <td style="padding: 0cm 5.4pt; width: 84.95pt;"
 valign="top" width="113">
@@ -672,15 +672,15 @@ align="center"><i><span style="">Vz<o:p></o:p></span></i></p>
 <br>
 <div>
 <p class="MsoNormal" style="text-align: center;"
-align="center"><b><span style="">''' + tr('Transformation Parameters:',str2HTML('Parâmetros de Transformação:')) + '''<o:p></o:p></span></b></p>
+align="center"><b><span style="">''' + str2HTML(tr('Transformation Parameters:','Parâmetros de Transformação:')) + '''<o:p></o:p></span></b></p>
 ''' + parametros + '''
 <div style="text-align: center;"><b><span style=""
->''' + tr('Adjustment&rsquo;s Reference Variance',str2HTML('Variância a posteriori')) + '''</span></b><span style=""
+>''' + str2HTML(tr('Adjustment Reference Variance','Variância a posteriori')) + '''</span></b><span style=""
 > <span style="">&nbsp;</span>=
 </span><span style="">''' + str(round(sigma2[0,0],4)) + '''</span></div>
 <br>
 <div style="text-align: center;"><b><span style=""
->''' + tr('Root Mean Square Error (RMSE)',str2HTML('Raiz do Erro Médio Quadrático (REMQ)')) + '''</span></b><span style=""
+>''' + str2HTML(tr('Root Mean Square Error (RMSE)','Raiz do Erro Médio Quadrático (REMQ)')) + '''</span></b><span style=""
 > <span style="">&nbsp;</span>=
 </span><span style="">''' + str(round(RMSE,4)) + '''</span></div>
 

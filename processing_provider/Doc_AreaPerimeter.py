@@ -381,9 +381,9 @@ class AreaPerimterReport(QgsProcessingAlgorithm):
  style="font-weight: bold;">
 </big></big>
 <div style="text-align: left;"><br>
-<span style="font-weight: bold;">'''+ self.tr('Property',str2HTML('Imóvel')) + ''':</span>
+<span style="font-weight: bold;">'''+ str2HTML(self.tr('Property','Imóvel')) + ''':</span>
 [IMOVEL]<br>
-<span style="font-weight: bold;">'''+ self.tr('County-State',str2HTML('Município-UF')) + ''':</span>
+<span style="font-weight: bold;">'''+ str2HTML(self.tr('County-State','Município-UF')) + ''':</span>
 [MUNICIPIO] - [UF]<br style="font-weight: bold;">
 <span style="font-weight: bold;">''' + self.tr('GRS','SGR') + ''':</span>
 SIRGAS2000<br>

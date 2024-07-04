@@ -43,6 +43,7 @@ from lftools.geocapt.topogeo import (dd2dms as DD2DMS,
                                      dms2dd as DMS2DD,
                                      azimute, str2HTML,
                                      geod2geoc, geoc2enu,
+                                     meters2degrees,
                                      gpsdate as GPSDATE)
 from lftools import geomag
 from lftools.geocapt.imgs import img2html_resized
@@ -942,6 +943,7 @@ def deedtable2(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
             coordinateTransformer = QgsCoordinateTransform()
             coordinateTransformer.setDestinationCrs(SGR)
             coordinateTransformer.setSourceCrs(SRC)
+            tol = 0.01 # tolerancia 1 cm
 
             for k, coord in enumerate(coords[:-1] if TipoGeometria == 2 else coords):
                 pnt = coordinateTransformer.transform(QgsPointXY(coord.x(), coord.y()))
@@ -952,7 +954,7 @@ def deedtable2(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
                     for feat in layer.getFeatures(QgsFeatureRequest(exp)):
                         # Identificar ponto correspondente
                         pnt_corresp = feat.geometry().asPoint()
-                        if coord.x() == pnt_corresp.x() and coord.y() == pnt_corresp.y():
+                        if abs(coord.x() - pnt_corresp.x()) < tol and abs(coord.y() - pnt_corresp.y()) < tol:
                             prefix = feat[nome]
                             pnts_UTM[k+1] = [coord, prefix, prefix]
                             pnts_GEO[k+1] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), prefix, prefix ]
@@ -973,6 +975,8 @@ def deedtable2(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
             coordinateTransformer = QgsCoordinateTransform()
             coordinateTransformer.setDestinationCrs(CRS_projeto)
             coordinateTransformer.setSourceCrs(SRC)
+            tol = 0.01/111000 # tolerancia 1 cm em graus
+
             for k, coord in enumerate(coords[:-1] if TipoGeometria == 2 else coords):
                 pnt = coordinateTransformer.transform(QgsPointXY(coord.x(), coord.y()))
                 if 'prefixo' in locals():
@@ -982,7 +986,7 @@ def deedtable2(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
                     for feat in layer.getFeatures(QgsFeatureRequest(exp)):
                         # Identificar ponto correspondente
                         pnt_corresp = feat.geometry().asPoint()
-                        if coord.x() == pnt_corresp.x() and coord.y() == pnt_corresp.y():
+                        if abs(coord.x() - pnt_corresp.x()) < tol and abs(coord.y() - pnt_corresp.y()) < tol:
                             prefix = feat[nome]
                             pnts_GEO[k+1] = [coord, prefix, prefix]
                             pnts_UTM[k+1] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), prefix, prefix]
@@ -1277,6 +1281,7 @@ def deedtable3(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
             coordinateTransformer = QgsCoordinateTransform()
             coordinateTransformer.setDestinationCrs(SGR)
             coordinateTransformer.setSourceCrs(SRC)
+            tol = 0.01 # tolerancia 1 cm
 
             for k, coord in enumerate(coords[:-1] if TipoGeometria == 2 else coords):
                 pnt = coordinateTransformer.transform(QgsPointXY(coord.x(), coord.y()))
@@ -1287,7 +1292,7 @@ def deedtable3(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
                     for feat in layer.getFeatures(QgsFeatureRequest(exp)):
                         # Identificar ponto correspondente
                         pnt_corresp = feat.geometry().asPoint()
-                        if coord.x() == pnt_corresp.x() and coord.y() == pnt_corresp.y():
+                        if abs(coord.x() - pnt_corresp.x()) < tol and abs(coord.y() - pnt_corresp.y()) < tol:
                             prefix = feat[nome]
                             pnts_UTM[k+1] = [coord, prefix, prefix]
                             pnts_GEO[k+1] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), prefix, prefix ]
@@ -1308,6 +1313,8 @@ def deedtable3(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
             coordinateTransformer = QgsCoordinateTransform()
             coordinateTransformer.setDestinationCrs(CRS_projeto)
             coordinateTransformer.setSourceCrs(SRC)
+            tol = 0.01/111000 # tolerancia 1 cm em graus
+
             for k, coord in enumerate(coords[:-1] if TipoGeometria == 2 else coords):
                 pnt = coordinateTransformer.transform(QgsPointXY(coord.x(), coord.y()))
                 if 'prefixo' in locals():
@@ -1317,7 +1324,7 @@ def deedtable3(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
                     for feat in layer.getFeatures(QgsFeatureRequest(exp)):
                         # Identificar ponto correspondente
                         pnt_corresp = feat.geometry().asPoint()
-                        if coord.x() == pnt_corresp.x() and coord.y() == pnt_corresp.y():
+                        if abs(coord.x() - pnt_corresp.x()) < tol and abs(coord.y() - pnt_corresp.y()) < tol:
                             prefix = feat[nome]
                             pnts_GEO[k+1] = [coord, prefix, prefix]
                             pnts_UTM[k+1] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), prefix, prefix]
@@ -1617,6 +1624,7 @@ def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature
             coordinateTransformer = QgsCoordinateTransform()
             coordinateTransformer.setDestinationCrs(SGR)
             coordinateTransformer.setSourceCrs(SRC)
+            tol = 0.01 # tolerancia 1 cm
 
             for k, coord in enumerate(coords[:-1] if TipoGeometria == 2 else coords):
                 pnt = coordinateTransformer.transform(QgsPointXY(coord.x(), coord.y()))
@@ -1627,7 +1635,7 @@ def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature
                     for feat in layer.getFeatures(QgsFeatureRequest(exp)):
                         # Identificar ponto correspondente
                         pnt_corresp = feat.geometry().asPoint()
-                        if coord.x() == pnt_corresp.x() and coord.y() == pnt_corresp.y():
+                        if abs(coord.x() - pnt_corresp.x()) < tol and abs(coord.y() - pnt_corresp.y()) < tol:
                             prefix = feat[nome]
                             pnts_UTM[k+1] = [coord, prefix, prefix]
                             pnts_GEO[k+1] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), prefix, prefix ]
@@ -1648,6 +1656,8 @@ def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature
             coordinateTransformer = QgsCoordinateTransform()
             coordinateTransformer.setDestinationCrs(CRS_projeto)
             coordinateTransformer.setSourceCrs(SRC)
+            tol = 0.01/111000 # tolerancia 1 cm em graus
+
             for k, coord in enumerate(coords[:-1] if TipoGeometria == 2 else coords):
                 pnt = coordinateTransformer.transform(QgsPointXY(coord.x(), coord.y()))
                 if 'prefixo' in locals():
@@ -1657,7 +1667,7 @@ def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature
                     for feat in layer.getFeatures(QgsFeatureRequest(exp)):
                         # Identificar ponto correspondente
                         pnt_corresp = feat.geometry().asPoint()
-                        if coord.x() == pnt_corresp.x() and coord.y() == pnt_corresp.y():
+                        if abs(coord.x() - pnt_corresp.x()) < tol and abs(coord.y() - pnt_corresp.y()) < tol:
                             prefix = feat[nome]
                             pnts_GEO[k+1] = [coord, prefix, prefix]
                             pnts_UTM[k+1] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), prefix, prefix]
@@ -2031,6 +2041,7 @@ def geoneighbors(layer_name, testada, borderer_field, prefix, decimal, fontsize,
             coordinateTransformer = QgsCoordinateTransform()
             coordinateTransformer.setDestinationCrs(SGR)
             coordinateTransformer.setSourceCrs(SRC)
+            tol = 0.01 # tolerancia 1 cm
 
             for k, coord in enumerate(coords[:-1]):
                 pnt = coordinateTransformer.transform(QgsPointXY(coord.x(), coord.y()))
@@ -2041,7 +2052,7 @@ def geoneighbors(layer_name, testada, borderer_field, prefix, decimal, fontsize,
                     for feat in layer.getFeatures(QgsFeatureRequest(exp)):
                         # Identificar ponto correspondente
                         pnt_corresp = feat.geometry().asPoint()
-                        if coord.x() == pnt_corresp.x() and coord.y() == pnt_corresp.y():
+                        if abs(coord.x() - pnt_corresp.x()) < tol and abs(coord.y() - pnt_corresp.y()) < tol:
                             prefix = feat[nome]
                             pnts_UTM[k+1] = [coord, prefix, prefix]
                             pnts_GEO[k+1] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), prefix, prefix ]
@@ -2062,6 +2073,8 @@ def geoneighbors(layer_name, testada, borderer_field, prefix, decimal, fontsize,
             coordinateTransformer = QgsCoordinateTransform()
             coordinateTransformer.setDestinationCrs(CRS_projeto)
             coordinateTransformer.setSourceCrs(SRC)
+            tol = 0.01/111000 # tolerancia 1 cm em graus
+            
             for k, coord in enumerate(coords[:-1]):
                 pnt = coordinateTransformer.transform(QgsPointXY(coord.x(), coord.y()))
                 if 'prefixo' in locals():
@@ -2071,7 +2084,7 @@ def geoneighbors(layer_name, testada, borderer_field, prefix, decimal, fontsize,
                     for feat in layer.getFeatures(QgsFeatureRequest(exp)):
                         # Identificar ponto correspondente
                         pnt_corresp = feat.geometry().asPoint()
-                        if coord.x() == pnt_corresp.x() and coord.y() == pnt_corresp.y():
+                        if abs(coord.x() - pnt_corresp.x()) < tol and abs(coord.y() - pnt_corresp.y()) < tol:
                             prefix = feat[nome]
                             pnts_GEO[k+1] = [coord, prefix, prefix]
                             pnts_UTM[k+1] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), prefix, prefix]
