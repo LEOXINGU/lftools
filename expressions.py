@@ -1050,7 +1050,7 @@ def deedtable2(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
         </tr>
         '''
             cabec = '''<tr>
-              <td colspan="6" rowspan="1">''' + str2HTML(tr('Synthetic deed description'.upper(), 'Memorial Sintético'.upper())) + '''[TITULO]</td>
+              <td colspan="6" rowspan="1">''' + str2HTML(tr('Synthetic deed description', 'Memorial Sintético').upper()) + '''[TITULO]</td>
             </tr>
             <tr>
               <td colspan="1" rowspan="2">''' + str2HTML(tr('VERTEX', 'VÉRTICE')) + '''</td>
@@ -1074,7 +1074,7 @@ def deedtable2(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
         '''
 
             cabec = '''<tr>
-              <td colspan="3" rowspan="1">''' + str2HTML(tr('Synthetic deed description'.upper(), 'Memorial Sintético'.upper())) + '''[TITULO]</td>
+              <td colspan="3" rowspan="1">''' + str2HTML(tr('Synthetic deed description', 'Memorial Sintético').upper()) + '''[TITULO]</td>
             </tr>
             <tr>
               <td colspan="1" rowspan="2">''' + str2HTML(tr('VERTEX', 'VÉRTICE')) + '''</td>
@@ -1097,7 +1097,7 @@ def deedtable2(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
             </tr>
             '''
             cabec = '''<tr>
-              <td colspan="6" rowspan="1">''' + str2HTML(tr('Synthetic deed description'.upper(), 'Memorial Sintético'.upper())) + '''[TITULO]</td>
+              <td colspan="6" rowspan="1">''' + str2HTML(tr('Synthetic deed description', 'Memorial Sintético').upper()) + '''[TITULO]</td>
             </tr>
             <tr>
               <td colspan="1" rowspan="2">''' + str2HTML(tr('VERTEX', 'VÉRTICE')) + '''</td>
@@ -1121,7 +1121,7 @@ def deedtable2(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
             '''
 
             cabec = '''<tr>
-              <td colspan="3" rowspan="1">''' + str2HTML(tr('Synthetic deed description'.upper(), 'Memorial Sintético'.upper())) + '''[TITULO]</td>
+              <td colspan="3" rowspan="1">''' + str2HTML(tr('Synthetic deed description', 'Memorial Sintético').upper()) + '''[TITULO]</td>
             </tr>
             <tr>
               <td colspan="1" rowspan="2">''' + str2HTML(tr('VERTEX', 'VÉRTICE')) + '''</td>
@@ -1147,7 +1147,7 @@ def deedtable2(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
             '''
 
             cabec = '''<tr>
-              <td colspan="8" rowspan="1">''' + str2HTML(tr('Synthetic deed description'.upper(), 'Memorial Sintético'.upper())) + '''[TITULO]</td>
+              <td colspan="8" rowspan="1">''' + str2HTML(tr('Synthetic deed description', 'Memorial Sintético').upper()) + '''[TITULO]</td>
             </tr>
             <tr>
               <td colspan="1" rowspan="2">''' + str2HTML(tr('VERTEX', 'VÉRTICE')) + '''</td>
@@ -1175,7 +1175,7 @@ def deedtable2(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
             '''
 
             cabec = '''<tr>
-              <td colspan="5" rowspan="1">''' + str2HTML(tr('Synthetic deed description'.upper(), 'Memorial Sintético'.upper())) + '''[TITULO]</td>
+              <td colspan="5" rowspan="1">''' + str2HTML(tr('Synthetic deed description', 'Memorial Sintético').upper()) + '''[TITULO]</td>
             </tr>
             <tr>
               <td colspan="1" rowspan="2">''' + str2HTML(tr('VERTEX', 'VÉRTICE')) + '''</td>
@@ -1382,7 +1382,7 @@ def deedtable3(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
         </tr>
         '''
             cabec = '''<tr>
-              <td colspan="7" rowspan="1">''' + str2HTML(tr('Synthetic deed description'.upper(), 'Memorial Sintético'.upper())) + '''[TITULO]</td>
+              <td colspan="7" rowspan="1">''' + str2HTML(tr('Synthetic deed description', 'Memorial Sintético').upper()) + '''[TITULO]</td>
             </tr>
             <tr>
               <td colspan="1" rowspan="2">''' + str2HTML(tr('VERTEX', 'VÉRTICE')) + '''</td>
@@ -1408,7 +1408,7 @@ def deedtable3(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
         '''
 
             cabec = '''<tr>
-              <td colspan="4" rowspan="1">''' + str2HTML(tr('Synthetic deed description'.upper(), 'Memorial Sintético'.upper())) + '''[TITULO]</td>
+              <td colspan="4" rowspan="1">''' + str2HTML(tr('Synthetic deed description', 'Memorial Sintético').upper()) + '''[TITULO]</td>
             </tr>
             <tr>
               <td colspan="1" rowspan="2">''' + str2HTML(tr('VERTEX', 'VÉRTICE')) + '''</td>
@@ -1433,7 +1433,7 @@ def deedtable3(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
             </tr>
             '''
             cabec = '''<tr>
-              <td colspan="7" rowspan="1">''' + str2HTML(tr('Synthetic deed description'.upper(), 'Memorial Sintético'.upper())) + '''[TITULO]</td>
+              <td colspan="7" rowspan="1">''' + str2HTML(tr('Synthetic deed description', 'Memorial Sintético').upper()) + '''[TITULO]</td>
             </tr>
             <tr>
               <td colspan="1" rowspan="2">''' + str2HTML(tr('VERTEX', 'VÉRTICE')) + '''</td>
@@ -1459,7 +1459,7 @@ def deedtable3(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
             '''
 
             cabec = '''<tr>
-              <td colspan="4" rowspan="1">''' + str2HTML(tr('Synthetic deed description'.upper(), 'Memorial Sintético'.upper())) + '''[TITULO]</td>
+              <td colspan="4" rowspan="1">''' + str2HTML(tr('Synthetic deed description', 'Memorial Sintético').upper()) + '''[TITULO]</td>
             </tr>
             <tr>
               <td colspan="1" rowspan="2">''' + str2HTML(tr('VERTEX', 'VÉRTICE')) + '''</td>
@@ -1487,7 +1487,7 @@ def deedtable3(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
             '''
 
             cabec = '''<tr>
-              <td colspan="9" rowspan="1">''' + str2HTML(tr('Synthetic deed description'.upper(), 'Memorial Sintético'.upper())) + '''[TITULO]</td>
+              <td colspan="9" rowspan="1">''' + str2HTML(tr('Synthetic deed description', 'Memorial Sintético').upper()) + '''[TITULO]</td>
             </tr>
             <tr>
               <td colspan="1" rowspan="2">''' + str2HTML(tr('VERTEX', 'VÉRTICE')) + '''</td>
@@ -1517,7 +1517,7 @@ def deedtable3(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
             '''
 
             cabec = '''<tr>
-              <td colspan="6" rowspan="1">''' + str2HTML(tr('Synthetic deed description'.upper(), 'Memorial Sintético'.upper())) + '''[TITULO]</td>
+              <td colspan="6" rowspan="1">''' + str2HTML(tr('Synthetic deed description', 'Memorial Sintético').upper()) + '''[TITULO]</td>
             </tr>
             <tr>
               <td colspan="1" rowspan="2">''' + str2HTML(tr('VERTEX', 'VÉRTICE')) + '''</td>
@@ -1751,11 +1751,11 @@ def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature
             descr_pnt_ini = str(descr_pnt_ini)
 
             # conteudo do memorial
-            text_ini = tr('<p style="text-align: justify; font-size: [FONTSIZE]px; ">The description of this perimeter begins at the vertex <b>[Vn]</b>, with coordinates ' + estilo_vertices + ', [descr_pnt_ini] from this, with the following flat azimuths and distances: ',
-                          '<p style="text-align: justify; font-size: [FONTSIZE]px; ">Inicia-se a descrição deste perímetro no vértice <b>[Vn]</b>, de coordenadas ' + estilo_vertices + ', [descr_pnt_ini] deste, segue com os seguintes azimutes planos e distâncias: ')
+            text_ini = tr('<p style="text-align: justify; font-size: [FONTSIZE]px; ">The description of this perimeter begins at the vertex <b>[Vn]</b>, with coordinates [XXX], [descr_pnt_ini] from this, with the following flat azimuths and distances: ',
+                          '<p style="text-align: justify; font-size: [FONTSIZE]px; ">Inicia-se a descrição deste perímetro no vértice <b>[Vn]</b>, de coordenadas [XXX], [descr_pnt_ini] deste, segue com os seguintes azimutes planos e distâncias: ').replace('[XXX]', estilo_vertices)
 
-            text_meio = tr('[Azn] and [Dn]m up to the vertex <b>[Vn]</b>, with coordinates ' + estilo_vertices + ', ',
-                           '[Azn] e [Dn]m até o vértice <b>[Vn]</b>, de coordenadas ' + estilo_vertices + ', ')
+            text_meio = tr('[Azn] and [Dn]m up to the vertex <b>[Vn]</b>, with coordinates [XXX], ',
+                           '[Azn] e [Dn]m até o vértice <b>[Vn]</b>, de coordenadas [XXX], ').replace('[XXX]', estilo_vertices)
 
             if TipoGeometria == 2:
                 text_fim = tr('''the starting point for the description of this perimeter.
@@ -1832,14 +1832,14 @@ def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature
         except: # >>>>>>>>>>>>>>>>> puxar nome dos confrontantes
 
             # conteudo do memorial
-            text_ini = tr('<p style="text-align: justify; font-size: [FONTSIZE]px; ">The description of this perimeter begins at the vertex <b>[Vn]</b>, with coordinates ' + estilo_vertices + ', ',
-                          '<p style="text-align: justify; font-size: [FONTSIZE]px; ">Inicia-se a descrição deste perímetro no vértice <b>[Vn]</b>, de coordenadas ' + estilo_vertices + ', ')
+            text_ini = tr('<p style="text-align: justify; font-size: [FONTSIZE]px; ">The description of this perimeter begins at the vertex <b>[Vn]</b>, with coordinates [XXX], ',
+                          '<p style="text-align: justify; font-size: [FONTSIZE]px; ">Inicia-se a descrição deste perímetro no vértice <b>[Vn]</b>, de coordenadas [XXX], ').replace('[XXX]', estilo_vertices)
 
-            text_meio1 = tr('from this, it continues adjoining with [ADJOINER], with the following flat azimuths and distances: [Azn] and [Dn]m up to the vertex <b>[Vn]</b>, with coordinates ' + estilo_vertices + ', ',
-                            'deste, segue confrontando com [ADJOINER], com os seguintes azimutes planos e distâncias: [Azn] e [Dn]m até o vértice <b>[Vn]</b>, de coordenadas ' + estilo_vertices + ', ')
+            text_meio1 = tr('from this, it continues adjoining with [ADJOINER], with the following flat azimuths and distances: [Azn] and [Dn]m up to the vertex <b>[Vn]</b>, with coordinates [XXX], ',
+                            'deste, segue confrontando com [ADJOINER], com os seguintes azimutes planos e distâncias: [Azn] e [Dn]m até o vértice <b>[Vn]</b>, de coordenadas [XXX], ').replace('[XXX]', estilo_vertices)
 
-            text_meio2 = tr('[Azn] and [Dn]m up to the vertex <b>[Vn]</b>, with coordinates ' + estilo_vertices + ', ',
-                            '[Azn] e [Dn]m até o vértice <b>[Vn]</b>, de coordenadas ' + estilo_vertices + ', ')
+            text_meio2 = tr('[Azn] and [Dn]m up to the vertex <b>[Vn]</b>, with coordinates [XXX], ',
+                            '[Azn] e [Dn]m até o vértice <b>[Vn]</b>, de coordenadas [XXX], ').replace('[XXX]', estilo_vertices)
 
             text_fim = tr('''the starting point for the description of this perimeter.
             All coordinates described here are georeferenced to the Geodetic Reference System (GRS) (SGR) <b>[SGR]</b>, and are projected in the system <b>[PROJ]</b>,
@@ -2074,7 +2074,7 @@ def geoneighbors(layer_name, testada, borderer_field, prefix, decimal, fontsize,
             coordinateTransformer.setDestinationCrs(CRS_projeto)
             coordinateTransformer.setSourceCrs(SRC)
             tol = 0.01/111000 # tolerancia 1 cm em graus
-            
+
             for k, coord in enumerate(coords[:-1]):
                 pnt = coordinateTransformer.transform(QgsPointXY(coord.x(), coord.y()))
                 if 'prefixo' in locals():
