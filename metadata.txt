@@ -6,7 +6,7 @@
 name=LF Tools
 qgisMinimumVersion=3.10
 description=Tools for cartographic production, surveying, database management, digital image processing and spatial analysis.
-version=1.12.11
+version=1.12.12
 author=Leandro França
 email=suporte@geoone.com.br
 
@@ -21,6 +21,7 @@ repository=https://github.com/LEOXINGU/lftools
 hasProcessingProvider=yes
 # Uncomment the following line and add your changelog:
 # changelog=
+  1.12.12 - Translation to Spanish
   1.12.11 - Improvements to calculate Local Tangent Plane measurements
   1.12.10 - Improvements in documentation tools with new coordinates types
   1.12.9 - Anti-dumb condition for the Table to point layer tool
