@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 
 dic = {
- 'Elaboration of Deed Description based on vector layers that define a property survey.': {'es': 'Elaboración de Descripción de Escritura en base a capas vectoriales que definen un levantamiento de propiedad.'},
+ 'Elaboration of Deed Description based on vector layers that define a property survey.': {'es': 'Elaboración de la Descripción de la Escritura basada en capas vectoriales que definen un levantamiento de la propiedad.'},
  'This tool works properly only with data in "TopoGeo" modeling.': {'es': 'Esta herramienta funciona correctamente sólo con datos en el modelado "TopoGeo".'},
  'Click here for understanding this data model.': {'es': 'Haga clic aquí para comprender este modelo de datos.'},
- 'Deed description': {'es': 'Descripción de la escritura'},
- 'Documents': {'es': 'Documentos'},
+ 'Deed description': {'es': 'Descripción de Escritura'},
+ 'Documents': {'es': 'Documentación'},
  'Author: Leandro Franca': {'es': 'Autor: Leandro Franca'},
- 'Boundary Survey Points': {'es': 'Puntos de estudio de límites'},
- 'Neighborhood Dividing Lines': {'es': 'Líneas divisorias de vecindarios'},
- 'Property Polygon': {'es': 'Polígono de propiedad'},
+ 'Boundary Survey Points': {'es': 'Puntos de levantamiento de límites'},
+ 'Neighborhood Dividing Lines': {'es': 'Líneas divisorias'},
+ 'Property Polygon': {'es': 'Polígono de la propiedad'},
  ' without suffix': {'es': ' sin sufijo'},
  'Coordinates': {'es': 'Coordenadas'},
- 'Project CRS, area in m²': {'es': 'Proyecto CRS, superficie en m²'},
+ 'Project CRS, area in m²': {'es': 'Proyecto CRS, área en m²'},
  'Project CRS, area in ha': {'es': 'Proyecto CRS, área en ha'},
  'Local Tangent Plane (LTP), area in m²': {'es': 'Plano tangente local (LTP), área en m²'},
  'Local Tangent Plane (LTP), area in ha': {'es': 'Plano tangente local (LTP), área en ha'},
@@ -20,7 +20,7 @@ dic = {
  'LTP, Puissant azimuth, area in ha': {'es': 'LTP, azimut de Puissant, área en ha'},
  'Logo (JPEG)': {'es': 'Logotipo (JPEG)'},
  'CARTOGRAPHY & SURVEYING': {'es': 'CARTOGRAFÍA Y TOPOGRAFÍA'},
- 'Decimal places': {'es': 'Lugares decimales'},
+ 'Decimal places': {'es': 'Posiciones decimales'},
  'Verify map projection': {'es': 'Verificar proyección cartográfica'},
  'Verify attributes': {'es': 'Verificar atributos'},
  'Verify topology': {'es': 'Verificar topología'},
@@ -28,11 +28,11 @@ dic = {
  'Database in the TopoGeo model...': {'es': 'Base de datos en el modelo TopoGeo...'},
  'Check that your layers have the correct field names for the TopoGeo model! More information: https://bit.ly/3FDNQGC': {'es': '¡Compruebe que sus capas tengan los nombres de campo correctos para el modelo TopoGeo! Más información: https://bit.ly/3FDNQGC'},
  'Input coordinates must be geodetic (longitude and latitude)!': {'es': '¡Las coordenadas de entrada deben ser geodésicas (longitud y latitud)!'},
- 'Validating layer attributes...': {'es': 'Validando atributos de capa...'},
- 'The code attribute must be filled in for all features!': {'es': '¡El atributo de código debe completarse para todas las funciones!'},
- 'The point sequence field must be filled in correctly!': {'es': '¡El campo de secuencia de puntos debe completarse correctamente!'},
+ 'Validating layer attributes...': {'es': 'Validando los atributos de la capa...'},
+ 'The code attribute must be filled in for all features!': {'es': '¡El atributo de código debe estar lleno para todas las entidades!'},
+ 'The point sequence field must be filled in correctly!': {'es': '¡El campo de secuencia de puntos debe estar lleno correctamente!'},
  'Validating topology of geometries...': {'es': 'Validando topología de geometrías...'},
- 'Sequencing "boundary_element_l" features...': {'es': 'Secuenciación de características "boundary_element_l"...'},
+ 'Sequencing "boundary_element_l" features...': {'es': 'Secuenciando entidades "boundary_element_l"...'},
  'The Project CRS must be projected!': {'es': '¡El Proyecto CRS debe ser proyectado!'},
  'Project CRS is {}.': {'es': 'El proyecto CRS es {}.'},
  'The number of points must be greater than 2!': {'es': '¡El número de puntos debe ser mayor que 2!'},
@@ -91,7 +91,7 @@ dic = {
 'Cadastre' : {'es': 'Catastro'},
 'Parcels' : {'es': 'Parcelas '},
 'Adjoiners' : {'es': 'Adyacentes'},
-'Feature id {} is multipart! Multipart features are not allowed!' : {'es': '¡La característica con ID {} es multipart! ¡No se permiten características multipart! '},
+'Feature id {} is multipart! Multipart features are not allowed!' : {'es': '¡La entidade con ID {} es multipart! ¡No se permiten entidades multipart! '},
 'Creating spatial index...' : {'es': 'Creando índice espacial...'},
 'Identifying adjoining lines...' : {'es': 'Identificando líneas contiguas...'},
 'Creating new layer...' : {'es': 'Creando nueva capa...'},
@@ -132,7 +132,7 @@ dic = {
 'Initial count' : {'es': 'Recuento inicial'},
 'Save Editions' : {'es': 'Guardar ediciones'},
 'Reading features...' : {'es': 'Funciones de lectura...'},
-'Sorting the features...' : {'es': 'Ordenando las características...'},
+'Sorting the features...' : {'es': 'Ordenando las entidades...'},
 'Orient polygons' : {'es': 'Orientar polígonos'},
 'Polygon layer' : {'es': 'capa de polígono'},
 'Clockwise' : {'es': 'Agujas del reloj'},
@@ -295,7 +295,7 @@ dic = {
 'Move' : {'es': 'Mover'},
 'Option' : {'es': 'Opción'},
 'Destination folder for photos' : {'es': 'Carpeta de destino para fotos.'},
-'At least one feature must be selected!' : {'es': '¡Se debe seleccionar al menos una característica!'},
+'At least one feature must be selected!' : {'es': '¡Se debe seleccionar al menos una entidade!'},
 'Generate GCP file from layer' : {'es': 'Generar archivo GCP desde la capa'},
 'Point Layer' : {'es': 'Capa de puntos'},
 'GCP name' : {'es': 'nombre de GCP'},
@@ -403,8 +403,8 @@ dic = {
 'Source field' : {'es': 'Campo fuente'},
 'Target layer for attribute' : {'es': 'Capa de destino para atributo'},
 'Destination field' : {'es': 'Campo de destino'},
-'from target feature' : {'es': 'desde la característica objetivo'},
-'from origin feature' : {'es': 'desde la característica de origen'},
+'from target feature' : {'es': 'desde la entidade objetivo'},
+'from origin feature' : {'es': 'desde la entidade de origen'},
 'Intersection with the centroid (Topology)' : {'es': 'Intersección con el centroide (Topología)'},
 'Filling attributes...' : {'es': 'Atributos de relleno...'},
 'Measure layers' : {'es': 'Medir capas'},
@@ -465,8 +465,8 @@ dic = {
 'Central points' : {'es': 'Puntos centrales'},
 'datetime' : {'es': 'fecha y hora'},
 'Check the input layer!' : {'es': '¡Comprueba la capa de entrada!'},
-'Calculating central features...' : {'es': 'Calculando características centrales...'},
-'Backup database' : {'es': 'Base de datos de respaldo'},
+'Calculating central features...' : {'es': 'Calculando entidades centrales...'},
+'Backup database' : {'es': 'Backup de base de datos'},
 'PostGIS' : {'es': 'PostGIS'},
 'Folder to save the backup file' : {'es': 'Carpeta para guardar el archivo de copia de seguridad'},
 'Database name' : {'es': 'Nombre de la base de datos'},
@@ -876,7 +876,7 @@ dic = {
 'Tolerance in degrees' : {'es': 'Tolerancia en grados'},
 'Merged lines' : {'es': 'Líneas fusionadas'},
 'The input angle must be between 0 and 90 degrees!' : {'es': '¡El ángulo de entrada debe estar entre 0 y 90 grados!'},
-'Calculating feature informations...' : {'es': 'Calculando información de características...'},
+'Calculating feature informations...' : {'es': 'Calculando información de entidades...'},
 'Merging lines...' : {'es': 'Fusionando líneas...'},
 'Saving output...' : {'es': 'Guardando salida...'},
 'Extend lines' : {'es': 'Extender líneas'},
@@ -974,7 +974,7 @@ dic = {
 'Calculates the adjusted coordinates from angles and horizontal distances of a Closed Polygonal.' : {'es': 'Calcula las coordenadas ajustadas a partir de ángulos y distancias horizontales de un Poligonal Cerrado.'},
 'This tool calculates the coordinates (X, Y, Z) of a point from azimuth and zenith angle measurements observed from two or more stations with known coordinates using the Foward Intersection Method adjusted by the Minimum Distances.' : {'es': 'Esta herramienta calcula las coordenadas (X, Y, Z) de un punto a partir de mediciones de ángulos de acimut y cenit observadas desde dos o más estaciones con coordenadas conocidas utilizando el método de intersección directa ajustado por las distancias mínimas.'},
 'This algorithm performs the traverse adjustments of a framed polygonal by least squares method, where  the distances, angles, and directions observations are adjusted simultaneously, providing the most probable values for the given data set.  Futhermore, the observations can be rigorously weighted based on their estimated errors and adjusted accordingly.' : {'es': 'Este algoritmo realiza los ajustes transversales de un poligonal enmarcado mediante el método de mínimos cuadrados, donde las observaciones de distancias, ángulos y direcciones se ajustan simultáneamente, proporcionando los valores más probables para el conjunto de datos dado. Además, las observaciones pueden ponderarse rigurosamente en función de sus errores estimados y ajustarse en consecuencia.'},
-'Creates ellipses based on the covariance matrix to summarize the spatial characteristics of point type geographic features: central tendency, dispersion, and directional trends.' : {'es': 'Crea elipses basadas en la matriz de covarianza para resumir las características espaciales de las características geográficas de tipo puntual: tendencia central, dispersión y tendencias direccionales.'},
+'Creates ellipses based on the covariance matrix to summarize the spatial characteristics of point type geographic features: central tendency, dispersion, and directional trends.' : {'es': 'Crea elipses basadas en la matriz de covarianza para resumir las características espaciales de las entidades geográficas de tipo puntual: tendencia central, dispersión y tendencias direccionales.'},
 'Generate gaussian (normal) random points in 2D space with a given mean position (X0, Y0), standard deviation for X and Y, and rotation angle.' : {'es': 'Genere puntos aleatorios gaussianos (normales) en el espacio 2D con una posición media determinada (X0, Y0), desviación estándar para X e Y y ángulo de rotación.'},
 'Generates a <b>point layer</b> from a coordinate table, whether it comes from a Microsoft <b>Excel</b> spreadsheet (.xls), Open Document Spreadsheet (.ods), or even attributes from another layer.' : {'es': 'Genera una <b>capa de puntos</b> a partir de una tabla de coordenadas, ya sea que provenga de una hoja de cálculo de Microsoft <b>Excel</b> (.xls), una hoja de cálculo de documento abierto (.ods) o incluso atributos de otra capa. .'},
 "This tool calculates the line feature's lengths and polygon feature's perimeter and area in virtual fields for all vector layers." : {'es': 'Esta herramienta calcula las longitudes de la entidad de línea y el perímetro y el área de la entidad poligonal en campos virtuales para todas las capas vectoriales.'},
@@ -995,7 +995,7 @@ dic = {
 'Extends lines at their <b>start</b> and/or <b>end</b> points.' : {'es': 'Extiende líneas en sus puntos <b>inicio</b> y/o <b>final</b>.'},
 'This algorithm calculates the inner and outer angles of the polygon vertices of a layer. The output layer corresponds to the points with the calculated angles stored in the respective attributes.' : {'es': 'Este algoritmo calcula los ángulos interior y exterior de los vértices del polígono de una capa. La capa de salida corresponde a los puntos con los ángulos calculados almacenados en los atributos respectivos.'},
 'Inverts vertex order for polygons and lines.' : {'es': 'Invierte el orden de los vértices de polígonos y líneas.'},
-'This script fills a certain attribute of the features of a layer of points according to its sequence in relation to the polygon of another layer.' : {'es': 'Este script rellena un determinado atributo de las características de una capa de puntos según su secuencia en relación al polígono de otra capa.'},
+'This script fills a certain attribute of the features of a layer of points according to its sequence in relation to the polygon of another layer.' : {'es': 'Este script rellena un determinado atributo de las entidades de una capa de puntos según su secuencia en relación al polígono de otra capa.'},
 'This tool generates a Report for the Analytical Calculation of Area, Azimuths, Polygon Sides, UTM Projection and Geodetic Coordinates of a Property.' : {'es': 'Esta herramienta genera un Informe para el Cálculo Analítico de Área, Acimutes, Lados de Polígono, Proyección UTM y Coordenadas Geodésicas de una Propiedad.'},
 'Elaboration of Deed Description based on vector layers that define a property survey.' : {'es': 'Elaboración de Descripción de Escritura en base a capas vectoriales que definen un levantamiento de propiedad.'},
 'This tool generates report(s) with the informations about a geodetic landmarks automatically from the "reference_point_p" layer.' : {'es': 'Esta herramienta genera informes con la información sobre puntos de referencia geodésicos automáticamente desde la capa "reference_point_p".'},
@@ -1025,21 +1025,21 @@ dic = {
 'The source and destination fields must be indicated to fill in the attributes.' : {'es': 'Se deben indicar los campos de origen y destino para completar los atributos.'},
 'Converts the red, green, and blue values of an RGB image to Hue (H), Saturation (S), and Value (V) images.' : {'es': 'Convierte los valores de rojo, verde y azul de una imagen RGB en imágenes de Tono (H), Saturación (S) y Valor (V).'},
 'This tool fills in a numeric attribute following a geographic criterion, for example: from north to south and west to east.' : {'es': 'Esta herramienta completa un atributo numérico siguiendo un criterio geográfico, por ejemplo: de norte a sur y de oeste a este.'},
-'Note: This algorithm uses the feature centroid to sort geographically.' : {'es': 'Nota: Este algoritmo utiliza el centroide de características para ordenar geográficamente.'},
+'Note: This algorithm uses the feature centroid to sort geographically.' : {'es': 'Nota: Este algoritmo utiliza el centroide de entidades para ordenar geográficamente.'},
 'Generates front lot lines from a polygon layer of parcels.' : {'es': 'Genera líneas frontales de lote a partir de una capa poligonal de parcelas.'},
 'This tool returns the central tendency point(s) for clustering points of entry points.' : {'es': 'Esta herramienta devuelve los puntos de tendencia central para los puntos de agrupación de puntos de entrada.'},
 'Performs the reconstitution of a Deed Description using Regular Expressions (RegEx).' : {'es': 'Realiza la reconstitución de una Descripción de Escritura utilizando Expresiones Regulares (RegEx).'},
 'Creates new vertices between adjacent polygons to ensure perfect connectivity (topology) between them.' : {'es': 'Crea nuevos vértices entre polígonos adyacentes para asegurar una perfecta conectividad (topología) entre ellos.'},
 'Loads a POS file (.pos) from GNSS processing as a point layer.' : {'es': 'Carga un archivo POS (.pos) desde el procesamiento GNSS como una capa de puntos.'},
-'This script fills in a certain attribute of the features of a layer of lines according to their connectivity sequence between them.' : {'es': 'Este script completa un determinado atributo de las características de una capa de líneas según su secuencia de conectividad entre ellas.'},
+'This script fills in a certain attribute of the features of a layer of lines according to their connectivity sequence between them.' : {'es': 'Este script completa un determinado atributo de las entidades de una capa de líneas según su secuencia de conectividad entre ellas.'},
 'This tool generates a polygon layer from a point layer and its filled order (sequence) attributes.' : {'es': 'Esta herramienta genera una capa de polígono a partir de una capa de puntos y sus atributos de orden (secuencia) rellenos.'},
 'This tool generates a polygon layer from a connected line layer.' : {'es': 'Esta herramienta genera una capa de polígono a partir de una capa de líneas conectadas.'},
 'Performs base RTK correction using post-process coordinates, for example by PPP, and applies corrections to all rover points.' : {'es': 'Realiza la corrección RTK base utilizando coordenadas de posprocesamiento, por ejemplo mediante PPP, y aplica correcciones a todos los puntos móviles.'},
-'Measures the degree to which features are concentrated or dispersed around the geometric mean center.' : {'es': 'Mide el grado en que las características se concentran o dispersan alrededor del centro de la media geométrica.'},
+'Measures the degree to which features are concentrated or dispersed around the geometric mean center.' : {'es': 'Mide el grado en que las entidades se concentran o dispersan alrededor del centro de la media geométrica.'},
 'This tool performs the horizontal and vertical adjustment of Cloud of Points in (TXT) format using LineStringZ vectors.' : {'es': 'Esta herramienta realiza el ajuste horizontal y vertical de Nube de Puntos en formato (TXT) utilizando vectores LineStringZ.'},
 'This tool exports a Digital Elevation Model (DEM) as a text file (txt) for later transformation into a point cloud.' : {'es': 'Esta herramienta exporta un Modelo de Elevación Digital (DEM) como un archivo de texto (txt) para su posterior transformación en una nube de puntos.'},
 'Optionally, the associated Orthomosaic RGB colors can be taken to the text file.' : {'es': 'Opcionalmente, los colores RGB del Ortomosaico asociados se pueden llevar al archivo de texto.'},
-'Generates adjoiner lines from a polygon layer of parcels.' : {'es': 'Genera líneas contiguas a partir de una capa poligonal de parcelas.'},
+'Generates adjoiner lines from a polygon layer of parcels.' : {'es': 'Genera líneas adyacentes a partir de una capa poligonal de parcelas.'},
 'Identifies the overlap between features of a polygon type layer.' : {'es': 'Identifica la superposición entre entidades de una capa de tipo polígono.'},
 'This tool performs the difference between two Digital Elevation Models (DEM).' : {'es': 'Esta herramienta realiza la diferencia entre dos Modelos Digitales de Elevación (DEM).'},
 'Minuend is the raster to be subtracted.' : {'es': 'Minuendo es el ráster que se va a restar.'},
@@ -1066,5 +1066,181 @@ from which all azimuths and distances, area and perimeter were calculated.</p>''
  from which all azimuths and distances, area and perimeter were calculated.</p>''': {'es': '''el último punto de este perímetro.
  Todas las coordenadas aquí descritas están georreferenciadas al Sistema de Referencia Geodésica (GRS) (SGR) <b>[SGR]</b>, y se proyectan en el sistema <b>[PROJ]</b>,
  a partir del cual se calcularon todos los acimutes y distancias, área y perímetro.</p>'''},
+
+'''This tool fills in a numeric attribute following a geographic criterion, for example: from north to south and west to east.
+Note: This algorithm uses the feature centroid to sort geographically.''': {'es': '''Esta herramienta completa un atributo numérico siguiendo un criterio geográfico, por ejemplo: de norte a sur y de oeste a este.
+Nota: Este algoritmo utiliza el centroide de entidades para ordenar geográficamente.'''},
+
+'''This tool exports a Digital Elevation Model (DEM) as a text file (txt) for later transformation into a point cloud.
+Optionally, the associated Orthomosaic RGB colors can be taken to the text file.''': {'es': '''Esta herramienta exporta un Modelo de Elevación Digital (DEM) como un archivo de texto (txt) para su posterior transformación en una nube de puntos.
+Opcionalmente, los colores RGB de Orthomosaic asociados se pueden llevar al archivo de texto.'''},
+
+'''This tool performs the difference between two Digital Elevation Models (DEM).
+Minuend is the raster to be subtracted.
+Subtrahend is the rastar that is subtracting.''': {'es': '''Esta herramienta realiza la diferencia entre dos Modelos Digitales de Elevación (DEM).
+Minuendo es el ráster que se va a restar.
+El sustraendo es el ráster que se está restando.'''},
+
+'''This tool applies the filtering technique in the Raster pixel by pixel, based on the gray level values of neighboring pixels.
+The filtering process is done using matrices called masks (or kernel), which are applied to the image.''': {'es': '''Esta herramienta aplica la técnica de filtrado en el Raster píxel a píxel, en función de los valores del nivel de gris de los píxeles vecinos.
+El proceso de filtrado se realiza mediante matrices llamadas máscaras (o kernel), que se aplican a la imagen.'''},
+
+'''This tool generates a layer of points with <b>Spot Elevations</b> from a <b>Digital Terrain Model</b> and a vector layer of <b>contour lines</b>.''': {'es': '''Esta herramienta genera una capa de puntos con <b>Elevaciones puntuales</b> a partir de un <b>Modelo digital de terreno</b> y una capa vectorial de <b>líneas de contorno</b>.'''},
+
+'''Calculates the sigmax, sigmay and sigmaz precisions (when available) of the closest points to each reference point considering a maximum distance or a minimum number of closest points.
+Output: Multipoint layer with positional accuracies in meters and other statistics.
+1) Max distance: get all points within the distance.
+2) Minimum quantity: get all the closest points, regardless of the maximum distance.
+3) Maximum distance and minimum quantity: get only the closest points that are within the maximum distance.''': {'es': '''Calcula las precisiones sigmax, sigmay y sigmaz (cuando estén disponibles) de los puntos más cercanos a cada punto de referencia considerando una distancia máxima o un número mínimo de puntos más cercanos.
+Salida: Capa multipunto con precisiones posicionales en metros y otras estadísticas.
+1) Distancia máxima: obtén todos los puntos dentro de la distancia.
+2) Cantidad mínima: consigue todos los puntos más cercanos, independientemente de la distancia máxima.
+3) Distancia máxima y cantidad mínima: obtenga solo los puntos más cercanos que estén dentro de la distancia máxima.'''},
+
+'''This tool returns the central tendency point(s) for clustering points of entry points.
+The following statistics can be obtained by grouping:
+◼️ <b>Mean Center</b>: calculation of the average in X and Y
+◼️ <b>Median Center</b>: calculation of the median in X and Y (less influenced by outliers)
+◼️ <b>Central Feature</b>: identification of the central feature (smallest Euclidean distance)
+Note: Layer in a projected SRC gets more accurate results.''': {'es': '''Esta herramienta devuelve los puntos de tendencia central para agrupar puntos de puntos de entrada.
+Las siguientes estadísticas se pueden obtener agrupando:
+◼️ <b>Centro medio</b>: cálculo del promedio en X e Y
+◼️ <b>Centro de la mediana</b>: cálculo de la mediana en X e Y (menos influenciado por valores atípicos)
+◼️ <b>Entidad central</b>: identificación de la entidad central (distancia euclidiana más pequeña)
+Nota: La capa en un SRC proyectado obtiene resultados más precisos.'''},
+
+'''Loads a POS file (.pos) from GNSS processing as a point layer.
+Compatibility: RTKLIB, IBGE-PPP.
+Types:
+◼️ All processed points
+◼️ Last point''': {'es': '''Carga un archivo POS (.pos) desde el procesamiento GNSS como una capa de puntos.
+Compatibilidad: RTKLIB, IBGE-PPP.
+Tipos:
+◼️ Todos los puntos procesados
+◼️ Último punto'''},
+
+'''It finds the central points (vertices) of the concentrations of points surveyed by the Kinematic method (stop and go) from the processing of GNSS data.
+Input data:
+◼️ GNSS point layer from RTKLIB or IBGE-PPP from .pos file
+◼️ Minimum time to survey the point in minutes
+◼️ Tolerance in centimeters to consider the static point''': {'es': '''Encuentra los puntos centrales (vértices) de las concentraciones de puntos levantados por el método Cinemático (stop and go) a partir del procesamiento de datos GNSS.
+Datos de entrada:
+◼️ Capa de puntos GNSS de RTKLIB o IBGE-PPP desde un archivo .pos
+◼️ Tiempo mínimo para inspeccionar el punto en minutos
+◼️ Tolerancia en centímetros para considerar el punto estático'''},
+
+'''Loads a NMEA file (protocol 0183) from GNSS receivers as a point layer.
+Modes:
+◼️ Kinematic - generates all tracked points with their accuracies (PDOP, HDOP and VDOP) and number of satellites.
+◼️ Static - calculates the mean and standard deviation of the observed points, for all points or only for fixed solution points (best result).''': {'es': '''Carga un archivo NMEA (protocolo 0183) desde receptores GNSS como una capa de puntos.
+Modos:
+◼️ Cinemática: genera todos los puntos rastreados con sus precisiones (PDOP, HDOP y VDOP) y número de satélites.
+◼️ Estático: calcula la media y la desviación estándar de los puntos observados, para todos los puntos o solo para los puntos de solución fijos (mejor resultado).'''},
+
+'This tool creates a <b>backup</b> file in the "<b>.sql</b>" format for a PostgreSQL server database.': {'es': 'Esta herramienta crea un archivo <b>copia de seguridad</b> en el formato "<b>.sql</b>" para una base de datos del servidor PostgreSQL.'},
+
+'''This tool changes the encoding type of a .sql file. A new file will be created with the user-defined encoding.
+In some cases, this is a possible solution  to transfer data between different operating systems, for example from Windows to Linux, and vice versa.''': {'es': '''Esta herramienta cambia el tipo de codificación de un archivo .sql. Se creará un nuevo archivo con la codificación definida por el usuario.
+En algunos casos, esta es una posible solución para transferir datos entre diferentes sistemas operativos, por ejemplo de Windows a Linux, y viceversa.'''},
+
+'''This tool allows you to rename a PostgreSQL database.
+Note: To run this operation, the database must be disconnected. This means, that it must not be opened in any software (PgAdmin, QGIS, etc.).''': {'es': '''Esta herramienta le permite cambiar el nombre de una base de datos PostgreSQL.
+Nota: Para ejecutar esta operación, la base de datos debe estar desconectada. Esto significa que no debe abrirse en ningún software (PgAdmin, QGIS, etc.).'''},
+
+'''This tool allows the user to clone any PostgreSQL database. From a model database, another database that has exactly the same (schema and instances) is generated with a new name defined by the operator.
+Note: To create more than one "clone", the new database names must be filled and separated by "comma".''': {'es': '''Esta herramienta permite al usuario clonar cualquier base de datos PostgreSQL. A partir de una base de datos modelo se genera otra base de datos que tiene exactamente lo mismo (esquema e instancias) con un nuevo nombre definido por el operador.
+Nota: Para crear más de un "clon", los nombres de las nuevas bases de datos deben completarse y separarse por "coma".'''},
+
+'''This tool allows you to delete / drop any PostgreSQL database.
+Notes:
+- To run this operation, the database must be disconnected. This means, that it must not be opened in any software (PgAdmin, QGIS, etc.).
+- To delete more than one database, the names must be filled and separated by "comma".
+<p style="color:red;">Attention: This operation is irreversible, so be sure before running it!</p>''': {'es': '''Esta herramienta le permite eliminar cualquier base de datos PostgreSQL.
+Notas:
+- Para ejecutar esta operación, la base de datos debe estar desconectada. Esto significa que no debe abrirse en ningún software (PgAdmin, QGIS, etc.).
+- Para eliminar más de una base de datos, se deben llenar los nombres y separarlos por "coma".
+<p style="color:red;">Atención: ¡Esta operación es irreversible, así que asegúrese antes de ejecutarla!</p>'''},
+
+'''Performs an arithmetic operation on the bands of a raster. The predefined formula is used to calculate the Green Leaf Index (GLI) for a RGB raster. However you can enter your own formula.
+Examples:
+NDVI with RGN raster: ( b3 - b1) / (b3 + b1)
+NDWI with RGN raster: ( b2 - b3) / (b2 + b3)
+GLI with RGB raster: (2*b2 - b1 - b3) / (2*b2 + b1 + b3)
+VARI with RGB raster: (b2 - b1) / (b2 + b1 - b3)
+VIgreen with RGB raster: (b2 - b1) / (b2 + b1)
+Obs.:
+The operators supported are:  + , - , * , /''': {'es': '''Realiza una operación aritmética sobre las bandas de un ráster. La fórmula predefinida se utiliza para calcular el Green Leaf Index (GLI) para un ráster RGB. Sin embargo, puede ingresar su propia fórmula.
+Ejemplos:
+NDVI con ráster RGN: ( b3 - b1) / (b3 + b1)
+NDWI con ráster RGN: ( b2 - b3) / (b2 + b3)
+GLI con ráster RGB: (2*b2 - b1 - b3) / (2*b2 + b1 + b3)
+VARI con ráster RGB: (b2 - b1) / (b2 + b1 - b3)
+VIgreen con ráster RGB: (b2 - b1) / (b2 + b1)
+Obs.:
+Los operadores admitidos son: + , - , * , /'''},
+
+'''Loads a set of raster files that intersect the geometries of an input vector layer.
+Optionally, it is possible to copy the selected rasters and paste them in another folder.''': {'es': '''Carga un conjunto de archivos ráster que intersectan las geometrías de una capa vectorial de entrada.
+ Opcionalmente, es posible copiar los rásteres seleccionados y pegarlos en otra carpeta.'''},
+
+ '''This algorithm calculates statistics for the bands of a raster layer, categorized by zones defined in a polygon type vector layer.
+The values of the raster cells where the pixel center is exactly inside the polygon are considered in the statistics.''': {'es': '''Este algoritmo calcula estadísticas para las bandas de una capa ráster, categorizadas por zonas definidas en una capa vectorial de tipo polígono.
+Los valores de las celdas ráster donde el centro del píxel está exactamente dentro del polígono se consideran en las estadísticas.'''},
+
+'''Creates a binarized raster, dividing the input raster into two distinct classes from statistical data (lower and upper threshold) from area or point samples. Optionally, minimum and maximum threshold values can also be set.
+A class matches the values within the range of thresholds, where the value 1 (true) is returned. The other class corresponds to values outside the range, returning the value 0 (false).''': {'es': '''Crea un ráster binario, dividiendo el ráster de entrada en dos clases distintas a partir de datos estadísticos (umbral inferior y superior) de muestras de área o puntos. Opcionalmente, también se pueden establecer valores de umbral mínimo y máximo.
+Una clase coincide con los valores dentro del rango de umbrales, donde se devuelve el valor 1 (verdadero). La otra clase corresponde a valores fuera del rango, devolviendo el valor 0 (falso).'''},
+
+'''Note: Binary thresholding is one of the easiest and fastest ways to classify an image from an index such as NDVI. This algorithm can be used to identify areas with vegetation cover using an index such as the NDVI (França et al., 2017).
+Reference:''': {'es': '''Nota: El umbral binario es una de las formas más fáciles y rápidas de clasificar una imagen a partir de un índice como NDVI. Este algoritmo se puede utilizar para identificar áreas con cobertura vegetal utilizando un índice como el NDVI (França et al., 2017).
+Referencia:'''},
+
+'''The largest width or height value of the original image is resized to the user-defined value. The short side is scaled proportionately.
+Note: The metadata is preserved.''': {'es': '''El valor de ancho o alto más grande de la imagen original cambia de tamaño al valor definido por el usuario. El lado corto tiene una escala proporcional.
+ Nota: Los metadatos se conservan."'''},
+
+ '''Creates a KML file embedding in that single file all photographs in base64 textual format to be viewed in Google Earth.
+ Images are resized to a new size corresponding to the image's largest side.''': {'es': '''Crea un archivo KML incrustando en ese único archivo todas las fotografías en formato textual base64 para ser visualizadas en Google Earth.
+ Las imágenes cambian de tamaño a un nuevo tamaño correspondiente al lado más grande de la imagen.'''},
+
+ '''Note: Sample data obtained from class notes of the Geodetic Survey discipline at UFPE.
+''': {'es': '''Nota: Datos de muestra obtenidos de apuntes de clase de la disciplina Levantamiento Geodésico de la UFPE.
+'''},
+
+'''Notes: Data collected in the discipline of <i>Geodetic Surveys</i> in the Graduate Program at UFPE, in field work coordinated by <b>Prof. Dr. Andrea de Seixas</b>.
+For more information on the methodology used, please read the article at the link below:''': {'es': '''Notas: Datos recopilados en la disciplina de <i>Levantamientos Geodésicos</i> en el Programa de Posgrado de la UFPE, en trabajo de campo coordinado por el <b>Prof. Dra. Andrea de Seixas</b>.
+Para obtener más información sobre la metodología utilizada, lea el artículo en el siguiente link:'''},
+
+'''Note: Sample data obtained from class notes of the Geodetic Survey discipline at UFPE.
+''': {'es': '''Nota: Datos de muestra obtenidos de apuntes de clase de la disciplina Levantamiento Geodésico de la UFPE.
+'''},
+
+"""This tool performs the following types of coordinate transformation:
+◼️ <b>Translation Transformation</b>: 1 vector without adjustment / 2 or + vectors with adjustment.
+◼️ <b>Conformal Transformation (2D Helmert)</b>: 2 vectors without adjustment / 3 or + vectors with adjustment.
+◼️ <b>Affine Transformation</b>: 3 vectors without adjustment / 4 or + vectors with adjustment.
+With this tool it is possible to perform correctly the georeferencing of vector files in QGIS.
+""": {'es': """Esta herramienta realiza los siguientes tipos de transformación de coordenadas:
+◼️ <b>Transformación de traslación</b>: 1 vector sin ajuste / 2 o + vectores con ajuste.
+◼️ <b>Transformación Conformal (2D Helmert)</b>: 2 vectores sin ajuste / 3 o + vectores con ajuste.
+◼️ <b>Transformación Afín</b>: 3 vectores sin ajuste / 4 o + vectores con ajuste.
+Con esta herramienta es posible realizar correctamente la georreferenciación de archivos vectoriales en QGIS.
+"""},
+
+'''
+This algorithm transforms coordinates between the following reference systems:
+- geodetic <b>(λ, ϕ, h)</b>;
+- geocentric or ECEF <b>(X, Y, Z)</b>; and
+- topocentric in a local tangent plane <b>(E, N, U)</b>.
+Default values for origin coordinates can be applied to Recife / Brazil.''': {'es': '''
+Este algoritmo transforma coordenadas entre los siguientes sistemas de referencia:
+- geodésico <b>(λ, ϕ, h)</b>;
+- geocéntrico o ECEF <b>(X, Y, Z)</b>; y
+- topocéntrico en un plano tangente local <b>(E, N, U)</b>.
+Los valores predeterminados para las coordenadas de origen se pueden aplicar a Recife/Brasil.'''},
+
+'''Nota: Dados de exemplo obtidos de Mendonça et al. (2010).
+Saiba mais:''': {'es': '''Nota: Dados de ejemplo obtidos de Mendonça et al. (2010).
+Saiba más:'''},
 
  }
