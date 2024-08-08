@@ -90,7 +90,7 @@ def dd2dms(dd, n_digits):
 
 
 def dms2dd(txt):
-    txt = txt.replace(' ','').replace('\t','').replace(',','.')
+    txt = txt.replace(' ','').replace("''", '"').replace('\t','').replace(',','.')
     newtxt =''
     if (txt[-1]).upper() in ('W','O','S'):
         if txt[0] != '-':
