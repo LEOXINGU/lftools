@@ -228,7 +228,8 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
         for fieldname in fieldnames:
             att = ponto[fieldname]
             if fieldname not in ['survey_ref_base']:
-                if not att or att in ['', ' ']:
+                print(att)
+                if str(att) in ['', ' ', 'NULL']:
                     raise QgsProcessingException(self.tr('The attributes of the class "reference_point_p" must be filled!', 'Os atributos da classe "Ponto de Referência Geodésica" devem ser preenchidos!'))
 
         # Coordenada em UTM
