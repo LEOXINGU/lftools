@@ -1243,4 +1243,6 @@ Los valores predeterminados para las coordenadas de origen se pueden aplicar a R
 Saiba mais:''': {'es': '''Nota: Dados de ejemplo obtidos de Mendonça et al. (2010).
 Saiba más:'''},
 
+'Error in coordinate {}!' : {'es': '¡Error en la coordenada {}!'},
+
  }
