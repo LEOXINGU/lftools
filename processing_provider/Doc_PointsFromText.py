@@ -235,34 +235,41 @@ class PointsFromText(QgsProcessingAlgorithm):
 
         # Validando dados
         if tam_x != tam_nome or tam_y!= tam_nome:
-            feedback.pushInfo(self.tr('Códigos:'))
+            feedback.pushInfo(self.tr('Códigos: ({})'.format(tam_nome)))
             feedback.pushInfo(self.tr(str(nm_list)))
-            feedback.pushInfo(self.tr('Coordenadas X:'))
+            feedback.pushInfo(self.tr('Coordenadas X: ({})'.format(tam_x)))
             feedback.pushInfo(self.tr(str(x_list)))
-            feedback.pushInfo(self.tr('Coordenadas Y:'))
+            feedback.pushInfo(self.tr('Coordenadas Y:  ({})'.format(tam_x)))
             feedback.pushInfo(self.tr(str(y_list)))
             raise QgsProcessingException(self.tr('Error: The number of input values does not match.', 'Erro na quantidade de coordenadas'))
 
         tam = tam_nome
         feedback.pushInfo(self.tr('Codes and coordinates', 'Código e coordenadas:'))
         for k, nome in enumerate(nm_list):
-            feedback.pushInfo(self.tr('{}   {}  {}'.format(nome ,x_list[k], y_list[k])))
+            feedback.pushInfo(self.tr('{};   {};  {}'.format(nome ,x_list[k], y_list[k])))
 
         # Removendo caracteres não digito
         lista_X, lista_Y = [],[]
+
         if sep_decimal:
             for k in range(tam):
                 txt = ''
                 for s in x_list[k]:
                     if s.isdigit() or s == '.':
                         txt += s
-                lista_X += [float(txt)]
+                try:
+                    lista_X += [float(txt)]
+                except:
+                    raise QgsProcessingException(self.tr('Error in coordinate {}!', 'Erro na coordenada {}!').format(x_list[k]))
 
                 txt = ''
                 for s in y_list[k]:
                     if s.isdigit() or s == '.':
                         txt += s
-                lista_Y += [float(txt)]
+                try:
+                    lista_Y += [float(txt)]
+                except:
+                    raise QgsProcessingException(self.tr('Error in coordinate {}!', 'Erro na coordenada {}!').format(y_list[k]))
         else:
             for k in range(tam):
                 txt = ''
@@ -270,14 +277,21 @@ class PointsFromText(QgsProcessingAlgorithm):
                     if s.isdigit() or s == ',':
                         txt += s
                 txt = txt.replace(',','.')
-                lista_X += [float(txt)]
+                try:
+                    lista_X += [float(txt)]
+                except:
+                    raise QgsProcessingException(self.tr('Error in coordinate {}!', 'Erro na coordenada {}!').format(x_list[k]))
 
                 txt = ''
                 for s in y_list[k]:
                     if s.isdigit() or s == ',':
                         txt += s
                 txt = txt.replace(',','.')
-                lista_Y += [float(txt)]
+                try:
+                    lista_Y += [float(txt)]
+                except:
+                    raise QgsProcessingException(self.tr('Error in coordinate {}!', 'Erro na coordenada {}!').format(y_list[k]))
+
 
         # Varrer pontos
         feat = QgsFeature()
