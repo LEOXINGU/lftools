@@ -136,9 +136,14 @@ def coord2inom(lon, lat, ScaleD, feature, parent):
 def dd2dms(dd, n_digits, feature, parent):
     """
     Transform decimal degrees to degrees, minutes and seconds.
-    <h2>Example usage:</h2>
+    <h2>Examples:</h2>
     <ul>
-      <li>dd2dms(dd, 3) -> -12°12'34.741"</li>
+      <li>dd2dms(dd, precision) -> GG°MM'SS.SSS"</li>
+      <li>dd2dms(-12.20965027, 3) -> -12°12'34.741"</li>
+      <li>dd2dms(0.56333, 2) -> 0°33'47.99"</li>
+      <li>dd2dms(0.56333, 0) -> 0°33'48"</li>
+      <li>dd2dms(0.56333,-1) -> 0°34'</li>
+      <li>dd2dms(0.56333,-2) -> 0°33.8'</li>
     </ul>
     """
     return DD2DMS(dd, n_digits)
