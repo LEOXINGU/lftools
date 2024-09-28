@@ -65,10 +65,10 @@ def DifAz(Az_ini, Az_fim):
 def dd2dms(dd, n_digits):
     if dd != 0:
         graus = int(floor(abs(dd)))
-        resto = round(abs(dd) - graus, 10)
-        minutos = int(floor(60*resto))
-        resto = round(resto*60 - minutos, 10)
-        segundos = resto*60
+        resto1 = round(abs(dd) - graus, 10)
+        minutos = int(floor(60*resto1))
+        resto2 = round(resto1*60 - minutos, 10)
+        segundos = resto2*60
         if round(segundos,n_digits) == 60:
             minutos += 1
             segundos = 0
@@ -79,14 +79,31 @@ def dd2dms(dd, n_digits):
             texto = '-' + str(graus) + '°'
         else:
             texto = str(graus) + '°'
-        texto = texto + '{:02d}'.format(minutos) + "'"
-        if n_digits < 1:
-            texto = texto + '{:02d}'.format(int(segundos)) + '"'
+
+        if n_digits < -1: # graus e minutos decimais
+            mindec = -1*(n_digits+1)
+            texto = texto + ('{:0' + str(3+mindec) + '.' + str(mindec) + 'f}').format(60*resto1) + "'"
         else:
+            if n_digits == -1:
+                texto = texto + '{:02d}'.format(round(60*resto1)) + "'"
+            else:
+                texto = texto + '{:02d}'.format(minutos) + "'"
+
+        if n_digits == 0:
+            texto = texto + '{:02d}'.format(round(segundos)) + '"'
+        elif n_digits > 0:
             texto = texto + ('{:0' + str(3+n_digits) + '.' + str(n_digits) + 'f}').format(segundos) + '"'
         return texto
     else:
-        return "0°00'" + ('{:0' + str(3+n_digits) + '.' + str(n_digits) + 'f}').format(0)
+        if n_digits > 0:
+            return "0°00'" + ('{:0' + str(3+n_digits) + '.' + str(n_digits) + 'f}').format(0) + '"'
+        elif n_digits == 0:
+            return "0°00'" + '"'
+        elif n_digits == -1:
+            return "0°00'"
+        else:
+            mindec = -1*(n_digits+1)
+            return "0°" + ('{:0' + str(3+mindec) + '.' + str(mindec) + 'f}').format(0) + "'"
 
 
 def dms2dd(txt):
@@ -105,13 +122,18 @@ def dms2dd(txt):
         else:
             newtxt += letter
     lista = newtxt[:-1].split('|')
-    if len(lista) != 3: # GMS
-        return None
-    else:
+    if len(lista) == 3: # GMS
         if '-' in lista[0]:
             return -1*(abs(float(lista[0])) + float(lista[1])/60 + float(lista[2])/3600)
         else:
             return float(lista[0]) + float(lista[1])/60 + float(lista[2])/3600
+    elif len(lista) == 2:
+        if '-' in lista[0]:
+            return -1*(abs(float(lista[0])) + float(lista[1])/60)
+        else:
+            return float(lista[0]) + float(lista[1])/60
+    else:
+        return None
 
 
 def str2HTML(texto):
