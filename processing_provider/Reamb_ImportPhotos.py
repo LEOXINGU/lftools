@@ -219,7 +219,7 @@ class ImportPhotos(QgsProcessingAlgorithm):
 
         # Funcao para gerar o padrao data-hora
         def data_hora(texto):
-            data_hora = texto.replace(' ',':')
+            data_hora = texto.replace(' ',':').replace('-',':')
             data_hora = data_hora.split(':')
             ano = int(data_hora[0])
             mes = int(data_hora[1])
