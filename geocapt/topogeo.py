@@ -66,32 +66,37 @@ def dd2dms(dd, n_digits):
     if dd != 0:
         graus = int(floor(abs(dd)))
         resto1 = round(abs(dd) - graus, 10)
-        minutos = int(floor(60*resto1))
-        resto2 = round(resto1*60 - minutos, 10)
-        segundos = resto2*60
-        if round(segundos,n_digits) == 60:
-            minutos += 1
-            segundos = 0
-        if minutos == 60:
-            graus += 1
-            minutos = 0
+        minutos = 60*resto1
+        if n_digits >= 0:
+            minutos = int(floor(minutos))
+            resto2 = round(resto1*60 - minutos, 10)
+            segundos = resto2*60
+            if round(segundos,n_digits) == 60:
+                minutos += 1
+                segundos = 0
+            if minutos == 60:
+                graus += 1
+                minutos = 0
+        else:
+            mindec = -1*(n_digits+1)
+            if round(minutos,mindec) == 60:
+                graus += 1
+                minutos = 0
         if dd < 0:
             texto = '-' + str(graus) + '°'
         else:
             texto = str(graus) + '°'
 
         if n_digits < -1: # graus e minutos decimais
-            mindec = -1*(n_digits+1)
-            texto = texto + ('{:0' + str(3+mindec) + '.' + str(mindec) + 'f}').format(60*resto1) + "'"
-        else:
-            if n_digits == -1:
-                texto = texto + '{:02d}'.format(round(60*resto1)) + "'"
-            else:
-                texto = texto + '{:02d}'.format(minutos) + "'"
+            texto = texto + ('{:0' + str(3+mindec) + '.' + str(mindec) + 'f}').format(minutos) + "'"
+        elif n_digits == -1: # graus e minutos inteiros
+            texto = texto + '{:02d}'.format(round(minutos)) + "'"
+        else: # graus, minutos e segundos
+            texto = texto + '{:02d}'.format(minutos) + "'"
 
-        if n_digits == 0:
+        if n_digits == 0: # segundos inteiros
             texto = texto + '{:02d}'.format(round(segundos)) + '"'
-        elif n_digits > 0:
+        elif n_digits > 0: # segundos decimais
             texto = texto + ('{:0' + str(3+n_digits) + '.' + str(n_digits) + 'f}').format(segundos) + '"'
         return texto
     else:
@@ -102,7 +107,6 @@ def dd2dms(dd, n_digits):
         elif n_digits == -1:
             return "0°00'"
         else:
-            mindec = -1*(n_digits+1)
             return "0°" + ('{:0' + str(3+mindec) + '.' + str(mindec) + 'f}').format(0) + "'"
 
 
