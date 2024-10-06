@@ -97,7 +97,7 @@ class ReverseVertexOrder(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterBoolean(
                 self.SELECTED,
-                self.tr('Only selected', 'Apenas para selecionados'),
+                self.tr('Only selected', 'Apenas feições selecionadas'),
                 defaultValue=False
             )
         )
