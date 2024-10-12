@@ -1244,5 +1244,6 @@ Saiba mais:''': {'es': '''Nota: Dados de ejemplo obtidos de Mendonça et al. (20
 Saiba más:'''},
 
 'Error in coordinate {}!' : {'es': '¡Error en la coordenada {}!'},
-
+'New CRS defined to zone {} and hemisphere {}.' : {'es': 'Nuevo CRS definido para zona {} y hemisferio {}.'},
+'Set CRS in UTM': {'es': 'Establecer SRC en UTM'},
  }
