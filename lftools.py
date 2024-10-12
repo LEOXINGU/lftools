@@ -25,9 +25,6 @@
 __author__ = 'Leandro Franca'
 __date__ = '2021-03-01'
 __copyright__ = '(C) 2021 by Leandro Franca'
-
-# This will get replaced with a git SHA1 when you do a git archive
-
 __revision__ = '$Format:%H$'
 
 import os
@@ -38,8 +35,17 @@ from qgis.core import (QgsProcessingAlgorithm,
                        QgsApplication,
                        QgsExpression)
 from PyQt5.QtCore import QCoreApplication
+# from PyQt5.QtGui import QMessageBox
 from .lftools_provider import LFToolsProvider
+from .translations.translate import translate
+from .geocapt.tools import *
 from .expressions import *
+from .LFTools_Dialog import ImportXYZ_Dialog
+from qgis.PyQt.QtCore import QUrl, QCoreApplication, QSettings, QTranslator
+from qgis.PyQt.QtGui import QIcon
+from qgis.PyQt.QtWidgets import QAction, QMenu, QToolButton
+from qgis.utils import iface
+import processing
 
 exprs = (coord2inom, fieldstat, dd2dms, projectCRS, layerCRS, magneticdec, mainAzimuth,
          dms2dd, scalefactor, zonehemisf, deedtable, inom2mi, meridianconv, cusum, inter_area,
@@ -51,10 +57,15 @@ cmd_folder = os.path.split(inspect.getfile(inspect.currentframe()))[0]
 if cmd_folder not in sys.path:
     sys.path.insert(0, cmd_folder)
 
+LOC = QgsApplication.locale()[:2]
+def tr(*string):
+    return translate(string, LOC)
 
 class LFToolsPlugin(object):
 
     def __init__(self):
+        self.iface = iface
+        self.canvas = iface.mapCanvas()
         self.provider = None
         self.plugin_dir = os.path.dirname(__file__)
 
@@ -63,15 +74,91 @@ class LFToolsPlugin(object):
         self.provider = LFToolsProvider()
         QgsApplication.processingRegistry().addProvider(self.provider)
 
-
     def initGui(self):
         self.initProcessing()
         for expr in exprs:
             if not QgsExpression.isFunctionName(expr.name()):
                 QgsExpression.registerFunction(expr)
 
+        # Iniciar LFTools toolbar
+        self.toolbar = self.iface.addToolBar('LFTools')
+        self.toolbar.setObjectName('LFToolsToolbar')
+        self.toolbar.setToolTip('LFTools')
+
+        # Definir SRC
+        icon = QIcon(self.plugin_dir + '/images/tools/UTM.svg')
+        self.UTM_Action = QAction(icon, tr('Set CRS in UTM', 'Definir SRC em UTM'), self.iface.mainWindow())
+        self.UTM_Action.setObjectName('DefineUTM')
+        self.UTM_Action.triggered.connect(self.runUTM)
+        self.toolbar.addAction(self.UTM_Action)
+
+        # Importar X,Y,Z
+        icon = QIcon(self.plugin_dir + '/images/easy.png')
+        self.ImportXYZ_Action = QAction(icon, tr('Import XYZ', 'Importar XYZ'), self.iface.mainWindow())
+        self.ImportXYZ_Action.setObjectName('ImportXYZ')
+        self.ImportXYZ_Action.triggered.connect(self.runImportXYZ)
+        self.toolbar.addAction(self.ImportXYZ_Action)
+
+        # Principais ferramentas LFTools
+        menu = QMenu()
+        menu.setObjectName('MainLFTools')
+        # Adicionando principais ferramentas
+        icon = QIcon(self.plugin_dir + '/images/document.png')
+        self.MemorialAction = menu.addAction(icon, tr('Memorial descritivo'), self.Memorial)
+        self.MemorialAction.setObjectName('LFMemorial')
+        icon = QIcon(self.plugin_dir + '/images/easy.png')
+        self.Coord2LayerAction = menu.addAction(icon, tr('Coord to Layer'), self.Coord2Layer)
+        self.Coord2LayerAction.setObjectName('CoordToLayer')
+        # Adicionando botão de seleção
+        self.MainLFToolsButton = QToolButton()
+        self.MainLFToolsButton.setMenu(menu)
+        self.MainLFToolsButton.setDefaultAction(self.Coord2LayerAction)
+        self.MainLFToolsButton.setPopupMode(QToolButton.MenuButtonPopup)
+        self.MainLFToolsButton.triggered.connect(self.toolButtonTriggered)
+        self.MainLFToolsToolbar = self.toolbar.addWidget(self.MainLFToolsButton)
+        self.MainLFToolsToolbar.setObjectName('MainLFToolsToolbar')
+
+    def runUTM(self):
+        DefinirUTM(self.iface)
+
+    def runImportXYZ(self):
+        # Criar caixa de diálogo
+        dlg = ImportXYZ_Dialog()
+        # Mostrar caixa de diálogo
+        dlg.adjustSize()
+        dlg.show()
+        result = dlg.exec_()
+        # Quando pressionado
+        if result == 1:
+            try:
+                XYZ = dlg.coordX.text()
+                print(XYZ)
+            except Exception as e:
+                QMessageBox.information(self.iface.mainWindow(), QCoreApplication.translate('GeoCoding', "GeoCoding plugin error"), QCoreApplication.translate('GeoCoding', "There was an error with the geocoding service:<br><strong>{}</strong>".format(e)))
+                return
+
+            # if not XYZ:
+            #     QMessageBox.information(self.iface.mainWindow(), QCoreApplication.translate('GeoCoding', "Not found"), QCoreApplication.translate('GeoCoding', "The geocoder service returned no data for the searched address: <strong>%s</strong>.".format(XYZ))
+            #     return
+
+
     def unload(self):
         QgsApplication.processingRegistry().removeProvider(self.provider)
         for expr in exprs:
             if QgsExpression.isFunctionName(expr.name()):
                 QgsExpression.unregisterFunction(expr.name())
+        # Remove from toolbar
+        self.iface.removeToolBarIcon(self.UTM_Action)
+        self.iface.removeToolBarIcon(self.ImportXYZ_Action)
+        self.iface.removeToolBarIcon(self.MemorialAction)
+        # remove the toolbar
+        del self.toolbar
+
+    def toolButtonTriggered(self, action):
+        self.MainLFToolsButton.setDefaultAction(action)
+
+    def Memorial(self):
+        processing.execAlgorithmDialog('lftools:descriptivetable', {})
+
+    def Coord2Layer(self):
+        processing.execAlgorithmDialog('lftools:coord2layer', {})
