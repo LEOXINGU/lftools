@@ -32,12 +32,15 @@ import sys
 import inspect
 
 from qgis.core import (QgsProcessingAlgorithm,
+                       QgsProject,
                        QgsApplication,
                        QgsExpression)
+from qgis.PyQt.QtCore import QVariant
 from PyQt5.QtCore import QCoreApplication
-# from PyQt5.QtGui import QMessageBox
+from PyQt5.QtWidgets import QMessageBox
 from .lftools_provider import LFToolsProvider
 from .translations.translate import translate
+from lftools.geocapt.topogeo import dms2dd as DMS2DD
 from .geocapt.tools import *
 from .expressions import *
 from .LFTools_Dialog import ImportXYZ_Dialog
@@ -68,6 +71,7 @@ class LFToolsPlugin(object):
         self.canvas = iface.mapCanvas()
         self.provider = None
         self.plugin_dir = os.path.dirname(__file__)
+        self.layerid = ''
 
     def initProcessing(self):
         """Init Processing provider for QGIS >= 3.8."""
@@ -93,13 +97,13 @@ class LFToolsPlugin(object):
         self.toolbar.addAction(self.UTM_Action)
 
         # Importar X,Y,Z
-        icon = QIcon(self.plugin_dir + '/images/easy.png')
+        icon = QIcon(self.plugin_dir + '/images/tools/XYZ.svg')
         self.ImportXYZ_Action = QAction(icon, tr('Import XYZ', 'Importar XYZ'), self.iface.mainWindow())
         self.ImportXYZ_Action.setObjectName('ImportXYZ')
         self.ImportXYZ_Action.triggered.connect(self.runImportXYZ)
         self.toolbar.addAction(self.ImportXYZ_Action)
 
-        # Principais ferramentas LFTools
+        # Principais ferramentas LFTools (Top 10)
         menu = QMenu()
         menu.setObjectName('MainLFTools')
         # Adicionando principais ferramentas
@@ -128,18 +132,81 @@ class LFToolsPlugin(object):
         dlg.adjustSize()
         dlg.show()
         result = dlg.exec_()
+        projeto = QgsProject.instance()
         # Quando pressionado
         if result == 1:
             try:
-                XYZ = dlg.coordX.text()
-                print(XYZ)
-            except Exception as e:
-                QMessageBox.information(self.iface.mainWindow(), QCoreApplication.translate('GeoCoding', "GeoCoding plugin error"), QCoreApplication.translate('GeoCoding', "There was an error with the geocoding service:<br><strong>{}</strong>".format(e)))
-                return
+                coordX = dlg.coordX.text()
+                coordY = dlg.coordY.text()
+                coordZ = dlg.coordZ.text()
+                coordZ = coordZ.replace(',', '.')
+                crs = dlg.CRS.crs()
+                nome = dlg.Name.text()
+                nome_campo = tr('name', 'nome')
 
-            # if not XYZ:
-            #     QMessageBox.information(self.iface.mainWindow(), QCoreApplication.translate('GeoCoding', "Not found"), QCoreApplication.translate('GeoCoding', "The geocoder service returned no data for the searched address: <strong>%s</strong>.".format(XYZ))
-            #     return
+                # Identificação e validação dos dados de entrada
+                if crs.isGeographic():
+                    # Verificar se está em GMS
+                    try:
+                        print(coordX,coordY,coordZ)
+                        X = DMS2DD(coordX)
+                        Y = DMS2DD(coordY)
+                    except:
+                        X = float(coordX)
+                        Y = float(coordY)
+                else:
+                    X = float(coordX)
+                    Y = float(coordY)
+                # Coordenada Z
+                # if coordZ == '':
+                #     Z = 0
+                # else:
+                #     Z = float(coordZ)
+                Z = 0
+                # Criando camada pela primeira vez
+                if not projeto.mapLayer(self.layerid):
+                    self.layer = QgsVectorLayer("PointZ?crs=" + crs.authid(), "GeoCoding Plugin Results", "memory")
+                    self.DP = self.layer.dataProvider()
+                    # adicionar campos
+                    campos = [QgsField(nome_campo, QVariant.String),
+                              QgsField('X', QVariant.String),
+                              QgsField('Y', QVariant.String),
+                              QgsField('Z', QVariant.String)]
+                    self.DP.addAttributes(campos)
+                    self.layer.updateFields()
+                    # Rotular pelo nome
+                    try:
+                        layer_settings = QgsPalLayerSettings()
+                        layer_settings.fieldName = nome_campo
+                        self.layer.setLabeling(QgsVectorLayerSimpleLabeling(layer_settings))
+                        self.layer.setLabelsEnabled(True)
+                    except:
+                        self.layer.setCustomProperty("labeling", "pal")
+                        self.layer.setCustomProperty("labeling/enabled", "true")
+                        self.layer.setCustomProperty("labeling/fieldName", nome_campo)
+
+                    # Adicionar camada
+                    projeto.addMapLayer(self.layer)
+                    # Armazenar id da camada
+                    self.layerid = self.layer.id()
+
+                # Adicionar feição
+                fields = self.layer.fields()
+                feat = QgsFeature(fields)
+                feat[nome_campo] = nome
+                feat['X'] = str(coordX)
+                feat['Y'] = str(coordY)
+                feat['Z'] = str(coordZ)
+                geom = QgsGeometry(QgsPoint(X, Y, Z))
+                feat.setGeometry(geom)
+                self.layer.startEditing()
+                self.layer.addFeatures([ feat ])
+                self.layer.commitChanges()
+                self.canvas.setCenter(QgsPointXY(X, Y))
+
+            except Exception as e:
+                QMessageBox.information(self.iface.mainWindow(), QCoreApplication.translate('LFTools', "LFTools plugin error"), QCoreApplication.translate('LFTools', tr("There was an error with the input parameter:<br><strong>{}</strong>").format(e)))
+                return
 
 
     def unload(self):
