@@ -89,72 +89,49 @@ def DefinirUTM(iface):
     # print(f"O novo SRC do projeto é: {project.crs().authid()}")
 
 
-# save point to file, point is in project's crs
-def save_point(self, point, address):
-    self.logMessage('Saving point ' + str(point[0])  + ' ' + str(point[1]))
-    # create and add the point layer if not exists or not set
-    if not self._get_registry().mapLayer(self.layerid) :
-        # create layer with same CRS as map canvas
-        crs = self._get_canvas_crs()
-        self.layer = QgsVectorLayer("Point?crs=" + crs.authid(), "GeoCoding Plugin Results", "memory")
-        self.provider = self.layer.dataProvider()
-
-        # add fields
-        self.provider.addAttributes([QgsField("address", QVariant.String)])
-
-        # BUG: need to explicitly call it, should be automatic!
-        self.layer.updateFields()
-
-        # Labels on
-        try:
-            label_settings = QgsPalLayerSettings()
-            label_settings.fieldName = "address"
-            self.layer.setLabeling(QgsVectorLayerSimpleLabeling(label_settings))
-            self.layer.setLabelsEnabled(True)
-        except:
-            self.layer.setCustomProperty("labeling", "pal")
-            self.layer.setCustomProperty("labeling/enabled", "true")
-            #self.layer.setCustomProperty("labeling/fontFamily", "Arial")
-            #self.layer.setCustomProperty("labeling/fontSize", "10")
-            self.layer.setCustomProperty("labeling/fieldName", "address")
-            self.layer.setCustomProperty("labeling/placement", "2")
-
-        # add layer if not already
-        self._get_registry().addMapLayer(self.layer)
-
-        # store layer id
-        self.layerid = self.layer.id()
-
-
-    # add a feature
-    try:
-        fields=self.layer.pendingFields()
-    except:
-        fields=self.layer.fields()
-
-    fet = QgsFeature(fields)
-    try:
-        fet.setGeometry(QgsGeometry.fromPoint(point))
-    except:
-        fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(point)))
-
-    try: # QGIS < 1.9
-        fet.setAttributeMap({0 : address})
-    except: # QGIS >= 1.9
-        fet['address'] = address
-
-    self.layer.startEditing()
-    self.layer.addFeatures([ fet ])
-    self.layer.commitChanges()
-
-
-# check config and project settings before geocoding,
-# return an error string
-def check_settings (self):
-    p = QgsProject.instance()
-    error = ''
-    if QT_VERSION==4:
-        if not self.iface.mapCanvas().hasCrsTransformEnabled() and self.iface.mapCanvas().mapRenderer().destinationCrs().authid() != 'EPSG:4326':
-            error = QCoreApplication.translate('GeoCoding', "On-the-fly reprojection must be enabled if the destination CRS is not EPSG:4326. Please enable on-the-fly reprojection.")
-
-    return error
+# # Criar PointZ
+# def CriarPointZ(self, dlg):
+#     # Ler parâmetros de entrada
+#     X = dlg.coordX.text()
+#     Y = dlg.coordY.text()
+#     Z = dlg.coordZ.text()
+#     crs = dlg.CRS.text()
+#     nome = dlg.Name.text()
+#
+#     # Identificação e validação dos dados de entrada
+#
+#     if not self._get_registry().mapLayer(self.layerid):
+#         self.layer = QgsVectorLayer("Point?crs=" + crs.authid(), "GeoCoding Plugin Results", "memory")
+#         self.provider = self.layer.dataProvider()
+#         # adicionar campos
+#         nome_campo = tr('name', 'nome')
+#         self.provider.addAttributes([QgsField(nome_campo, QVariant.String)])
+#         self.layer.updateFields()
+#         # Rotular pelo nome
+#         try:
+#             label_settings = QgsPalLayerSettings()
+#             label_settings.fieldName = nome_campo
+#             self.layer.setLabeling(QgsVectorLayerSimpleLabeling(label_settings))
+#             self.layer.setLabelsEnabled(True)
+#         except:
+#             self.layer.setCustomProperty("labeling", "pal")
+#             self.layer.setCustomProperty("labeling/enabled", "true")
+#             self.layer.setCustomProperty("labeling/fieldName", nome_campo)
+#             self.layer.setCustomProperty("labeling/placement", "2")
+#             #self.layer.setCustomProperty("labeling/fontFamily", "Arial")
+#             #self.layer.setCustomProperty("labeling/fontSize", "10")
+#         # Adicionar camada
+#         self._get_registry().addMapLayer(self.layer)
+#         # Armazenar id da camada
+#         self.layerid = self.layer.id()
+#
+#     # Adicionar feição
+#     fields = self.layer.fields()
+#     feat = QgsFeature(fields)
+#     geom = QgsGeometry(QgsPoint(float(X), float(Y), float(Z)))
+#     feat.setGeometry(geom)
+#     feat[nome_campo] = nome
+#
+#     self.layer.startEditing()
+#     self.layer.addFeatures([ fet ])
+#     self.layer.commitChanges()
