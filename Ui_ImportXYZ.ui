@@ -58,7 +58,17 @@
       </widget>
      </item>
      <item>
-      <widget class="QgsProjectionSelectionWidget" name="mQgsProjectionSelectionWidget"/>
+      <widget class="QgsProjectionSelectionWidget" name="CRS"/>
+     </item>
+     <item>
+      <widget class="QLabel" name="Name_Label">
+       <property name="text">
+        <string>Name (optional)</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="Name"/>
      </item>
      <item>
       <spacer name="verticalSpacer">
