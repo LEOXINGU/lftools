@@ -136,36 +136,27 @@ class LFToolsPlugin(object):
         # Quando pressionado
         if result == 1:
             try:
-                coordX = dlg.coordX.text()
-                coordY = dlg.coordY.text()
-                coordZ = dlg.coordZ.text()
-                coordZ = coordZ.replace(',', '.')
+                coordX = dlg.coordX.text().replace(',', '.')
+                coordY = dlg.coordY.text().replace(',', '.')
+                coordZ = dlg.coordZ.text().replace(',', '.')
                 crs = dlg.CRS.crs()
                 nome = dlg.Name.text()
                 nome_campo = tr('name', 'nome')
 
                 # Identificação e validação dos dados de entrada
                 if crs.isGeographic():
-                    # Verificar se está em GMS
-                    try:
-                        print(coordX,coordY,coordZ)
-                        X = DMS2DD(coordX)
-                        Y = DMS2DD(coordY)
-                    except:
-                        X = float(coordX)
-                        Y = float(coordY)
+                    # GMS para graus decimais
+                    X = DMS2DD(coordX)
+                    Y = DMS2DD(coordY)
                 else:
                     X = float(coordX)
                     Y = float(coordY)
-                # Coordenada Z
-                # if coordZ == '':
-                #     Z = 0
-                # else:
-                #     Z = float(coordZ)
-                Z = 0
+
+                Z = 0 if coordZ == '' else float(coordZ)
+
                 # Criando camada pela primeira vez
                 if not projeto.mapLayer(self.layerid):
-                    self.layer = QgsVectorLayer("PointZ?crs=" + crs.authid(), "GeoCoding Plugin Results", "memory")
+                    self.layer = QgsVectorLayer("PointZ?crs=" + crs.authid(), tr('Points XYZ', 'Pontos XYZ'), "memory")
                     self.DP = self.layer.dataProvider()
                     # adicionar campos
                     campos = [QgsField(nome_campo, QVariant.String),
