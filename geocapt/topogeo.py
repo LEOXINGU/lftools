@@ -125,7 +125,10 @@ def dms2dd(txt):
             newtxt += '|'
         else:
             newtxt += letter
-    lista = newtxt[:-1].split('|')
+    if newtxt[-1] == '|':
+        lista = newtxt[:-1].split('|')
+    else:
+        lista = newtxt.split('|')
     if len(lista) == 3: # GMS
         if '-' in lista[0]:
             return -1*(abs(float(lista[0])) + float(lista[1])/60 + float(lista[2])/3600)
@@ -136,6 +139,8 @@ def dms2dd(txt):
             return -1*(abs(float(lista[0])) + float(lista[1])/60)
         else:
             return float(lista[0]) + float(lista[1])/60
+    elif len(lista) == 1:
+        return(float(lista[0]))
     else:
         return None
 
