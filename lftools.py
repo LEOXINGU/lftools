@@ -49,6 +49,7 @@ from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction, QMenu, QToolButton
 from qgis.utils import iface
 import processing
+import webbrowser
 
 exprs = (coord2inom, fieldstat, dd2dms, projectCRS, layerCRS, magneticdec, mainAzimuth,
          dms2dd, scalefactor, zonehemisf, deedtable, inom2mi, meridianconv, cusum, inter_area,
@@ -70,6 +71,7 @@ class LFToolsPlugin(object):
         self.iface = iface
         self.canvas = iface.mapCanvas()
         self.provider = None
+        self.camada_copiada = None
         self.plugin_dir = os.path.dirname(__file__)
         self.layerid = ''
 
@@ -103,27 +105,101 @@ class LFToolsPlugin(object):
         self.ImportXYZ_Action.triggered.connect(self.runImportXYZ)
         self.toolbar.addAction(self.ImportXYZ_Action)
 
-        # Principais ferramentas LFTools (Top 10)
+        # Copiar estilo da camada ativa
+        icon = QIcon(self.plugin_dir + '/images/tools/COPY_STYLE.svg')
+        self.CopiarEstilo_Action = QAction(icon, tr('Copy layer style', 'Copiar estilo da camada'), self.iface.mainWindow())
+        self.CopiarEstilo_Action.setObjectName('ImportXYZ')
+        self.CopiarEstilo_Action.triggered.connect(self.runCopiarEstilo)
+        self.toolbar.addAction(self.CopiarEstilo_Action)
+
+        # Colar estilo
+        icon = QIcon(self.plugin_dir + '/images/tools/PASTE_STYLE.svg')
+        self.ColarEstilo_Action = QAction(icon, tr('Paste style to the layer', 'Colar estilo na camada'), self.iface.mainWindow())
+        self.ColarEstilo_Action.setObjectName('ImportXYZ')
+        self.ColarEstilo_Action.triggered.connect(self.runColarEstilo)
+        self.toolbar.addAction(self.ColarEstilo_Action)
+
+        # Principais ferramentas LFTools (Mão na roda)
         menu = QMenu()
         menu.setObjectName('MainLFTools')
         # Adicionando principais ferramentas
-        icon = QIcon(self.plugin_dir + '/images/document.png')
-        self.MemorialAction = menu.addAction(icon, tr('Memorial descritivo'), self.Memorial)
-        self.MemorialAction.setObjectName('LFMemorial')
         icon = QIcon(self.plugin_dir + '/images/easy.png')
-        self.Coord2LayerAction = menu.addAction(icon, tr('Coord to Layer'), self.Coord2Layer)
-        self.Coord2LayerAction.setObjectName('CoordToLayer')
-        # Adicionando botão de seleção
+        self.Coord2Layer_Action = menu.addAction(icon, tr('Table to point layer', 'Planilha para camada de pontos'), self.Coord2Layer)
+        self.Coord2Layer_Action.setObjectName('CoordToLayer')
+        icon = QIcon(self.plugin_dir + '/images/easy.png')
+        self.GetAttribute_Action = menu.addAction(icon, tr('Get attribute by location', 'Pegar atributo pela localização'), self.GetAttribute)
+        self.GetAttribute_Action.setObjectName('GetAttribute')
+        icon = QIcon(self.plugin_dir + '/images/easy.png')
+        self.MeasureLayer_Action = menu.addAction(icon, tr('Measure layers', 'Medir camadas'), self.MeasureLayer)
+        self.MeasureLayer_Action.setObjectName('MeasureLayer')
+        icon = QIcon(self.plugin_dir + '/images/easy.png')
+        self.ExportASCII_Action = menu.addAction(icon, tr('Export expression as ASCII', 'Exportar expressão como ASCII'), self.ExportASCII)
+        self.ExportASCII_Action.setObjectName('ExportASCII')
+
+        # Adicionando conjunto de botões
         self.MainLFToolsButton = QToolButton()
         self.MainLFToolsButton.setMenu(menu)
-        self.MainLFToolsButton.setDefaultAction(self.Coord2LayerAction)
+        self.MainLFToolsButton.setDefaultAction(self.Coord2Layer_Action)
         self.MainLFToolsButton.setPopupMode(QToolButton.MenuButtonPopup)
         self.MainLFToolsButton.triggered.connect(self.toolButtonTriggered)
         self.MainLFToolsToolbar = self.toolbar.addWidget(self.MainLFToolsButton)
         self.MainLFToolsToolbar.setObjectName('MainLFToolsToolbar')
 
+        # Ajuda do LFTools
+        icon = QIcon(self.plugin_dir + '/images/tools/GEOONE.svg')
+        self.Tutoriais_Action = QAction(icon, tr('Tutorials', 'Tutoriais'), self.iface.mainWindow())
+        self.Tutoriais_Action.setObjectName('Tutorials')
+        self.Tutoriais_Action.triggered.connect(self.runTutoriais)
+        self.toolbar.addAction(self.Tutoriais_Action)
+
+
+    def unload(self):
+        QgsApplication.processingRegistry().removeProvider(self.provider)
+        for expr in exprs:
+            if QgsExpression.isFunctionName(expr.name()):
+                QgsExpression.unregisterFunction(expr.name())
+        # Remove from toolbar
+        self.iface.removeToolBarIcon(self.UTM_Action)
+        self.iface.removeToolBarIcon(self.ImportXYZ_Action)
+        self.iface.removeToolBarIcon(self.CopiarEstilo_Action)
+        self.iface.removeToolBarIcon(self.ColarEstilo_Action)
+        self.iface.removeToolBarIcon(self.Coord2Layer_Action)
+        self.iface.removeToolBarIcon(self.GetAttribute_Action)
+        self.iface.removeToolBarIcon(self.MeasureLayer_Action)
+        self.iface.removeToolBarIcon(self.ExportASCII_Action)
+        self.iface.removeToolBarIcon(self.Tutoriais_Action)
+        # remove the toolbar
+        del self.toolbar
+
+
+    def toolButtonTriggered(self, action):
+        self.MainLFToolsButton.setDefaultAction(action)
+
+
+    def Coord2Layer(self):
+        processing.execAlgorithmDialog('lftools:coord2layer', {})
+
+    def GetAttribute(self):
+        processing.execAlgorithmDialog('lftools:getattributebylocation', {})
+
+    def MeasureLayer(self):
+        processing.execAlgorithmDialog('lftools:measure_layers', {})
+
+    def ExportASCII(self):
+        processing.execAlgorithmDialog('lftools:exportascii', {})
+
+
     def runUTM(self):
         DefinirUTM(self.iface)
+
+    def runCopiarEstilo(self):
+        self.camada_copiada = copiar_estilo_camada_ativa(self.iface)
+
+    def runColarEstilo(self):
+        colar_estilo_em_camada_destino(self.iface, self.camada_copiada)
+
+    def runTutoriais(self):
+        webbrowser.open_new('https://www.youtube.com/@geoleandrofranca')
 
     def runImportXYZ(self):
         # Criar caixa de diálogo
@@ -198,25 +274,3 @@ class LFToolsPlugin(object):
             except Exception as e:
                 QMessageBox.information(self.iface.mainWindow(), QCoreApplication.translate('LFTools', "LFTools plugin error"), QCoreApplication.translate('LFTools', tr("There was an error with the input parameter:<br><strong>{}</strong>").format(e)))
                 return
-
-
-    def unload(self):
-        QgsApplication.processingRegistry().removeProvider(self.provider)
-        for expr in exprs:
-            if QgsExpression.isFunctionName(expr.name()):
-                QgsExpression.unregisterFunction(expr.name())
-        # Remove from toolbar
-        self.iface.removeToolBarIcon(self.UTM_Action)
-        self.iface.removeToolBarIcon(self.ImportXYZ_Action)
-        self.iface.removeToolBarIcon(self.MemorialAction)
-        # remove the toolbar
-        del self.toolbar
-
-    def toolButtonTriggered(self, action):
-        self.MainLFToolsButton.setDefaultAction(action)
-
-    def Memorial(self):
-        processing.execAlgorithmDialog('lftools:descriptivetable', {})
-
-    def Coord2Layer(self):
-        processing.execAlgorithmDialog('lftools:coord2layer', {})
