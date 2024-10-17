@@ -89,49 +89,46 @@ def DefinirUTM(iface):
     # print(f"O novo SRC do projeto é: {project.crs().authid()}")
 
 
-# # Criar PointZ
-# def CriarPointZ(self, dlg):
-#     # Ler parâmetros de entrada
-#     X = dlg.coordX.text()
-#     Y = dlg.coordY.text()
-#     Z = dlg.coordZ.text()
-#     crs = dlg.CRS.text()
-#     nome = dlg.Name.text()
-#
-#     # Identificação e validação dos dados de entrada
-#
-#     if not self._get_registry().mapLayer(self.layerid):
-#         self.layer = QgsVectorLayer("Point?crs=" + crs.authid(), "GeoCoding Plugin Results", "memory")
-#         self.provider = self.layer.dataProvider()
-#         # adicionar campos
-#         nome_campo = tr('name', 'nome')
-#         self.provider.addAttributes([QgsField(nome_campo, QVariant.String)])
-#         self.layer.updateFields()
-#         # Rotular pelo nome
-#         try:
-#             label_settings = QgsPalLayerSettings()
-#             label_settings.fieldName = nome_campo
-#             self.layer.setLabeling(QgsVectorLayerSimpleLabeling(label_settings))
-#             self.layer.setLabelsEnabled(True)
-#         except:
-#             self.layer.setCustomProperty("labeling", "pal")
-#             self.layer.setCustomProperty("labeling/enabled", "true")
-#             self.layer.setCustomProperty("labeling/fieldName", nome_campo)
-#             self.layer.setCustomProperty("labeling/placement", "2")
-#             #self.layer.setCustomProperty("labeling/fontFamily", "Arial")
-#             #self.layer.setCustomProperty("labeling/fontSize", "10")
-#         # Adicionar camada
-#         self._get_registry().addMapLayer(self.layer)
-#         # Armazenar id da camada
-#         self.layerid = self.layer.id()
-#
-#     # Adicionar feição
-#     fields = self.layer.fields()
-#     feat = QgsFeature(fields)
-#     geom = QgsGeometry(QgsPoint(float(X), float(Y), float(Z)))
-#     feat.setGeometry(geom)
-#     feat[nome_campo] = nome
-#
-#     self.layer.startEditing()
-#     self.layer.addFeatures([ fet ])
-#     self.layer.commitChanges()
+def copiar_estilo_camada_ativa(iface):
+    # Obter a camada ativa
+    camada_ativa = iface.activeLayer()
+
+    # Verificar se há uma camada ativa
+    if camada_ativa is not None:
+        # Copiar o estilo da camada ativa
+        iface.actionCopyLayerStyle().trigger()
+        iface.messageBar().pushMessage("LFTools", tr('Active layer style successfully copied.', 'Estilo da camada ativa copiado com sucesso.'), level=Qgis.Info)
+        return camada_ativa
+    else:
+        iface.messageBar().pushMessage("LFTools", tr("No active layer found!", "Nenhuma camada ativa encontrada!"), level=Qgis.Warning)
+        return
+
+
+def colar_estilo_em_camada_destino(iface, camada_origem):
+    # Obter a camada ativa
+    camada_destino = iface.activeLayer()
+
+    if camada_origem is None:
+        iface.messageBar().pushMessage("LFTools", tr("No style copied!", "Nenhum estilo copiado!"), level=Qgis.Warning)
+        return
+
+    if camada_destino is None:
+        iface.messageBar().pushMessage("LFTools", tr("No active layer found!", "Nenhuma camada ativa encontrada!"), level=Qgis.Warning)
+        return
+
+    # Verificar se ambas as camadas são do mesmo tipo
+    if camada_origem.type() != camada_destino.type():
+        iface.messageBar().pushMessage("LFTools", tr("The layers are of different types (raster and vector)!", "As camadas são de tipos diferentes (raster e vetor)!"), level=Qgis.Warning)
+        return
+
+    # Verificar se ambas as camadas são vetores e se possuem a mesma geometria
+    if camada_destino.type() == QgsMapLayer.VectorLayer:
+        if camada_origem.geometryType() != camada_destino.geometryType():
+            iface.messageBar().pushMessage("LFTools", tr("The vector layers have different geometry types!", "As camadas vetoriais têm tipos de geometria diferentes!"), level=Qgis.Warning)
+            return
+
+    # Colar o estilo se as camadas forem compatíveis
+    iface.actionPasteLayerStyle().trigger()
+    camada_destino.triggerRepaint()
+    camada_destino.emitStyleChanged()
+    iface.messageBar().pushMessage("LFTools", tr('Style successfully pasted to the destination layer.', 'Estilo colado com sucesso na camada de destino.'), level=Qgis.Info)
