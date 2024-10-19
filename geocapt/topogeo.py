@@ -325,13 +325,13 @@ def validar_precisoes(lista, val = [1,5]):
     # Verifica se a lista tem 1 ou 5 elementos
     if len(lista) != val[0] and len(lista) != val[1]:
         return False
-    for item in lista:
+    for k,item in enumerate(lista):
         # Tenta converter o item para um inteiro
         try:
             numero = int(item)
         except ValueError:
             return False
-        # Verifica se o número é maior ou igual a zero
-        if numero < 0:
+        # Verifica se o número é menor zero
+        if k!=1 and numero < 0:
             return False
     return True
