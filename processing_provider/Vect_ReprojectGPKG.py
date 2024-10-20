@@ -84,7 +84,7 @@ class ReprojectGPKG(QgsProcessingAlgorithm):
     txt_en = 'This tool allows for the automatic conversion and reprojection of all vector layers present in a GeoPackage (.GPKG) file to a new Coordinate Reference System (CRS) defined by the user. The tool simplifies working with multiple layers while maintaining the integrity of the vector data by reprojecting them in batch.'
     txt_pt = 'Esta ferramenta permite a conversão e reprojeção automática de todas as camadas vetoriais presentes em um arquivo GeoPackage (.GPKG) para um novo Sistema de Referência de Coordenadas (SRC) definido pelo usuário. A ferramenta facilita o trabalho com múltiplas camadas, mantendo a integridade dos dados vetoriais ao reprojetá-los em lote.'
 
-    figure = 'images/tutorial/gnss_pos2layer.jpg'
+    figure = 'images/tutorial/vect_reprojectGPKG.jpg'
 
     def shortHelpString(self):
         social_BW = Imgs().social_BW
