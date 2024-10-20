@@ -1255,5 +1255,10 @@ Saiba más:'''},
 'Style successfully pasted to the destination layer.': {'es': 'Estilo pegado con éxito en la capa de destino.'},
 'Paste style to the layer': {'es': 'Pegar estilo en la capa'},
 'Tutorials': {'es': 'Tutoriales'},
+'This tool allows for the automatic conversion and reprojection of all vector layers present in a GeoPackage (.GPKG) file to a new Coordinate Reference System (CRS) defined by the user. The tool simplifies working with multiple layers while maintaining the integrity of the vector data by reprojecting them in batch.': {'es': 'Esta herramienta permite la conversión y reproyección automática de todas las capas vectoriales presentes en un archivo GeoPackage (.GPKG) a un nuevo Sistema de Referencia de Coordenadas (SRC) definido por el usuario. La herramienta facilita el trabajo con múltiples capas, manteniendo la integridad de los datos vectoriales al reproyectarlos por lotes.'},
+'Reproject GeoPackage': {'es': 'Reproyectar GeoPackage'},
+'Allow projected CRS': {'es': 'Permitir SRC proyectado'},
+'Converting layer {}...': {'es': 'Convirtiendo capa {}...'},
+'Only instantiated layers': {'es': 'Solo capas instanciadas'},
 
  }
