@@ -23,15 +23,15 @@
      inkscape:pagecheckerboard="0"
      inkscape:document-units="mm"
      showgrid="false"
-     inkscape:zoom="1.0507202"
-     inkscape:cx="176.0697"
-     inkscape:cy="130.86262"
+     inkscape:zoom="2.749612"
+     inkscape:cx="254.94507"
+     inkscape:cy="175.11562"
      inkscape:window-width="1920"
      inkscape:window-height="1001"
      inkscape:window-x="-9"
      inkscape:window-y="-9"
      inkscape:window-maximized="1"
-     inkscape:current-layer="g93-5-4" />
+     inkscape:current-layer="rect37575" />
   <defs
      id="defs2" />
   <g
@@ -42,7 +42,7 @@
     <rect
        style="fill:#ffffff;stroke:#4d4d4d;stroke-width:2.10701;stroke-linecap:round;stroke-linejoin:round"
        id="rect971"
-       width="89.865334"
+       width="89.864998"
        height="89.277802"
        x="60.176788"
        y="108.0482"
@@ -51,13 +51,9 @@
        id="rect37575"
        transform="matrix(0.58749617,0.57266746,-0.57306617,0.58708743,-14.328616,43.590029)">
       <path
-         style="color:#000000;fill:#ffffff;stroke-width:2.41481;stroke-linecap:round;stroke-linejoin:round;-inkscape-stroke:none"
-         d="m 171.3856,-23.343544 c 14.31035,0 28.62069,0 42.93104,0 0,11.64453 0,23.28906 0,34.93359 -14.31035,0 -28.62069,0 -42.93104,0 0,-11.64453 0,-23.28906 0,-34.93359 z"
+         style="color:#000000;fill:#000000;stroke-width:2.60588;stroke-linecap:round;stroke-linejoin:round;-inkscape-stroke:none"
+         d="m 173.24668,-26.18291 c 15.43863,0.2308 30.87726,0.461599 46.31589,0.692397 0.18781,12.571981 0.37561,25.14395043 0.56341,37.715914 -15.43863,-0.230799 -30.87725,-0.461597 -46.31589,-0.692396 -0.1878,-12.5719636 -0.37561,-25.143933 -0.56341,-37.715915 z"
          id="path38827" />
-      <path
-         style="color:#000000;fill:#ffffff;stroke-linecap:round;stroke-linejoin:round;-inkscape-stroke:none"
-         d="m 171.38477,-24.550781 c -2.20906,1.18804 -0.81549,4.418488 -1.20704,6.587203 0,9.8511405 0,19.7022813 0,29.553422 1.18806,2.209042 4.41849,0.815487 6.58721,1.207031 12.51716,0 25.03431,0 37.55147,0 2.20904,-1.188053 0.81549,-4.4184881 1.20703,-6.5872028 0,-9.8511407 0,-19.7022812 0,-29.5534222 -1.18805,-2.209043 -4.41849,-0.815486 -6.5872,-1.207031 -12.51716,0 -25.03431,0 -37.55147,0 z m 1.20898,2.414062 c 13.50521,0 27.01041,0 40.51562,0 0,10.839844 0,21.679688 0,32.519532 -13.50521,0 -27.01041,0 -40.51562,0 0,-10.839844 0,-21.679688 0,-32.519532 z"
-         id="path38829" />
     </g>
     <g
        id="g37168-4-7"
