@@ -122,6 +122,7 @@ from .processing_provider.Cart_framesFromLines import FramesFromLines
 from .processing_provider.Vect_CrossSections import CrossSections
 from .processing_provider.Easy_exportASCII import ExportASCII
 from .processing_provider.Doc_ValidateTopology import ValidateTopology
+from .processing_provider.Vect_ReprojectGPKG import ReprojectGPKG
 
 
 class LFToolsProvider(QgsProcessingProvider):
@@ -229,6 +230,7 @@ class LFToolsProvider(QgsProcessingProvider):
         self.addAlgorithm(CrossSections())
         self.addAlgorithm(ExportASCII())
         self.addAlgorithm(ValidateTopology())
+        self.addAlgorithm(ReprojectGPKG())
 
     def id(self):
         return 'lftools'
