@@ -887,6 +887,7 @@ def deedtable2(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
     <p>Note 1: A layer or QGIS Project with a projected SRC is required.</p>
     <p>Note 2: Table types: 'proj' - projected, 'geo' - geographic, 'both' - both coordinate systems.</p>
     <p>Note 3: Define 1 or 0 for with or without azimuths and distances, respectivelly.</p>
+    <p>Note 4: Use 'geo-suffix' for geographic with suffix.</p>
 
     <h2>Exemples:</h2>
     <ul>
@@ -909,6 +910,7 @@ def deedtable2(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
     SRC = layer.crs()
     SGR = QgsCoordinateReferenceSystem(SRC.geographicCrsAuthId())
 
+    tipo = tipo.lower()
     format_num = '{:,.Xf}'.replace('X', str(decimal))
 
     geom = feature.geometry()
@@ -1091,7 +1093,7 @@ def deedtable2(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
             </tr>'''
 
         # GEO
-        if tipo == 'geo' and azimuteDist == 1:
+        if 'geo' in tipo and azimuteDist == 1:
             linha = '''<tr>
               <td>Vn</td>
               <td>lonn</td>
@@ -1117,7 +1119,7 @@ def deedtable2(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
             </tr>'''
 
         # GEO sem Az e d
-        if tipo == 'geo' and azimuteDist == 0:
+        if 'geo' in tipo and azimuteDist == 0:
             linha = '''<tr>
               <td>Vn</td>
               <td>lonn</td>
@@ -1196,11 +1198,16 @@ def deedtable2(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
         LINHAS = ''
         for k in range(tam):
             linha0 = linha
+            lonn = tr(DD2DMS(pnts_GEO[k+1][0].x(),decimal + 3), DD2DMS(pnts_GEO[k+1][0].x(),decimal + 3).replace('.', ','))
+            latn = tr(DD2DMS(pnts_GEO[k+1][0].y(),decimal + 3), DD2DMS(pnts_GEO[k+1][0].y(),decimal + 3).replace('.', ','))
+            if 'suffix' in tipo:
+                lonn = lonn.replace('-', '') + 'W' if pnts_GEO[k+1][0].x() < 0 else 'E'
+                latn = latn.replace('-', '') + 'S' if pnts_GEO[k+1][0].y() < 0 else 'N'
             itens = {'Vn': pnts_UTM[k+1][2],
                         'En': tr(format_num.format(pnts_UTM[k+1][0].x()), format_num.format(pnts_UTM[k+1][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
                         'Nn': tr(format_num.format(pnts_UTM[k+1][0].y()), format_num.format(pnts_UTM[k+1][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                        'lonn': tr(DD2DMS(pnts_GEO[k+1][0].x(),decimal + 3), DD2DMS(pnts_GEO[k+1][0].x(),decimal + 3).replace('.', ',')),
-                        'latn': tr(DD2DMS(pnts_GEO[k+1][0].y(),decimal + 3), DD2DMS(pnts_GEO[k+1][0].y(),decimal + 3).replace('.', ',')),
+                        'lonn': lonn,
+                        'latn': latn,
                         'Ln': '-' if TipoGeometria == 1 and k+1 == tam else pnts_UTM[k+1][2] + '/' + pnts_UTM[1 if k+2 > tam else k+2][2],
                         'Az_n': '-' if TipoGeometria == 1 and k+1 == tam else tr(DD2DMS(Az_lista[k],1), DD2DMS(Az_lista[k],1).replace('.', ',')),
                         'Dn': '-' if TipoGeometria == 1 and k+1 == tam else tr(format_num.format(Dist[k]), format_num.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'))
@@ -1225,6 +1232,7 @@ def deedtable3(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
     <p>Note 1: A layer or QGIS Project with a projected SRC is required.</p>
     <p>Note 2: Table types: 'proj' - projected, 'geo' - geographic, 'both' - both coordinate systems.</p>
     <p>Note 3: Define 1 or 0 for with or without azimuths and distances, respectivelly.</p>
+    <p>Note 4: Use 'geo-suffix' for geographic with suffix.</p>
 
     <h2>Exemples:</h2>
     <ul>
@@ -1247,6 +1255,7 @@ def deedtable3(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
     SRC = layer.crs()
     SGR = QgsCoordinateReferenceSystem(SRC.geographicCrsAuthId())
 
+    tipo = tipo.lower()
     format_num = '{:,.Xf}'.replace('X', str(decimal))
 
     geom = feature.geometry()
@@ -1426,7 +1435,7 @@ def deedtable3(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
             </tr>'''
 
         # GEO
-        if tipo == 'geo' and azimuteDist == 1:
+        if 'geo' in tipo and azimuteDist == 1:
             linha = '''<tr>
               <td>Vn</td>
               <td>lonn</td>
@@ -1454,7 +1463,7 @@ def deedtable3(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
             </tr>'''
 
         # GEO sem Az e d
-        if tipo == 'geo' and azimuteDist == 0:
+        if 'geo' in tipo and azimuteDist == 0:
             linha = '''<tr>
               <td>Vn</td>
               <td>lonn</td>
@@ -1539,12 +1548,17 @@ def deedtable3(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
         LINHAS = ''
         for k in range(tam):
             linha0 = linha
+            lonn = tr(DD2DMS(pnts_GEO[k+1][0].x(),decimal + 3), DD2DMS(pnts_GEO[k+1][0].x(),decimal + 3).replace('.', ','))
+            latn = tr(DD2DMS(pnts_GEO[k+1][0].y(),decimal + 3), DD2DMS(pnts_GEO[k+1][0].y(),decimal + 3).replace('.', ','))
+            if 'suffix' in tipo:
+                lonn = lonn.replace('-', '') + 'W' if pnts_GEO[k+1][0].x() < 0 else 'E'
+                latn = latn.replace('-', '') + 'S' if pnts_GEO[k+1][0].y() < 0 else 'N'
             itens = {'Vn': pnts_UTM[k+1][2],
                         'En': tr(format_num.format(pnts_UTM[k+1][0].x()), format_num.format(pnts_UTM[k+1][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
                         'Nn': tr(format_num.format(pnts_UTM[k+1][0].y()), format_num.format(pnts_UTM[k+1][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.')),
                         'hn': tr(format_num.format(pnts_UTM[k+1][0].z()), format_num.format(pnts_UTM[k+1][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                        'lonn': tr(DD2DMS(pnts_GEO[k+1][0].x(),decimal + 3), DD2DMS(pnts_GEO[k+1][0].x(),decimal + 3).replace('.', ',')),
-                        'latn': tr(DD2DMS(pnts_GEO[k+1][0].y(),decimal + 3), DD2DMS(pnts_GEO[k+1][0].y(),decimal + 3).replace('.', ',')),
+                        'lonn': lonn,
+                        'latn': latn,
                         'Ln': '-' if TipoGeometria == 1 and k+1 == tam else pnts_UTM[k+1][2] + '/' + pnts_UTM[1 if k+2 > tam else k+2][2],
                         'Az_n': '-' if TipoGeometria == 1 and k+1 == tam else tr(DD2DMS(Az_lista[k],1), DD2DMS(Az_lista[k],1).replace('.', ',')),
                         'Dn': '-' if TipoGeometria == 1 and k+1 == tam else tr(format_num.format(Dist[k]), format_num.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'))
@@ -1566,6 +1580,7 @@ def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature
     Generates a description of a property with coordinates as text.
     <p>Note 1: A layer or QGIS Project with a projected SRC is required.</p>
     <p>Note 2: Coordinates styles: 'E,N' (default), 'N,E', 'E,N,h', 'N,E,h', 'lat,lon', 'lon,lat', 'lat,lon,h'  or 'lon,lat,h'.</p>
+    <p>Note 3: Combine the text 'suffix' for geographic coordinates with suffix.</p>
 
     <h2>Exemples:</h2>
     <ul>
@@ -1596,6 +1611,9 @@ def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature
 
     geom = feature.geometry()
     TipoGeometria = geom.type()
+
+    estilo = estilo.replace(' ', '').lower()
+
     if geom and TipoGeometria in (1,2):
 
         if TipoGeometria == 2: # Polígono
@@ -1711,17 +1729,17 @@ def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature
         elif estilo =='N,E,h'.lower():
             estilo_vertices = '<b>N [Yn]m</b>, <b>E [Xn]m</b> ' + tr('and', 'e') +  ' <b>h [hn]m</b>'
         elif estilo =='E,N'.lower():
-            estilo_vertices = '<b>E [Xn]m</b> ' + tr('and', 'e') +  ' <b>N [Yn]m</b>'
+            estilo_vertices = '<b>E [Xn]    m</b> ' + tr('and', 'e') +  ' <b>N [Yn]m</b>'
         elif estilo =='N,E'.lower():
             estilo_vertices = '<b>N [Yn]m</b> ' + tr('and', 'e') +  ' <b>E [Xn]m</b>'
-        elif estilo =='lon,lat'.lower():
-            estilo_vertices = '<b> [Xn]</b> ' + tr('and', 'e') +  ' <b> [Yn]</b>'
-        elif estilo =='lon,lat,h'.lower():
+        elif 'lon,lat,h' in estilo:
             estilo_vertices = '<b> [Xn]</b>,  <b> [Yn]</b> ' + tr('and', 'e') + ' <b>h [hn]m</b>'
-        elif estilo =='lat,lon'.lower():
-            estilo_vertices = '<b> [Yn]</b> ' + tr('and', 'e') +  ' <b> [Xn]</b>'
-        elif estilo =='lat,lon,h'.lower():
+        elif 'lon,lat' in estilo:
+            estilo_vertices = '<b> [Xn]</b> ' + tr('and', 'e') +  ' <b> [Yn]</b>'
+        elif 'lat,lon,h' in estilo:
             estilo_vertices = '<b> [Yn]</b>,  <b> [Xn]</b> ' + tr('and', 'e') + ' <b>h [hn]m</b>'
+        elif 'lat,lon' in estilo:
+            estilo_vertices = '<b> [Yn]</b> ' + tr('and', 'e') +  ' <b> [Xn]</b>'
         else: # default
             estilo_vertices = '<b>E [Xn]m</b> ' + tr('and', 'e') +  ' <b>N [Yn]m</b>'
 
@@ -1730,8 +1748,12 @@ def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature
                 Xn = tr(format_num.format(PtsUTM[0].x()), format_num.format(PtsUTM[0].x()).replace(',', 'X').replace('.', ',').replace('X', '.'))
                 Yn = tr(format_num.format(PtsUTM[0].y()), format_num.format(PtsUTM[0].y()).replace(',', 'X').replace('.', ',').replace('X', '.'))
             else: # coordenadas geodesicas
-                Xn = str2HTML(tr(DD2DMS(PtsGEO[0].x(),decimal+3), DD2DMS(PtsGEO[0].x(),decimal+3).replace('.', ','))).replace('-','') + 'W' if PtsGEO[0].x() < 0 else 'E'
-                Yn = str2HTML(tr(DD2DMS(PtsGEO[0].y(),decimal+3), DD2DMS(PtsGEO[0].y(),decimal+3).replace('.', ','))).replace('-','') + 'S' if PtsGEO[0].y() < 0 else 'N'
+                if 'suffix' in estilo:
+                    Xn = str2HTML(tr(DD2DMS(PtsGEO[0].x(),decimal+3), DD2DMS(PtsGEO[0].x(),decimal+3).replace('.', ','))).replace('-','') + 'W' if PtsGEO[0].x() < 0 else 'E'
+                    Yn = str2HTML(tr(DD2DMS(PtsGEO[0].y(),decimal+3), DD2DMS(PtsGEO[0].y(),decimal+3).replace('.', ','))).replace('-','') + 'S' if PtsGEO[0].y() < 0 else 'N'
+                else:
+                    Xn = str2HTML(tr(DD2DMS(PtsGEO[0].x(),decimal+3), DD2DMS(PtsGEO[0].x(),decimal+3).replace('.', ',')))
+                    Yn = str2HTML(tr(DD2DMS(PtsGEO[0].y(),decimal+3), DD2DMS(PtsGEO[0].y(),decimal+3).replace('.', ',')))
             return (Xn, Yn)
 
 
