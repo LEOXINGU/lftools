@@ -140,7 +140,7 @@ class FrontLotLine(QgsProcessingAlgorithm):
         # Camada de Saída
         Fields = lotes.fields()
         itens  = {
-                     self.tr('sequence', 'sequência') : QVariant.Int,
+                     self.tr('sequence', 'sequencia') : QVariant.Int,
                      self.tr('lenght', 'comprimento') : QVariant.Double,
                      self.tr('cumulative', 'valor_testada') : QVariant.Double,
                      }
