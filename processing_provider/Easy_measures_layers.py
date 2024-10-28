@@ -186,15 +186,9 @@ class MeasureLayers(QgsProcessingAlgorithm):
         for current, layer in enumerate(layers):
 
             if layer.type() == 0:# VectorLayer
-                if formula in [0,1]: # Elipsoidal e Cartográfica
-                    formula_length = ['$length', 'length($geometry)'][formula]
-                    formula_perimeter = ['$perimeter', 'perimeter($geometry)'][formula]
-                    formula_area = ['$area', 'area($geometry)'][formula]
-
-                elif formula == 2: # SGL
-                    formula_length = "lengthLTP('{}', '2d')".format(layer.id())
-                    formula_area = "areaLTP('{}')".format(layer.id())
-                    formula_perimeter = "perimeterLTP('{}')".format(layer.id())
+                formula_length = ['$length', 'length($geometry)', "$lengthLTP2d"][formula]
+                formula_perimeter = ['$perimeter', 'perimeter($geometry)', "$areaLTP"][formula]
+                formula_area = ['$area', 'area($geometry)', "$perimeterLTP"][formula]
 
                 if layer.geometryType() == QgsWkbTypes.LineGeometry:
                     layer.addExpressionField(formula_length + '/' + str(unidade_dist), field_length)
