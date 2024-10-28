@@ -54,7 +54,8 @@ import webbrowser
 exprs = (coord2inom, fieldstat, dd2dms, projectCRS, layerCRS, magneticdec, mainAzimuth,
          dms2dd, scalefactor, zonehemisf, deedtable, inom2mi, meridianconv, cusum, inter_area,
          removespetialchar, deedtable2, deedtable3, areaLTP, deedtext, geoneighbors, gpsdate,
-         str2html, img2html, dinamictable, perimeterLTP, lengthLTP)
+         str2html, img2html, dinamictable, perimeterLTP, lengthLTP, areaLTP2, perimeterLTP2,
+         lengthLTP2, lengthLTP3)
 
 cmd_folder = os.path.split(inspect.getfile(inspect.currentframe()))[0]
 
