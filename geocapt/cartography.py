@@ -607,6 +607,32 @@ def Mesclar_Multilinhas(inters):
         return inters
 
 
+def LayerIs3D(camada):
+    if not camada or not camada.type() == 0:
+        return False
+    else:
+        # Iterar sobre as feições para verificar a presença de coordenada Z
+        tem_coordenada_Z = False
+        for feicao in camada.getFeatures():
+            geometria = feicao.geometry()
+            if geometria and geometria.isEmpty() == False:
+                # Verificar os vértices da geometria
+                for parte in geometria.parts():
+                    for coordenada in parte.vertices():
+                        if coordenada.is3D():
+                            tem_coordenada_Z = True
+                            break
+                    if tem_coordenada_Z:
+                        break
+            if tem_coordenada_Z:
+                break
+
+        if tem_coordenada_Z:
+            return True
+        else:
+            return False
+
+
 def map_sistem(lon, lat, ScaleD=1e6):
     # Escala 1:1.000.000
     nome = ''
