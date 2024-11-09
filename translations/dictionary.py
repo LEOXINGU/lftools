@@ -1260,5 +1260,9 @@ Saiba más:'''},
 'Allow projected CRS': {'es': 'Permitir SRC proyectado'},
 'Converting layer {}...': {'es': 'Convirtiendo capa {}...'},
 'Only instantiated layers': {'es': 'Solo capas instanciadas'},
+'This tool replaces the Z coordinates of an existing layer with the value of the nearest cell from a Digital Elevation Model (DEM).': {'es': 'Esta herramienta reemplaza las coordenadas Z de una capa existente con el valor de la celda más cercana de un Modelo de Elevación Digital (DEM).'},
+'Set Z coordinate from DEM': {'es': 'Establecer la coordenada Z desde DEM'},
+'Defining Z coordinate...': {'es': 'Definiendo la coordenada Z...'},
+'Input layer has no Z dimension': {'es': 'La capa de entrada no tiene dimensión Z'},
 
  }
