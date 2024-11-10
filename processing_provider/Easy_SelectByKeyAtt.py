@@ -58,7 +58,7 @@ class SelectByKeyAtt(QgsProcessingAlgorithm):
     Note: Enter the foreign key field name if it is not the same as the primary key field name.'''
     txt_pt = '''Esta ferramenta permite selecionar feições que compartilham o mesmo atributo de chave estrangeira de diversas camadas com base no atributo de chave primária de uma feição selecionada de outra camada.
     Nota: Insira o nome do campo de chave estrangeira se não for igual ao nome do campo de chave primária.'''
-    figure = 'images/tutorial/relief_dem2txt.jpg'
+    figure = 'images/tutorial/easy_selectByKey.jpg'
 
     def shortHelpString(self):
         social_BW = Imgs().social_BW
