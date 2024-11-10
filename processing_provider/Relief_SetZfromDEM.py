@@ -17,7 +17,6 @@ __copyright__ = '(C) 2024, Leandro França'
 
 from PyQt5.QtCore import QCoreApplication, QVariant
 from qgis.core import *
-from osgeo import osr, gdal_array, gdal #https://gdal.org/python/
 import numpy as np
 from pyproj.crs import CRS
 from lftools.geocapt.imgs import Imgs
@@ -129,6 +128,7 @@ class SetZfromDEM(QgsProcessingAlgorithm):
         )
         if camada is None:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.INPUT))
+
         # Verificar se a camada de entrada tem a coordenada Z
         if not LayerIs3D(camada):
             raise QgsProcessingException(self.tr('Input layer has no Z dimension', 'Camada de entrada não possui dimensão Z'))
