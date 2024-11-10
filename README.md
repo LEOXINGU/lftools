@@ -125,6 +125,9 @@ pip install Pillow
         <li><a href="#measure-layers">Measure layers</a></li>
       </ul>
       <ul>
+        <li><a href="#select-by-key-attribute">Select by key attribute</a></li>
+      </ul>
+      <ul>
         <li><a href="#table-to-point-layer">Table to point layer</a></li>
       </ul>
       </li><li>
@@ -245,6 +248,9 @@ pip install Pillow
       <ul>
         <li><a href="#generate-spot-elevations">Generate Spot Elevations</a></li>
       </ul>
+      <ul>
+        <li><a href="#set-z-coordinate-from-dem">Set Z coordinate from DEM</a></li>
+      </ul>
       </li><li>
       <a href="#spatial-statistics">Spatial Statistics</a>
       <ul>
@@ -310,6 +316,9 @@ pip install Pillow
       </ul>
       <ul>
         <li><a href="#points-to-polygon">Points to polygon</a></li>
+      </ul>
+      <ul>
+        <li><a href="#reproject-geopackage">Reproject GeoPackage</a></li>
       </ul>
       <ul>
         <li><a href="#reverse-vertex-order">Reverse vertex order</a></li>
@@ -473,6 +482,9 @@ pip install Pillow
       <ul>
         <li><a href="#planilha-para-camada-de-pontos">Planilha para camada de pontos</a></li>
       </ul>
+      <ul>
+        <li><a href="#selecionar-por-atributo-chave">Selecionar por atributo chave</a></li>
+      </ul>
       </li><li>
       <a href="#mão-na-roda">Mão na roda</a>
       <ul>
@@ -571,6 +583,9 @@ pip install Pillow
       </li><li>
       <a href="#relevo">Relevo</a>
       <ul>
+        <li><a href="#definir-coordenada-z-pelo-mde">Definir coordenada Z pelo MDE</a></li>
+      </ul>
+      <ul>
         <li><a href="#diferença-de-mde">Diferença de MDE</a></li>
       </ul>
       <ul>
@@ -604,6 +619,9 @@ pip install Pillow
       </ul>
       <ul>
         <li><a href="#pontos-para-polígono">Pontos para polígono</a></li>
+      </ul>
+      <ul>
+        <li><a href="#reprojetar-geopackage">Reprojetar GeoPackage</a></li>
       </ul>
       <ul>
         <li><a href="#sequenciar-linhas">Sequenciar linhas</a></li>
@@ -758,7 +776,7 @@ This tool generates a Report for the Analytical Calculation of Area, Azimuths, P
 </div>
 
 ### Deed description
-Elaboration of Deed Description based on vector layers that define a property.
+Elaboration of Deed Description based on vector layers that define a property survey.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
@@ -995,6 +1013,18 @@ This tool calculates the line feature's lengths and polygon feature's perimeter 
 </table>
 </div>
 
+### Select by key attribute
+This tool allows you to select features that share the same foreign key attribute from multiple layers based on the primary key attribute of a selected feature from another layer.</br>    Note: Enter the foreign key field name if it is not the same as the primary key field name.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/easy_selectByKey.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
 ### Table to point layer
 Generates a <b>point layer</b> from a coordinate table, whether it comes from a Microsoft <b>Excel</b> spreadsheet (.xls), Open Document Spreadsheet (.ods), or even attributes from another layer.
 <div align="center">
@@ -1155,7 +1185,7 @@ This tool allows you to restore a database content by importing all the backup i
 
 
 ### Band Arithmetic
-Performs an arithmetic operation on the bands of a raster. The predefined formula is used to calculate the Green Leaf Index (GLI) for a RGB raster. However you can enter your own formula.</br>Examples:</br>NDVI with RGN raster: ( b3 - b1) / (b3 + b1)</br>NDWI with RGN raster: ( b3 - b2) / (b3 + b2)</br>GLI with RGB raster: (2*b2 - b1 - b3) / (2*b2 + b1 + b3)</br>VARI with RGB raster: (b2 - b1) / (b2 + b1 - b3)</br>VIgreen with RGB raster: (b2 - b1) / (b2 + b1)</br>Obs.:</br>The operators supported are:  + , - , * , /
+Performs an arithmetic operation on the bands of a raster. The predefined formula is used to calculate the Green Leaf Index (GLI) for a RGB raster. However you can enter your own formula.</br>Examples:</br>NDVI with RGN raster: ( b3 - b1) / (b3 + b1)</br>NDWI with RGN raster: ( b2 - b3) / (b2 + b3)</br>GLI with RGB raster: (2*b2 - b1 - b3) / (2*b2 + b1 + b3)</br>VARI with RGB raster: (b2 - b1) / (b2 + b1 - b3)</br>VIgreen with RGB raster: (b2 - b1) / (b2 + b1)</br>Obs.:</br>The operators supported are:  + , - , * , /
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
@@ -1464,6 +1494,18 @@ This tool generates a layer of points with <b>Spot Elevations</b> from a <b>Digi
 </table>
 </div>
 
+### Set Z coordinate from DEM
+This tool replaces the Z coordinates of an existing layer with the value of the nearest cell from a Digital Elevation Model (DEM).
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/relief_defineZ.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
 
 
 ## Spatial Statistics
@@ -1714,6 +1756,18 @@ This tool generates a polygon layer from a point layer and its filled order (seq
   <tbody>
     <tr>
       <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/vect_point2polygon.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Reproject GeoPackage
+This tool allows for the automatic conversion and reprojection of all vector layers present in a GeoPackage (.GPKG) file to a new Coordinate Reference System (CRS) defined by the user. The tool simplifies working with multiple layers while maintaining the integrity of the vector data by reprojecting them in batch.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/vect_reprojectGPKG.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -2314,6 +2368,18 @@ Geração de uma camada de pontos a partir das coordenadas preenchidas em uma pl
 </table>
 </div>
 
+### Selecionar por atributo chave
+Esta ferramenta permite selecionar feições que compartilham o mesmo atributo de chave estrangeira de diversas camadas com base no atributo de chave primária de uma feição selecionada de outra camada.</br>    Nota: Insira o nome do campo de chave estrangeira se não for igual ao nome do campo de chave primária.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/easy_selectByKey.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
 
 
 ## Mão na roda
@@ -2426,7 +2492,7 @@ Esta ferramenta realiza a troca do tipo de codificação de um arquivo <b>.sql</
 
 
 ### Aritmética de bandas
-Executa uma operação aritmética entre as bandas de um raster. A fórmula predefinida é usado para calcular o Green Leaf Index (GLI) para um raster RGB. No entanto, você pode inserir sua própria fórmula.</br>Exemplos:</br>NDVI com raster RGN: ( b3 - b1) / (b3 + b1)</br>NDWI com raster RGN: ( b3 - b2) / (b3 + b2)</br>GLI com raster RGB: (2*b2 - b1 - b3) / (2*b2 + b1 + b3)</br>VARI com raster RGB: (b2 - b1) / (b2 + b1 - b3)</br>VIgreen com raster RGB: (b2 - b1) / (b2 + b1)</br>Obs.:</br>Os operadores suportados são: + , - , * , /
+Executa uma operação aritmética entre as bandas de um raster. A fórmula predefinida é usado para calcular o Green Leaf Index (GLI) para um raster RGB. No entanto, você pode inserir sua própria fórmula.</br>Exemplos:</br>NDVI com raster RGN: ( b3 - b1) / (b3 + b1)</br>NDWI com raster RGN: ( b2 - b3) / (b2 + b3)</br>GLI com raster RGB: (2*b2 - b1 - b3) / (2*b2 + b1 + b3)</br>VARI com raster RGB: (b2 - b1) / (b2 + b1 - b3)</br>VIgreen com raster RGB: (b2 - b1) / (b2 + b1)</br>Obs.:</br>Os operadores suportados são: + , - , * , /
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
@@ -2687,6 +2753,18 @@ O maior valor de largura ou altura da imagem original é redimensionado para o v
 ## Relevo
 
 
+### Definir coordenada Z pelo MDE
+Esta ferramenta substitui as coordenadas Z de uma camada existente pelo valor da célula mais próxima de um Modelo Digital de Elevação (MDE).
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/relief_defineZ.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
 ### Diferença de MDE
 Esta ferramenta executa a diferença entre dois Modelos Digitais de Elevação (MDE).</br>Minuendo é o raster a ser subtraído.</br>Subtraendo é o rastar que está subtraindo.
 <div align="center">
@@ -2819,6 +2897,18 @@ Esta ferramenta gera uma camada de polígono a partir de uma camada de pontos e 
   <tbody>
     <tr>
       <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/vect_point2polygon.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Reprojetar GeoPackage
+Esta ferramenta permite a conversão e reprojeção automática de todas as camadas vetoriais presentes em um arquivo GeoPackage (.GPKG) para um novo Sistema de Referência de Coordenadas (SRC) definido pelo usuário. A ferramenta facilita o trabalho com múltiplas camadas, mantendo a integridade dos dados vetoriais ao reprojetá-los em lote.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/vect_reprojectGPKG.jpg"></td>
     </tr>
   </tbody>
 </table>
