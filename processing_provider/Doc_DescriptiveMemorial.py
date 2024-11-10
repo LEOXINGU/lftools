@@ -589,7 +589,7 @@ class DescriptiveMemorial(QgisAlgorithm):
         SRC = QgsProject.instance().crs().description()
 
         # Verificando o SRC
-        if QgsProject.instance().crs().isGeographic():
+        if QgsProject.instance().crs().isGeographic() and (coordenadas in [0,1,2,3] or calculo in [0,1]):
             raise QgsProcessingException(self.tr('The Project CRS must be projected!', 'O SRC do Projeto deve ser Projetado!'))
         feedback.pushInfo(self.tr('Project CRS is {}.', 'SRC do Projeto é {}.').format(SRC))
 
@@ -615,7 +615,7 @@ class DescriptiveMemorial(QgisAlgorithm):
         centroideG = geom.centroid().asPoint()
 
         # Verificar se a projeção UTM do Projeto está correta
-        if projecao:
+        if projecao and (coordenadas in [0,1,2,3] or calculo in [0,1]):
             fuso, hemisf = FusoHemisf(centroideG)
             if SRC.split(' ')[-1] != str(fuso)+hemisf :
                 raise QgsProcessingException(self.tr('Warning: Make sure your projection is correct!', 'Aviso: Verifique se sua projeção está correta!').upper())
