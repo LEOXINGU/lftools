@@ -1264,5 +1264,12 @@ Saiba más:'''},
 'Set Z coordinate from DEM': {'es': 'Establecer la coordenada Z desde DEM'},
 'Defining Z coordinate...': {'es': 'Definiendo la coordenada Z...'},
 'Input layer has no Z dimension': {'es': 'La capa de entrada no tiene dimensión Z'},
+'Select by key attribute': {'es': 'Seleccionar por atributo clave'},
+'''This tool allows you to select features that share the same foreign key attribute from multiple layers based on the primary key attribute of a selected feature from another layer.
+Note: Enter the foreign key field name if it is not the same as the primary key field name.''': {'es': '''Esta herramienta le permite seleccionar entidades que comparten el mismo atributo de clave externa de varias capas en función del atributo de clave principal de una entidad seleccionada de otra capa.
+Nota: Introduzca el nombre del campo de clave externa si no es el mismo que el nombre del campo de clave principal.'''},
+'Primary key': {'es': 'Clave primaria'},
+'Foreign key': {'es': 'Clave externa'},
+'Layer {} has no key field!': {'es': '¡La capa {} no tiene campo clave!'},
 
  }
