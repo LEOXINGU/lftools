@@ -56,7 +56,7 @@ class SetZfromDEM(QgsProcessingAlgorithm):
 
     txt_en = '''This tool replaces the Z coordinates of an existing layer with the value of the nearest cell from a Digital Elevation Model (DEM).'''
     txt_pt = '''Esta ferramenta substitui as coordenadas Z de uma camada existente pelo valor da célula mais próxima de um Modelo Digital de Elevação (MDE).'''
-    figure = 'images/tutorial/relief_dem2txt.jpg'
+    figure = 'images/tutorial/relief_defineZ.jpg'
 
     def shortHelpString(self):
         social_BW = Imgs().social_BW
