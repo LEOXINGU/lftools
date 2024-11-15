@@ -136,6 +136,8 @@ class LFToolsPlugin(object):
         icon = QIcon(self.plugin_dir + '/images/easy.png')
         self.ExportASCII_Action = menu.addAction(icon, tr('Export expression as ASCII', 'Exportar expressão como ASCII'), self.ExportASCII)
         self.ExportASCII_Action.setObjectName('ExportASCII')
+        self.SelectByKeyAtt_Action = menu.addAction(icon, tr('Select by key attribute', 'Selecionar por atributo chave'), self.SelectByKeyAtt)
+        self.SelectByKeyAtt_Action.setObjectName('SelectByKeyAtt')
 
         # Adicionando conjunto de botões
         self.MainLFToolsButton = QToolButton()
@@ -168,6 +170,7 @@ class LFToolsPlugin(object):
         self.iface.removeToolBarIcon(self.GetAttribute_Action)
         self.iface.removeToolBarIcon(self.MeasureLayer_Action)
         self.iface.removeToolBarIcon(self.ExportASCII_Action)
+        self.iface.removeToolBarIcon(self.SelectByKeyAtt)
         self.iface.removeToolBarIcon(self.Tutoriais_Action)
         # remove the toolbar
         del self.toolbar
@@ -188,6 +191,9 @@ class LFToolsPlugin(object):
 
     def ExportASCII(self):
         processing.execAlgorithmDialog('lftools:exportascii', {})
+
+    def SelectByKeyAtt(self):
+        processing.execAlgorithmDialog('lftools:selectbykeyatt', {})
 
 
     def runUTM(self):
