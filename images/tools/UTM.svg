@@ -7,7 +7,7 @@
    viewBox="0 0 61.41782 61.902878"
    version="1.1"
    id="svg5"
-   inkscape:version="1.1.2 (b8e25be833, 2022-02-05)"
+   inkscape:version="1.2.2 (732a01da63, 2022-12-09)"
    sodipodi:docname="UTM.svg"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
@@ -24,14 +24,16 @@
      inkscape:document-units="mm"
      showgrid="false"
      inkscape:zoom="2.9718855"
-     inkscape:cx="129.37914"
-     inkscape:cy="134.42644"
+     inkscape:cx="63.932477"
+     inkscape:cy="134.59469"
      inkscape:window-width="1920"
-     inkscape:window-height="1001"
-     inkscape:window-x="-9"
-     inkscape:window-y="-9"
+     inkscape:window-height="1009"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
      inkscape:window-maximized="1"
-     inkscape:current-layer="g17544" />
+     inkscape:current-layer="g17544"
+     inkscape:showpageshadow="0"
+     inkscape:deskcolor="#d1d1d1" />
   <defs
      id="defs2">
     <rect
@@ -50,7 +52,7 @@
        xml:space="preserve"
        transform="scale(0.26458333)"
        id="text1619"
-       style="font-size:96px;line-height:1.25;font-family:Calibri;-inkscape-font-specification:'Calibri, Normal';font-variant-ligatures:none;white-space:pre;shape-inside:url(#rect1621)" />
+       style="font-size:96px;line-height:1.25;font-family:Calibri;-inkscape-font-specification:'Calibri, Normal';font-variant-ligatures:none;white-space:pre;shape-inside:url(#rect1621);display:inline" />
     <g
        id="g17544">
       <g
@@ -59,23 +61,23 @@
          style="opacity:1;fill:#ffff00;stroke:#00ff00;stroke-width:1.77774;stroke-miterlimit:4;stroke-dasharray:none">
         <path
            id="rect7625"
-           style="opacity:0.603175;stroke-linecap:round;stroke-linejoin:round"
+           style="opacity:1;stroke-linecap:round;stroke-linejoin:round"
            d="m 56.842667,106.07181 h 11.968551 v 46.97034 H 56.842667 Z" />
         <path
            id="rect7625-1"
-           style="opacity:0.603175;stroke-linecap:round;stroke-linejoin:round"
+           style="opacity:1;stroke-linecap:round;stroke-linejoin:round"
            d="M 68.811218,106.07181 H 80.77977 v 46.97034 H 68.811218 Z" />
         <path
            id="rect7625-4"
-           style="opacity:0.603175;stroke-linecap:round;stroke-linejoin:round"
+           style="opacity:1;stroke-linecap:round;stroke-linejoin:round"
            d="m 80.77977,106.07181 h 11.968552 v 46.97034 H 80.77977 Z" />
         <path
            id="rect7625-7"
-           style="opacity:0.603175;stroke-linecap:round;stroke-linejoin:round"
+           style="opacity:1;stroke-linecap:round;stroke-linejoin:round"
            d="m 92.748322,106.07181 h 11.968548 v 46.97034 H 92.748322 Z" />
         <path
            id="rect7625-6"
-           style="opacity:0.603175;stroke-linecap:round;stroke-linejoin:round"
+           style="opacity:1;stroke-linecap:round;stroke-linejoin:round"
            d="m 104.71687,106.07181 h 11.96855 v 46.97034 h -11.96855 z" />
       </g>
       <g
@@ -98,8 +100,8 @@
       </g>
       <path
          id="path17384"
-         style="opacity:1;fill:#f46d00;fill-opacity:1;stroke:#f46d00;stroke-width:1.60277;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
-         d="m 89.136518,146.29484 a 3.3296709,3.3296709 0 0 1 -3.329671,3.32967 3.3296709,3.3296709 0 0 1 -3.329671,-3.32967 3.3296709,3.3296709 0 0 1 3.329671,-3.32968 3.3296709,3.3296709 0 0 1 3.329671,3.32968 z" />
+         style="opacity:1;fill:#f46d00;fill-opacity:1;stroke:#f46d00;stroke-width:2.09653;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
+         d="m 89.960692,147.66906 a 4.3554176,4.3554176 0 0 1 -4.355418,4.35541 4.3554176,4.3554176 0 0 1 -4.355418,-4.35541 4.3554176,4.3554176 0 0 1 4.355418,-4.35543 4.3554176,4.3554176 0 0 1 4.355418,4.35543 z" />
     </g>
   </g>
 </svg>
