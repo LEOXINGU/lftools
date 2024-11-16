@@ -107,7 +107,7 @@ class DescriptiveMemorial(QgisAlgorithm):
                       </div>
                       <div align="right">
                       <div>''' + self.tr('This tool works properly only with data in "TopoGeo" modeling.',
-                                         'Esta ferramenta funciona adequadamente com os dados na modelagem "TopoGeo".') + '''
+                                         'Esta ferramenta funciona adequadamente com os dados na modelagem "TopoGeo" ou "GeoRural".') + '''
                       </div>
                       <p align="right">
                       <b><a href="'''+ self.tr('https://www.researchgate.net/publication/356911797_TopoGeo_a_data_model_for_elaboration_of_cadastral_survey_plans_and_land_register_documents',
