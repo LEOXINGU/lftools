@@ -268,7 +268,7 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
       <td style="text-align: center;">[UF]</td>
     </tr>
     <tr>
-      <td colspan="5" rowspan="1">'''+ str2HTML(self.tr('Description/Location:','Descrição/Localização:')) + ''': [DESCR]</td>
+      <td colspan="5" rowspan="1">'''+ str2HTML(self.tr('Description/Location:','Descrição/Localização:')) + ''' [DESCR]</td>
     </tr>
     <tr>
       <td colspan="5" rowspan="1"></td>
