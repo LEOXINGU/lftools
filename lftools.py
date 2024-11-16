@@ -170,7 +170,7 @@ class LFToolsPlugin(object):
         self.iface.removeToolBarIcon(self.GetAttribute_Action)
         self.iface.removeToolBarIcon(self.MeasureLayer_Action)
         self.iface.removeToolBarIcon(self.ExportASCII_Action)
-        self.iface.removeToolBarIcon(self.SelectByKeyAtt)
+        self.iface.removeToolBarIcon(self.SelectByKeyAtt_Action)
         self.iface.removeToolBarIcon(self.Tutoriais_Action)
         # remove the toolbar
         del self.toolbar
