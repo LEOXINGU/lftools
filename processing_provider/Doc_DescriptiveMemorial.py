@@ -362,6 +362,7 @@ class DescriptiveMemorial(QgisAlgorithm):
         campos_area = ['property', 'registry', 'transcript', 'owner', 'county', 'state', 'survey_date']
         if TestModelo(campos_vertices, campos_limites, campos_area):
             modeloBD = 'TG' # TopoGeo
+            campos_area_teste = campos_area
             feedback.pushInfo(self.tr('Database in the TopoGeo model...', 'Banco de dados no modelo TopoGeo...' ))
 
         campos_vertices = ['tipo_verti', 'vertice', 'indice']
@@ -369,6 +370,7 @@ class DescriptiveMemorial(QgisAlgorithm):
         campos_area = ['denominacao', 'sncr', 'matricula', 'nome', 'cpf_cnpj', 'municipio', 'uf', 'data', 'resp_tec', 'reg_prof']
         if TestModelo(campos_vertices, campos_limites, campos_area):
             modeloBD = 'GR' # GeoRural
+            campos_area_teste = campos_area
             feedback.pushInfo('Banco de dados no modelo GeoRural...' )
 
         if not modeloBD:
@@ -622,13 +624,12 @@ class DescriptiveMemorial(QgisAlgorithm):
 
         # Área do imóvel
         Fields = area.fields()
-        fieldnames = [field.name() for field in Fields]
+        # fieldnames = [field.name() for field in Fields]
         if atributos:
-            for fieldname in fieldnames:
-                if 'auxiliary' not in fieldname and fieldname not in ['qrcode']: # campos a ignorar
-                    att = feat1[fieldname]
-                    if not att or att in ['', ' ']:
-                        raise QgsProcessingException(self.tr('The attribute {} of the polygon layer must be filled!', 'O atributo {} da camada polígono do imóvel deve ser preenchido!').format(fieldname))
+            for fieldname in campos_area_teste:
+                att = feat1[fieldname]
+                if not att or att in ['', ' ']:
+                    raise QgsProcessingException(self.tr('The attribute {} of the polygon layer must be filled!', 'O atributo {} da camada polígono do imóvel deve ser preenchido!').format(fieldname))
 
         # Transformar Coordenadas de Geográficas para o sistema UTM
         coordinateTransformer = QgsCoordinateTransform()
