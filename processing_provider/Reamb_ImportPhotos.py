@@ -385,15 +385,15 @@ class ImportPhotos(QgsProcessingAlgorithm):
     def postProcessAlgorithm(self, context, feedback):
         layer = QgsProcessingUtils.mapLayerFromString(self.SAIDA, context)
         if self.pasta[0:2] in (r'\\', r'//'):
-            layer.setMapTipTemplate(r'''[% "nome" %]<br><img src="file://[%''' + self.tr('path','caminho') + '''%]" width="450">''')
+            layer.setMapTipTemplate(r'''[%''' + self.tr("name","nome") + '''%]<br><img src="file://[%''' + self.tr('path','caminho') + '''%]" width="450">''')
         else:
-            layer.setMapTipTemplate(r'''[% "nome" %]<br><img src="file:///[%''' + self.tr('path','caminho') + '''%]" width="450">''')
+            layer.setMapTipTemplate(r'''[%''' + self.tr("name","nome") + '''%]<br><img src="file:///[%''' + self.tr('path','caminho') + '''%]" width="450">''')
 
         acManager = layer.actions()
         acActor = QgsAction(QgsAction.ActionType.GenericPython , self.tr('Open photo', 'Abrir foto'),"""
 import os
-os.popen(r'[%"caminho"%]')
-""", False)
+os.popen(r'[%"{}"%]')
+""".format(self.tr("path","caminho")), False)
         acActor.setActionScopes({'Field', 'Layer', 'Canvas', 'Feature'})
         acManager.addAction(acActor)
 
