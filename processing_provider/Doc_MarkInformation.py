@@ -94,7 +94,7 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
                       </div>
                       <p align="right">
                       <b><a href="'''+ self.tr('https://www.researchgate.net/publication/356911797_TopoGeo_a_data_model_for_elaboration_of_cadastral_survey_plans_and_land_register_documents',
-                      'https://geoone.com.br/ebook_gratis/') + '''" target="_blank">'''+ self.tr('Click here for understanding this data model.',
+                      'https://geoone.com.br/ebooks/livro2/') + '''" target="_blank">'''+ self.tr('Click here for understanding this data model.',
                                     'Clique aqui para entender esse modelo de dados') +'</a><br><br>'+ self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
                       </p>'''+ social_BW + '''</div>
                     </div>'''
@@ -416,7 +416,7 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
                     '[SRC]': self.tr(SRC, SRC.replace('zone', 'fuso'))
                         }
         except:
-            raise QgsProcessingException(self.tr('Check that your layer "reference_point_p" has the correct field names for the TopoGeo model! More information: https://bit.ly/3FDNQGC', 'Verifique se sua camada "Ponto de Referência Geodésica" está com os nomes dos campos corretos para o modelo TopoGeo! Mais informações: https://geoone.com.br/ebook_gratis/'))
+            raise QgsProcessingException(self.tr('Check that your layer "reference_point_p" has the correct field names for the TopoGeo model! More information: https://bit.ly/3FDNQGC', 'Verifique se sua camada "Ponto de Referência Geodésica" está com os nomes dos campos corretos para o modelo TopoGeo! Mais informações: https://geoone.com.br/ebooks/livro2/'))
 
         try:
             itens['[FOTO_MARCO]'] = img2html_resized(ponto['mark_photo']) if ponto['mark_photo'] else ''
