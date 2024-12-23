@@ -93,7 +93,7 @@ class DescriptiveTable(QgsProcessingAlgorithm):
                       </div>
                       <p align="right">
                       <b><a href="'''+ self.tr('https://www.researchgate.net/publication/356911797_TopoGeo_a_data_model_for_elaboration_of_cadastral_survey_plans_and_land_register_documents',
-                      'https://geoone.com.br/ebook_gratis/') + '''" target="_blank">'''+ self.tr('Click here for understanding this data model.',
+                      'https://geoone.com.br/ebooks/livro2/') + '''" target="_blank">'''+ self.tr('Click here for understanding this data model.',
                                     'Clique aqui para entender esse modelo de dados') +'</a><br><br>'+ self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
                       </p>'''+ social_BW + '''</div>
                     </div>'''
@@ -317,7 +317,7 @@ class DescriptiveTable(QgsProcessingAlgorithm):
             feedback.pushInfo('Camada no modelo GeoRural...' )
 
         if not modeloBD:
-            raise QgsProcessingException(self.tr('Check that your layers have the correct field names for the TopoGeo model! More information: https://bit.ly/3FDNQGC', 'Verifique se suas camadas estão com os nomes dos campos corretos para o modelo de banco de dados (TopoGeo ou GeoRural)! Mais informações: https://geoone.com.br/ebook_gratis/'))
+            raise QgsProcessingException(self.tr('Check that your layers have the correct field names for the TopoGeo model! More information: https://bit.ly/3FDNQGC', 'Verifique se suas camadas estão com os nomes dos campos corretos para o modelo de banco de dados (TopoGeo ou GeoRural)! Mais informações: https://geoone.com.br/ebooks/livro2/'))
 
         # ponto_limite
         ordem_list = list(range(1,vertices.featureCount()+1))
