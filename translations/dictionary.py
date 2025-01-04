@@ -1271,5 +1271,6 @@ Nota: Introduzca el nombre del campo de clave externa si no es el mismo que el n
 'Primary key': {'es': 'Clave primaria'},
 'Foreign key': {'es': 'Clave externa'},
 'Layer {} has no key field!': {'es': '¡La capa {} no tiene campo clave!'},
-
+'Offset': {'es': 'Compensar'},
+'Connected layer': {'es': 'Capa conectada'},
  }
