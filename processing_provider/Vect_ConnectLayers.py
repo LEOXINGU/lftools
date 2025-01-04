@@ -98,8 +98,8 @@ class ConnectLayers(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.POLYGONS,
-                self.tr('Polygons', 'Polígonos'),
-                [QgsProcessing.TypeVectorPolygon]
+                self.tr('Input layer', 'Camada de Entrada'),
+                [QgsProcessing.TypeVectorPolygon, QgsProcessing.TypeVectorLine]
             )
         )
 
@@ -124,7 +124,7 @@ class ConnectLayers(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSink(
                 self.OUTPUT,
-                self.tr('Connected polygons', 'Polígonos conectados')
+                self.tr('Connected layer', 'Camada conectada')
             )
         )
 
@@ -211,31 +211,59 @@ class ConnectLayers(QgsProcessingAlgorithm):
             bbox_a = geom_a.boundingBox()
             feat_ids = index.intersects(bbox_a)
 
-            for feat_id in feat_ids:
-                feat_b = feicoes[feat_id]
-                geom_b = feat_b.geometry()
-                # Verificar se algum ponto de A que intercepta o segmento de B, não tem vértice correspondente
-                if geom_b.isMultipart():
-                    coord_b = geom_b.asMultiPolygon()[0][0]
-                else:
-                    coord_b = geom_b.asPolygon()[0]
-                new_coord_b = []
-                for k in range(len(coord_b)-1):
-                    p1 = coord_b[k]
-                    p2 = coord_b[k+1]
-                    segm = QgsGeometry.fromPolylineXY([p1, p2])
-                    sentinela = False
-                    for pnt_a in coord_a:
-                        pnt = QgsGeometry.fromPointXY(pnt_a).buffer(tol,1)
-                        if pnt_a not in coord_b and pnt.intersects(segm):
-                            new_coord_b += [p1, pnt_a]
-                            sentinela = True
-                            break
-                    if not sentinela:
-                        new_coord_b += [p1]
-                new_coord_b += [coord_b[-1]]
-                feat_b.setGeometry(QgsGeometry.fromPolygonXY([new_coord_b]))
-                feicoes[feat_id] = feat_b
+            if lotes.wkbType() in [QgsWkbTypes.Polygon, QgsWkbTypes.PolygonZ, QgsWkbTypes.PolygonZM]:
+                for feat_id in feat_ids:
+                    feat_b = feicoes[feat_id]
+                    geom_b = feat_b.geometry()
+                    # Verificar se algum ponto de A que intercepta o segmento de B, não tem vértice correspondente
+                    if geom_b.isMultipart():
+                        coord_b = geom_b.asMultiPolygon()[0][0]
+                    else:
+                        coord_b = geom_b.asPolygon()[0]
+                    new_coord_b = []
+                    for k in range(len(coord_b)-1):
+                        p1 = coord_b[k]
+                        p2 = coord_b[k+1]
+                        segm = QgsGeometry.fromPolylineXY([p1, p2])
+                        sentinela = False
+                        for pnt_a in coord_a:
+                            pnt = QgsGeometry.fromPointXY(pnt_a).buffer(tol,1)
+                            if pnt_a not in coord_b and pnt.intersects(segm):
+                                new_coord_b += [p1, pnt_a]
+                                sentinela = True
+                                break
+                        if not sentinela:
+                            new_coord_b += [p1]
+                    new_coord_b += [coord_b[-1]]
+                    feat_b.setGeometry(QgsGeometry.fromPolygonXY([new_coord_b]))
+                    feicoes[feat_id] = feat_b
+
+            elif lotes.wkbType() in [QgsWkbTypes.LineString, QgsWkbTypes.LineStringZ, QgsWkbTypes.LineStringZM]:
+                for feat_id in feat_ids:
+                    feat_b = feicoes[feat_id]
+                    geom_b = feat_b.geometry()
+                    # Verificar se algum ponto de A que intercepta o segmento de B, não tem vértice correspondente
+                    if geom_b.isMultipart():
+                        coord_b = geom_b.asMultiPolyline()[0]
+                    else:
+                        coord_b = geom_b.asPolyline()
+                    new_coord_b = []
+                    for k in range(len(coord_b)-1):
+                        p1 = coord_b[k]
+                        p2 = coord_b[k+1]
+                        segm = QgsGeometry.fromPolylineXY([p1, p2])
+                        sentinela = False
+                        for pnt_a in coord_a:
+                            pnt = QgsGeometry.fromPointXY(pnt_a).buffer(tol,1)
+                            if pnt_a not in coord_b and pnt.intersects(segm):
+                                new_coord_b += [p1, pnt_a]
+                                sentinela = True
+                                break
+                        if not sentinela:
+                            new_coord_b += [p1]
+                    new_coord_b += [coord_b[-1]]
+                    feat_b.setGeometry(QgsGeometry.fromPolylineXY(new_coord_b))
+                    feicoes[feat_id] = feat_b
 
         for index, ID in enumerate(feicoes):
             feature = feicoes[ID]
