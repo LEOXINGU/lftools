@@ -72,6 +72,7 @@ class SetZfromDEM(QgsProcessingAlgorithm):
 
     INPUT = 'INPUT'
     DEM ='DEM'
+    OFFSET = 'OFFSET'
     SAVE = 'SAVE'
     SELECTED = 'SELECTED'
 
@@ -103,6 +104,16 @@ class SetZfromDEM(QgsProcessingAlgorithm):
         )
 
         self.addParameter(
+            QgsProcessingParameterNumber(
+                self.OFFSET,
+                self.tr('Offset', 'Deslocamento'),
+                type = QgsProcessingParameterNumber.Type.Double,
+                defaultValue = 0.0,
+                minValue = 0
+                )
+            )
+
+        self.addParameter(
             QgsProcessingParameterBoolean(
                 self.SAVE,
                 self.tr('Save Editions', 'Salvar Edições'),
@@ -128,6 +139,12 @@ class SetZfromDEM(QgsProcessingAlgorithm):
         )
         if camada is None:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.INPUT))
+
+        offset = self.parameterAsDouble(
+            parameters,
+            self.OFFSET,
+            context
+        )
 
         # Verificar se a camada de entrada tem a coordenada Z
         if not LayerIs3D(camada):
@@ -159,7 +176,7 @@ class SetZfromDEM(QgsProcessingAlgorithm):
         layer3D = processing.run("native:setzfromraster",
                     {'INPUT': layerID,
                      'RASTER': MDE,
-                     'BAND':1, 'NODATA':0, 'SCALE':1, 'OFFSET':0,
+                     'BAND':1, 'NODATA':0, 'SCALE':1, 'OFFSET':offset,
                      'OUTPUT':'TEMPORARY_OUTPUT'})
         layer3D = layer3D['OUTPUT']
 
