@@ -206,7 +206,7 @@ class CoordinatesToLayer(QgsProcessingAlgorithm):
                         valido = False
                         feedback.pushInfo(self.tr('Feature id {} has attributes Z={} incompatible for point geometry!'.format(feat.id(), att[Z_id]),
                                                   'Feição de id {} tem atributos Z={} incompatível para geometria ponto!'.format(feat.id(),att[Z_id]) ))
-            if valido and X and Y:
+            if valido and X is not None and Y is not None:
                 # Verificando se o SRC é compatível com as coordenadas
                 if CRS.isGeographic():
                     if X < -180 or X > 180 or Y < -90 or Y > 90:
