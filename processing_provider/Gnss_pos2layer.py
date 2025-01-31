@@ -79,7 +79,7 @@ class Pos2layer(QgsProcessingAlgorithm):
         return 'gnss'
 
     def tags(self):
-        return self.tr('gps,position,ibge,.pos,rtklib,ppp,navigation,satellites,rinex,surveying,glonass,beidou,compass,galileu,track,kinematic,rtk,ntrip,static').split(',')
+        return self.tr('gps,position,ibge,.pos,rtklib,ppp,navigation,vemos,satellites,rinex,surveying,glonass,beidou,compass,galileu,track,kinematic,rtk,ntrip,static').split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/satellite.png'))
@@ -166,7 +166,8 @@ Tipos:
 
         vemos = [self.tr('None', 'Nenhum'),
                 self.tr('VEMOS2009'),
-                self.tr('VEMOS2017')
+                self.tr('VEMOS2017'),
+                self.tr('VEMOS2022')
                 ]
 
         self.addParameter(
@@ -337,7 +338,7 @@ Tipos:
             feat['quality'] = quality
 
             if model_vel > 0 and saida == 0:
-                vlat, vlon = vemos(lat, lon, ['vemos2009','vemos2017'][model_vel-1])
+                vlat, vlon = vemos(lat, lon, ['vemos2009','vemos2017','vemos2022'][model_vel-1])
                 delta_tempo = datetime.strptime(datahora, "%Y-%m-%d %H:%M:%S") - datetime.strptime('2000-04-24 12:00:00', "%Y-%m-%d %H:%M:%S")
                 anos = delta_tempo.days/365.25
                 dLat = meters2degrees(vlat*anos, lat, QgsCoordinateReferenceSystem('EPSG:4674'))
