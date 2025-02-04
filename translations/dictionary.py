@@ -1274,4 +1274,5 @@ Nota: Introduzca el nombre del campo de clave externa si no es el mismo que el n
 'Offset': {'es': 'Compensar'},
 'Connected layer': {'es': 'Capa conectada'},
 'Path {} does not exist!': {'es': '¡La ruta del archivo {} no existe!'},
+'Coordinates in Degrees, Minutes, and Seconds (DMS)': {'es': 'Coordenadas en Grados, Minutos y Segundos (GMS)'},
  }
