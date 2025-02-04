@@ -42,7 +42,7 @@ from qgis.core import (QgsProcessing,
 import re, os
 from lftools.geocapt.imgs import *
 from lftools.translations.translate import translate
-from lftools.geocapt.topogeo import dd2dms, dd2dms
+from lftools.geocapt.topogeo import dms2dd
 from qgis.PyQt.QtGui import QIcon
 
 class PointsFromText(QgsProcessingAlgorithm):
@@ -54,6 +54,7 @@ class PointsFromText(QgsProcessingAlgorithm):
     CRS = 'CRS'
     OUTPUT ='OUTPUT'
     DEC_SEPARATOR = 'DEC_SEPARATOR'
+    GMS = 'GMS'
 
     LOC = QgsApplication.locale()[:2]
 
@@ -93,7 +94,15 @@ class PointsFromText(QgsProcessingAlgorithm):
                       <div align="right">
                       <p align="right">
                       <b><a href="https://regex101.com/" target="_blank">'''+ self.tr('Click here for testing your regular expression (RegEx).',
-                                    'Clique aqui para testar sua expressão regular (RegEx).') +'</a><br><br>'+ self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
+                                    'Clique aqui para testar sua expressão regular (RegEx).') +'''</a><br>
+                                    <b>Longitude Regex:</b>
+                                    (-?\d{1,3}[\s°º˚]\s*\d{1,2}[\s'`´]\s*\d{1,2}[,.]\d+\s*["''″]?\s*[WE])
+                                    <b>Latitude Regex:</b>
+                                    (-?\d{1,3}[\s°º˚]\s*\d{1,2}[\s'`´]\s*\d{1,2}[,.]\d+\s*["''″]?\s*[SN])
+                                    <b>INCRA code:</b>
+                                    \s*[A-Z]{3,4}-[MPV]-\d{1,5}
+                                    <br>
+                                    '''+ self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
                       </p>'''+ social_BW + '''</div>
                     </div>'''
         return self.tr(self.txt_en, self.txt_pt) + footer
@@ -121,6 +130,14 @@ class PointsFromText(QgsProcessingAlgorithm):
                 self.RE_Y,
                 self.tr('X coordinate RegEx', 'RegEx da coordenada Y'),
                 defaultValue = self.tr(r'N[\s-]+[\d\,-]+[\d\,-]+[\d\.-]+[\d]', r'N[\s-]+[\d\.-]+[\d\.-]+[\d\,-]+[\d]')
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterBoolean(
+            self.GMS,
+            self.tr('Coordinates in Degrees, Minutes, and Seconds (DMS)', 'Coordenadas em Graus, Minutos e Segundos (GMS)'),
+            defaultValue = False
             )
         )
 
@@ -192,6 +209,15 @@ class PointsFromText(QgsProcessingAlgorithm):
             context
         )
 
+        GMS = self.parameterAsBool(
+            parameters,
+            self.GMS,
+            context
+        )
+
+        if GMS and not crs.isGeographic():
+            raise QgsProcessingException(self.tr('Choose a geographic CRS!', 'Escolha um SRC geográfico!'))
+
         Fields = QgsFields()
         itens  = {
                      'ord' : QVariant.Int,
@@ -248,49 +274,60 @@ class PointsFromText(QgsProcessingAlgorithm):
         for k, nome in enumerate(nm_list):
             feedback.pushInfo(self.tr('{};   {};  {}'.format(nome ,x_list[k], y_list[k])))
 
-        # Removendo caracteres não digito
+        
         lista_X, lista_Y = [],[]
 
-        if sep_decimal:
+        if GMS:
             for k in range(tam):
-                txt = ''
-                for s in x_list[k]:
-                    if s.isdigit() or s == '.':
-                        txt += s
                 try:
-                    lista_X += [float(txt)]
+                    lista_X += [dms2dd(x_list[k])]
+                    lista_Y += [dms2dd(y_list[k])]
                 except:
                     raise QgsProcessingException(self.tr('Error in coordinate {}!', 'Erro na coordenada {}!').format(x_list[k]))
 
-                txt = ''
-                for s in y_list[k]:
-                    if s.isdigit() or s == '.':
-                        txt += s
-                try:
-                    lista_Y += [float(txt)]
-                except:
-                    raise QgsProcessingException(self.tr('Error in coordinate {}!', 'Erro na coordenada {}!').format(y_list[k]))
-        else:
-            for k in range(tam):
-                txt = ''
-                for s in x_list[k]:
-                    if s.isdigit() or s == ',':
-                        txt += s
-                txt = txt.replace(',','.')
-                try:
-                    lista_X += [float(txt)]
-                except:
-                    raise QgsProcessingException(self.tr('Error in coordinate {}!', 'Erro na coordenada {}!').format(x_list[k]))
+        else: 
 
-                txt = ''
-                for s in y_list[k]:
-                    if s.isdigit() or s == ',':
-                        txt += s
-                txt = txt.replace(',','.')
-                try:
-                    lista_Y += [float(txt)]
-                except:
-                    raise QgsProcessingException(self.tr('Error in coordinate {}!', 'Erro na coordenada {}!').format(y_list[k]))
+            if sep_decimal:
+                # Removendo caracteres não digito
+                for k in range(tam):
+                    txt = ''
+                    for s in x_list[k]:
+                        if s.isdigit() or s == '.':
+                            txt += s
+                    try:
+                        lista_X += [float(txt)]
+                    except:
+                        raise QgsProcessingException(self.tr('Error in coordinate {}!', 'Erro na coordenada {}!').format(x_list[k]))
+
+                    txt = ''
+                    for s in y_list[k]:
+                        if s.isdigit() or s == '.':
+                            txt += s
+                    try:
+                        lista_Y += [float(txt)]
+                    except:
+                        raise QgsProcessingException(self.tr('Error in coordinate {}!', 'Erro na coordenada {}!').format(y_list[k]))
+            else:
+                for k in range(tam):
+                    txt = ''
+                    for s in x_list[k]:
+                        if s.isdigit() or s == ',':
+                            txt += s
+                    txt = txt.replace(',','.')
+                    try:
+                        lista_X += [float(txt)]
+                    except:
+                        raise QgsProcessingException(self.tr('Error in coordinate {}!', 'Erro na coordenada {}!').format(x_list[k]))
+
+                    txt = ''
+                    for s in y_list[k]:
+                        if s.isdigit() or s == ',':
+                            txt += s
+                    txt = txt.replace(',','.')
+                    try:
+                        lista_Y += [float(txt)]
+                    except:
+                        raise QgsProcessingException(self.tr('Error in coordinate {}!', 'Erro na coordenada {}!').format(y_list[k]))
 
 
         # Varrer pontos
