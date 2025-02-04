@@ -15,21 +15,9 @@ __author__ = 'Leandro França'
 __date__ = '2021-11-07'
 __copyright__ = '(C) 2021, Leandro França'
 
+from qgis.utils import iface
 from qgis.PyQt.QtCore import QCoreApplication
-from qgis.core import (QgsApplication,
-                       QgsProcessingParameterVectorLayer,
-                       QgsGeometry,
-                       QgsProcessing,
-                       QgsProcessingParameterField,
-                       QgsProcessingParameterString,
-                       QgsProcessingParameterEnum,
-                       QgsProcessingParameterBoolean,
-                       QgsProcessingParameterFile,
-                       QgsFeatureSink,
-                       QgsProcessingException,
-                       QgsProcessingAlgorithm,
-                       QgsProcessingParameterFeatureSource,
-                       QgsProcessingParameterFeatureSink)
+from qgis.core import *
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
 import os, shutil
@@ -167,11 +155,15 @@ class CopySelectedPhotos(QgsProcessingAlgorithm):
         cont = 1
         for pnt in pontos.getSelectedFeatures():
             origem = pnt[columnIndex]
-            nome = os.path.split(origem)[-1]
-            if opcao == 0:
-                shutil.copy2(origem, os.path.join(destino, nome))
-            elif opcao == 1:
-                shutil.move(origem, os.path.join(destino, nome))
+            if os.path.exists(origem):
+                nome = os.path.split(origem)[-1]
+                if opcao == 0:
+                    shutil.copy2(origem, os.path.join(destino, nome))
+                elif opcao == 1:
+                    shutil.move(origem, os.path.join(destino, nome))
+            else:
+                feedback.reportError('📢 ' + self.tr('Path {} does not exist!', 'Caminho {} não exite!').format(origem))
+                
             if feedback.isCanceled():
                 break
             feedback.setProgress(int((cont) * total))
