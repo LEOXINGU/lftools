@@ -185,11 +185,15 @@ class PointsFromText(QgsProcessingAlgorithm):
             context
         )
 
+        regex_x = regex_x.replace(' ', '')
+
         regex_y = self.parameterAsString(
             parameters,
             self.RE_Y,
             context
         )
+
+        regex_y = regex_y.replace(' ', '')
 
         crs = self.parameterAsCrs(
             parameters,
@@ -274,7 +278,7 @@ class PointsFromText(QgsProcessingAlgorithm):
         for k, nome in enumerate(nm_list):
             feedback.pushInfo(self.tr('{};   {};  {}'.format(nome ,x_list[k], y_list[k])))
 
-        
+
         lista_X, lista_Y = [],[]
 
         if GMS:
@@ -285,7 +289,7 @@ class PointsFromText(QgsProcessingAlgorithm):
                 except:
                     raise QgsProcessingException(self.tr('Error in coordinate {}!', 'Erro na coordenada {}!').format(x_list[k]))
 
-        else: 
+        else:
 
             if sep_decimal:
                 # Removendo caracteres não digito
