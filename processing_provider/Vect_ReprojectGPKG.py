@@ -211,7 +211,7 @@ class ReprojectGPKG(QgsProcessingAlgorithm):
                 DP = newlayer.dataProvider()
 
                 # Transformação de coordenadas
-                coordinateTransformer = QgsCoordinateTransform(sub_vlayer.crs(), QgsCoordinateReferenceSystem('EPSG:31985'), QgsProject.instance())
+                coordinateTransformer = QgsCoordinateTransform(sub_vlayer.crs(), out_CRS, QgsProject.instance())
 
                 for feat in sub_vlayer.getFeatures():
                     geom = feat.geometry()
@@ -237,4 +237,4 @@ class ReprojectGPKG(QgsProcessingAlgorithm):
         feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
         feedback.pushInfo(self.tr('Leandro Franca - Cartographic Engineer', 'Leandro França - Eng Cart'))
 
-        return {self.OUTPUT: out_CRS}
+        return {self.OUTPUT: outputGPKG}
