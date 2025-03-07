@@ -107,6 +107,7 @@ def dd2dms(dd, n_digits):
         elif n_digits == -1:
             return "0°00'"
         else:
+            mindec = -1*(n_digits+1)
             return "0°" + ('{:0' + str(3+mindec) + '.' + str(mindec) + 'f}').format(0) + "'"
 
 
