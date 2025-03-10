@@ -18,26 +18,20 @@ __copyright__ = '(C) 2021, Leandro França'
 from qgis.PyQt.QtCore import QCoreApplication
 from PyQt5.QtCore import QVariant
 from qgis.core import (QgsApplication,
-                       QgsProcessingParameterVectorLayer,
                        QgsGeometry,
-                       QgsPointXY,
+                       QgsPoint,
                        QgsWkbTypes,
                        QgsFeature,
                        QgsField,
                        QgsFields,
                        QgsAction,
                        QgsCoordinateReferenceSystem,
-                       QgsProcessing,
                        QgsProcessingParameterFile,
-                       QgsProcessingParameterField,
                        QgsProcessingParameterBoolean,
-                       QgsProcessingParameterEnum,
-                       QgsProcessingParameterNumber,
                        QgsFeatureSink,
                        QgsProcessingUtils,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
-                       QgsProcessingParameterFeatureSource,
                        QgsProcessingParameterFeatureSink)
 
 import datetime
@@ -248,7 +242,7 @@ class ImportPhotos(QgsProcessingAlgorithm):
             self.OUTPUT,
             context,
             fields,
-            QgsWkbTypes.Point,
+            QgsWkbTypes.PointZ,
             crs
         )
         if sink is None:
@@ -303,7 +297,7 @@ class ImportPhotos(QgsProcessingAlgorithm):
 
                 if lon != 0:
                     feature = QgsFeature(fields)
-                    feature.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(lon, lat)))
+                    feature.setGeometry(QgsGeometry(QgsPoint(lon, lat, altitude if altitude != None else 0)))
                     feature.setAttributes([arquivo, lon, lat, altitude, Az, date_time, os.path.join(caminho, arquivo), fabricante, modelo])
                     sink.addFeature(feature, QgsFeatureSink.FastInsert)
                 else:
@@ -364,7 +358,7 @@ class ImportPhotos(QgsProcessingAlgorithm):
 
                     if lon != 0:
                         feature = QgsFeature(fields)
-                        feature.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(lon, lat)))
+                        feature.setGeometry(QgsGeometry(QgsPoint(lon, lat, altitude if altitude != None else 0)))
                         feature.setAttributes([arquivo, lon, lat, altitude, Az, date_time, os.path.join(caminho, arquivo), fabricante, modelo])
                         sink.addFeature(feature, QgsFeatureSink.FastInsert)
                 else:
