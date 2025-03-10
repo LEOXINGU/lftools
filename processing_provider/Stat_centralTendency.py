@@ -23,6 +23,7 @@ from qgis.core import (QgsProcessing,
                        QgsField,
                        QgsFeature,
                        QgsPointXY,
+                       QgsPoint,
                        QgsGeometry,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
@@ -171,6 +172,7 @@ Observação: Camada em um SRC projetado obtém resultado mais acurados.'''
         )
         if layer is None:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.INPUT))
+        TemZ = layer.wkbType() == QgsWkbTypes.PointZ
 
         estat = self.parameterAsEnum(
             parameters,
@@ -200,33 +202,74 @@ Observação: Camada em um SRC projetado obtém resultado mais acurados.'''
 
         # OUTPUT
         if estat == 0: # média
-            itens  = {
-                 'id' : QVariant.Int,
-                 self.tr('group','grupo'): QVariant.String,
-                 'min_x' : QVariant.Double,
-                 'min_y' : QVariant.Double,
-                 'avg_x' : QVariant.Double,
-                 'avg_y' : QVariant.Double,
-                 'max_x' : QVariant.Double,
-                 'max_y' : QVariant.Double,
-                 'std_x' : QVariant.Double,
-                 'std_y' : QVariant.Double,
-                 }
+            if not TemZ:
+                itens  = {
+                    'id' : QVariant.Int,
+                    self.tr('group','grupo'): QVariant.String,
+                    'min_x' : QVariant.Double,
+                    'min_y' : QVariant.Double,
+                    'avg_x' : QVariant.Double,
+                    'avg_y' : QVariant.Double,
+                    'max_x' : QVariant.Double,
+                    'max_y' : QVariant.Double,
+                    'std_x' : QVariant.Double,
+                    'std_y' : QVariant.Double,
+                    }
+            else:
+                itens  = {
+                    'id' : QVariant.Int,
+                    self.tr('group','grupo'): QVariant.String,
+                    'min_x' : QVariant.Double,
+                    'min_y' : QVariant.Double,
+                    'min_z' : QVariant.Double,
+                    'avg_x' : QVariant.Double,
+                    'avg_y' : QVariant.Double,
+                    'avg_z' : QVariant.Double,
+                    'max_x' : QVariant.Double,
+                    'max_y' : QVariant.Double,
+                    'max_z' : QVariant.Double,
+                    'std_x' : QVariant.Double,
+                    'std_y' : QVariant.Double,
+                    'std_z' : QVariant.Double,
+                    }
+                
         elif estat == 1: # mediana
-            itens  = {
-                 'id' : QVariant.Int,
-                 self.tr('group','grupo'): QVariant.String,
-                 'min_x' : QVariant.Double,
-                 'min_y' : QVariant.Double,
-                 'perc25_x' : QVariant.Double,
-                 'perc25_y' : QVariant.Double,
-                 'median_x' : QVariant.Double,
-                 'median_y' : QVariant.Double,
-                 'perc75_x' : QVariant.Double,
-                 'perc75_y' : QVariant.Double,
-                 'max_x' : QVariant.Double,
-                 'max_y' : QVariant.Double,
-                 }
+            if not TemZ:
+                itens  = {
+                    'id' : QVariant.Int,
+                    self.tr('group','grupo'): QVariant.String,
+                    'min_x' : QVariant.Double,
+                    'min_y' : QVariant.Double,
+                    'perc25_x' : QVariant.Double,
+                    'perc25_y' : QVariant.Double,
+                    'median_x' : QVariant.Double,
+                    'median_y' : QVariant.Double,
+                    'perc75_x' : QVariant.Double,
+                    'perc75_y' : QVariant.Double,
+                    'max_x' : QVariant.Double,
+                    'max_y' : QVariant.Double,
+                    }
+            else:
+                itens  = {
+                    'id' : QVariant.Int,
+                    self.tr('group','grupo'): QVariant.String,
+                    'min_x' : QVariant.Double,
+                    'min_y' : QVariant.Double,
+                    'min_z' : QVariant.Double,
+                    'perc25_x' : QVariant.Double,
+                    'perc25_y' : QVariant.Double,
+                    'perc25_z' : QVariant.Double,
+                    'median_x' : QVariant.Double,
+                    'median_y' : QVariant.Double,
+                    'median_z' : QVariant.Double,
+                    'perc75_x' : QVariant.Double,
+                    'perc75_y' : QVariant.Double,
+                    'perc75_z' : QVariant.Double,
+                    'max_x' : QVariant.Double,
+                    'max_y' : QVariant.Double,
+                    'max_z' : QVariant.Double,
+                    }
+                
         elif estat == 2: # feição central
             itens = {
                     self.tr('group','grupo'): QVariant.String,
@@ -244,7 +287,7 @@ Observação: Camada em um SRC projetado obtém resultado mais acurados.'''
             self.OUTPUT,
             context,
             Fields,
-            QgsWkbTypes.Point,
+            QgsWkbTypes.PointZ if TemZ else QgsWkbTypes.Point,
             layer.sourceCrs()
         )
         if sink is None:
@@ -254,40 +297,62 @@ Observação: Camada em um SRC projetado obtém resultado mais acurados.'''
             dic = {}
             for feat in layer.getFeatures():
                 geom = feat.geometry()
-                if geom.isMultipart():
-                    pnt = geom.asMultiPoint()[0]
+                if TemZ:
+                    pnt = geom.constGet()
                 else:
-                    pnt = geom.asPoint()
+                    if geom.isMultipart():
+                        pnt = geom.asMultiPoint()[0]
+                    else:
+                        pnt = geom.asPoint()
                 grupo = feat[Campo_Agrupar]
                 if grupo in dic:
                     dic[grupo]['x'] = dic[grupo]['x'] + [pnt.x()]
                     dic[grupo]['y'] = dic[grupo]['y'] + [pnt.y()]
+                    if TemZ:
+                        dic[grupo]['z'] = dic[grupo]['z'] + [pnt.z()]
                     if Campo_Peso:
                         dic[grupo]['w'] = dic[grupo]['w'] + [int(feat[Campo_Peso])]
                 else:
                     if Campo_Peso:
-                        dic[grupo] = {'x':[pnt.x()], 'y':[pnt.y()], 'w':[int(feat[Campo_Peso])]}
+                        if TemZ:
+                            dic[grupo] = {'x':[pnt.x()], 'y':[pnt.y()], 'z':[pnt.z()], 'w':[int(feat[Campo_Peso])]}
+                        else:
+                            dic[grupo] = {'x':[pnt.x()], 'y':[pnt.y()], 'w':[int(feat[Campo_Peso])]}
                     else:
-                        dic[grupo] = {'x':[pnt.x()], 'y':[pnt.y()]}
+                        if TemZ:
+                            dic[grupo] = {'x':[pnt.x()], 'y':[pnt.y()], 'z':[pnt.z()]}
+                        else:
+                            dic[grupo] = {'x':[pnt.x()], 'y':[pnt.y()]}
         else:
             dic = {}
             for feat in layer.getFeatures():
                 geom = feat.geometry()
-                if geom.isMultipart():
-                    pnt = geom.asMultiPoint()[0]
+                if TemZ:
+                    pnt = geom.constGet()
                 else:
-                    pnt = geom.asPoint()
+                    if geom.isMultipart():
+                        pnt = geom.asMultiPoint()[0]
+                    else:
+                        pnt = geom.asPoint()
                 grupo = 'ungrouped'
                 if grupo in dic:
                     dic[grupo]['x'] = dic[grupo]['x'] + [pnt.x()]
                     dic[grupo]['y'] = dic[grupo]['y'] + [pnt.y()]
+                    if TemZ:
+                        dic[grupo]['z'] = dic[grupo]['z'] + [pnt.z()]
                     if Campo_Peso:
                         dic[grupo]['w'] = dic[grupo]['w'] + [int(feat[Campo_Peso])]
                 else:
                     if Campo_Peso:
-                        dic[grupo] = {'x':[pnt.x()], 'y':[pnt.y()], 'w':[int(feat[Campo_Peso])]}
+                        if TemZ:
+                            dic[grupo] = {'x':[pnt.x()], 'y':[pnt.y()], 'z':[pnt.z()], 'w':[int(feat[Campo_Peso])]}
+                        else:
+                            dic[grupo] = {'x':[pnt.x()], 'y':[pnt.y()], 'w':[int(feat[Campo_Peso])]}
                     else:
-                        dic[grupo] = {'x':[pnt.x()], 'y':[pnt.y()]}
+                        if TemZ:
+                            dic[grupo] = {'x':[pnt.x()], 'y':[pnt.y()], 'z':[pnt.z()]}
+                        else:
+                            dic[grupo] = {'x':[pnt.x()], 'y':[pnt.y()]}
 
         # Função para calcular a Mediana Ponderada
         def quantis_ponderados(valores, quantis, pesos):
@@ -328,6 +393,8 @@ Observação: Camada em um SRC projetado obtém resultado mais acurados.'''
         for current, grupo in enumerate(dic):
             x = np.array(dic[grupo]['x'])
             y = np.array(dic[grupo]['y'])
+            if TemZ:
+                z = np.array(dic[grupo]['z'])
             if Campo_Peso:
                 w = dic[grupo]['w']
             else:
@@ -338,25 +405,38 @@ Observação: Camada em um SRC projetado obtém resultado mais acurados.'''
                     if (np.array(w) > 0).sum() > 1: # Mais de um ponto com peso maior que zero
                         mediaX = float(np.average(x, weights = w))
                         mediaY = float(np.average(y, weights = w))
+                        if TemZ:
+                            mediaZ = float(np.average(z, weights = w))
+
                         std_X = float(np.sqrt(np.average((x-mediaX)**2, weights = w)))
                         std_Y = float(np.sqrt(np.average((y-mediaY)**2, weights = w)))
+                        if TemZ:
+                            std_Z = float(np.sqrt(np.average((z-mediaZ)**2, weights = w)))
                     else:
                         continue
                 else:
                     mediaX = float(np.average(x))
                     mediaY = float(np.average(y))
+                    if TemZ:
+                        mediaZ = float(np.average(z))
                     std_X = float(np.std(x))
                     std_Y = float(np.std(y))
+                    if TemZ:
+                        std_Z = float(np.std(z))
             elif estat == 1:
                 if Campo_Peso:
                     if (np.array(w) > 0).sum() > 1: # Mais de um ponto com peso maior que zero
                         perc25X, medianX, perc75X = quantis_ponderados(x, [0.25, 0.5, 0.75], w)
                         perc25Y, medianY, perc75Y = quantis_ponderados(y, [0.25, 0.5, 0.75], w)
+                        if TemZ:
+                            perc25Z, medianZ, perc75Z = quantis_ponderados(z, [0.25, 0.5, 0.75], w)
                     else:
                         continue
                 else:
                     perc25X, medianX, perc75X = np.quantile(x, [0.25, 0.5, 0.75])
                     perc25Y, medianY, perc75Y = np.quantile(y, [0.25, 0.5, 0.75])
+                    if TemZ:
+                        perc25Z, medianZ, perc75Z = np.quantile(z, [0.25, 0.5, 0.75])
             elif estat == 2:
                 central_X, central_Y = CentralFeature(x, y, w)
 
@@ -364,25 +444,44 @@ Observação: Camada em um SRC projetado obtém resultado mais acurados.'''
             max_y = np.max(y)
             min_x = np.min(x)
             min_y = np.min(y)
+            if TemZ:
+                max_z = np.max(z)
+                min_z = np.min(z)
 
             feat = QgsFeature(Fields)
             if estat == 0:
-                pnt = QgsGeometry.fromPointXY(QgsPointXY(float(mediaX),float(mediaY)))
-                att = [current+1, str(grupo),
-                        float(min_x), float(min_y),
-                        float(mediaX),float(mediaY),
-                        float(max_x), float(max_y),
-                        float(std_X), float(std_Y)]
+                if not TemZ:
+                    pnt = QgsGeometry.fromPointXY(QgsPointXY(float(mediaX),float(mediaY)))
+                    att = [current+1, str(grupo),
+                            float(min_x), float(min_y),
+                            float(mediaX),float(mediaY),
+                            float(max_x), float(max_y),
+                            float(std_X), float(std_Y)]
+                else:
+                    pnt = QgsGeometry(QgsPoint(float(mediaX),float(mediaY),float(mediaZ)))
+                    att = [current+1, str(grupo),
+                            float(min_x), float(min_y), float(min_z),
+                            float(mediaX), float(mediaY), float(mediaZ),
+                            float(max_x), float(max_y), float(max_z),
+                            float(std_X), float(std_Y), float(std_Z)]
             elif estat == 1:
-                pnt = QgsGeometry.fromPointXY(QgsPointXY(float(medianX), float(medianY)))
-                att = [current+1, str(grupo),
-                    float(min_x), float(min_y),
-                    float(perc25X), float(perc25Y),
-                    float(medianX), float(medianY),
-                    float(perc75X), float(perc75Y),
-                    float(max_x), float(max_y)]
+                if not TemZ:
+                    pnt = QgsGeometry.fromPointXY(QgsPointXY(float(medianX), float(medianY)))
+                    att = [current+1, str(grupo),
+                        float(min_x), float(min_y),
+                        float(perc25X), float(perc25Y),
+                        float(medianX), float(medianY),
+                        float(perc75X), float(perc75Y),
+                        float(max_x), float(max_y)]
+                else:
+                    pnt = QgsGeometry(QgsPoint(float(medianX), float(medianY), float(medianZ)))
+                    att = [current+1, str(grupo),
+                        float(min_x), float(min_y), float(min_z),
+                        float(perc25X), float(perc25Y), float(perc25Z),
+                        float(medianX), float(medianY), float(medianZ),
+                        float(perc75X), float(perc75Y), float(perc75Z),
+                        float(max_x), float(max_y), float(max_z)]
             elif estat == 2:
-                pnt = QgsGeometry.fromPointXY(QgsPointXY(float(central_X), float(central_Y)))
                 # Pegar atributos do ponto central
                 for feat in layer.getFeatures():
                     geom = feat.geometry()
@@ -392,6 +491,10 @@ Observação: Camada em um SRC projetado obtém resultado mais acurados.'''
                         coord = geom.asPoint()
                     if coord.x() == central_X and coord.y() == central_Y:
                         att = feat.attributes()
+                        if TemZ:
+                            pnt = geom
+                        else:
+                            pnt = QgsGeometry.fromPointXY(QgsPointXY(float(central_X), float(central_Y)))
                         break
                 att += [str(grupo), len(x)]
 
