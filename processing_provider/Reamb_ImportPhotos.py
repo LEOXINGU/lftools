@@ -93,6 +93,7 @@ class ImportPhotos(QgsProcessingAlgorithm):
     NONGEO = 'NONGEO'
     OUTPUT = 'OUTPUT'
     SUBFOLDER = 'SUBFOLDER'
+    AZIMUTH = 'AZIMUTH'
 
     def initAlgorithm(self, config=None):
 
@@ -109,6 +110,14 @@ class ImportPhotos(QgsProcessingAlgorithm):
             QgsProcessingParameterBoolean(
                 self.SUBFOLDER,
                 self.tr('Check subfolders', 'Verificar sub-pastas'),
+                defaultValue = False
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterBoolean(
+                self.AZIMUTH,
+                self.tr('Estimate azimuth', 'Estimar azimute'),
                 defaultValue = False
             )
         )
@@ -146,6 +155,14 @@ class ImportPhotos(QgsProcessingAlgorithm):
             self.SUBFOLDER,
             context
         )
+
+        CalcAz = self.parameterAsBool(
+            parameters,
+            self.AZIMUTH,
+            context
+        )
+        if CalcAz:
+            Atributos = []
 
         fotos_nao_geo = self.parameterAsFile(
             parameters,
@@ -296,10 +313,13 @@ class ImportPhotos(QgsProcessingAlgorithm):
                     modelo = ''
 
                 if lon != 0:
-                    feature = QgsFeature(fields)
-                    feature.setGeometry(QgsGeometry(QgsPoint(lon, lat, altitude if altitude != None else 0)))
-                    feature.setAttributes([arquivo, lon, lat, altitude, Az, date_time, os.path.join(caminho, arquivo), fabricante, modelo])
-                    sink.addFeature(feature, QgsFeatureSink.FastInsert)
+                    if not CalcAz:
+                        feature = QgsFeature(fields)
+                        feature.setGeometry(QgsGeometry(QgsPoint(lon, lat, altitude if altitude != None else 0)))
+                        feature.setAttributes([arquivo, lon, lat, altitude, Az, date_time, os.path.join(caminho, arquivo), fabricante, modelo])
+                        sink.addFeature(feature, QgsFeatureSink.FastInsert)
+                    else:
+                        Atributos += [[arquivo, lon, lat, altitude, Az, date_time, os.path.join(caminho, arquivo), fabricante, modelo]]
                 else:
                     feedback.pushInfo(self.tr('The file "{}" has no geotag!'.format(arquivo), 'A imagem "{}" não possui geotag!'.format(arquivo)))
                     if copy_ngeo:
@@ -369,6 +389,10 @@ class ImportPhotos(QgsProcessingAlgorithm):
             if feedback.isCanceled():
                 break
             feedback.setProgress(int((index+1) * Percent))
+        
+        # if calcAz:
+        #     Azimutes = []
+        #     for 
 
         feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
         feedback.pushInfo(self.tr('Leandro Franca - Cartographic Engineer', 'Leandro França - Eng Cart'))
