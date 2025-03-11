@@ -37,8 +37,10 @@ from qgis.core import (QgsApplication,
 import datetime
 import shutil
 from lftools.geocapt.imgs import Imgs
+from lftools.geocapt.topogeo import azimute as CalAZ
 from lftools.translations.translate import translate
 import os
+from math import pi
 from qgis.PyQt.QtGui import QIcon
 from PIL import Image, TiffTags, ExifTags
 from PIL.TiffImagePlugin import ImageFileDirectory_v2
@@ -377,10 +379,13 @@ class ImportPhotos(QgsProcessingAlgorithm):
                         modelo = ''
 
                     if lon != 0:
-                        feature = QgsFeature(fields)
-                        feature.setGeometry(QgsGeometry(QgsPoint(lon, lat, altitude if altitude != None else 0)))
-                        feature.setAttributes([arquivo, lon, lat, altitude, Az, date_time, os.path.join(caminho, arquivo), fabricante, modelo])
-                        sink.addFeature(feature, QgsFeatureSink.FastInsert)
+                        if not CalcAz:
+                            feature = QgsFeature(fields)
+                            feature.setGeometry(QgsGeometry(QgsPoint(lon, lat, altitude if altitude != None else 0)))
+                            feature.setAttributes([arquivo, lon, lat, altitude, Az, date_time, os.path.join(caminho, arquivo), fabricante, modelo])
+                            sink.addFeature(feature, QgsFeatureSink.FastInsert)
+                        else:
+                            Atributos += [[arquivo, lon, lat, altitude, Az, date_time, os.path.join(caminho, arquivo), fabricante, modelo]]
                 else:
                     feedback.pushInfo(self.tr('The file "{}" has no geotag!'.format(arquivo), 'A imagem "{}" não possui geotag!'.format(arquivo)))
                     if copy_ngeo:
@@ -390,9 +395,23 @@ class ImportPhotos(QgsProcessingAlgorithm):
                 break
             feedback.setProgress(int((index+1) * Percent))
         
-        # if calcAz:
-        #     Azimutes = []
-        #     for 
+        if CalcAz and len(Atributos) > 0:
+            # Calcular azimutes
+            for k in range(len(Atributos)-1):
+                pntA = QgsPoint( float(Atributos[k][1]),  float(Atributos[k][2]))
+                pntB = QgsPoint( float(Atributos[k+1][1]),float(Atributos[k+1][2]))
+                Az = int(180*CalAZ(pntA, pntB)[0]/pi)
+                Atributos[k][4] = Az
+            Atributos[-1][4] = Az
+
+            # Criar feições
+            for att in Atributos:
+                feature = QgsFeature(fields)
+                lon, lat = att[1], att[2]
+                h = att[3] if att[3] != None else 0
+                feature.setGeometry(QgsGeometry(QgsPoint(float(lon), float(lat), float(h))))
+                feature.setAttributes(att)
+                sink.addFeature(feature, QgsFeatureSink.FastInsert)
 
         feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
         feedback.pushInfo(self.tr('Leandro Franca - Cartographic Engineer', 'Leandro França - Eng Cart'))
