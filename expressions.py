@@ -46,7 +46,7 @@ from lftools.geocapt.topogeo import (dd2dms as DD2DMS,
                                      meters2degrees,
                                      gpsdate as GPSDATE)
 from lftools import geomag
-from lftools.geocapt.imgs import img2html_resized
+from lftools.geocapt.imgs import img2html_resized, geom_icons
 from lftools.translations.translate import translate
 from numpy import array, pi, sqrt, median
 import numpy as np
@@ -2410,3 +2410,95 @@ def geoneighbors(layer_name, testada, borderer_field, prefix, decimal, fontsize,
 
     else:
         return tr('Check if the geometry is null or invalid! Or if Atlas is on!', 'Verifique se a geometria é nula ou inválida! Ou se o Atlas está ligado!')
+
+
+@qgsfunction(args='auto', group='LF Tools')
+def layer_schema(layer_name, not_rela, feature, parent):
+    """
+    Generates a conceptual model of the given layer, documenting its geometry type and attributes. The output is formatted as an HTML table for better visualization.<br>
+    <h2>Example usage:</h2>
+    <ul>
+      <li>layer_schema(layer_name, not_related_attributes) -> HTML Table</li>
+      <li>layer_schema('vegetation', array('id', 'area')) -> HTML</li>
+    </ul>
+    """
+
+    if len(QgsProject.instance().mapLayersByName(layer_name)) == 1:
+        layer = QgsProject.instance().mapLayersByName(layer_name)[0]
+    else:
+        layer = QgsProject.instance().mapLayer(layer_name)
+    nao_rela = list(not_rela)
+
+    # ler nome da classe
+    nome = str2HTML(layer.name())
+    # ler nome e tipo dos atributos
+    header = layer.fields()
+    campos = [field.name() for field in header]
+
+    if layer.type() == 0:
+        geomTipo = layer.geometryType()
+        if geomTipo == 0:
+            tipo = 'ponto'
+        elif geomTipo == 1:
+            tipo = 'linha'
+        elif geomTipo == 2:
+            tipo = 'area'
+        else:
+            tipo = 'nogeom'
+
+    if tipo == 'nogeom':
+        lista = ''
+    else:
+        try:
+            lista = '+geom: ' + QgsWkbTypes.displayString(layer.wkbType()) + '<br>'
+        except:
+            lista = ''
+
+    for field in header:
+        if field.name() not in nao_rela:
+            lista += '+' + str2HTML(field.name()) + ': ' + field.typeName() +'<br>'
+
+    figuras = geom_icons
+
+    html = '''<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1"
+ http-equiv="content-type">
+  <title>classe</title>
+</head>
+<body>
+<table class="MsoTableGrid"
+ style="border: medium none ; background: rgb(251, 254, 187) none repeat scroll 0% 50%; -moz-background-clip: initial; -moz-background-origin: initial; -moz-background-inline-policy: initial; border-collapse: collapse; text-align: left; margin-left: auto; margin-right: auto; font-family: Arial;"
+ border="1" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr style="">
+      <td
+ style="border: 1.5pt solid rgb(128, 96, 0); padding: 0cm 5.4pt;">
+      <p class="MsoNormal"
+ style="margin-bottom: 0cm; text-align: center; line-height: normal;"
+ align="center"><span style="">
+ <img style="width: 22px; height: 22px;" alt="geometry" src="data:image/jpg;base64,[FIGURA]">
+ </span><o:p></o:p></p>
+      </td>
+      <td
+ style="border: 1.5pt solid rgb(128, 96, 0); padding: 0cm 5.4pt;">
+      <p class="MsoNormal"
+ style="margin-bottom: 0cm; text-align: center; line-height: normal;"
+ align="center"><span style="color: black;">[CLASS_NAME]</span><o:p></o:p></p>
+      </td>
+    </tr>
+    <tr style="">
+      <td colspan="2"
+ style="border: 1.5pt solid rgb(128, 96, 0); padding: 0cm 5.4pt;">
+[ATT]
+      </td>
+    </tr>
+  </tbody>
+</table>
+</body>
+</html>
+'''
+
+    html = html.replace('[CLASS_NAME]',nome).replace('[ATT]', lista).replace('[FIGURA]', figuras[tipo])
+    return html
