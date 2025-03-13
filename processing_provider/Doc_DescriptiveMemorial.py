@@ -830,7 +830,7 @@ class DescriptiveMemorial(QgisAlgorithm):
         texto_final = str2HTML(self.tr('the vertex ', 'o vértice ')) + '''<b>[P-01]</b>, '''+ self.tr('with coordinates', 'de coordenadas') + ''' [Coord1],
     ''' + str2HTML(self.tr('the starting point for the description of this perimeter. All coordinates described here are georeferenced to the Geodetic Reference System (GRS)',
          'ponto inicial da descrição deste perímetro. Todas as coordenadas aqui descritas estão georreferenciadas ao Sistema Geodésico de Referência (SGR)')) + ''' <b>[GRS]</b>
-    ''' + str2HTML(self.tr(texto_calculo)) + '''
+    ''' + str2HTML(texto_calculo) + '''
      <o:p></o:p></p>
     <p class="western"
      style="margin-bottom: 0.0001pt; text-align: right;"
