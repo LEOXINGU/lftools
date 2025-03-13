@@ -36,7 +36,9 @@ from lftools.geocapt.cartography import (map_sistem,
                                          geom2PointList,
                                          Mesclar_Multilinhas,
                                          areaGauss,
+                                         FusoHemisf,
                                          main_azimuth,
+                                         AzimuteDistanciaSGL,
                                          areaSGL, perimetroSGL, comprimentoSGL,
                                          inom2mi as INOM2MI)
 from lftools.geocapt.topogeo import (dd2dms as DD2DMS,
@@ -1710,39 +1712,54 @@ def deedtable3(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
 
 
 @qgsfunction(args='auto', group='LF Tools')
-def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature, parent):
+def deedtext(description, estilo, prefix, decimal, calculation, fontsize, feature, parent, context):
     """
     Generates a description of a property with coordinates as text.
     <p>Note 1: A layer or QGIS Project with a projected SRC is required.</p>
     <p>Note 2: Coordinates styles: 'E,N' (default), 'N,E', 'E,N,h', 'N,E,h', 'lat,lon', 'lon,lat', 'lat,lon,h'  or 'lon,lat,h'.</p>
     <p>Note 3: Combine the text 'suffix' for geographic coordinates with suffix.</p>
+    <p>Note 4: The value of "precision" can be an integer that will be applied to coordinate and distance, or an array with 3 numbers for the precision of the coordinates, azimuth and distances, respectively.</p>
 
     <h2>Exemples:</h2>
     <ul>
-      <li>deedtext('layer_name', 'initial description', 'style', 'preffix', precision, fontsize) = HTML</li>
-      <li>deedtext('layer_name', 'northernmost point', 'E,N,h', 'V-', 2, 12) = HTML</li>
-      <li>deedtext('layer_name', 'rightmost point in front of the property', 'N,E', 'P-', 3, 10) = HTML</li>
+      <li>deedtext('initial description', 'style', 'preffix', precision, calculation, fontsize) = HTML</li>
+      <li>deedtext('northernmost point', 'E,N,h', 'V-', 2, 12) = HTML</li>
+      <li>deedtext('rightmost point in front of the property', 'N,E', 'P-', 3, 10) = HTML</li>
     </ul>
     <h2>Exemples with adjointer layer:</h2>
     <ul>
-      <li>deedtext('layer_name', 'adjoiner_line_layer,id,name', 'style', 'preffix', precision, fontsize) = HTML</li>
-      <li>deedtext('layer_name', 'Adjoiners,ID1,name', 'E,N', 'P-', 2, 10) = HTML</li>
+      <li>deedtext('adjoiner_line_layer,id,name', 'style', 'preffix', precision, calculation, fontsize) = HTML</li>
+      <li>deedtext('Adjoiners,ID1,name', 'E,N', 'P-', 2, 10) = HTML</li>
     </ul>
     <h2>Exemples with vertex layer:</h2>
     <ul>
-      <li>deedtext('layer_name', 'initial description', 'style', 'vertex_point_layer,ID,name', precision, fontsize) = HTML</li>
-      <li>deedtext('layer_name', 'northernmost point', 'E,N', 'Vertex,id,name', 2, 10) = HTML</li>
+      <li>deedtext('initial description', 'style', 'vertex_point_layer,ID,name', precision, calculation, fontsize) = HTML</li>
+      <li>deedtext('northernmost point', 'E,N', 'Vertex,id,name', 2, 10) = HTML</li>
+    </ul>
+
+    <h2>Choose the method for calculating azimuths and distances:</h2>
+    <ul>
+      <li>calculation = 1 ➡️ Layer or projection CRS</li>
+      <li>calculation = 2 ➡️ Local Tangent Plane (LTP)</li>
+      <li>calculation = 3 ➡️ LTP distance and Puissant azimuth</li>
     </ul>
     """
-    if len(QgsProject.instance().mapLayersByName(layer_name)) == 1:
-        layer = QgsProject.instance().mapLayersByName(layer_name)[0]
-    else:
-        layer = QgsProject.instance().mapLayer(layer_name)
-
+    layer_id = context.variable('layer_id')
+    layer = QgsProject.instance().mapLayer(layer_id)
     SRC = layer.crs()
     SGR = QgsCoordinateReferenceSystem(SRC.geographicCrsAuthId())
 
-    format_num = '{:,.Xf}'.replace('X', str(decimal))
+    if isinstance(decimal, list):
+        format_utm = '{:,.Xf}'.replace('X', str(decimal[0]))
+        prec_geo = decimal[0]
+        prec_Azimute = decimal[1]
+        format_dist = '{:,.Xf}'.replace('X', str(decimal[2]))
+    else:
+        format_utm = '{:,.Xf}'.replace('X', str(decimal))
+        prec_geo = decimal + 2
+        prec_Azimute = 1
+        format_dist = '{:,.Xf}'.replace('X', str(decimal))
+
 
     geom = feature.geometry()
     TipoGeometria = geom.type()
@@ -1844,18 +1861,61 @@ def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature
         # Calculo dos Azimutes e Distancias
         tam = len(pnts_UTM)
         Az_lista, Dist = [], []
+
+        # Calcular geomGeo e crsGeo
+        if not layer.crs().isGeographic():
+            geom.transform(coordinateTransformer)
+        crsGeo = SGR
+        geomGeo = geom
+        centroideG = geom.centroid().asPoint()
+
         if TipoGeometria == 2: # Polígono
-            for k in range(tam):
-                pntA = pnts_UTM[k+1][0]
-                pntB = pnts_UTM[1 if k+2 > tam else k+2][0]
-                Az_lista += [(180/pi)*azimute(pntA, pntB)[0]]
-                Dist += [sqrt((pntA.x() - pntB.x())**2 + (pntA.y() - pntB.y())**2)]
+
+            if calculation == 1: # Projetadas (Ex: UTM)
+                for k in range(tam):
+                    pntA = pnts_UTM[k+1][0]
+                    pntB = pnts_UTM[1 if k+2 > tam else k+2][0]
+                    Az_lista += [(180/pi)*azimute(pntA, pntB)[0]]
+                    Dist += [sqrt((pntA.x() - pntB.x())**2 + (pntA.y() - pntB.y())**2)]
+            elif calculation == 2: # SGL
+                for k in range(tam):
+                    pntA = pnts_GEO[k+1][0]
+                    pntB = pnts_GEO[1 if k+2 > tam else k+2][0]
+                    Az, dist = AzimuteDistanciaSGL(pntA, pntB, geomGeo, crsGeo, 'SGL')
+                    Az_lista += [Az]
+                    Dist += [dist]
+            elif calculation == 3: # SGL e Puissant
+                for k in range(tam):
+                    pntA = pnts_GEO[k+1][0]
+                    pntB = pnts_GEO[1 if k+2 > tam else k+2][0]
+                    Az, dist = AzimuteDistanciaSGL(pntA, pntB, geomGeo, crsGeo, 'puissant')
+                    Az_lista += [Az]
+                    Dist += [dist]
+
+
         else: # Linha
-            for k in range(tam-1):
-                pntA = pnts_UTM[k+1][0]
-                pntB = pnts_UTM[k+2][0]
-                Az_lista += [(180/pi)*azimute(pntA, pntB)[0]]
-                Dist += [sqrt((pntA.x() - pntB.x())**2 + (pntA.y() - pntB.y())**2)]
+
+            if calculation == 1: # Projetadas (Ex: UTM)
+                for k in range(tam-1):
+                    pntA = pnts_UTM[k+1][0]
+                    pntB = pnts_UTM[k+2][0]
+                    Az_lista += [(180/pi)*azimute(pntA, pntB)[0]]
+                    Dist += [sqrt((pntA.x() - pntB.x())**2 + (pntA.y() - pntB.y())**2)]
+            elif calculation == 2: # SGL
+                for k in range(tam-1):
+                    pntA = pnts_GEO[k+1][0]
+                    pntB = pnts_GEO[k+2][0]
+                    Az, dist = AzimuteDistanciaSGL(pntA, pntB, geomGeo, crsGeo, 'SGL')
+                    Az_lista += [Az]
+                    Dist += [dist]
+            elif calculation == 3: # SGL e Puissant
+                for k in range(tam-1):
+                    pntA = pnts_GEO[k+1][0]
+                    pntB = pnts_GEO[k+2][0]
+                    Az, dist = AzimuteDistanciaSGL(pntA, pntB, geomGeo, crsGeo, 'puissant')
+                    Az_lista += [Az]
+                    Dist += [dist]
+
 
         # Definindo estilo das coordendas
         estilo = estilo.replace(' ','').lower()
@@ -1880,20 +1940,49 @@ def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature
 
         def CoordenadaN (PtsUTM, PtsGEO, estilo, decimal):
             if 'e' in estilo: # coordenadas projetadas
-                Xn = tr(format_num.format(PtsUTM[0].x()), format_num.format(PtsUTM[0].x()).replace(',', 'X').replace('.', ',').replace('X', '.'))
-                Yn = tr(format_num.format(PtsUTM[0].y()), format_num.format(PtsUTM[0].y()).replace(',', 'X').replace('.', ',').replace('X', '.'))
+                Xn = tr(format_utm.format(PtsUTM[0].x()), format_utm.format(PtsUTM[0].x()).replace(',', 'X').replace('.', ',').replace('X', '.'))
+                Yn = tr(format_utm.format(PtsUTM[0].y()), format_utm.format(PtsUTM[0].y()).replace(',', 'X').replace('.', ',').replace('X', '.'))
             else: # coordenadas geodesicas
                 if 'suffix' in estilo:
-                    Xn = str2HTML(tr(DD2DMS(PtsGEO[0].x(),decimal+3), DD2DMS(PtsGEO[0].x(),decimal+3).replace('.', ','))).replace('-','') + 'W' if PtsGEO[0].x() < 0 else 'E'
-                    Yn = str2HTML(tr(DD2DMS(PtsGEO[0].y(),decimal+3), DD2DMS(PtsGEO[0].y(),decimal+3).replace('.', ','))).replace('-','') + 'S' if PtsGEO[0].y() < 0 else 'N'
+                    Xn = str2HTML(tr(DD2DMS(PtsGEO[0].x(),prec_geo), DD2DMS(PtsGEO[0].x(),prec_geo).replace('.', ','))).replace('-','') + 'W' if PtsGEO[0].x() < 0 else 'E'
+                    Yn = str2HTML(tr(DD2DMS(PtsGEO[0].y(),prec_geo), DD2DMS(PtsGEO[0].y(),prec_geo).replace('.', ','))).replace('-','') + 'S' if PtsGEO[0].y() < 0 else 'N'
                 else:
-                    Xn = str2HTML(tr(DD2DMS(PtsGEO[0].x(),decimal+3), DD2DMS(PtsGEO[0].x(),decimal+3).replace('.', ',')))
-                    Yn = str2HTML(tr(DD2DMS(PtsGEO[0].y(),decimal+3), DD2DMS(PtsGEO[0].y(),decimal+3).replace('.', ',')))
+                    Xn = str2HTML(tr(DD2DMS(PtsGEO[0].x(),prec_geo), DD2DMS(PtsGEO[0].x(),prec_geo).replace('.', ',')))
+                    Yn = str2HTML(tr(DD2DMS(PtsGEO[0].y(),prec_geo), DD2DMS(PtsGEO[0].y(),prec_geo).replace('.', ',')))
             return (Xn, Yn)
 
+        # Texto do cálculo, no final do memorial
+        if 'e' in estilo and calculation == 1: # Coordenadas UTM e cálculo em UTM
+            texto_calculo = tr(', and are projected in the UTM system, zone [FUSO] and hemisphere [HEMISFERIO], from which all azimuths and distances, area and perimeter were calculated.',
+                                    ', sendo projetadas no Sistema UTM, fuso [FUSO] e hemisfério [HEMISFERIO], a partir das quais todos os azimutes e distâncias, área e perímetro foram calculados.')
+        elif 'e' in estilo and calculation == 2: # Coordenadas UTM e cálculo em SGL:
+            texto_calculo = tr(', and are projected in the UTM system, zone [FUSO] and hemisphere [HEMISFERIO]. All azimuths and distances, area and perimeter were calculated in the Local Tangent Plane (LTP), having as origin the centroid and average altitude of the property survey.',
+                                    ', sendo projetadas no Sistema UTM, fuso [FUSO] e hemisfério [HEMISFERIO]. Todos os azimutes e distâncias, área e perímetro foram calculados no Sistema Geodésico Local (SGL) com origem no centroide e altitude média do imóvel.')
+        elif 'lat' in estilo and calculation == 1: # Coordenadas Geo e cálculo em UTM:
+            texto_calculo = tr('. All azimuths and distances, area and perimeter were calculated from the projected coordinates in UTM, zone [FUSO] and hemisphere [HEMISPHERE].',
+                                    '. Todos os azimutes e distâncias, área e perímetro foram calculados a partir das coordenadas projetadas no sistema UTM, fuso [FUSO] e hemisfério [HEMISFERIO].')
+        elif 'lat' in estilo and calculation == 2: # Coordenadas Geo e cálculo em SGL:
+            texto_calculo = tr('. All azimuths and distances, area and perimeter were calculated in the Local Tangent Plane (LTP), having as origin the centroid and average altitude of the property survey.',
+                                    '. Todos os azimutes e distâncias, área e perímetro foram calculados no Sistema Geodésico Local (SGL) com origem no centroide e altitude média do imóvel.')
+        elif 'e' in estilo and calculation == 3: # Coordenadas UTM, cálculo em SGL e Azimute Puissant:
+            texto_calculo = tr(', and are projected in the UTM system, zone [FUSO] and hemisphere [HEMISFERIO]. The azimuths were calculated using the Inverse Geodetic Problem formula according to Puissant, and the distances were calculated in the Local Tangent Plane (LTP) having as origin the centroid and average altitude of the property survey.',
+                                    ', sendo projetadas no Sistema UTM, fuso [FUSO] e hemisfério [HEMISFERIO]. Os azimutes foram determinados pela fórmula do Problema Geodésico Inverso segundo Puissant, e as distâncias foram calculados no Sistema Geodésico Local (SGL) com origem no centroide e altitude média do imóvel.')
+        elif 'lat' in estilo and calculation == 3: # Coordenadas Geo, cálculo em SGL e Azimute Puissant:
+            texto_calculo = tr('. The azimuths were calculated using the Inverse Geodetic Problem formula according to Puissant, and the distances were calculated in the Local Tangent Plane (LTP) having as origin the centroid and average altitude of the perimeter.',
+                                    '. Os azimutes foram determinados pela fórmula do Problema Geodésico Inverso segundo Puissant, e as distâncias foram calculadas no Sistema Geodésico Local (SGL) com origem no centroide e altitude média do perímetro.')
+        # texto final do memorial
+        if TipoGeometria == 2:
+            text_fim = tr('''the starting point for the description of this perimeter.
+            All coordinates described here are georeferenced to the Geodetic Reference System (GRS) <b>[SGR]</b>''' + texto_calculo,
+            '''ponto inicial da descrição deste perímetro.
+            Todas as coordenadas aqui descritas estão georreferenciadas ao Sistema Geodésico de Referência (SGR) <b>[SGR]</b>''' + texto_calculo)
+        else:
+            text_fim = tr('''the last point of this perimeter.
+            All coordinates described here are georeferenced to the Geodetic Reference System (GRS) <b>[SGR]</b>''' + texto_calculo,
+            '''último ponto deste perímetro.
+            Todas as coordenadas aqui descritas estão georreferenciadas ao Sistema Geodésico de Referência (SGR) <b>[SGR]</b>''' + texto_calculo)
 
-        # Descrição
-        try:
+        try:  # >>>>>>>>>>>>>>>>> Pegar nome do confrontante
             descricao, id, nome = description.replace(' ', '').split(',')
             if len(QgsProject.instance().mapLayersByName(descricao)) == 1:
                 layer = QgsProject.instance().mapLayersByName(descricao)[0]
@@ -1919,21 +2008,6 @@ def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature
             text_meio = tr('[Azn] and [Dn]m up to the vertex <b>[Vn]</b>, with coordinates [XXX], ',
                            '[Azn] e [Dn]m até o vértice <b>[Vn]</b>, de coordenadas [XXX], ').replace('[XXX]', estilo_vertices)
 
-            if TipoGeometria == 2:
-                text_fim = tr('''the starting point for the description of this perimeter.
-                All coordinates described here are georeferenced to the Geodetic Reference System (GRS) (SGR) <b>[SGR]</b>, and are projected in the system <b>[PROJ]</b>,
-                from which all azimuths and distances, area and perimeter were calculated.</p>''',
-                '''ponto inicial da descrição deste perímetro.
-                Todas as coordenadas aqui descritas estão georreferenciadas ao Sistema Geodésico de Referência (SGR) <b>[SGR]</b>, sendo projetadas no sistema <b>[PROJ]</b>,
-                a partir das quais todos os azimutes e distâncias foram calculados.</p>''')
-            else:
-                text_fim = tr('''the last point of this perimeter.
-                All coordinates described here are georeferenced to the Geodetic Reference System (GRS) (SGR) <b>[SGR]</b>, and are projected in the system <b>[PROJ]</b>,
-                from which all azimuths and distances, area and perimeter were calculated.</p>''',
-                '''último ponto deste perímetro.
-                Todas as coordenadas aqui descritas estão georreferenciadas ao Sistema Geodésico de Referência (SGR) <b>[SGR]</b>, sendo projetadas no sistema <b>[PROJ]</b>,
-                a partir das quais todos os azimutes e distâncias foram calculados.</p>''')
-
             # Texto inicial
             itens = {'[Vn]': pnts_UTM[1][2],
                      '[Xn]': CoordenadaN (pnts_UTM[1], pnts_GEO[1], estilo, decimal)[0],
@@ -1941,7 +2015,7 @@ def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature
                      '[descr_pnt_ini]': descr_pnt_ini + ', ' if descr_pnt_ini else ''
                         }
             if 'h' in estilo:
-                itens['[hn]'] = tr(format_num.format(pnts_UTM[1][0].z()), format_num.format(pnts_UTM[1][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.'))
+                itens['[hn]'] = tr(format_utm.format(pnts_UTM[1][0].z()), format_utm.format(pnts_UTM[1][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.'))
             for item in itens:
                 text_ini = text_ini.replace(item, itens[item]).replace('[FONTSIZE]', str(fontsize))
 
@@ -1954,12 +2028,12 @@ def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature
                     itens = {'[Vn]': pnts_UTM[indice][2],
                              '[Xn]': CoordenadaN (pnts_UTM[indice], pnts_GEO[indice], estilo, decimal)[0],
                              '[Yn]': CoordenadaN (pnts_UTM[indice], pnts_GEO[indice], estilo, decimal)[1],
-                             '[Azn]': tr(DD2DMS(Az_lista[k],1), DD2DMS(Az_lista[k],1).replace('.', ',')),
-                             '[Dn]': tr(format_num.format(Dist[k]), format_num.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'))
+                             '[Azn]': tr(DD2DMS(Az_lista[k],prec_Azimute), DD2DMS(Az_lista[k],prec_Azimute).replace('.', ',')),
+                             '[Dn]': tr(format_dist.format(Dist[k]), format_dist.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'))
                                 }
                     if 'h' in estilo:
-                        itens['[hn]'] = tr(format_num.format(pnts_UTM[indice][0].z()),
-                                           format_num.format(pnts_UTM[indice][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.'))
+                        itens['[hn]'] = tr(format_utm.format(pnts_UTM[indice][0].z()),
+                                           format_utm.format(pnts_UTM[indice][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.'))
                     for item in itens:
                         linha0 = linha0.replace(item, itens[item])
                     LINHAS += linha0
@@ -1971,19 +2045,20 @@ def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature
                     itens = {'[Vn]': pnts_UTM[indice][2],
                              '[Xn]': CoordenadaN (pnts_UTM[indice], pnts_GEO[indice], estilo, decimal)[0],
                              '[Yn]': CoordenadaN (pnts_UTM[indice], pnts_GEO[indice], estilo, decimal)[1],
-                             '[Azn]': tr(DD2DMS(Az_lista[k],1), DD2DMS(Az_lista[k],1).replace('.', ',')),
-                             '[Dn]': tr(format_num.format(Dist[k]), format_num.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'))
+                             '[Azn]': tr(DD2DMS(Az_lista[k],prec_Azimute), DD2DMS(Az_lista[k],prec_Azimute).replace('.', ',')),
+                             '[Dn]': tr(format_dist.format(Dist[k]), format_dist.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'))
                                 }
                     if 'h' in estilo:
-                        itens['[hn]'] = tr(format_num.format(pnts_UTM[indice][0].z()),
-                                           format_num.format(pnts_UTM[indice][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.'))
+                        itens['[hn]'] = tr(format_utm.format(pnts_UTM[indice][0].z()),
+                                           format_utm.format(pnts_UTM[indice][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.'))
                     for item in itens:
                         linha0 = linha0.replace(item, itens[item])
                     LINHAS += linha0
 
             # Texto final
             itens = {'[SGR]': SGR.description(),
-                     '[PROJ]': PROJ
+                     '[FUSO]': str(FusoHemisf(centroideG)[0]),
+                     '[HEMISFERIO]': FusoHemisf(centroideG)[1]
                         }
             for item in itens:
                 text_fim = text_fim.replace(item, itens[item])
@@ -2003,12 +2078,6 @@ def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature
             text_meio2 = tr('[Azn] and [Dn]m up to the vertex <b>[Vn]</b>, with coordinates [XXX], ',
                             '[Azn] e [Dn]m até o vértice <b>[Vn]</b>, de coordenadas [XXX], ').replace('[XXX]', estilo_vertices)
 
-            text_fim = tr('''the starting point for the description of this perimeter.
-            All coordinates described here are georeferenced to the Geodetic Reference System (GRS) (SGR) <b>[SGR]</b>, and are projected in the system <b>[PROJ]</b>,
-            from which all azimuths and distances, area and perimeter were calculated.</p>''',
-            '''ponto inicial da descrição deste perímetro.
-            Todas as coordenadas aqui descritas estão georreferenciadas ao Sistema Geodésico de Referência (SGR) <b>[SGR]</b>, sendo projetadas no sistema <b>[PROJ]</b>,
-            a partir das quais todos os azimutes e distâncias foram calculados.</p>''')
 
             # Texto inicial
             itens = {'[Vn]': pnts_UTM[1][2],
@@ -2016,7 +2085,7 @@ def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature
                      '[Yn]': CoordenadaN (pnts_UTM[1], pnts_GEO[1], estilo, decimal)[1]
                         }
             if 'h' in estilo:
-                itens['[hn]'] = tr(format_num.format(pnts_UTM[1][0].z()), format_num.format(pnts_UTM[1][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.'))
+                itens['[hn]'] = tr(format_utm.format(pnts_UTM[1][0].z()), format_utm.format(pnts_UTM[1][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.'))
             for item in itens:
                 text_ini = text_ini.replace(item, itens[item]).replace('[FONTSIZE]', str(fontsize))
 
@@ -2051,13 +2120,13 @@ def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature
                 itens = {'[Vn]': pnts_UTM[indice][2],
                          '[Xn]': CoordenadaN (pnts_UTM[indice], pnts_GEO[indice], estilo, decimal)[0],
                          '[Yn]': CoordenadaN (pnts_UTM[indice], pnts_GEO[indice], estilo, decimal)[1],
-                         '[Azn]': tr(DD2DMS(Az_lista[k],1), DD2DMS(Az_lista[k],1).replace('.', ',')),
-                         '[Dn]': tr(format_num.format(Dist[k]), format_num.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                         '[Azn]': tr(DD2DMS(Az_lista[k],prec_Azimute), DD2DMS(Az_lista[k],prec_Azimute).replace('.', ',')),
+                         '[Dn]': tr(format_dist.format(Dist[k]), format_dist.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.')),
                          '[ADJOINER]': Confrontante,
                             }
                 if 'h' in estilo:
-                    itens['[hn]'] = tr(format_num.format(pnts_UTM[indice][0].z()),
-                                       format_num.format(pnts_UTM[indice][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.'))
+                    itens['[hn]'] = tr(format_utm.format(pnts_UTM[indice][0].z()),
+                                       format_utm.format(pnts_UTM[indice][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.'))
 
                 for item in itens:
                     try:
@@ -2069,7 +2138,8 @@ def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature
 
             # Texto final
             itens = {'[SGR]': SGR.description(),
-                     '[PROJ]': PROJ
+                     '[FUSO]': str(FusoHemisf(centroideG)[0]),
+                     '[HEMISFERIO]': FusoHemisf(centroideG)[1]
                         }
             for item in itens:
                 text_fim = text_fim.replace(item, itens[item])
@@ -2078,6 +2148,8 @@ def deedtext(layer_name, description, estilo, prefix, decimal, fontsize, feature
             return FINAL
     else:
         return tr('Check if the geometry is null or invalid! Or if Atlas is on!', 'Verifique se a geometria é nula ou inválida! Ou se o Atlas está ligado!')
+
+
 
 
 @qgsfunction(args='auto', group='LF Tools')
