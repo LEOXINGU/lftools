@@ -82,7 +82,7 @@ class RTKCorrection(QgsProcessingAlgorithm):
         return 'gnss'
 
     def tags(self):
-        return self.tr('gps,position,ibge,ppp,ppk,navigation,satellites,surveying,rinex,glonass,beidou,compass,galileu,track,kinematic,rtk,ntrip,static,real').split(',')
+        return self.tr('gps,position,ibge,ppp,ppk,navigation,ajdusted,ajustar,ajustado,ajustada,satellites,corrected,corrigir,surveying,rinex,glonass,beidou,compass,galileu,track,kinematic,rtk,ntrip,static,real').split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/satellite.png'))
@@ -216,8 +216,17 @@ class RTKCorrection(QgsProcessingAlgorithm):
         ppp = QgsGeometry(QgsPoint(ppp.x(), ppp.y(), z_fim))
         ppp.transform(transf_pnt)
 
+        # Novos atributos
+        Fields = layer.fields()
+        itens  = {
+                     self.tr('lon_adjusted', 'lon_ajustada') : QVariant.Double,
+                     self.tr('lat_adjusted', 'lat_ajustada') : QVariant.Double,
+                     self.tr('h_adjusted', 'h_ajustada') : QVariant.Double,
+                     }
+        for item in itens:
+            Fields.append(QgsField(item, itens[item]))
 
-        (sink, dest_id) = self.parameterAsSink( parameters, self.OUTPUT, context, layer.fields(), QgsWkbTypes.PointZ, GRS)
+        (sink, dest_id) = self.parameterAsSink( parameters, self.OUTPUT, context, Fields, QgsWkbTypes.PointZ, GRS)
         if sink is None:
             raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT))
 
@@ -262,7 +271,8 @@ class RTKCorrection(QgsProcessingAlgorithm):
 
             new_geom = QgsGeometry(QgsPoint(lon, lat, h))
             feature.setGeometry(new_geom)
-            feature.setAttributes( feat.attributes() )
+            att = feat.attributes() + [float(lon), float(lat), float(h)]
+            feature.setAttributes( att )
             sink.addFeature(feature, QgsFeatureSink.FastInsert)
 
             if feedback.isCanceled():
