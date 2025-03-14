@@ -1953,20 +1953,20 @@ def deedtext(description, estilo, prefix, decimal, calculation, fontsize, featur
 
         # Texto do cálculo, no final do memorial
         if 'e' in estilo and calculation == 1: # Coordenadas UTM e cálculo em UTM
-            texto_calculo = tr(', and are projected in the UTM system, zone [FUSO] and hemisphere [HEMISFERIO], from which all azimuths and distances, area and perimeter were calculated.',
-                                    ', sendo projetadas no Sistema UTM, fuso [FUSO] e hemisfério [HEMISFERIO], a partir das quais todos os azimutes e distâncias, área e perímetro foram calculados.')
+            texto_calculo = tr(', and are projected in the UTM system, zone [FUSO] and hemisphere [HEMISFERIO], from which all azimuths and distances were calculated.',
+                                    ', sendo projetadas no Sistema UTM, fuso [FUSO] e hemisfério [HEMISFERIO], a partir das quais todos os azimutes e distâncias foram calculados.')
         elif 'e' in estilo and calculation == 2: # Coordenadas UTM e cálculo em SGL:
-            texto_calculo = tr(', and are projected in the UTM system, zone [FUSO] and hemisphere [HEMISFERIO]. All azimuths and distances, area and perimeter were calculated in the Local Tangent Plane (LTP), having as origin the centroid and average altitude of the property survey.',
-                                    ', sendo projetadas no Sistema UTM, fuso [FUSO] e hemisfério [HEMISFERIO]. Todos os azimutes e distâncias, área e perímetro foram calculados no Sistema Geodésico Local (SGL) com origem no centroide e altitude média do imóvel.')
+            texto_calculo = tr(', and are projected in the UTM system, zone [FUSO] and hemisphere [HEMISFERIO]. All azimuths and distances were calculated in the Local Tangent Plane (LTP), having as origin the centroid and average altitude of the perimeter.',
+                                    ', sendo projetadas no Sistema UTM, fuso [FUSO] e hemisfério [HEMISFERIO]. Todos os azimutes e distâncias foram calculados no Sistema Geodésico Local (SGL) com origem no centroide e altitude média do perímetro.')
         elif 'lat' in estilo and calculation == 1: # Coordenadas Geo e cálculo em UTM:
-            texto_calculo = tr('. All azimuths and distances, area and perimeter were calculated from the projected coordinates in UTM, zone [FUSO] and hemisphere [HEMISPHERE].',
-                                    '. Todos os azimutes e distâncias, área e perímetro foram calculados a partir das coordenadas projetadas no sistema UTM, fuso [FUSO] e hemisfério [HEMISFERIO].')
+            texto_calculo = tr('. All azimuths and distances were calculated from the projected coordinates in UTM, zone [FUSO] and hemisphere [HEMISPHERE].',
+                                    '. Todos os azimutes e distâncias foram calculados a partir das coordenadas projetadas no sistema UTM, fuso [FUSO] e hemisfério [HEMISFERIO].')
         elif 'lat' in estilo and calculation == 2: # Coordenadas Geo e cálculo em SGL:
-            texto_calculo = tr('. All azimuths and distances, area and perimeter were calculated in the Local Tangent Plane (LTP), having as origin the centroid and average altitude of the property survey.',
-                                    '. Todos os azimutes e distâncias, área e perímetro foram calculados no Sistema Geodésico Local (SGL) com origem no centroide e altitude média do imóvel.')
+            texto_calculo = tr('. All azimuths and distances were calculated in the Local Tangent Plane (LTP), having as origin the centroid and average altitude of the perimeter.',
+                                    '. Todos os azimutes e distâncias foram calculados no Sistema Geodésico Local (SGL) com origem no centroide e altitude média do perímetro.')
         elif 'e' in estilo and calculation == 3: # Coordenadas UTM, cálculo em SGL e Azimute Puissant:
-            texto_calculo = tr(', and are projected in the UTM system, zone [FUSO] and hemisphere [HEMISFERIO]. The azimuths were calculated using the Inverse Geodetic Problem formula according to Puissant, and the distances were calculated in the Local Tangent Plane (LTP) having as origin the centroid and average altitude of the property survey.',
-                                    ', sendo projetadas no Sistema UTM, fuso [FUSO] e hemisfério [HEMISFERIO]. Os azimutes foram determinados pela fórmula do Problema Geodésico Inverso segundo Puissant, e as distâncias foram calculados no Sistema Geodésico Local (SGL) com origem no centroide e altitude média do imóvel.')
+            texto_calculo = tr(', and are projected in the UTM system, zone [FUSO] and hemisphere [HEMISFERIO]. The azimuths were calculated using the Inverse Geodetic Problem formula according to Puissant, and the distances were calculated in the Local Tangent Plane (LTP) having as origin the centroid and average altitude of the perimeter.',
+                                    ', sendo projetadas no Sistema UTM, fuso [FUSO] e hemisfério [HEMISFERIO]. Os azimutes foram determinados pela fórmula do Problema Geodésico Inverso segundo Puissant, e as distâncias foram calculados no Sistema Geodésico Local (SGL) com origem no centroide e altitude média do perímetro.')
         elif 'lat' in estilo and calculation == 3: # Coordenadas Geo, cálculo em SGL e Azimute Puissant:
             texto_calculo = tr('. The azimuths were calculated using the Inverse Geodetic Problem formula according to Puissant, and the distances were calculated in the Local Tangent Plane (LTP) having as origin the centroid and average altitude of the perimeter.',
                                     '. Os azimutes foram determinados pela fórmula do Problema Geodésico Inverso segundo Puissant, e as distâncias foram calculadas no Sistema Geodésico Local (SGL) com origem no centroide e altitude média do perímetro.')
