@@ -214,10 +214,18 @@ def areaSGL(geomGeo, crsGeo):
         for k, coords in enumerate(coordsXY):
             coordsGeo = coordsXYZ[k]
             areaSGL += AreaPerimetroParteSGL(coordsGeo[0], coords[0], crsGeo)[0]
+            n_aneis = len(coordsGeo)
+            if n_aneis > 1:
+                for w in range(1, n_aneis):
+                    areaSGL -= AreaPerimetroParteSGL(coordsGeo[w], coords[w], crsGeo)[0]
     else:
         coordsGeo = geom2PointList(geomGeo)
         coords = geomGeo.asPolygon()
         areaSGL = AreaPerimetroParteSGL(coordsGeo[0], coords[0], crsGeo)[0]
+        n_aneis = len(coordsGeo)
+        if n_aneis > 1:
+            for w in range(1, n_aneis):
+                areaSGL -= AreaPerimetroParteSGL(coordsGeo[w], coords[w], crsGeo)[0]
     return areaSGL
 
 def perimetroSGL(geomGeo, crsGeo):
