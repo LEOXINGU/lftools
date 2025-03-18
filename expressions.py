@@ -1723,18 +1723,24 @@ def deedtext(description, estilo, prefix, decimal, calculation, fontsize, featur
     <h2>Exemples:</h2>
     <ul>
       <li>deedtext('initial description', 'style', 'preffix', precision, calculation, fontsize) = HTML</li>
-      <li>deedtext('northernmost point', 'E,N,h', 'V-', 2, 12) = HTML</li>
-      <li>deedtext('rightmost point in front of the property', 'N,E', 'P-', 3, 10) = HTML</li>
+      <li>deedtext('northernmost point', 'E,N,h', 'V-', 2, 1, 12) = HTML</li>
+      <li>deedtext('rightmost point in front of the property', 'N,E', 'P-', 3, 1, 10) = HTML</li>
+
     </ul>
-    <h2>Exemples with adjointer layer:</h2>
+    <h2>Exemple with adjointer layer:</h2>
     <ul>
       <li>deedtext('adjoiner_line_layer,id,name', 'style', 'preffix', precision, calculation, fontsize) = HTML</li>
-      <li>deedtext('Adjoiners,ID1,name', 'E,N', 'P-', 2, 10) = HTML</li>
+      <li>deedtext('Adjoiners,ID1,name', 'E,N', 'P-', 2, 1, 10) = HTML</li>
     </ul>
-    <h2>Exemples with vertex layer:</h2>
+    <h2>Exemple with vertex layer:</h2>
     <ul>
       <li>deedtext('initial description', 'style', 'vertex_point_layer,ID,name', precision, calculation, fontsize) = HTML</li>
-      <li>deedtext('northernmost point', 'E,N', 'Vertex,id,name', 2, 10) = HTML</li>
+      <li>deedtext('northernmost point', 'E,N', 'Vertex,id,name', 2, 1, 10) = HTML</li>
+    </ul>
+    <h2>Exemple with different precisions:</h2>
+    <ul>
+      <li>deedtext('initial description', 'style', 'preffix', array(coord,azimuth,distance), calc, fontsize) = HTML</li>
+      <li>deedtext('northernmost point', 'lat,lon,h', 'P-', array(3,-1,2), 3, 10) = HTML</li>
     </ul>
 
     <h2>Choose the method for calculating azimuths and distances:</h2>
