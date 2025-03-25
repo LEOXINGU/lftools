@@ -1018,37 +1018,59 @@ def deedtable(layer_name, ini, fim, titulo, fontsize, feature, parent):
 
 
 @qgsfunction(args='auto', group='LF Tools')
-def deedtable2(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist, feature, parent):
+def deedtable2(prefix, titulo, decimal, fontsize, tipo, azimuth_dist, feature, parent, context):
     """
-    Generates the 2D Vertices and Sides Descriptive Table, also known as Synthetic Deed Description, based on vertices of a Polygon or MultiPoligon.
+    Generates the 2D Vertices and Sides Descriptive Table, also known as Synthetic Deed Description, based on vertices of a Polygon or Linestring.
     <p>Note 1: A layer or QGIS Project with a projected SRC is required.</p>
     <p>Note 2: Table types: 'proj' - projected, 'geo' - geographic, 'both' - both coordinate systems.</p>
-    <p>Note 3: Define 1 or 0 for with or without azimuths and distances, respectivelly.</p>
-    <p>Note 4: Use 'geo-suffix' for geographic with suffix.</p>
+    <p>Note 3: Use 'geo-suffix' for geographic with suffix.</p>
+    <p>Note 4: The value of "precision" can be an integer that will be applied to coordinate and distance, or an array with 3 numbers for the precision of the coordinates, azimuth and distances, respectively.</p>
 
     <h2>Exemples:</h2>
     <ul>
-      <li>deedtable2('preffix', 'title', precision, fontsize, layer_name, type, azimuth_dist) = HTML</li>
-      <li>deedtable2('V-', ' - Area X', 3, 12, 'layer_name', 'proj', 1) = HTML</li>
-      <li>deedtable2('V-', ' - Area X', 3, 12, 'layer_name', 'geo', 0) = HTML</li>
-      <li>deedtable2('V-', ' - Area X', 3, 12, 'layer_name', 'both', 1) = HTML</li>
+      <li>deedtable2('preffix', 'title', precision, fontsize, type, azimuth_dist) = HTML</li>
+      <li>deedtable2('V-', ' - Area X', 3, 12, 'proj', 1) = HTML</li>
+      <li>deedtable2('V-', ' - Area X', 3, 12, 'geo', 0) = HTML</li>
+      <li>deedtable2('V-', ' - Area X', 3, 12, 'both', 1) = HTML</li>
     </ul>
-    <h2>Exemples with vertex layer:</h2>
+
+    <h2>Exemple with vertex layer:</h2>
     <ul>
-      <li>deedtable2('vertex_point_layer,ID,name', 'title', precision, fontsize, layer_name, type, azimuth_dist) = HTML</li>
-      <li>deedtable2('Vertex,id,name', ' - Area Z', 3, 12, 'layer_name', 'both', 1) = HTML</li>
+      <li>deedtable2('vertex_point_layer,ID,name', 'title', precision, fontsize, type, azimuth_dist) = HTML</li>
+      <li>deedtable2('Vertex,id,name', ' - Area Z', 3, 12, 'both', 1) = HTML</li>
+    </ul>
+
+    <h2>Exemple with different precisions:</h2>
+    <ul>
+      <li>deedtable2('preffix', 'title', array(coord,azimuth,distance), fontsize, type, azimuth_dist) = HTML</li>
+      <li>deedtable2('M-', ' - Property', array(3,0,2), 10, 'both', 0) = HTML</li>
+    </ul>
+
+    <h2>Choose the method for calculating azimuths and distances:</h2>
+    <ul>
+      <li>azimuth_dist = 0 ➡️ No azimuths and distances</li>
+      <li>azimuth_dist = 1 ➡️ Layer or projection CRS</li>
+      <li>azimuth_dist = 2 ➡️ Local Tangent Plane (LTP)</li>
+      <li>azimuth_dist = 3 ➡️ LTP distance and Puissant azimuth</li>
     </ul>
     """
-    if len(QgsProject.instance().mapLayersByName(layer_name)) == 1:
-        layer = QgsProject.instance().mapLayersByName(layer_name)[0]
-    else:
-        layer = QgsProject.instance().mapLayer(layer_name)
-
+    layer_id = context.variable('layer_id')
+    layer = QgsProject.instance().mapLayer(layer_id)
     SRC = layer.crs()
     SGR = QgsCoordinateReferenceSystem(SRC.geographicCrsAuthId())
 
     tipo = tipo.lower()
-    format_num = '{:,.Xf}'.replace('X', str(decimal))
+
+    if isinstance(decimal, list):
+        format_utm = '{:,.Xf}'.replace('X', str(decimal[0]))
+        prec_geo = decimal[0]
+        prec_Azimute = decimal[1]
+        format_dist = '{:,.Xf}'.replace('X', str(decimal[2]))
+    else:
+        format_utm = '{:,.Xf}'.replace('X', str(decimal))
+        prec_geo = decimal + 2
+        prec_Azimute = 1
+        format_dist = '{:,.Xf}'.replace('X', str(decimal))
 
     geom = feature.geometry()
     TipoGeometria = geom.type()
@@ -1149,18 +1171,67 @@ def deedtable2(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
         # Calculo dos Azimutes e Distancias
         tam = len(pnts_UTM)
         Az_lista, Dist = [], []
-        if TipoGeometria == 2:
-            for k in range(tam):
-                pntA = pnts_UTM[k+1][0]
-                pntB = pnts_UTM[1 if k+2 > tam else k+2][0]
-                Az_lista += [(180/pi)*azimute(pntA, pntB)[0]]
-                Dist += [sqrt((pntA.x() - pntB.x())**2 + (pntA.y() - pntB.y())**2)]
-        else:
-            for k in range(tam-1):
-                pntA = pnts_UTM[k+1][0]
-                pntB = pnts_UTM[k+2][0]
-                Az_lista += [(180/pi)*azimute(pntA, pntB)[0]]
-                Dist += [sqrt((pntA.x() - pntB.x())**2 + (pntA.y() - pntB.y())**2)]
+        
+        # Calcular geomGeo e crsGeo
+        if not layer.crs().isGeographic():
+            geom.transform(coordinateTransformer)
+        crsGeo = SGR
+        geomGeo = geom
+        centroideG = geom.centroid().asPoint()
+
+        if TipoGeometria == 2: # Polígono
+
+            if azimuth_dist == 1: # Projetadas (Ex: UTM)
+                for k in range(tam):
+                    pntA = pnts_UTM[k+1][0]
+                    pntB = pnts_UTM[1 if k+2 > tam else k+2][0]
+                    Az_lista += [(180/pi)*azimute(pntA, pntB)[0]]
+                    Dist += [sqrt((pntA.x() - pntB.x())**2 + (pntA.y() - pntB.y())**2)]
+            elif azimuth_dist == 2: # SGL
+                for k in range(tam):
+                    pntA = pnts_GEO[k+1][0]
+                    pntB = pnts_GEO[1 if k+2 > tam else k+2][0]
+                    Az, dist = AzimuteDistanciaSGL(pntA, pntB, geomGeo, crsGeo, 'SGL')
+                    Az_lista += [Az]
+                    Dist += [dist]
+            elif azimuth_dist == 3: # SGL e Puissant
+                for k in range(tam):
+                    pntA = pnts_GEO[k+1][0]
+                    pntB = pnts_GEO[1 if k+2 > tam else k+2][0]
+                    Az, dist = AzimuteDistanciaSGL(pntA, pntB, geomGeo, crsGeo, 'puissant')
+                    Az_lista += [Az]
+                    Dist += [dist]
+            elif azimuth_dist == 0: # Sem cálculo de Azimute e distância
+                for k in range(tam):
+                    Az_lista += [0]
+                    Dist += [0]
+
+        else: # Linha
+
+            if azimuth_dist == 1: # Projetadas (Ex: UTM)
+                for k in range(tam-1):
+                    pntA = pnts_UTM[k+1][0]
+                    pntB = pnts_UTM[k+2][0]
+                    Az_lista += [(180/pi)*azimute(pntA, pntB)[0]]
+                    Dist += [sqrt((pntA.x() - pntB.x())**2 + (pntA.y() - pntB.y())**2)]
+            elif azimuth_dist == 2: # SGL
+                for k in range(tam-1):
+                    pntA = pnts_GEO[k+1][0]
+                    pntB = pnts_GEO[k+2][0]
+                    Az, dist = AzimuteDistanciaSGL(pntA, pntB, geomGeo, crsGeo, 'SGL')
+                    Az_lista += [Az]
+                    Dist += [dist]
+            elif azimuth_dist == 3: # SGL e Puissant
+                for k in range(tam-1):
+                    pntA = pnts_GEO[k+1][0]
+                    pntB = pnts_GEO[k+2][0]
+                    Az, dist = AzimuteDistanciaSGL(pntA, pntB, geomGeo, crsGeo, 'puissant')
+                    Az_lista += [Az]
+                    Dist += [dist]
+            elif azimuth_dist == 0: # Sem cálculo de Azimute e distância
+                for k in range(tam-1):
+                    Az_lista += [0]
+                    Dist += [0]
 
         texto = '''<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
         <html>
@@ -1183,7 +1254,7 @@ def deedtable2(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
         #Tipos de cabeçalhos
 
         # UTM
-        if tipo == 'proj' and azimuteDist == 1:
+        if tipo == 'proj' and azimuth_dist > 0:
             linha = '''<tr>
           <td>Vn</td>
           <td>En</td>
@@ -1209,7 +1280,7 @@ def deedtable2(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
             </tr>'''
 
         # UTM sem Az e d
-        if tipo == 'proj' and azimuteDist == 0:
+        if tipo == 'proj' and azimuth_dist == 0:
             linha = '''<tr>
           <td>Vn</td>
           <td>En</td>
@@ -1230,7 +1301,7 @@ def deedtable2(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
             </tr>'''
 
         # GEO
-        if 'geo' in tipo and azimuteDist == 1:
+        if 'geo' in tipo and azimuth_dist > 0:
             linha = '''<tr>
               <td>Vn</td>
               <td>lonn</td>
@@ -1256,7 +1327,7 @@ def deedtable2(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
             </tr>'''
 
         # GEO sem Az e d
-        if 'geo' in tipo and azimuteDist == 0:
+        if 'geo' in tipo and azimuth_dist == 0:
             linha = '''<tr>
               <td>Vn</td>
               <td>lonn</td>
@@ -1277,7 +1348,7 @@ def deedtable2(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
             </tr>'''
 
         # UTM e GEO
-        if tipo == 'both' and azimuteDist == 1:
+        if tipo == 'both' and azimuth_dist > 0:
             linha = '''<tr>
               <td>Vn</td>
               <td>lonn</td>
@@ -1308,7 +1379,7 @@ def deedtable2(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
             </tr>'''
 
         # UTM e GEO sem Az e d
-        if tipo == 'both' and azimuteDist == 0:
+        if tipo == 'both' and azimuth_dist == 0:
             linha = '''<tr>
               <td>Vn</td>
               <td>lonn</td>
@@ -1335,19 +1406,19 @@ def deedtable2(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
         LINHAS = ''
         for k in range(tam):
             linha0 = linha
-            lonn = tr(DD2DMS(pnts_GEO[k+1][0].x(),decimal + 3), DD2DMS(pnts_GEO[k+1][0].x(),decimal + 3).replace('.', ','))
-            latn = tr(DD2DMS(pnts_GEO[k+1][0].y(),decimal + 3), DD2DMS(pnts_GEO[k+1][0].y(),decimal + 3).replace('.', ','))
+            lonn = tr(DD2DMS(pnts_GEO[k+1][0].x(),prec_geo), DD2DMS(pnts_GEO[k+1][0].x(),prec_geo).replace('.', ','))
+            latn = tr(DD2DMS(pnts_GEO[k+1][0].y(),prec_geo), DD2DMS(pnts_GEO[k+1][0].y(),prec_geo).replace('.', ','))
             if 'suffix' in tipo:
                 lonn = lonn.replace('-', '') + 'W' if pnts_GEO[k+1][0].x() < 0 else 'E'
                 latn = latn.replace('-', '') + 'S' if pnts_GEO[k+1][0].y() < 0 else 'N'
             itens = {'Vn': pnts_UTM[k+1][2],
-                        'En': tr(format_num.format(pnts_UTM[k+1][0].x()), format_num.format(pnts_UTM[k+1][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                        'Nn': tr(format_num.format(pnts_UTM[k+1][0].y()), format_num.format(pnts_UTM[k+1][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                        'En': tr(format_utm.format(pnts_UTM[k+1][0].x()), format_utm.format(pnts_UTM[k+1][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                        'Nn': tr(format_utm.format(pnts_UTM[k+1][0].y()), format_utm.format(pnts_UTM[k+1][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.')),
                         'lonn': lonn,
                         'latn': latn,
                         'Ln': '-' if TipoGeometria == 1 and k+1 == tam else pnts_UTM[k+1][2] + '/' + pnts_UTM[1 if k+2 > tam else k+2][2],
-                        'Az_n': '-' if TipoGeometria == 1 and k+1 == tam else tr(DD2DMS(Az_lista[k],1), DD2DMS(Az_lista[k],1).replace('.', ',')),
-                        'Dn': '-' if TipoGeometria == 1 and k+1 == tam else tr(format_num.format(Dist[k]), format_num.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'))
+                        'Az_n': '-' if TipoGeometria == 1 and k+1 == tam else tr(DD2DMS(Az_lista[k],prec_Azimute), DD2DMS(Az_lista[k],prec_Azimute).replace('.', ',')),
+                        'Dn': '-' if TipoGeometria == 1 and k+1 == tam else tr(format_dist.format(Dist[k]), format_dist.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'))
                         }
             for item in itens:
                 linha0 = linha0.replace(item, itens[item])
@@ -1363,37 +1434,59 @@ def deedtable2(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
 
 
 @qgsfunction(args='auto', group='LF Tools')
-def deedtable3(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist, feature, parent):
+def deedtable3(prefix, titulo, decimal, fontsize, tipo, azimuth_dist, feature, parent, context):
     """
-    Generates the 3D Vertices and Sides Descriptive Table, also known as Synthetic Deed Description, based on vertices of a PolygonZ or MultiPoligonZ.
+    Generates the 3D Vertices and Sides Descriptive Table, also known as Synthetic Deed Description, based on vertices of a PolygonZ or LinestringZ.
     <p>Note 1: A layer or QGIS Project with a projected SRC is required.</p>
     <p>Note 2: Table types: 'proj' - projected, 'geo' - geographic, 'both' - both coordinate systems.</p>
-    <p>Note 3: Define 1 or 0 for with or without azimuths and distances, respectivelly.</p>
-    <p>Note 4: Use 'geo-suffix' for geographic with suffix.</p>
+    <p>Note 3: Use 'geo-suffix' for geographic with suffix.</p>
+    <p>Note 4: The value of "precision" can be an integer that will be applied to coordinate and distance, or an array with 3 numbers for the precision of the coordinates, azimuth and distances, respectively.</p>
 
     <h2>Exemples:</h2>
     <ul>
-      <li>deedtable3('preffix', 'title', precision, fontsize, layer_name, type, azimuth_dist) = HTML</li>
-      <li>deedtable3('V-', ' - Area X', 3, 12, 'layer_name', 'proj', 1) = HTML</li>
-      <li>deedtable3('V-', ' - Area X', 3, 12, 'layer_name', 'geo', 0) = HTML</li>
-      <li>deedtable3('V-', ' - Area X', 3, 12, 'layer_name', 'both', 1) = HTML</li>
+      <li>deedtable3('preffix', 'title', precision, fontsize, type, azimuth_dist) = HTML</li>
+      <li>deedtable3('V-', ' - Area X', 3, 12, 'proj', 1) = HTML</li>
+      <li>deedtable3('V-', ' - Area X', 3, 12, 'geo', 0) = HTML</li>
+      <li>deedtable3('P-', ' - Area X', 3, 12, 'both', 1) = HTML</li>
     </ul>
-    <h2>Exemples with vertex layer:</h2>
+
+    <h2>Exemple with vertex layer:</h2>
     <ul>
-      <li>deedtable3('vertex_point_layer,ID,name', 'title', precision, fontsize, layer_name, type, azimuth_dist) = HTML</li>
-      <li>deedtable3('Vertex,id,name', ' - Area Z', 3, 12, 'layer_name', 'both', 1) = HTML</li>
+      <li>deedtable3('vertex_point_layer,ID,name', 'title', precision, fontsize, type, azimuth_dist) = HTML</li>
+      <li>deedtable3('Vertex,id,name', ' - Area Z', 3, 12, 'both', 1) = HTML</li>
+    </ul>
+
+    <h2>Exemple with different precisions:</h2>
+    <ul>
+      <li>deedtable3('preffix', 'title', array(coord,azimuth,distance), fontsize, type, azimuth_dist) = HTML</li>
+      <li>deedtable3('M-', ' - Property', array(3,0,2), 10, 'both', 0) = HTML</li>
+    </ul>
+
+    <h2>Choose the method for calculating azimuths and distances:</h2>
+    <ul>
+      <li>azimuth_dist = 0 ➡️ No azimuths and distances</li>
+      <li>azimuth_dist = 1 ➡️ Layer or projection CRS</li>
+      <li>azimuth_dist = 2 ➡️ Local Tangent Plane (LTP)</li>
+      <li>azimuth_dist = 3 ➡️ LTP distance and Puissant azimuth</li>
     </ul>
     """
-    if len(QgsProject.instance().mapLayersByName(layer_name)) == 1:
-        layer = QgsProject.instance().mapLayersByName(layer_name)[0]
-    else:
-        layer = QgsProject.instance().mapLayer(layer_name)
-
+    layer_id = context.variable('layer_id')
+    layer = QgsProject.instance().mapLayer(layer_id)
     SRC = layer.crs()
     SGR = QgsCoordinateReferenceSystem(SRC.geographicCrsAuthId())
 
     tipo = tipo.lower()
-    format_num = '{:,.Xf}'.replace('X', str(decimal))
+    
+    if isinstance(decimal, list):
+        format_utm = '{:,.Xf}'.replace('X', str(decimal[0]))
+        prec_geo = decimal[0]
+        prec_Azimute = decimal[1]
+        format_dist = '{:,.Xf}'.replace('X', str(decimal[2]))
+    else:
+        format_utm = '{:,.Xf}'.replace('X', str(decimal))
+        prec_geo = decimal + 2
+        prec_Azimute = 1
+        format_dist = '{:,.Xf}'.replace('X', str(decimal))
 
     geom = feature.geometry()
     TipoGeometria = geom.type()
@@ -1494,11 +1587,39 @@ def deedtable3(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
         # Calculo dos Azimutes e Distancias
         tam = len(pnts_UTM)
         Az_lista, Dist = [], []
-        for k in range(tam):
-            pntA = pnts_UTM[k+1][0]
-            pntB = pnts_UTM[1 if k+2 > tam else k+2][0]
-            Az_lista += [(180/pi)*azimute(pntA, pntB)[0]]
-            Dist += [sqrt((pntA.x() - pntB.x())**2 + (pntA.y() - pntB.y())**2)]
+        # Calcular geomGeo e crsGeo
+        if not layer.crs().isGeographic():
+            geom.transform(coordinateTransformer)
+        crsGeo = SGR
+        geomGeo = geom
+        centroideG = geom.centroid().asPoint()
+
+        if TipoGeometria == 2: # Polígono
+
+            if azimuth_dist == 1: # Projetadas (Ex: UTM)
+                for k in range(tam):
+                    pntA = pnts_UTM[k+1][0]
+                    pntB = pnts_UTM[1 if k+2 > tam else k+2][0]
+                    Az_lista += [(180/pi)*azimute(pntA, pntB)[0]]
+                    Dist += [sqrt((pntA.x() - pntB.x())**2 + (pntA.y() - pntB.y())**2)]
+            elif azimuth_dist == 2: # SGL
+                for k in range(tam):
+                    pntA = pnts_GEO[k+1][0]
+                    pntB = pnts_GEO[1 if k+2 > tam else k+2][0]
+                    Az, dist = AzimuteDistanciaSGL(pntA, pntB, geomGeo, crsGeo, 'SGL')
+                    Az_lista += [Az]
+                    Dist += [dist]
+            elif azimuth_dist == 3: # SGL e Puissant
+                for k in range(tam):
+                    pntA = pnts_GEO[k+1][0]
+                    pntB = pnts_GEO[1 if k+2 > tam else k+2][0]
+                    Az, dist = AzimuteDistanciaSGL(pntA, pntB, geomGeo, crsGeo, 'puissant')
+                    Az_lista += [Az]
+                    Dist += [dist]
+            elif azimuth_dist == 0: # Sem cálculo de Azimute e distância
+                for k in range(tam):
+                    Az_lista += [0]
+                    Dist += [0]
 
         texto = '''<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
         <html>
@@ -1521,7 +1642,7 @@ def deedtable3(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
         #Tipos de cabeçalhos
 
         # UTM
-        if tipo == 'proj' and azimuteDist == 1:
+        if tipo == 'proj' and azimuth_dist > 0:
             linha = '''<tr>
           <td>Vn</td>
           <td>En</td>
@@ -1549,7 +1670,7 @@ def deedtable3(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
             </tr>'''
 
         # UTM sem Az e d
-        if tipo == 'proj' and azimuteDist == 0:
+        if tipo == 'proj' and azimuth_dist== 0:
             linha = '''<tr>
           <td>Vn</td>
           <td>En</td>
@@ -1572,7 +1693,7 @@ def deedtable3(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
             </tr>'''
 
         # GEO
-        if 'geo' in tipo and azimuteDist == 1:
+        if 'geo' in tipo and azimuth_dist> 0:
             linha = '''<tr>
               <td>Vn</td>
               <td>lonn</td>
@@ -1600,7 +1721,7 @@ def deedtable3(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
             </tr>'''
 
         # GEO sem Az e d
-        if 'geo' in tipo and azimuteDist == 0:
+        if 'geo' in tipo and azimuth_dist== 0:
             linha = '''<tr>
               <td>Vn</td>
               <td>lonn</td>
@@ -1623,7 +1744,7 @@ def deedtable3(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
             </tr>'''
 
         # UTM e GEO
-        if tipo == 'both' and azimuteDist == 1:
+        if tipo == 'both' and azimuth_dist> 0:
             linha = '''<tr>
               <td>Vn</td>
               <td>lonn</td>
@@ -1656,7 +1777,7 @@ def deedtable3(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
             </tr>'''
 
         # UTM e GEO sem Az e d
-        if tipo == 'both' and azimuteDist == 0:
+        if tipo == 'both' and azimuth_dist== 0:
             linha = '''<tr>
               <td>Vn</td>
               <td>lonn</td>
@@ -1685,20 +1806,20 @@ def deedtable3(prefix, titulo, decimal, fontsize, layer_name, tipo, azimuteDist,
         LINHAS = ''
         for k in range(tam):
             linha0 = linha
-            lonn = tr(DD2DMS(pnts_GEO[k+1][0].x(),decimal + 3), DD2DMS(pnts_GEO[k+1][0].x(),decimal + 3).replace('.', ','))
-            latn = tr(DD2DMS(pnts_GEO[k+1][0].y(),decimal + 3), DD2DMS(pnts_GEO[k+1][0].y(),decimal + 3).replace('.', ','))
+            lonn = tr(DD2DMS(pnts_GEO[k+1][0].x(),prec_geo), DD2DMS(pnts_GEO[k+1][0].x(),prec_geo).replace('.', ','))
+            latn = tr(DD2DMS(pnts_GEO[k+1][0].y(),prec_geo), DD2DMS(pnts_GEO[k+1][0].y(),prec_geo).replace('.', ','))
             if 'suffix' in tipo:
                 lonn = lonn.replace('-', '') + 'W' if pnts_GEO[k+1][0].x() < 0 else 'E'
                 latn = latn.replace('-', '') + 'S' if pnts_GEO[k+1][0].y() < 0 else 'N'
             itens = {'Vn': pnts_UTM[k+1][2],
-                        'En': tr(format_num.format(pnts_UTM[k+1][0].x()), format_num.format(pnts_UTM[k+1][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                        'Nn': tr(format_num.format(pnts_UTM[k+1][0].y()), format_num.format(pnts_UTM[k+1][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                        'hn': tr(format_num.format(pnts_UTM[k+1][0].z()), format_num.format(pnts_UTM[k+1][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                        'En': tr(format_utm.format(pnts_UTM[k+1][0].x()), format_utm.format(pnts_UTM[k+1][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                        'Nn': tr(format_utm.format(pnts_UTM[k+1][0].y()), format_utm.format(pnts_UTM[k+1][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                        'hn': tr(format_utm.format(pnts_UTM[k+1][0].z()), format_utm.format(pnts_UTM[k+1][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.')),
                         'lonn': lonn,
                         'latn': latn,
                         'Ln': '-' if TipoGeometria == 1 and k+1 == tam else pnts_UTM[k+1][2] + '/' + pnts_UTM[1 if k+2 > tam else k+2][2],
-                        'Az_n': '-' if TipoGeometria == 1 and k+1 == tam else tr(DD2DMS(Az_lista[k],1), DD2DMS(Az_lista[k],1).replace('.', ',')),
-                        'Dn': '-' if TipoGeometria == 1 and k+1 == tam else tr(format_num.format(Dist[k]), format_num.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'))
+                        'Az_n': '-' if TipoGeometria == 1 and k+1 == tam else tr(DD2DMS(Az_lista[k],prec_Azimute), DD2DMS(Az_lista[k],prec_Azimute).replace('.', ',')),
+                        'Dn': '-' if TipoGeometria == 1 and k+1 == tam else tr(format_dist.format(Dist[k]), format_dist.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'))
                         }
             for item in itens:
                 linha0 = linha0.replace(item, itens[item])
