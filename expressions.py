@@ -907,16 +907,25 @@ def dinamictable(titulo, campos, apelidos, decimal, fator, compensador, feature,
 
 
 @qgsfunction(args='auto', group='LF Tools')
-def deedtable(layer_name, ini, fim, titulo, fontsize, feature, parent):
+def deedtable(layer_name, ini, fim, titulo, decimal, fontsize, tipo, azimuth_dist, feature, parent):
     """
-    Generates the Vertices and Sides Descriptive Table, also known as Synthetic Deed Description, based on the attributes, sequence and code, in the point layer's attribute table.
+    Generates the Vertices and Sides for a Descriptive Table, also known as Synthetic Deed Description, based on the attributes, sequence and code, in the point layer's attribute table.
     <p>Note: The table title must be inserted as string.</p>
-    <h2>Exemple:</h2>
+    <h2>Exemples:</h2>
     <ul>
-      <li>deedtable('layer_name', start, end, 'title',fontsize) = HTML</li>
-      <li>deedtable('Limit Point', 1, 20, 'Area X',10) = HTML</li>
+      <li>deedtable('layer_name', start, end, 'title', precision, fontsize, coord_type, azimuth_dist) = HTML</li>
+      <li>deedtable('Limit Point', 1, 20, 'Area X', 3, 10, 'proj', 1) = HTML</li>
+      <li>deedtable('Vertices', 1, -1, 'Property B', 2, 12, 'geo', 0) = HTML</li>
     </ul>
     """
+    # Novos parâmetros: decimal, tipo, azimuth_dist
+    # format_num
+
+    # format_utm
+    # prec_geo
+    # prec_Azimute
+    # format_dist
+
     # Templates HTML
     texto = '''<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
     <html>
