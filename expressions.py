@@ -906,72 +906,387 @@ def dinamictable(titulo, campos, apelidos, decimal, fator, compensador, feature,
 
 
 
+def template_table(tipo, azimuth_dist, dimension):
+    texto = '''<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+        <html>
+        <head>
+          <title>''' + str2HTML(tr('Synthetic deed description', 'Memorial Sintético')) + '''</title>    </head>
+        <body>
+        <table
+        style="text-align: center; width: 100%; font-size: [FONTSIZE]px;  border: medium none; border-collapse: collapse;"
+        border="1" cellpadding="0" cellspacing="0">
+        <tbody>
+        [CABECALHO]
+        [LINHAS]
+        </tbody>
+        </table>
+        <br>
+        </body>
+        </html>
+        '''
+
+    # Definição de cabeçalhos
+
+    dimension = dimension.lower()
+    if dimension == '2d':
+        # UTM
+        if tipo == 'proj' and azimuth_dist > 0:
+            linha = '''<tr>
+            <td>Vn</td>
+            <td>En</td>
+            <td>Nn</td>
+            <td>Ln</td>
+            <td>Az_n</td>
+            <td>Dn</td>
+        </tr>
+        '''
+            cabec = '''<tr>
+                <td colspan="6" rowspan="1">''' + str2HTML(tr('Synthetic deed description', 'Memorial Sintético').upper()) + '''[TITULO]</td>
+            </tr>
+            <tr>
+                <td colspan="1" rowspan="2">''' + str2HTML(tr('VERTEX', 'VÉRTICE')) + '''</td>
+                <td colspan="2" rowspan="1">''' + str2HTML(tr('COORDINATE', 'COORDENADA')) + '''</td>
+                <td colspan="1" rowspan="2">''' + str2HTML(tr('SIDE', 'LADO')) + '''</td>
+                <td colspan="1" rowspan="2">''' + str2HTML(tr('AZIMUTH', 'AZIMUTE')) + '''</td>
+                <td colspan="1" rowspan="2">''' + str2HTML(tr('DISTANCE', 'DISTÂNCIA')) + ''' (m)</td>
+            </tr>
+            <tr>
+                <td>E</td>
+                <td>N</td>
+            </tr>'''
+
+        # UTM sem Az e d
+        if tipo == 'proj' and azimuth_dist == 0:
+            linha = '''<tr>
+            <td>Vn</td>
+            <td>En</td>
+            <td>Nn</td>
+        </tr>
+        '''
+
+            cabec = '''<tr>
+                <td colspan="3" rowspan="1">''' + str2HTML(tr('Synthetic deed description', 'Memorial Sintético').upper()) + '''[TITULO]</td>
+            </tr>
+            <tr>
+                <td colspan="1" rowspan="2">''' + str2HTML(tr('VERTEX', 'VÉRTICE')) + '''</td>
+                <td colspan="2" rowspan="1">''' + str2HTML(tr('COORDINATE', 'COORDENADA')) + '''</td>
+            </tr>
+            <tr>
+                <td>E</td>
+                <td>N</td>
+            </tr>'''
+
+        # GEO
+        if 'geo' in tipo and azimuth_dist > 0:
+            linha = '''<tr>
+                <td>Vn</td>
+                <td>lonn</td>
+                <td>latn</td>
+                <td>Ln</td>
+                <td>Az_n</td>
+                <td>Dn</td>
+            </tr>
+            '''
+            cabec = '''<tr>
+                <td colspan="6" rowspan="1">''' + str2HTML(tr('Synthetic deed description', 'Memorial Sintético').upper()) + '''[TITULO]</td>
+            </tr>
+            <tr>
+                <td colspan="1" rowspan="2">''' + str2HTML(tr('VERTEX', 'VÉRTICE')) + '''</td>
+                <td colspan="2" rowspan="1">''' + str2HTML(tr('COORDINATE', 'COORDENADA')) + '''</td>
+                <td colspan="1" rowspan="2">''' + str2HTML(tr('SIDE', 'LADO')) + '''</td>
+                <td colspan="1" rowspan="2">''' + str2HTML(tr('AZIMUTH', 'AZIMUTE')) + '''</td>
+                <td colspan="1" rowspan="2">''' + str2HTML(tr('DISTANCE', 'DISTÂNCIA')) + ''' (m)</td>
+            </tr>
+            <tr>
+                <td>longitude</td>
+                <td>latitude</td>
+            </tr>'''
+
+        # GEO sem Az e d
+        if 'geo' in tipo and azimuth_dist == 0:
+            linha = '''<tr>
+                <td>Vn</td>
+                <td>lonn</td>
+                <td>latn</td>
+            </tr>
+            '''
+
+            cabec = '''<tr>
+                <td colspan="3" rowspan="1">''' + str2HTML(tr('Synthetic deed description', 'Memorial Sintético').upper()) + '''[TITULO]</td>
+            </tr>
+            <tr>
+                <td colspan="1" rowspan="2">''' + str2HTML(tr('VERTEX', 'VÉRTICE')) + '''</td>
+                <td colspan="2" rowspan="1">''' + str2HTML(tr('COORDINATE', 'COORDENADA')) + '''</td>
+            </tr>
+            <tr>
+                <td>longitude</td>
+                <td>latitude</td>
+            </tr>'''
+
+        # UTM e GEO
+        if tipo == 'both' and azimuth_dist > 0:
+            linha = '''<tr>
+                <td>Vn</td>
+                <td>lonn</td>
+                <td>latn</td>
+                <td>En</td>
+                <td>Nn</td>
+                <td>Ln</td>
+                <td>Az_n</td>
+                <td>Dn</td>
+            </tr>
+            '''
+
+            cabec = '''<tr>
+                <td colspan="8" rowspan="1">''' + str2HTML(tr('Synthetic deed description', 'Memorial Sintético').upper()) + '''[TITULO]</td>
+            </tr>
+            <tr>
+                <td colspan="1" rowspan="2">''' + str2HTML(tr('VERTEX', 'VÉRTICE')) + '''</td>
+                <td colspan="4" rowspan="1">''' + str2HTML(tr('COORDINATE', 'COORDENADA')) + '''</td>
+                <td colspan="1" rowspan="2">''' + str2HTML(tr('SIDE', 'LADO')) + '''</td>
+                <td colspan="1" rowspan="2">''' + str2HTML(tr('AZIMUTH', 'AZIMUTE')) + '''</td>
+                <td colspan="1" rowspan="2">''' + str2HTML(tr('DISTANCE', 'DISTÂNCIA')) + ''' (m)</td>
+            </tr>
+            <tr>
+                <td>longitude</td>
+                <td>latitude</td>
+                <td>E</td>
+                <td>N</td>
+            </tr>'''
+
+        # UTM e GEO sem Az e d
+        if tipo == 'both' and azimuth_dist == 0:
+            linha = '''<tr>
+                <td>Vn</td>
+                <td>lonn</td>
+                <td>latn</td>
+                <td>En</td>
+                <td>Nn</td>
+            </tr>
+            '''
+
+            cabec = '''<tr>
+                <td colspan="5" rowspan="1">''' + str2HTML(tr('Synthetic deed description', 'Memorial Sintético').upper()) + '''[TITULO]</td>
+            </tr>
+            <tr>
+                <td colspan="1" rowspan="2">''' + str2HTML(tr('VERTEX', 'VÉRTICE')) + '''</td>
+                <td colspan="4" rowspan="1">''' + str2HTML(tr('COORDINATE', 'COORDENADA')) + '''</td>
+            </tr>
+            <tr>
+                <td>longitude</td>
+                <td>latitude</td>
+                <td>E</td>
+                <td>N</td>
+            </tr>'''
+    elif dimension == '3d':
+        
+        # UTM
+        if tipo == 'proj' and azimuth_dist > 0:
+            linha = '''<tr>
+          <td>Vn</td>
+          <td>En</td>
+          <td>Nn</td>
+          <td>hn</td>
+          <td>Ln</td>
+          <td>Az_n</td>
+          <td>Dn</td>
+        </tr>
+        '''
+            cabec = '''<tr>
+              <td colspan="7" rowspan="1">''' + str2HTML(tr('Synthetic deed description', 'Memorial Sintético').upper()) + '''[TITULO]</td>
+            </tr>
+            <tr>
+              <td colspan="1" rowspan="2">''' + str2HTML(tr('VERTEX', 'VÉRTICE')) + '''</td>
+              <td colspan="3" rowspan="1">''' + str2HTML(tr('COORDINATE', 'COORDENADA')) + '''</td>
+              <td colspan="1" rowspan="2">''' + str2HTML(tr('SIDE', 'LADO')) + '''</td>
+              <td colspan="1" rowspan="2">''' + str2HTML(tr('AZIMUTH', 'AZIMUTE')) + '''</td>
+              <td colspan="1" rowspan="2">''' + str2HTML(tr('DISTANCE', 'DISTÂNCIA')) + ''' (m)</td>
+            </tr>
+            <tr>
+              <td>E</td>
+              <td>N</td>
+              <td>h</td>
+            </tr>'''
+
+        # UTM sem Az e d
+        if tipo == 'proj' and azimuth_dist== 0:
+            linha = '''<tr>
+          <td>Vn</td>
+          <td>En</td>
+          <td>Nn</td>
+          <td>hn</td>
+        </tr>
+        '''
+
+            cabec = '''<tr>
+              <td colspan="4" rowspan="1">''' + str2HTML(tr('Synthetic deed description', 'Memorial Sintético').upper()) + '''[TITULO]</td>
+            </tr>
+            <tr>
+              <td colspan="1" rowspan="2">''' + str2HTML(tr('VERTEX', 'VÉRTICE')) + '''</td>
+              <td colspan="3" rowspan="1">''' + str2HTML(tr('COORDINATE', 'COORDENADA')) + '''</td>
+            </tr>
+            <tr>
+              <td>E</td>
+              <td>N</td>
+              <td>h</td>
+            </tr>'''
+
+        # GEO
+        if 'geo' in tipo and azimuth_dist> 0:
+            linha = '''<tr>
+              <td>Vn</td>
+              <td>lonn</td>
+              <td>latn</td>
+              <td>hn</td>
+              <td>Ln</td>
+              <td>Az_n</td>
+              <td>Dn</td>
+            </tr>
+            '''
+            cabec = '''<tr>
+              <td colspan="7" rowspan="1">''' + str2HTML(tr('Synthetic deed description', 'Memorial Sintético').upper()) + '''[TITULO]</td>
+            </tr>
+            <tr>
+              <td colspan="1" rowspan="2">''' + str2HTML(tr('VERTEX', 'VÉRTICE')) + '''</td>
+              <td colspan="3" rowspan="1">''' + str2HTML(tr('COORDINATE', 'COORDENADA')) + '''</td>
+              <td colspan="1" rowspan="2">''' + str2HTML(tr('SIDE', 'LADO')) + '''</td>
+              <td colspan="1" rowspan="2">''' + str2HTML(tr('AZIMUTH', 'AZIMUTE')) + '''</td>
+              <td colspan="1" rowspan="2">''' + str2HTML(tr('DISTANCE', 'DISTÂNCIA')) + ''' (m)</td>
+            </tr>
+            <tr>
+              <td>longitude</td>
+              <td>latitude</td>
+              <td>h</td>
+            </tr>'''
+
+        # GEO sem Az e d
+        if 'geo' in tipo and azimuth_dist== 0:
+            linha = '''<tr>
+              <td>Vn</td>
+              <td>lonn</td>
+              <td>latn</td>
+              <td>hn</td>
+            </tr>
+            '''
+
+            cabec = '''<tr>
+              <td colspan="4" rowspan="1">''' + str2HTML(tr('Synthetic deed description', 'Memorial Sintético').upper()) + '''[TITULO]</td>
+            </tr>
+            <tr>
+              <td colspan="1" rowspan="2">''' + str2HTML(tr('VERTEX', 'VÉRTICE')) + '''</td>
+              <td colspan="3" rowspan="1">''' + str2HTML(tr('COORDINATE', 'COORDENADA')) + '''</td>
+            </tr>
+            <tr>
+              <td>longitude</td>
+              <td>latitude</td>
+              <td>h</td>
+            </tr>'''
+
+        # UTM e GEO
+        if tipo == 'both' and azimuth_dist> 0:
+            linha = '''<tr>
+              <td>Vn</td>
+              <td>lonn</td>
+              <td>latn</td>
+              <td>En</td>
+              <td>Nn</td>
+              <td>hn</td>
+              <td>Ln</td>
+              <td>Az_n</td>
+              <td>Dn</td>
+            </tr>
+            '''
+
+            cabec = '''<tr>
+              <td colspan="9" rowspan="1">''' + str2HTML(tr('Synthetic deed description', 'Memorial Sintético').upper()) + '''[TITULO]</td>
+            </tr>
+            <tr>
+              <td colspan="1" rowspan="2">''' + str2HTML(tr('VERTEX', 'VÉRTICE')) + '''</td>
+              <td colspan="5" rowspan="1">''' + str2HTML(tr('COORDINATE', 'COORDENADA')) + '''</td>
+              <td colspan="1" rowspan="2">''' + str2HTML(tr('SIDE', 'LADO')) + '''</td>
+              <td colspan="1" rowspan="2">''' + str2HTML(tr('AZIMUTH', 'AZIMUTE')) + '''</td>
+              <td colspan="1" rowspan="2">''' + str2HTML(tr('DISTANCE', 'DISTÂNCIA')) + ''' (m)</td>
+            </tr>
+            <tr>
+              <td>longitude</td>
+              <td>latitude</td>
+              <td>E</td>
+              <td>N</td>
+              <td>h</td>
+            </tr>'''
+
+        # UTM e GEO sem Az e d
+        if tipo == 'both' and azimuth_dist== 0:
+            linha = '''<tr>
+              <td>Vn</td>
+              <td>lonn</td>
+              <td>latn</td>
+              <td>En</td>
+              <td>Nn</td>
+              <td>hn</td>
+            </tr>
+            '''
+
+            cabec = '''<tr>
+              <td colspan="6" rowspan="1">''' + str2HTML(tr('Synthetic deed description', 'Memorial Sintético').upper()) + '''[TITULO]</td>
+            </tr>
+            <tr>
+              <td colspan="1" rowspan="2">''' + str2HTML(tr('VERTEX', 'VÉRTICE')) + '''</td>
+              <td colspan="5" rowspan="1">''' + str2HTML(tr('COORDINATE', 'COORDENADA')) + '''</td>
+            </tr>
+            <tr>
+              <td>longitude</td>
+              <td>latitude</td>
+              <td>E</td>
+              <td>N</td>
+              <td>h</td>
+            </tr>'''
+    
+    return texto, linha, cabec
+
+
+
 @qgsfunction(args='auto', group='LF Tools')
 def deedtable(layer_name, ini, fim, titulo, decimal, fontsize, tipo, azimuth_dist, feature, parent):
     """
-    Generates the Vertices and Sides for a Descriptive Table, also known as Synthetic Deed Description, based on the attributes, sequence and code, in the point layer's attribute table.
-    <p>Note: The table title must be inserted as string.</p>
+    Generates the Vertices and Sides for a Descriptive Table, also known as Synthetic Deed Description, based on the layer'sattributes: sequence and code.
+    <p>Note 1: A layer or QGIS Project with a projected SRC is required.</p>
+    <p>Note 2: Types: 'proj' - projected, 'geo' - geographic, 'both' - both coordinate systems.</p>
+    <p>Note 3: Use 'geo-suffix' for geographic with suffix.</p>
+    <p>Note 4: The value of "precision" can be an integer that will be applied to coordinate and distance, or an array with 3 numbers for the precision of the coordinates, azimuth and distances, respectively.</p>
+    
     <h2>Exemples:</h2>
     <ul>
       <li>deedtable('layer_name', start, end, 'title', precision, fontsize, coord_type, azimuth_dist) = HTML</li>
       <li>deedtable('Limit Point', 1, 20, 'Area X', 3, 10, 'proj', 1) = HTML</li>
       <li>deedtable('Vertices', 1, -1, 'Property B', 2, 12, 'geo', 0) = HTML</li>
     </ul>
+
+    <h2>Choose the method for calculating azimuths and distances:</h2>
+    <ul>
+      <li>azimuth_dist = 0 ➡️ No azimuths and distances</li>
+      <li>azimuth_dist = 1 ➡️ Layer or projection CRS</li>
+      <li>azimuth_dist = 2 ➡️ Local Tangent Plane (LTP)</li>
+      <li>azimuth_dist = 3 ➡️ LTP distance and Puissant azimuth</li>
+    </ul>
     """
     # Novos parâmetros: decimal, tipo, azimuth_dist
-    # format_num
+    
+    tipo = tipo.lower()
 
-    # format_utm
-    # prec_geo
-    # prec_Azimute
-    # format_dist
+    if isinstance(decimal, list):
+        format_utm = '{:,.Xf}'.replace('X', str(decimal[0]))
+        prec_geo = decimal[0]
+        prec_Azimute = decimal[1]
+        format_dist = '{:,.Xf}'.replace('X', str(decimal[2]))
+    else:
+        format_utm = '{:,.Xf}'.replace('X', str(decimal))
+        prec_geo = decimal + 2
+        prec_Azimute = 1
+        format_dist = '{:,.Xf}'.replace('X', str(decimal))
 
     # Templates HTML
-    texto = '''<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-    <html>
-    <head>
-      <title>''' + str2HTML(tr('Synthetic deed description', 'Memorial Sintético')) + '''</title>    </head>
-    <body>
-    <table
-    style="text-align: center; width: 100%; font-size: [FONTSIZE]px;  border: medium none; border-collapse: collapse;"
-    border="1" cellpadding="0" cellspacing="0">
-    <tbody>
-    [CABECALHO]
-    [LINHAS]
-    </tbody>
-    </table>
-    <br>
-    </body>
-    </html>
-    '''
-    linha = '''<tr>
-      <td>Vn</td>
-      <td>En</td>
-      <td>Nn</td>
-      <td>hn</td>
-      <td>Ln</td>
-      <td>Az_n</td>
-      <td>Dn</td>
-    </tr>
-    '''
-    cabec = '''<tr>
-      <td colspan="7" rowspan="1">''' + str2HTML(tr('Synthetic deed description'.upper(), 'Memorial Sintético'.upper())) + '''[TITULO]</td>
-    </tr>
-    <tr>
-      <td colspan="1" rowspan="2">''' + str2HTML(tr('VERTEX', 'VÉRTICE')) + '''</td>
-      <td colspan="3" rowspan="1">''' + str2HTML(tr('COORDINATE', 'COORDENADA')) + '''</td>
-      <td colspan="1" rowspan="2">''' + str2HTML(tr('SIDE', 'LADO')) + '''</td>
-      <td colspan="1" rowspan="2">''' + str2HTML(tr('AZIMUTH', 'AZIMUTE')) + '''</td>
-      <td colspan="1" rowspan="2">''' + str2HTML(tr('DISTANCE', 'DISTÂNCIA')) + ''' (m)</td>
-    </tr>
-    <tr>
-      <td>E</td>
-      <td>N</td>
-      <td>h</td>
-    </tr>'''
-
-    decimal = 2
-    format_num = '{:,.Xf}'.replace('X', str(decimal))
+    texto, linha, cabec = template_table(tipo, azimuth_dist, '3d')
 
     # Camada de Pontos
     if len(QgsProject.instance().mapLayersByName(layer_name)) == 1:
@@ -989,35 +1304,65 @@ def deedtable(layer_name, ini, fim, titulo, decimal, fontsize, tipo, azimuth_dis
     for feat in layer.getFeatures():
         pnt = feat.geometry().asPoint()
         coord = geom2PointList(feat.geometry())
-        pnts_UTM[feat['sequence']] = [coordinateTransformer.transform(pnt), feat['type'], feat['code'], MeridianConvergence(pnt.x(), pnt.y(), crsDest) ]
+        pnts_UTM[feat['sequence']] = [coordinateTransformer.transform(pnt), feat['type'], feat['code'] ]
         pnts_GEO[feat['sequence']] = [QgsPoint(pnt.x(),pnt.y(),coord.z()), feat['type'], feat['code'] ]
 
     # Calculo dos Azimutes e Distancias
     tam = len(pnts_UTM)
-    Az_lista, Az_Geo_lista, Dist = [], [], []
+    Az_lista, lista_pnts, Dist = [], [], []
+    crsGeo = SRC
     for k in range(tam):
-        pntA = pnts_UTM[k+1][0]
-        pntB = pnts_UTM[1 if k+2 > tam else k+2][0]
-        Az_lista += [(180/pi)*azimute(pntA, pntB)[0]]
-        ConvMerediana = pnts_UTM[k+1][3]
-        Az_Geo_lista += [(180/pi)*azimute(pntA, pntB)[0]+ConvMerediana]
-        Dist += [sqrt((pntA.x() - pntB.x())**2 + (pntA.y() - pntB.y())**2)]
+        lista_pnts += [pnts_GEO[k+1][0]]
+    # criar poligono a partir dos pontos da camada
+    anel_ext = QgsLineString(lista_pnts)
+    pol = QgsPolygon(anel_ext)
+    geomGeo = QgsGeometry(pol)
+
+    if azimuth_dist == 1: # Projetadas (Ex: UTM)
+        for k in range(tam):
+            pntA = pnts_UTM[k+1][0]
+            pntB = pnts_UTM[1 if k+2 > tam else k+2][0]
+            Az_lista += [(180/pi)*azimute(pntA, pntB)[0]]
+            Dist += [sqrt((pntA.x() - pntB.x())**2 + (pntA.y() - pntB.y())**2)]
+    elif azimuth_dist == 2: # SGL
+        for k in range(tam):
+            pntA = pnts_GEO[k+1][0]
+            pntB = pnts_GEO[1 if k+2 > tam else k+2][0]
+            Az, dist = AzimuteDistanciaSGL(pntA, pntB, geomGeo, crsGeo, 'SGL')
+            Az_lista += [Az]
+            Dist += [dist]
+    elif azimuth_dist == 3: # SGL e Puissant
+        for k in range(tam):
+            pntA = pnts_GEO[k+1][0]
+            pntB = pnts_GEO[1 if k+2 > tam else k+2][0]
+            Az, dist = AzimuteDistanciaSGL(pntA, pntB, geomGeo, crsGeo, 'puissant')
+            Az_lista += [Az]
+            Dist += [dist]
+    elif azimuth_dist == 0: # Sem cálculo de Azimute e distância
+        for k in range(tam):
+            Az_lista += [0]
+            Dist += [0]
 
     LINHAS = ''
     if fim == -1 or fim > tam:
         fim = tam
     for k in range(ini-1,fim):
         linha0 = linha
+        lonn = tr(DD2DMS(pnts_GEO[k+1][0].x(),prec_geo), DD2DMS(pnts_GEO[k+1][0].x(),prec_geo).replace('.', ','))
+        latn = tr(DD2DMS(pnts_GEO[k+1][0].y(),prec_geo), DD2DMS(pnts_GEO[k+1][0].y(),prec_geo).replace('.', ','))
+        if 'suffix' in tipo:
+            lonn = lonn.replace('-', '') + 'W' if pnts_GEO[k+1][0].x() < 0 else 'E'
+            latn = latn.replace('-', '') + 'S' if pnts_GEO[k+1][0].y() < 0 else 'N'
         itens = {'Vn': pnts_UTM[k+1][2],
-                    'En':tr(format_num.format(pnts_UTM[k+1][0].x()), format_num.format(pnts_UTM[k+1][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                    'Nn':tr(format_num.format(pnts_UTM[k+1][0].y()), format_num.format(pnts_UTM[k+1][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                    'hn':tr(format_num.format(pnts_GEO[k+1][0].z()), format_num.format(pnts_GEO[k+1][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                    'lonn':tr(DD2DMS(pnts_GEO[k+1][0].x(),decimal + 3), DD2DMS(pnts_GEO[k+1][0].x(),decimal + 3).replace('.', ',')),
-                    'latn':tr(DD2DMS(pnts_GEO[k+1][0].y(),decimal + 3), DD2DMS(pnts_GEO[k+1][0].y(),decimal + 3).replace('.', ',')),
-                    'Ln': pnts_UTM[k+1][2] + '/' + pnts_UTM[1 if k+2 > tam else k+2][2],
-                    'Az_n':tr(DD2DMS(Az_lista[k],1), DD2DMS(Az_lista[k],1).replace('.', ',')),
-                    'Dn':tr(format_num.format(Dist[k]), format_num.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'))
-                    }
+                 'En': tr(format_utm.format(pnts_UTM[k+1][0].x()), format_utm.format(pnts_UTM[k+1][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                 'Nn': tr(format_utm.format(pnts_UTM[k+1][0].y()), format_utm.format(pnts_UTM[k+1][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                 'hn': tr(format_utm.format(pnts_GEO[k+1][0].z()), format_utm.format(pnts_GEO[k+1][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                 'lonn': lonn,
+                 'latn': latn,
+                 'Ln': pnts_UTM[k+1][2] + '/' + pnts_UTM[1 if k+2 > tam else k+2][2],
+                 'Az_n': tr(DD2DMS(Az_lista[k], prec_Azimute), DD2DMS(Az_lista[k], prec_Azimute).replace('.', ',')),
+                 'Dn': tr(format_dist.format(Dist[k]), format_dist.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'))
+                 }
         for item in itens:
             linha0 = linha0.replace(item, itens[item])
         LINHAS += linha0
@@ -1186,7 +1531,6 @@ def deedtable2(prefix, titulo, decimal, fontsize, tipo, azimuth_dist, feature, p
             geom.transform(coordinateTransformer)
         crsGeo = SGR
         geomGeo = geom
-        centroideG = geom.centroid().asPoint()
 
         if TipoGeometria == 2: # Polígono
 
@@ -1242,175 +1586,7 @@ def deedtable2(prefix, titulo, decimal, fontsize, tipo, azimuth_dist, feature, p
                     Az_lista += [0]
                     Dist += [0]
 
-        texto = '''<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-        <html>
-        <head>
-          <title>''' + str2HTML(tr('Synthetic deed description', 'Memorial Sintético')) + '''</title>    </head>
-        <body>
-        <table
-        style="text-align: center; width: 100%; font-size: [FONTSIZE]px;  border: medium none; border-collapse: collapse;"
-        border="1" cellpadding="0" cellspacing="0">
-        <tbody>
-        [CABECALHO]
-        [LINHAS]
-        </tbody>
-        </table>
-        <br>
-        </body>
-        </html>
-        '''
-
-        #Tipos de cabeçalhos
-
-        # UTM
-        if tipo == 'proj' and azimuth_dist > 0:
-            linha = '''<tr>
-          <td>Vn</td>
-          <td>En</td>
-          <td>Nn</td>
-          <td>Ln</td>
-          <td>Az_n</td>
-          <td>Dn</td>
-        </tr>
-        '''
-            cabec = '''<tr>
-              <td colspan="6" rowspan="1">''' + str2HTML(tr('Synthetic deed description', 'Memorial Sintético').upper()) + '''[TITULO]</td>
-            </tr>
-            <tr>
-              <td colspan="1" rowspan="2">''' + str2HTML(tr('VERTEX', 'VÉRTICE')) + '''</td>
-              <td colspan="2" rowspan="1">''' + str2HTML(tr('COORDINATE', 'COORDENADA')) + '''</td>
-              <td colspan="1" rowspan="2">''' + str2HTML(tr('SIDE', 'LADO')) + '''</td>
-              <td colspan="1" rowspan="2">''' + str2HTML(tr('AZIMUTH', 'AZIMUTE')) + '''</td>
-              <td colspan="1" rowspan="2">''' + str2HTML(tr('DISTANCE', 'DISTÂNCIA')) + ''' (m)</td>
-            </tr>
-            <tr>
-              <td>E</td>
-              <td>N</td>
-            </tr>'''
-
-        # UTM sem Az e d
-        if tipo == 'proj' and azimuth_dist == 0:
-            linha = '''<tr>
-          <td>Vn</td>
-          <td>En</td>
-          <td>Nn</td>
-        </tr>
-        '''
-
-            cabec = '''<tr>
-              <td colspan="3" rowspan="1">''' + str2HTML(tr('Synthetic deed description', 'Memorial Sintético').upper()) + '''[TITULO]</td>
-            </tr>
-            <tr>
-              <td colspan="1" rowspan="2">''' + str2HTML(tr('VERTEX', 'VÉRTICE')) + '''</td>
-              <td colspan="2" rowspan="1">''' + str2HTML(tr('COORDINATE', 'COORDENADA')) + '''</td>
-            </tr>
-            <tr>
-              <td>E</td>
-              <td>N</td>
-            </tr>'''
-
-        # GEO
-        if 'geo' in tipo and azimuth_dist > 0:
-            linha = '''<tr>
-              <td>Vn</td>
-              <td>lonn</td>
-              <td>latn</td>
-              <td>Ln</td>
-              <td>Az_n</td>
-              <td>Dn</td>
-            </tr>
-            '''
-            cabec = '''<tr>
-              <td colspan="6" rowspan="1">''' + str2HTML(tr('Synthetic deed description', 'Memorial Sintético').upper()) + '''[TITULO]</td>
-            </tr>
-            <tr>
-              <td colspan="1" rowspan="2">''' + str2HTML(tr('VERTEX', 'VÉRTICE')) + '''</td>
-              <td colspan="2" rowspan="1">''' + str2HTML(tr('COORDINATE', 'COORDENADA')) + '''</td>
-              <td colspan="1" rowspan="2">''' + str2HTML(tr('SIDE', 'LADO')) + '''</td>
-              <td colspan="1" rowspan="2">''' + str2HTML(tr('AZIMUTH', 'AZIMUTE')) + '''</td>
-              <td colspan="1" rowspan="2">''' + str2HTML(tr('DISTANCE', 'DISTÂNCIA')) + ''' (m)</td>
-            </tr>
-            <tr>
-              <td>longitude</td>
-              <td>latitude</td>
-            </tr>'''
-
-        # GEO sem Az e d
-        if 'geo' in tipo and azimuth_dist == 0:
-            linha = '''<tr>
-              <td>Vn</td>
-              <td>lonn</td>
-              <td>latn</td>
-            </tr>
-            '''
-
-            cabec = '''<tr>
-              <td colspan="3" rowspan="1">''' + str2HTML(tr('Synthetic deed description', 'Memorial Sintético').upper()) + '''[TITULO]</td>
-            </tr>
-            <tr>
-              <td colspan="1" rowspan="2">''' + str2HTML(tr('VERTEX', 'VÉRTICE')) + '''</td>
-              <td colspan="2" rowspan="1">''' + str2HTML(tr('COORDINATE', 'COORDENADA')) + '''</td>
-            </tr>
-            <tr>
-              <td>longitude</td>
-              <td>latitude</td>
-            </tr>'''
-
-        # UTM e GEO
-        if tipo == 'both' and azimuth_dist > 0:
-            linha = '''<tr>
-              <td>Vn</td>
-              <td>lonn</td>
-              <td>latn</td>
-              <td>En</td>
-              <td>Nn</td>
-              <td>Ln</td>
-              <td>Az_n</td>
-              <td>Dn</td>
-            </tr>
-            '''
-
-            cabec = '''<tr>
-              <td colspan="8" rowspan="1">''' + str2HTML(tr('Synthetic deed description', 'Memorial Sintético').upper()) + '''[TITULO]</td>
-            </tr>
-            <tr>
-              <td colspan="1" rowspan="2">''' + str2HTML(tr('VERTEX', 'VÉRTICE')) + '''</td>
-              <td colspan="4" rowspan="1">''' + str2HTML(tr('COORDINATE', 'COORDENADA')) + '''</td>
-              <td colspan="1" rowspan="2">''' + str2HTML(tr('SIDE', 'LADO')) + '''</td>
-              <td colspan="1" rowspan="2">''' + str2HTML(tr('AZIMUTH', 'AZIMUTE')) + '''</td>
-              <td colspan="1" rowspan="2">''' + str2HTML(tr('DISTANCE', 'DISTÂNCIA')) + ''' (m)</td>
-            </tr>
-            <tr>
-              <td>longitude</td>
-              <td>latitude</td>
-              <td>E</td>
-              <td>N</td>
-            </tr>'''
-
-        # UTM e GEO sem Az e d
-        if tipo == 'both' and azimuth_dist == 0:
-            linha = '''<tr>
-              <td>Vn</td>
-              <td>lonn</td>
-              <td>latn</td>
-              <td>En</td>
-              <td>Nn</td>
-            </tr>
-            '''
-
-            cabec = '''<tr>
-              <td colspan="5" rowspan="1">''' + str2HTML(tr('Synthetic deed description', 'Memorial Sintético').upper()) + '''[TITULO]</td>
-            </tr>
-            <tr>
-              <td colspan="1" rowspan="2">''' + str2HTML(tr('VERTEX', 'VÉRTICE')) + '''</td>
-              <td colspan="4" rowspan="1">''' + str2HTML(tr('COORDINATE', 'COORDENADA')) + '''</td>
-            </tr>
-            <tr>
-              <td>longitude</td>
-              <td>latitude</td>
-              <td>E</td>
-              <td>N</td>
-            </tr>'''
+        texto, linha, cabec = template_table(tipo, azimuth_dist, '2d')
 
         LINHAS = ''
         for k in range(tam):
@@ -1601,7 +1777,6 @@ def deedtable3(prefix, titulo, decimal, fontsize, tipo, azimuth_dist, feature, p
             geom.transform(coordinateTransformer)
         crsGeo = SGR
         geomGeo = geom
-        centroideG = geom.centroid().asPoint()
 
         if TipoGeometria == 2: # Polígono
 
@@ -1630,187 +1805,7 @@ def deedtable3(prefix, titulo, decimal, fontsize, tipo, azimuth_dist, feature, p
                     Az_lista += [0]
                     Dist += [0]
 
-        texto = '''<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-        <html>
-        <head>
-          <title>''' + str2HTML(tr('Synthetic deed description', 'Memorial Sintético')) + '''</title>    </head>
-        <body>
-        <table class="MsoTableGrid"
-        style="text-align: center; width: 100%; font-size: [FONTSIZE]px;  border: medium none ; border-collapse: collapse;"
-        border="1" cellpadding="0" cellspacing="0">
-        <tbody>
-        [CABECALHO]
-        [LINHAS]
-        </tbody>
-        </table>
-        <br>
-        </body>
-        </html>
-        '''
-
-        #Tipos de cabeçalhos
-
-        # UTM
-        if tipo == 'proj' and azimuth_dist > 0:
-            linha = '''<tr>
-          <td>Vn</td>
-          <td>En</td>
-          <td>Nn</td>
-          <td>hn</td>
-          <td>Ln</td>
-          <td>Az_n</td>
-          <td>Dn</td>
-        </tr>
-        '''
-            cabec = '''<tr>
-              <td colspan="7" rowspan="1">''' + str2HTML(tr('Synthetic deed description', 'Memorial Sintético').upper()) + '''[TITULO]</td>
-            </tr>
-            <tr>
-              <td colspan="1" rowspan="2">''' + str2HTML(tr('VERTEX', 'VÉRTICE')) + '''</td>
-              <td colspan="3" rowspan="1">''' + str2HTML(tr('COORDINATE', 'COORDENADA')) + '''</td>
-              <td colspan="1" rowspan="2">''' + str2HTML(tr('SIDE', 'LADO')) + '''</td>
-              <td colspan="1" rowspan="2">''' + str2HTML(tr('AZIMUTH', 'AZIMUTE')) + '''</td>
-              <td colspan="1" rowspan="2">''' + str2HTML(tr('DISTANCE', 'DISTÂNCIA')) + ''' (m)</td>
-            </tr>
-            <tr>
-              <td>E</td>
-              <td>N</td>
-              <td>h</td>
-            </tr>'''
-
-        # UTM sem Az e d
-        if tipo == 'proj' and azimuth_dist== 0:
-            linha = '''<tr>
-          <td>Vn</td>
-          <td>En</td>
-          <td>Nn</td>
-          <td>hn</td>
-        </tr>
-        '''
-
-            cabec = '''<tr>
-              <td colspan="4" rowspan="1">''' + str2HTML(tr('Synthetic deed description', 'Memorial Sintético').upper()) + '''[TITULO]</td>
-            </tr>
-            <tr>
-              <td colspan="1" rowspan="2">''' + str2HTML(tr('VERTEX', 'VÉRTICE')) + '''</td>
-              <td colspan="3" rowspan="1">''' + str2HTML(tr('COORDINATE', 'COORDENADA')) + '''</td>
-            </tr>
-            <tr>
-              <td>E</td>
-              <td>N</td>
-              <td>h</td>
-            </tr>'''
-
-        # GEO
-        if 'geo' in tipo and azimuth_dist> 0:
-            linha = '''<tr>
-              <td>Vn</td>
-              <td>lonn</td>
-              <td>latn</td>
-              <td>hn</td>
-              <td>Ln</td>
-              <td>Az_n</td>
-              <td>Dn</td>
-            </tr>
-            '''
-            cabec = '''<tr>
-              <td colspan="7" rowspan="1">''' + str2HTML(tr('Synthetic deed description', 'Memorial Sintético').upper()) + '''[TITULO]</td>
-            </tr>
-            <tr>
-              <td colspan="1" rowspan="2">''' + str2HTML(tr('VERTEX', 'VÉRTICE')) + '''</td>
-              <td colspan="3" rowspan="1">''' + str2HTML(tr('COORDINATE', 'COORDENADA')) + '''</td>
-              <td colspan="1" rowspan="2">''' + str2HTML(tr('SIDE', 'LADO')) + '''</td>
-              <td colspan="1" rowspan="2">''' + str2HTML(tr('AZIMUTH', 'AZIMUTE')) + '''</td>
-              <td colspan="1" rowspan="2">''' + str2HTML(tr('DISTANCE', 'DISTÂNCIA')) + ''' (m)</td>
-            </tr>
-            <tr>
-              <td>longitude</td>
-              <td>latitude</td>
-              <td>h</td>
-            </tr>'''
-
-        # GEO sem Az e d
-        if 'geo' in tipo and azimuth_dist== 0:
-            linha = '''<tr>
-              <td>Vn</td>
-              <td>lonn</td>
-              <td>latn</td>
-              <td>hn</td>
-            </tr>
-            '''
-
-            cabec = '''<tr>
-              <td colspan="4" rowspan="1">''' + str2HTML(tr('Synthetic deed description', 'Memorial Sintético').upper()) + '''[TITULO]</td>
-            </tr>
-            <tr>
-              <td colspan="1" rowspan="2">''' + str2HTML(tr('VERTEX', 'VÉRTICE')) + '''</td>
-              <td colspan="3" rowspan="1">''' + str2HTML(tr('COORDINATE', 'COORDENADA')) + '''</td>
-            </tr>
-            <tr>
-              <td>longitude</td>
-              <td>latitude</td>
-              <td>h</td>
-            </tr>'''
-
-        # UTM e GEO
-        if tipo == 'both' and azimuth_dist> 0:
-            linha = '''<tr>
-              <td>Vn</td>
-              <td>lonn</td>
-              <td>latn</td>
-              <td>En</td>
-              <td>Nn</td>
-              <td>hn</td>
-              <td>Ln</td>
-              <td>Az_n</td>
-              <td>Dn</td>
-            </tr>
-            '''
-
-            cabec = '''<tr>
-              <td colspan="9" rowspan="1">''' + str2HTML(tr('Synthetic deed description', 'Memorial Sintético').upper()) + '''[TITULO]</td>
-            </tr>
-            <tr>
-              <td colspan="1" rowspan="2">''' + str2HTML(tr('VERTEX', 'VÉRTICE')) + '''</td>
-              <td colspan="5" rowspan="1">''' + str2HTML(tr('COORDINATE', 'COORDENADA')) + '''</td>
-              <td colspan="1" rowspan="2">''' + str2HTML(tr('SIDE', 'LADO')) + '''</td>
-              <td colspan="1" rowspan="2">''' + str2HTML(tr('AZIMUTH', 'AZIMUTE')) + '''</td>
-              <td colspan="1" rowspan="2">''' + str2HTML(tr('DISTANCE', 'DISTÂNCIA')) + ''' (m)</td>
-            </tr>
-            <tr>
-              <td>longitude</td>
-              <td>latitude</td>
-              <td>E</td>
-              <td>N</td>
-              <td>h</td>
-            </tr>'''
-
-        # UTM e GEO sem Az e d
-        if tipo == 'both' and azimuth_dist== 0:
-            linha = '''<tr>
-              <td>Vn</td>
-              <td>lonn</td>
-              <td>latn</td>
-              <td>En</td>
-              <td>Nn</td>
-              <td>hn</td>
-            </tr>
-            '''
-
-            cabec = '''<tr>
-              <td colspan="6" rowspan="1">''' + str2HTML(tr('Synthetic deed description', 'Memorial Sintético').upper()) + '''[TITULO]</td>
-            </tr>
-            <tr>
-              <td colspan="1" rowspan="2">''' + str2HTML(tr('VERTEX', 'VÉRTICE')) + '''</td>
-              <td colspan="5" rowspan="1">''' + str2HTML(tr('COORDINATE', 'COORDENADA')) + '''</td>
-            </tr>
-            <tr>
-              <td>longitude</td>
-              <td>latitude</td>
-              <td>E</td>
-              <td>N</td>
-              <td>h</td>
-            </tr>'''
+        texto, linha, cabec = template_table(tipo, azimuth_dist, '3d')
 
         LINHAS = ''
         for k in range(tam):
