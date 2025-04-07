@@ -147,6 +147,8 @@ class ExportASCII(QgsProcessingAlgorithm):
         )
         if layer is None:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.LAYER))
+        
+        layer_real = self.parameterAsVectorLayer(parameters, self.LAYER, context)
 
         campo = self.parameterAsFields(
             parameters,
@@ -212,20 +214,34 @@ class ExportASCII(QgsProcessingAlgorithm):
         for current, feat in enumerate(layer.getFeatures()):
             nome = str(feat[campo]) + formato
             att = feat.attributes()
+            
             contexto = QgsExpressionContext()
+
+            scope_feat = QgsExpressionContextScope("feature")
+            scope_feat.setFeature(feat)
+            scope_feat.setVariable('layer_id', layer_real.id())  # define o id da camada
+
+            contexto.appendScopes([
+                QgsExpressionContextUtils.globalScope(),
+                QgsExpressionContextUtils.projectScope(QgsProject.instance()),
+                QgsExpressionContextUtils.layerScope(layer_real),
+                scope_feat
+            ])
+
             contexto.setFeature(feat)
+            texto_expr = str(expr.evaluate(contexto))
 
             if not unico:
                 output = os.path.join(pasta, nome)
                 arq = open(output, 'w')
-                arq.write(str(expr.evaluate(contexto)))
+                arq.write(texto_expr)
                 arq.close()
             else:
                 nome_seq = feat[ordem]
                 if nome_seq not in dic:
-                    dic[nome_seq] = [str(expr.evaluate(contexto)) + nova_linha]
+                    dic[nome_seq] = [texto_expr + nova_linha]
                 else:
-                    dic[nome_seq] = dic[nome_seq] + [str(expr.evaluate(contexto)) + nova_linha]
+                    dic[nome_seq] = dic[nome_seq] + [texto_expr + nova_linha]
 
             if feedback.isCanceled():
                 break
