@@ -60,8 +60,10 @@ Os campos de origem e de destino devem ser indicadas para preenchimento dos atri
     figure = 'images/tutorial/easy_get_attributes.jpg'
 
     SOURCE ='SOURCE'
+    SOURCE_SELECTED = 'SOURCE_SELECTED'
     SOURCE_FIELD = 'SOURCE_FIELD'
     DEST = 'DEST'
+    DEST_SELECTED = 'DEST_SELECTED'
     DEST_FIELD = 'DEST_FIELD'
     TOPOLOGY = 'TOPOLOGY'
     SAVE = 'SAVE'
@@ -89,6 +91,14 @@ Os campos de origem e de destino devem ser indicadas para preenchimento dos atri
         )
 
         self.addParameter(
+            QgsProcessingParameterBoolean(
+                self.SOURCE_SELECTED,
+                self.tr('Only selected', 'Apenas selecionados'),
+                defaultValue= False
+            )
+        )
+
+        self.addParameter(
             QgsProcessingParameterField(
                 self.SOURCE_FIELD,
                 self.tr('Source field', 'Campo de origem'),
@@ -101,6 +111,14 @@ Os campos de origem e de destino devem ser indicadas para preenchimento dos atri
             self.DEST,
             self.tr('Target layer for attribute', 'Camada de destino para o atributo'),
             [QgsProcessing.TypeVector]
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterBoolean(
+                self.DEST_SELECTED,
+                self.tr('Only selected', 'Apenas selecionados'),
+                defaultValue= False
             )
         )
 
@@ -177,6 +195,18 @@ Os campos de origem e de destino devem ser indicadas para preenchimento dos atri
             context
         )
 
+        selec_origem = self.parameterAsBool(
+            parameters,
+            self.SOURCE_SELECTED,
+            context
+        )
+
+        selec_dest = self.parameterAsBool(
+            parameters,
+            self.DEST_SELECTED,
+            context
+        )
+
         feedback.pushInfo(self.tr('Source field: {}'.format(campo_lote[0]), 'Campo de origem: {}'.format(campo_lote[0])))
         feedback.pushInfo(self.tr('Destination field: {}'.format(campo_edif[0]), 'Campo de destino: {}\n'.format(campo_edif[0])))
 
@@ -197,20 +227,26 @@ Os campos de origem e de destino devem ser indicadas para preenchimento dos atri
         feedback.pushInfo(self.tr('Creating spatial index...', 'Criando índice espacial...'))
         if topologia == 0:
             index = QgsSpatialIndex(lotes.getFeatures())
-            total = 100.0 /edif.featureCount() if edif.featureCount() else 0
+            if selec_dest:
+                total = 100.0 /edif.selectedFeatureCount() if edif.selectedFeatureCount()>0 else 0
+            else:
+                total = 100.0 /edif.featureCount() if edif.featureCount() else 0
         else:
             index = QgsSpatialIndex(edif.getFeatures())
-            total = 100.0 /lotes.featureCount() if lotes.featureCount() else 0
+            if selec_origem:
+                total = 100.0 /lotes.selectedFeatureCount() if lotes.selectedFeatureCount()>0 else 0
+            else:
+                total = 100.0 /lotes.featureCount() if lotes.featureCount() else 0
         cont = 0
 
         # Preenchendo atributos
         feedback.pushInfo(self.tr('Filling attributes...', 'Preenchendo atributos...'))
         if topologia == 0:
             feicoes = {}
-            for feat in lotes.getFeatures():
+            for feat in lotes.getSelectedFeatures() if selec_origem else lotes.getFeatures(): 
                 feicoes[feat.id()] = feat
 
-            for feat1 in edif.getFeatures():
+            for feat1 in edif.getSelectedFeatures() if selec_dest else edif.getFeatures():
                 centroide = feat1.geometry().centroid()
                 if not mesmoSRC:
                     centroide = reprojectPoints(centroide, coordinateTransformer)
@@ -228,10 +264,10 @@ Os campos de origem e de destino devem ser indicadas para preenchimento dos atri
                 feedback.setProgress(int(cont * total))
         elif topologia == 1:
             feicoes = {}
-            for feat in edif.getFeatures():
+            for feat in edif.getSelectedFeatures() if selec_dest else edif.getFeatures():
                 feicoes[feat.id()] = feat
 
-            for feat1 in lotes.getFeatures():
+            for feat1 in lotes.getSelectedFeatures() if selec_origem else lotes.getFeatures():
                 centroide = feat1.geometry().centroid()
                 if not mesmoSRC:
                     centroide = reprojectPoints(centroide, coordinateTransformer)
