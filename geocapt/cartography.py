@@ -23,6 +23,7 @@ from pyproj.crs import CRS
 from lftools.geocapt.topogeo import azimute, geod2geoc, geoc2enu
 from qgis.core import (QgsGeometry,
                        QgsPointXY, QgsPoint,
+                       QgsEllipsoidUtils,
                        QgsCoordinateTransform,
                        QgsProject,
                        QgsCoordinateReferenceSystem)
@@ -173,10 +174,10 @@ def raioMedioGauss(lat, EPSG):
 
 
 def OrigemSGL(lon0, lat0, h0, crsGeo):
-    EPSG = int(crsGeo.authid().split(':')[-1]) # pegando o EPGS do SRC do QGIS
-    proj_crs = CRS.from_epsg(EPSG) # transformando para SRC do pyproj
-    a = proj_crs.ellipsoid.semi_major_metre
-    f_inv = proj_crs.ellipsoid.inverse_flattening
+    ellipsoid_id = crsGeo.ellipsoidAcronym()
+    ellipsoid = QgsEllipsoidUtils.ellipsoidParameters(ellipsoid_id)
+    a = ellipsoid.semiMajor
+    f_inv = ellipsoid.inverseFlattening
     f = 1/f_inv
     X0, Y0, Z0 = geod2geoc(lon0, lat0, h0, a, f)
     return (X0, Y0, Z0, a, f)
@@ -303,11 +304,13 @@ def comprimentoSGL(geomGeo, crsGeo, dim):
     h0 = np.array(alt).mean()
     lon0 = centroide.x()
     lat0 = centroide.y()
-    EPSG = int(crsGeo.authid().split(':')[-1]) # pegando o EPGS do SRC do QGIS
-    proj_crs = CRS.from_epsg(EPSG) # transformando para SRC do pyproj
-    a = proj_crs.ellipsoid.semi_major_metre
-    f_inv = proj_crs.ellipsoid.inverse_flattening
+
+    ellipsoid_id = crsGeo.ellipsoidAcronym()
+    ellipsoid = QgsEllipsoidUtils.ellipsoidParameters(ellipsoid_id)
+    a = ellipsoid.semiMajor
+    f_inv = ellipsoid.inverseFlattening
     f = 1/f_inv
+
     # CENTRO DE ROTAÇÃO
     Xo, Yo, Zo = geod2geoc(lon0, lat0, h0, a, f)
     # CONVERSÃO DAS COORDENADAS
