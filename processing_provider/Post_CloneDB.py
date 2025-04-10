@@ -188,6 +188,7 @@ Obs.: Para criação de mais de um "clone", os novos nomes dos bancos devem ser 
         win32 = 'C:/Program Files/PostgreSQL/'+version+'/bin'
         win32d = 'D:/Program Files/PostgreSQL/'+version+'/bin'
         mac = '/Library/PostgreSQL/'+version+'/bin/'
+        linux = '/usr/lib/postgresql/'+version+'/bin/'
         if os.path.isdir(win64):
             os.chdir(win64)
         elif os.path.isdir(win64d):
@@ -198,6 +199,8 @@ Obs.: Para criação de mais de um "clone", os novos nomes dos bancos devem ser 
             os.chdir(win32d)
         elif os.path.isdir(mac):
             os.chdir(mac)
+        elif os.path.isdir(linux):
+            os.chdir(linux)
         else:
             raise QgsProcessingException(self.tr('Make sure your PostgreSQL version is correct!', 'Verifique se a versão do seu PostgreSQL está correta!'))
 
