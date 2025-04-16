@@ -24,8 +24,8 @@ import math
 from numpy import floor
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
-from lftools.geocapt.topogeo import azimute, dd2dms
-from lftools.geocapt.cartography import areaGauss
+from lftools.geocapt.topogeo import azimute, dd2dms, meters2degrees
+from lftools.geocapt.cartography import areaGauss, Mesclar_Multilinhas
 import os
 from qgis.PyQt.QtGui import QIcon
 
@@ -34,6 +34,10 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
 
     POLYGONS = 'POLYGONS'
     ANGLES = 'ANGLES'
+    DISTANCE = 'DISTANCE'
+    INTERNAL = 'INTERNAL'
+    EXTERNAL = 'EXTERNAL'
+
     LOC = QgsApplication.locale()[:2]
 
     def tr(self, *string):
@@ -87,11 +91,35 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
             )
         )
 
+        self.addParameter(
+            QgsProcessingParameterNumber(
+                self.DISTANCE,
+                self.tr('Distance (m)', 'Distância (m)'),
+                type = QgsProcessingParameterNumber.Type.Double,
+                defaultValue = 2.5,
+                minValue = 0.001
+                )
+            )
+
         # OUTPUT
         self.addParameter(
             QgsProcessingParameterFeatureSink(
                 self.ANGLES,
                 self.tr('Points with angles', 'Pontos com ângulos')
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterFeatureSink(
+                self.INTERNAL,
+                self.tr('Interior angle lines', 'Linhas de ângulos interiores')
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterFeatureSink(
+                self.EXTERNAL,
+                self.tr('Exterior angle lines', 'Linhas de ângulos exteriores')
             )
         )
 
@@ -105,11 +133,28 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
         )
         if source is None:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.POLYGONS))
+        
+        Distancia = self.parameterAsDouble(
+            parameters,
+            self.DISTANCE,
+            context
+        )
+        if Distancia is None or Distancia < 0:
+            raise QgsProcessingException(self.tr('The input distance must be grater than 0!', 'A distância de entrada deve ser maior que 0!'))
+        
+        # Camada de entrada
+        CRS = source.sourceCrs()
+        extensao = source.sourceExtent()
+        y_max = extensao.yMaximum()
+        y_min = extensao.yMinimum()
 
-        # OUTPUT
+        # Transformar distancia para graus, se o SRC for Geográfico
+        if CRS.isGeographic():
+            Distancia = meters2degrees(Distancia, (y_max + y_min)/2, CRS)
+
+        # OUTPUT 1: Points
         GeomType = QgsWkbTypes.Point
         Fields = QgsFields()
-        CRS = source.sourceCrs()
 
         itens  = {
                      'ord' : QVariant.Int,
@@ -123,7 +168,7 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
         for item in itens:
             Fields.append(QgsField(item, itens[item]))
 
-        (sink, dest_id) = self.parameterAsSink(
+        (sink1, dest_id1) = self.parameterAsSink(
             parameters,
             self.ANGLES,
             context,
@@ -131,11 +176,47 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
             GeomType,
             CRS
         )
-        if sink is None:
+        if sink1 is None:
+            raise QgsProcessingException(self.invalidSinkError(parameters, self.ANGLES))
+        
+        # OUTPUT 2: Linhas interiores
+        GeomType = QgsWkbTypes.LineString
+        Fields = QgsFields()
+
+        itens  = {
+                     'ord' : QVariant.Int,
+                     self.tr('ang_dd','ang_dec') : QVariant.Double,
+                     self.tr('ang_dms','ang_gms') : QVariant.String,
+                     'feat_id': QVariant.Int,
+                     }
+        for item in itens:
+            Fields.append(QgsField(item, itens[item]))
+
+        (sink2, dest_id2) = self.parameterAsSink(
+            parameters,
+            self.INTERNAL,
+            context,
+            Fields,
+            GeomType,
+            CRS
+        )
+        if sink2 is None:
+            raise QgsProcessingException(self.invalidSinkError(parameters, self.ANGLES))
+        
+        # OUTPUT 3: Linhas exteriores
+        (sink3, dest_id3) = self.parameterAsSink(
+            parameters,
+            self.EXTERNAL,
+            context,
+            Fields,
+            GeomType,
+            CRS
+        )
+        if sink3 is None:
             raise QgsProcessingException(self.invalidSinkError(parameters, self.ANGLES))
 
         total = 100.0 / source.featureCount() if source.featureCount() else 0
-        fet = QgsFeature()
+
         for current, feat in enumerate(source.getFeatures()):
             geom = feat.geometry()
             if geom.isMultipart():
@@ -148,6 +229,7 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
 
             # para cada parte
             for coord in coords:
+                geomPol = QgsGeometry.fromPolygonXY([coord])
                 AreaGauss = areaGauss(coord[:-1])
                 tam = len(coord[:-1])
                 cont = 0
@@ -177,9 +259,12 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
                     Azimute = azimute(QgsPointXY(0,0), QgsPointXY(float(Vr[0]), float(Vr[1]) ))[0]
                     pntsDic[k+1]['azimute'] = Azimute*180/pi
 
-                # Carregando ângulos internos na camada
+                
                 for ponto in pntsDic:
-                    fet.setGeometry(QgsGeometry.fromPointXY(pntsDic[ponto]['pnt']))
+                    # Carregando ângulos internos na camada
+                    geomPonto = QgsGeometry.fromPointXY(pntsDic[ponto]['pnt'])
+                    fet = QgsFeature()
+                    fet.setGeometry(geomPonto)
                     fet.setAttributes([ponto,
                                         float(pntsDic[ponto]['alfa_int']),
                                         dd2dms(pntsDic[ponto]['alfa_int'],1),
@@ -188,7 +273,34 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
                                         feat.id(),
                                         float(pntsDic[ponto]['azimute'])
                                             ])
-                    sink.addFeature(fet, QgsFeatureSink.FastInsert)
+                    sink1.addFeature(fet, QgsFeatureSink.FastInsert)
+                
+                    # Geração das linhas internas e externas
+                    buffer = geomPonto.buffer(Distancia, 6)
+                    anel = QgsGeometry.fromPolylineXY(buffer.asPolygon()[0])
+                    lin_int = anel.intersection(geomPol)
+                    lin_ext = anel.difference(geomPol)
+                    
+                    # Alimentar camada de linhas internas
+                    fet = QgsFeature()
+                    fet.setGeometry(lin_int)
+                    fet.setAttributes([ponto,
+                                        float(pntsDic[ponto]['alfa_int']),
+                                        dd2dms(pntsDic[ponto]['alfa_int'],1),
+                                        feat.id()
+                                            ])
+                    sink2.addFeature(fet, QgsFeatureSink.FastInsert)
+
+                    # Alimentar camada de linhas externas
+                    fet = QgsFeature()
+                    fet.setGeometry(lin_ext)
+                    fet.setAttributes([ponto,
+                                        float(pntsDic[ponto]['alfa_ext']),
+                                        dd2dms(pntsDic[ponto]['alfa_ext'],1),
+                                        feat.id()
+                                            ])
+                    sink3.addFeature(fet, QgsFeatureSink.FastInsert)
+
 
             if feedback.isCanceled():
                 break
@@ -196,4 +308,6 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
 
         feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
         feedback.pushInfo(self.tr('Leandro França - Cartographic Engineer', 'Leandro França - Eng Cart'))
-        return {self.ANGLES: dest_id}
+        return {self.ANGLES: dest_id1,
+                self.INTERNAL: dest_id2,
+                self.EXTERNAL: dest_id3,    }
