@@ -37,6 +37,7 @@ import numpy as np
 from numpy.linalg import norm
 from pyproj.crs import CRS
 from lftools.geocapt.imgs import Imgs
+from lftools.geocapt.topogeo import meters2degrees
 from lftools.translations.translate import translate
 import os
 from qgis.PyQt.QtGui import QIcon
@@ -120,7 +121,8 @@ class ExtendLines(QgsProcessingAlgorithm):
                 self.DISTANCE,
                 self.tr('Distance (m)', 'Distância (m)'),
                 type = QgsProcessingParameterNumber.Type.Double,
-                defaultValue = 25.0
+                defaultValue = 25.0,
+                minValue = 0.001
                 )
             )
 
@@ -175,19 +177,10 @@ class ExtendLines(QgsProcessingAlgorithm):
         extensao = linhas.sourceExtent()
         y_max = extensao.yMaximum()
         y_min = extensao.yMinimum()
-
+      
         # Transformar distancia para graus, se o SRC for Geográfico
         if SRC.isGeographic():
-            EPSG = int(SRC.authid().split(':')[-1])
-            proj_crs = CRS.from_epsg(EPSG)
-            a=proj_crs.ellipsoid.semi_major_metre
-            f=1/proj_crs.ellipsoid.inverse_flattening
-            e2 = f*(2-f)
-            N = a/np.sqrt(1-e2*(np.sin((y_min+y_max)/2))**2) # Raio de curvatura 1º vertical
-            M = a*(1-e2)/(1-e2*(np.sin((y_min+y_max)/2))**2)**(3/2.) # Raio de curvatura meridiana
-            R = np.sqrt(M*N) # Raio médio de Gauss
-            theta = Distancia/R
-            Distancia = np.degrees(theta) # Radianos para graus
+            Distancia = meters2degrees(Distancia, (y_max + y_min)/2, SRC)
 
         # Varrer linhas
         Percent = 100.0/linhas.featureCount() if linhas.featureCount()>0 else 0
