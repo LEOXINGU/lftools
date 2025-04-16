@@ -283,7 +283,7 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
                     
                     # Alimentar camada de linhas internas
                     fet = QgsFeature()
-                    fet.setGeometry(lin_int)
+                    fet.setGeometry(Mesclar_Multilinhas(lin_int))
                     fet.setAttributes([ponto,
                                         float(pntsDic[ponto]['alfa_int']),
                                         dd2dms(pntsDic[ponto]['alfa_int'],1),
@@ -293,7 +293,7 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
 
                     # Alimentar camada de linhas externas
                     fet = QgsFeature()
-                    fet.setGeometry(lin_ext)
+                    fet.setGeometry(Mesclar_Multilinhas(lin_ext))
                     fet.setAttributes([ponto,
                                         float(pntsDic[ponto]['alfa_ext']),
                                         dd2dms(pntsDic[ponto]['alfa_ext'],1),
@@ -308,6 +308,29 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
 
         feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
         feedback.pushInfo(self.tr('Leandro França - Cartographic Engineer', 'Leandro França - Eng Cart'))
+
+        self.SAIDA1 = dest_id1
+        self.SAIDA2 = dest_id2
+        self.SAIDA3 = dest_id3
+
         return {self.ANGLES: dest_id1,
                 self.INTERNAL: dest_id2,
                 self.EXTERNAL: dest_id3,    }
+
+    def postProcessAlgorithm(self, context, feedback):
+        layer1 = QgsProcessingUtils.mapLayerFromString(self.SAIDA1, context)
+        estilo1 = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'styles/vertice_angulo_prof_leandro.qml')
+        layer1.loadNamedStyle(estilo1)
+        layer1.triggerRepaint()
+
+        layer2 = QgsProcessingUtils.mapLayerFromString(self.SAIDA2, context)
+        estilo2 = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'styles/linha_angulo_int_prof_leandro.qml')
+        layer2.loadNamedStyle(estilo2)
+        layer2.triggerRepaint()
+
+        layer3 = QgsProcessingUtils.mapLayerFromString(self.SAIDA3, context)
+        estilo3 = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'styles/linha_angulo_ext_prof_leandro.qml')
+        layer3.loadNamedStyle(estilo3)
+        layer3.triggerRepaint()
+
+        return {}
