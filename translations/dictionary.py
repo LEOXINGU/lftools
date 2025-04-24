@@ -1284,5 +1284,6 @@ Nota: Introduzca el nombre del campo de clave externa si no es el mismo que el n
 '. The azimuths were calculated using the Inverse Geodetic Problem formula according to Puissant, and the distances were calculated in the Local Tangent Plane (LTP) having as origin the centroid and average altitude of the perimeter.': {'es': '. Los acimutes se calcularon utilizando la fórmula del Problema Geodésico Inverso según Puissant, y las distancias se calcularon en el Plano Tangente Local (LTP), teniendo como origen el centroide y la altitud media del perímetro.'},
 'Interior angle lines': {'es': 'Líneas de ángulos interiores'},
 'Exterior angle lines': {'es': 'Líneas de ángulos exteriores'},
+'Angle line outside polygon bounds! Reduce radius size (distance).': {'es': '¡Línea angular fuera de los límites del polígono! Reducir el radio (distancia).'},
 
  }
