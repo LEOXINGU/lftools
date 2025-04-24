@@ -133,7 +133,7 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
         )
         if source is None:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.POLYGONS))
-        
+
         Distancia = self.parameterAsDouble(
             parameters,
             self.DISTANCE,
@@ -141,7 +141,7 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
         )
         if Distancia is None or Distancia < 0:
             raise QgsProcessingException(self.tr('The input distance must be grater than 0!', 'A distância de entrada deve ser maior que 0!'))
-        
+
         # Camada de entrada
         CRS = source.sourceCrs()
         extensao = source.sourceExtent()
@@ -178,7 +178,7 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
         )
         if sink1 is None:
             raise QgsProcessingException(self.invalidSinkError(parameters, self.ANGLES))
-        
+
         # OUTPUT 2: Linhas interiores
         GeomType = QgsWkbTypes.LineString
         Fields = QgsFields()
@@ -202,7 +202,7 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
         )
         if sink2 is None:
             raise QgsProcessingException(self.invalidSinkError(parameters, self.ANGLES))
-        
+
         # OUTPUT 3: Linhas exteriores
         (sink3, dest_id3) = self.parameterAsSink(
             parameters,
@@ -259,7 +259,7 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
                     Azimute = azimute(QgsPointXY(0,0), QgsPointXY(float(Vr[0]), float(Vr[1]) ))[0]
                     pntsDic[k+1]['azimute'] = Azimute*180/pi
 
-                
+
                 for ponto in pntsDic:
                     # Carregando ângulos internos na camada
                     geomPonto = QgsGeometry.fromPointXY(pntsDic[ponto]['pnt'])
@@ -274,16 +274,19 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
                                         float(pntsDic[ponto]['azimute'])
                                             ])
                     sink1.addFeature(fet, QgsFeatureSink.FastInsert)
-                
+
                     # Geração das linhas internas e externas
                     buffer = geomPonto.buffer(Distancia, 6)
                     anel = QgsGeometry.fromPolylineXY(buffer.asPolygon()[0])
                     lin_int = anel.intersection(geomPol)
                     lin_ext = anel.difference(geomPol)
-                    
+
                     # Alimentar camada de linhas internas
                     fet = QgsFeature()
-                    fet.setGeometry(Mesclar_Multilinhas(lin_int))
+                    try:
+                        fet.setGeometry(Mesclar_Multilinhas(lin_int))
+                    except:
+                        raise QgsProcessingException(self.tr('Angle line outside polygon bounds! Reduce radius size (distance).', 'Linha de ângulo fora dos limites do polígono! Reduza o tamanho do raio (distância).'))
                     fet.setAttributes([ponto,
                                         float(pntsDic[ponto]['alfa_int']),
                                         dd2dms(pntsDic[ponto]['alfa_int'],1),
