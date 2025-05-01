@@ -322,17 +322,19 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
 
     def postProcessAlgorithm(self, context, feedback):
         layer1 = QgsProcessingUtils.mapLayerFromString(self.SAIDA1, context)
-        estilo1 = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'styles/vertice_angulo_prof_leandro.qml')
+
+        # Definir estilos
+        estilo1 = os.path.join(os.path.dirname(os.path.dirname(__file__)), self.tr('styles/vertex_angle_prof_leandro.qml', 'styles/vertice_angulo_prof_leandro.qml'))
         layer1.loadNamedStyle(estilo1)
         layer1.triggerRepaint()
 
         layer2 = QgsProcessingUtils.mapLayerFromString(self.SAIDA2, context)
-        estilo2 = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'styles/linha_angulo_int_prof_leandro.qml')
+        estilo2 = os.path.join(os.path.dirname(os.path.dirname(__file__)), self.tr('styles/line_angles_interior_prof_leandro.qml', 'styles/linha_angulo_int_prof_leandro.qml'))
         layer2.loadNamedStyle(estilo2)
         layer2.triggerRepaint()
 
         layer3 = QgsProcessingUtils.mapLayerFromString(self.SAIDA3, context)
-        estilo3 = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'styles/linha_angulo_ext_prof_leandro.qml')
+        estilo3 = os.path.join(os.path.dirname(os.path.dirname(__file__)), self.tr('styles/line_angles_exterior_prof_leandro.qml', 'styles/linha_angulo_ext_prof_leandro.qml'))
         layer3.loadNamedStyle(estilo3)
         layer3.triggerRepaint()
 
