@@ -281,28 +281,29 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
                     lin_int = anel.intersection(geomPol)
                     lin_ext = anel.difference(geomPol)
 
-                    # Alimentar camada de linhas internas
-                    fet = QgsFeature()
                     try:
+                        # Alimentar camada de linhas internas
+                        fet = QgsFeature()
                         fet.setGeometry(Mesclar_Multilinhas(lin_int))
-                    except:
-                        raise QgsProcessingException(self.tr('Angle line outside polygon bounds! Reduce radius size (distance).', 'Linha de ângulo fora dos limites do polígono! Reduza o tamanho do raio (distância).'))
-                    fet.setAttributes([ponto,
-                                        float(pntsDic[ponto]['alfa_int']),
-                                        dd2dms(pntsDic[ponto]['alfa_int'],1),
-                                        feat.id()
-                                            ])
-                    sink2.addFeature(fet, QgsFeatureSink.FastInsert)
+                        fet.setAttributes([ponto,
+                                            float(pntsDic[ponto]['alfa_int']),
+                                            dd2dms(pntsDic[ponto]['alfa_int'],1),
+                                            feat.id()
+                                                ])
+                        sink2.addFeature(fet, QgsFeatureSink.FastInsert)
 
-                    # Alimentar camada de linhas externas
-                    fet = QgsFeature()
-                    fet.setGeometry(Mesclar_Multilinhas(lin_ext))
-                    fet.setAttributes([ponto,
-                                        float(pntsDic[ponto]['alfa_ext']),
-                                        dd2dms(pntsDic[ponto]['alfa_ext'],1),
-                                        feat.id()
-                                            ])
-                    sink3.addFeature(fet, QgsFeatureSink.FastInsert)
+                        # Alimentar camada de linhas externas
+                        fet = QgsFeature()
+                        fet.setGeometry(Mesclar_Multilinhas(lin_ext))
+                        fet.setAttributes([ponto,
+                                            float(pntsDic[ponto]['alfa_ext']),
+                                            dd2dms(pntsDic[ponto]['alfa_ext'],1),
+                                            feat.id()
+                                                ])
+                        sink3.addFeature(fet, QgsFeatureSink.FastInsert)
+
+                    except:
+                        feedback.reportError(self.tr('Angle line outside polygon bounds! Reduce radius size (distance).', 'Linha de ângulo fora dos limites do polígono! Reduza o tamanho do raio (distância).') + ' ID: {}, vertex: {}'.format(feat.id(), ponto))
 
 
             if feedback.isCanceled():
