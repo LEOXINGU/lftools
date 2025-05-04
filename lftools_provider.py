@@ -125,6 +125,7 @@ from .processing_provider.Doc_ValidateTopology import ValidateTopology
 from .processing_provider.Vect_ReprojectGPKG import ReprojectGPKG
 from .processing_provider.Relief_SetZfromDEM import SetZfromDEM
 from .processing_provider.Easy_SelectByKeyAtt import SelectByKeyAtt
+from .processing_provider.Drone_exportToCloudCompare import ExportToCloudCompare
 
 
 class LFToolsProvider(QgsProcessingProvider):
@@ -235,6 +236,7 @@ class LFToolsProvider(QgsProcessingProvider):
         self.addAlgorithm(ReprojectGPKG())
         self.addAlgorithm(SetZfromDEM())
         self.addAlgorithm(SelectByKeyAtt())
+        self.addAlgorithm(ExportToCloudCompare())
 
     def id(self):
         return 'lftools'
