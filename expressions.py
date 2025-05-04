@@ -469,6 +469,81 @@ def cusum (layer_name, sequence_field, value_field, group_field, feature, parent
 
 
 @qgsfunction(args='auto', group='LF Tools')
+def azimuth_by_sequence (sequence_field, group_field, feature, parent, context):
+    """
+    Calculates the azimuth between sequential points in a point layer based on an ordering field.
+    Optionally, azimuths can be calculated within separate groups defined by a grouping field
+    (e.g., segments, classes, blocks).
+
+    If a grouping field is provided, the azimuth is computed independently within each group.
+    The azimuth for each point is calculated from it to the next point in the sequence.
+    For the last point in the sequence, the azimuth is calculated to the first point (cyclical).
+
+    Parameters:
+    - sequence_field (string or number): Name of the field that defines the order of the points.
+    - group_field (string or number): Name of the grouping field. If no grouping is used, provide an empty string ''.
+
+    Returns:
+    - The azimuth value (in degrees) for the current feature.
+    <ul>
+      <li>azimuth_by_sequence (sequence_field, group_field) -> azimuth </li>
+      <li>azimuth_by_sequence('order', 'block') -> 45.7823</li>
+      <li>azimuth_by_sequence('fid', '') -> 192.1045</li>
+    </ul>
+    """
+    layer_id = context.variable('layer_id')
+    layer = QgsProject.instance().mapLayer(layer_id)
+    field_names = [campo.name() for campo in layer.fields()]
+
+    if group_field in field_names: # Grupos
+        grupos = {}
+        for feat in layer.getFeatures():
+            if feat[group_field] not in grupos:
+                grupos[feat[group_field]] = [feat]
+            else:
+                grupos[feat[group_field]] += [feat]
+
+        dic = {}
+        for grupo in grupos:
+            dic2 = {}
+            for feat in grupos[grupo]:
+                ponto = feat.geometry().asPoint()
+                dic2[feat[sequence_field]] = ponto
+
+            chaves = list(dic2.keys())
+            chaves.sort()
+            lista = list(chaves)
+            tam = len(lista)
+            dic3 = {}
+            for k in range(tam):
+                p1 = dic2[lista[k]]
+                p2 = dic2[lista[0 if k+1 >= tam else k+1]]
+                Az = (180/pi)*azimute(p1, p2)[0]
+                dic3[lista[k]] = Az
+            dic[grupo] = dic3
+        return float(dic[feature[group_field]][feature[sequence_field]])
+
+    else:
+        dic = {}
+        for feat in layer.getFeatures():
+            ponto = feat.geometry().asPoint()
+            dic[feat[sequence_field]] = ponto
+
+        chaves = list(dic.keys())
+        chaves.sort()
+        lista = list(chaves)
+        tam = len(lista)
+        dic2 = {}
+        for k in range(tam):
+            p1 = dic[lista[k]]
+            p2 = dic[lista[0 if k+1 >= tam else k+1]]
+            Az = (180/pi)*azimute(p1, p2)[0]
+            dic2[lista[k]] = Az
+        print(dic2[feature[sequence_field]])
+        return float(dic2[feature[sequence_field]])
+
+
+@qgsfunction(args='auto', group='LF Tools')
 def areaLTP (geometry, layer_crs, feature, parent):
     """
     Calculates the area on the Local Tangent Plane (LTP), also known as Local Geodetic Coordinate System, which is a spatial reference system based on the tangent plane on the feature centroid defined by the local vertical direction.
@@ -1079,7 +1154,7 @@ def template_table(tipo, azimuth_dist, dimension):
                 <td>N</td>
             </tr>'''
     elif dimension == '3d':
-        
+
         # UTM
         if tipo == 'proj' and azimuth_dist > 0:
             linha = '''<tr>
@@ -1241,7 +1316,7 @@ def template_table(tipo, azimuth_dist, dimension):
               <td>N</td>
               <td>h</td>
             </tr>'''
-    
+
     return texto, linha, cabec
 
 
@@ -1254,7 +1329,7 @@ def deedtable(layer_name, ini, fim, titulo, decimal, fontsize, tipo, azimuth_dis
     <p>Note 2: Types: 'proj' - projected, 'geo' - geographic, 'both' - both coordinate systems.</p>
     <p>Note 3: Use 'geo-suffix' for geographic with suffix.</p>
     <p>Note 4: The value of "precision" can be an integer that will be applied to coordinate and distance, or an array with 3 numbers for the precision of the coordinates, azimuth and distances, respectively.</p>
-    
+
     <h2>Exemples:</h2>
     <ul>
       <li>deedtable('layer_name', start, end, 'title', precision, fontsize, coord_type, azimuth_dist) = HTML</li>
@@ -1271,7 +1346,7 @@ def deedtable(layer_name, ini, fim, titulo, decimal, fontsize, tipo, azimuth_dis
     </ul>
     """
     # Novos parâmetros: decimal, tipo, azimuth_dist
-    
+
     tipo = tipo.lower()
 
     if isinstance(decimal, list):
@@ -1525,7 +1600,7 @@ def deedtable2(prefix, titulo, decimal, fontsize, tipo, azimuth_dist, feature, p
         # Calculo dos Azimutes e Distancias
         tam = len(pnts_UTM)
         Az_lista, Dist = [], []
-        
+
         # Calcular geomGeo e crsGeo
         if not layer.crs().isGeographic():
             geom.transform(coordinateTransformer)
@@ -1661,7 +1736,7 @@ def deedtable3(prefix, titulo, decimal, fontsize, tipo, azimuth_dist, feature, p
     SGR = QgsCoordinateReferenceSystem(SRC.geographicCrsAuthId())
 
     tipo = tipo.lower()
-    
+
     if isinstance(decimal, list):
         format_utm = '{:,.Xf}'.replace('X', str(decimal[0]))
         prec_geo = decimal[0]
