@@ -19,6 +19,8 @@ from numpy.linalg import norm
 import numpy as np
 from math import floor, modf
 import math
+import random
+import colorsys
 from pyproj.crs import CRS
 from lftools.geocapt.topogeo import azimute, geod2geoc, geoc2enu
 from qgis.core import (QgsGeometry,
@@ -642,6 +644,76 @@ def LayerIs3D(camada):
             return True
         else:
             return False
+
+
+def gerar_paleta_tematica(tema, n=10):
+    """
+    Gera uma lista de cores RGB (tuplas) com base em um tema e quantidade desejada.
+    
+    Parâmetros:
+    ----------
+    tema : str
+        Nome do tema de cor. Exemplos: 'pastel', 'vibrante', 'rústica', 'gelo',
+        'crepúsculo', 'neon', 'infantil', 'natureza', 'metálico'
+        
+    n : int
+        Número de cores a serem geradas
+    
+    Retorno:
+    -------
+    List[Tuple[int, int, int]] : Lista de tuplas RGB
+    """
+
+    cores = []
+
+    for i in range(n):
+        if tema == 'vibrante':
+            h = i / n
+            s, v = 0.9, 0.95
+
+        elif tema == 'pastel':
+            h = i / n
+            s, v = 0.4, 0.95
+
+        elif tema == 'rústica':
+            h = random.uniform(0.05, 0.15)
+            s, v = 0.5, 0.5
+
+        elif tema == 'gelo':
+            h = random.uniform(0.5, 0.6)
+            s, v = 0.2, 0.95
+
+        elif tema == 'crepúsculo':
+            h = random.uniform(0.85, 1.0) if i % 2 == 0 else random.uniform(0.05, 0.1)
+            s, v = 0.8, 0.9
+
+        elif tema == 'neon':
+            h = random.random()
+            s, v = 1.0, 1.0
+
+        elif tema == 'infantil':
+            h = i / n
+            s, v = 0.5, 1.0
+
+        elif tema == 'natureza':
+            h = random.uniform(0.25, 0.4)  # tons de verde e marrom claro
+            s, v = 0.5, 0.6
+
+        elif tema == 'metálico':
+            paleta_fixa = [
+                (105, 105, 105), (169, 169, 169), (192, 192, 192),
+                (112, 128, 144), (70, 130, 180)
+            ]
+            return (paleta_fixa * ((n // len(paleta_fixa)) + 1))[:n]
+
+        else:
+            h = random.random()
+            s, v = 0.7, 0.9
+
+        r, g, b = colorsys.hsv_to_rgb(h, s, v)
+        cores.append((int(r * 255), int(g * 255), int(b * 255)))
+
+    return cores
 
 
 def map_sistem(lon, lat, ScaleD=1e6):
