@@ -204,16 +204,26 @@ Para mais informações sobre a metodologia utilizada, por favor leia o artigo n
         # Pontos
         Coords = String2CoordList(COs)
 
+        # Verificar se azimutes e angulos zenitais estão em graus
+        graus_az = True if '°' in Azimutes or "'" in Azimutes or '"' in Azimutes else False
+        graus_ze = True if '°' in ÂngulosZenitais or "'" in ÂngulosZenitais or '"' in ÂngulosZenitais else False
+
         # Azimutes (radianos)
         Az = []
         for item in String2StringList(Azimutes):
-            Az += [dms2dd(item)]
+            if graus_az:
+                Az += [dms2dd(item)]
+            else:
+                Az += [float(item)]
         Az = radians(array(Az))
 
         # Ângulos Zenitais (radianos)
         Z = []
         for item in String2StringList(ÂngulosZenitais):
-            Z += [dms2dd(item)]
+            if graus_ze:
+                Z += [dms2dd(item)]
+            else:
+                Z += [float(item)]
         Z = radians(array(Z))
 
         # Validação dos dados de entrada
