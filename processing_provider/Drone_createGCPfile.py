@@ -50,7 +50,7 @@ class CreateGCPfile(QgsProcessingAlgorithm):
         return 'creategcpfile'
 
     def displayName(self):
-        return self.tr('Generate GCP file from layer', 'Gerar arquivo de GCP a partir de camada')
+        return self.tr('Generate GCP file for WebODM', 'Gerar arquivo de GCP para o WebODM')
 
     def group(self):
         return self.tr('Drones')
@@ -59,12 +59,12 @@ class CreateGCPfile(QgsProcessingAlgorithm):
         return 'drones'
 
     def tags(self):
-        return self.tr('drones,fotografia,photography,gcp,copy,points,control,ground,quality,homologous,controle,terreno').split(',')
+        return self.tr('drones,fotografia,webodm,opendronemap,odm,photography,gcp,copy,points,control,ground,quality,homologous,controle,terreno').split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/drone.png'))
 
-    txt_en = 'Generate text file with Ground Control Points (GCP) from a point layer.'
+    txt_en = 'Generate text file with Ground Control Points (GCP) from a point layer to WebODM.'
     txt_pt = 'Gera arquivo texto com Pontos de Controle no Terreno (GCP) a partir de uma camada de pontos.'
     figure = 'images/tutorial/drone_createGCP.jpg'
 
@@ -108,7 +108,8 @@ class CreateGCPfile(QgsProcessingAlgorithm):
                 self.DECIMAL,
                 self.tr('Decimal places', 'Casas decimais'),
                 type = QgsProcessingParameterNumber.Type.Integer,
-                defaultValue = 3
+                defaultValue = 3,
+                minValue = 1
                 )
             )
 
