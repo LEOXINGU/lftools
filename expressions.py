@@ -36,6 +36,7 @@ from lftools.geocapt.cartography import (map_sistem,
                                          geom2PointList,
                                          Mesclar_Multilinhas,
                                          areaGauss,
+                                         classificar,
                                          FusoHemisf,
                                          main_azimuth,
                                          AzimuteDistanciaSGL,
@@ -309,6 +310,68 @@ def zonehemisf(lon, lat, feature, parent):
 
 
 @qgsfunction(args='auto', group='LF Tools')
+def classify(value, number_classes, method, group, feature, parent, context):
+    """
+    Classifies a feature's numeric value into a class (from 1 to N) based on a statistical classification method.
+    Parameters:
+    - <b>value</b> (numeric): the numeric value to classify (e.g. a field like "elevation" or "area")<br>
+    - <b>number_classes</b> (int): total number of desired classes (e.g. 5)<br>
+    - <b>method</b> (string): classification method to apply (see list below)<br>
+    - <b>group</b> (string): group identifier to classify values separately per group (use '' for no grouping)
+
+    Returns:
+    - An integer (1 to number_classes) indicating the class.
+    <h2>Example usage:</h2>
+    <ul>
+      <li>classify('measure', 4, 'jenks', 'block') -> 1</li>
+      <li>classify('value', 5, 'quantile', '') -> 3</li>
+    </ul>
+    <h3>Available classification methods:</h3>
+   <ul>
+    <li><b>'stddev'</b> – Standard Deviation from the mean</li>
+    <li><b>'log'</b> – Logarithmic scale</li>
+    <li><b>'quantile'</b> – Equal count per class (e.g., quartiles)</li>
+    <li><b>'fixed'</b> – Fixed interval (default step = 10)</li>
+    <li><b>'equal'</b> – Equal range intervals between min and max</li>
+    <li><b>'jenks'</b> – Natural Breaks (Jenks optimization)</li>
+    <li><b>'smooth'</b> – Smooth sinusoidal distribution (sine interpolation)</li>
+   </ul>
+    """
+    layer_id = context.variable('layer_id')
+    layer = QgsProject.instance().mapLayer(layer_id)
+
+    grupo = group if group else 'ALL'
+    # Dicionário para agrupar valores por grupo
+    grupos = {}
+
+    for f in layer.getFeatures():
+        g = f[group] if group else 'ALL'
+        v = f[value]
+        if g not in grupos:
+            grupos[g] = [v]
+        else:
+            grupos[g] += [v]
+
+    # Obter valores para o grupo atual
+    lista_valores = grupos[feature[group]] if group else grupos['ALL']
+    if len(lista_valores) < number_classes:
+        return NULL
+    else:
+        # Calcular limites das classes
+        limites = classificar(lista_valores, method, number_classes)
+
+        valor = feature[value]
+        if valor is None:
+            return NULL
+        # Determinar a qual classe o valor pertence
+        for i, limite in enumerate(limites):
+            if valor <= limite:
+                resultado = i + 1
+                break
+        return resultado
+
+
+@qgsfunction(args='auto', group='LF Tools')
 def removespetialchar (text, feature, parent):
     """
     Replaces special characters.
@@ -539,7 +602,6 @@ def azimuth_by_sequence (sequence_field, group_field, feature, parent, context):
             p2 = dic[lista[0 if k+1 >= tam else k+1]]
             Az = (180/pi)*azimute(p1, p2)[0]
             dic2[lista[k]] = Az
-        print(dic2[feature[sequence_field]])
         return float(dic2[feature[sequence_field]])
 
 
