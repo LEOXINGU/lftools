@@ -28,6 +28,7 @@ from qgis.core import (QgsGeometry,
                        QgsEllipsoidUtils,
                        QgsCoordinateTransform,
                        QgsProject,
+                       QgsClassificationJenks,
                        QgsCoordinateReferenceSystem)
 
 
@@ -646,19 +647,74 @@ def LayerIs3D(camada):
             return False
 
 
+def classificar(values, method, n_classes):
+    """
+    Classifica uma lista de valores em intervalos segundo o método indicado.
+    Métodos suportados:
+    - 'stddev'      : Standard Deviation
+    - 'log'         : Logarithmic Scale
+    - 'quantile'    : Equal Count (e.g., quartiles)
+    - 'fixed'       : Fixed Interval (step of 10 by default)
+    - 'equal'       : Equal Interval (min to max equally divided)
+    - 'jenks'       : Natural Breaks (Jenks)
+    - 'smooth'      : Smooth Breaks (sine interpolation)
+    Retorna uma lista com os valores de limite superior de cada classe.
+    """
+
+    values = sorted([v for v in values if v is not None and isinstance(v, (int, float))])
+    if not values or len(values) < n_classes:
+        return []
+
+    minimum, maximum = min(values), max(values)
+
+    if method == 'jenks':
+        jenks = QgsClassificationJenks()
+        ranges = jenks.classes(values, n_classes)
+        return [r.upperBound() for r in ranges]
+
+    elif method == 'quantile':
+        return [values[int(len(values) * i / n_classes)] for i in range(1, n_classes + 1)]
+
+    elif method == 'equal':
+        step = (maximum - minimum) / n_classes
+        return [minimum + step * (i + 1) for i in range(n_classes)]
+
+    elif method == 'fixed':
+        # Arbitrary fixed step of 10 (customize if needed)
+        step = 10
+        return [minimum + step * (i + 1) for i in range(n_classes)]
+
+    elif method == 'stddev':
+        mean = sum(values) / len(values)
+        stddev = (sum((x - mean) ** 2 for x in values) / len(values)) ** 0.5
+        return [mean + stddev * (i - n_classes // 2) for i in range(1, n_classes + 1)]
+
+    elif method == 'log':
+        if minimum <= 0:
+            minimum = 1e-6
+        step = (math.log10(maximum) - math.log10(minimum)) / n_classes
+        return [10 ** (math.log10(minimum) + step * (i + 1)) for i in range(n_classes)]
+
+    elif method == 'smooth':
+        return [(maximum - minimum) * math.sin((i + 1) * math.pi / (2 * n_classes)) + minimum for i in range(n_classes)]
+
+    else:
+        return []
+
+
 def gerar_paleta_tematica(tema, n=10):
     """
     Gera uma lista de cores RGB (tuplas) com base em um tema e quantidade desejada.
-    
+
     Parâmetros:
     ----------
     tema : str
         Nome do tema de cor. Exemplos: 'pastel', 'vibrante', 'rústica', 'gelo',
         'crepúsculo', 'neon', 'infantil', 'natureza', 'metálico'
-        
+
     n : int
         Número de cores a serem geradas
-    
+
     Retorno:
     -------
     List[Tuple[int, int, int]] : Lista de tuplas RGB
