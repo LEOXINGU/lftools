@@ -1488,8 +1488,8 @@ def deedtable(layer_name, ini, fim, titulo, decimal, fontsize, tipo, azimuth_dis
         lonn = tr(DD2DMS(pnts_GEO[k+1][0].x(),prec_geo), DD2DMS(pnts_GEO[k+1][0].x(),prec_geo).replace('.', ','))
         latn = tr(DD2DMS(pnts_GEO[k+1][0].y(),prec_geo), DD2DMS(pnts_GEO[k+1][0].y(),prec_geo).replace('.', ','))
         if 'suffix' in tipo:
-            lonn = lonn.replace('-', '') + 'W' if pnts_GEO[k+1][0].x() < 0 else 'E'
-            latn = latn.replace('-', '') + 'S' if pnts_GEO[k+1][0].y() < 0 else 'N'
+            lonn = lonn.replace('-', '') + ('W' if pnts_GEO[k+1][0].x() < 0 else 'E')
+            latn = latn.replace('-', '') + ('S' if pnts_GEO[k+1][0].y() < 0 else 'N')
         itens = {'Vn': pnts_UTM[k+1][2],
                  'En': tr(format_utm.format(pnts_UTM[k+1][0].x()), format_utm.format(pnts_UTM[k+1][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
                  'Nn': tr(format_utm.format(pnts_UTM[k+1][0].y()), format_utm.format(pnts_UTM[k+1][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.')),
@@ -1731,8 +1731,8 @@ def deedtable2(prefix, titulo, decimal, fontsize, tipo, azimuth_dist, feature, p
             lonn = tr(DD2DMS(pnts_GEO[k+1][0].x(),prec_geo), DD2DMS(pnts_GEO[k+1][0].x(),prec_geo).replace('.', ','))
             latn = tr(DD2DMS(pnts_GEO[k+1][0].y(),prec_geo), DD2DMS(pnts_GEO[k+1][0].y(),prec_geo).replace('.', ','))
             if 'suffix' in tipo:
-                lonn = lonn.replace('-', '') + 'W' if pnts_GEO[k+1][0].x() < 0 else 'E'
-                latn = latn.replace('-', '') + 'S' if pnts_GEO[k+1][0].y() < 0 else 'N'
+                lonn = lonn.replace('-', '') + ('W' if pnts_GEO[k+1][0].x() < 0 else 'E')
+                latn = latn.replace('-', '') + ('S' if pnts_GEO[k+1][0].y() < 0 else 'N')
             itens = {'Vn': pnts_UTM[k+1][2],
                         'En': tr(format_utm.format(pnts_UTM[k+1][0].x()), format_utm.format(pnts_UTM[k+1][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
                         'Nn': tr(format_utm.format(pnts_UTM[k+1][0].y()), format_utm.format(pnts_UTM[k+1][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.')),
@@ -1950,8 +1950,8 @@ def deedtable3(prefix, titulo, decimal, fontsize, tipo, azimuth_dist, feature, p
             lonn = tr(DD2DMS(pnts_GEO[k+1][0].x(),prec_geo), DD2DMS(pnts_GEO[k+1][0].x(),prec_geo).replace('.', ','))
             latn = tr(DD2DMS(pnts_GEO[k+1][0].y(),prec_geo), DD2DMS(pnts_GEO[k+1][0].y(),prec_geo).replace('.', ','))
             if 'suffix' in tipo:
-                lonn = lonn.replace('-', '') + 'W' if pnts_GEO[k+1][0].x() < 0 else 'E'
-                latn = latn.replace('-', '') + 'S' if pnts_GEO[k+1][0].y() < 0 else 'N'
+                lonn = lonn.replace('-', '') + ('W' if pnts_GEO[k+1][0].x() < 0 else 'E')
+                latn = latn.replace('-', '') + ('S' if pnts_GEO[k+1][0].y() < 0 else 'N')
             itens = {'Vn': pnts_UTM[k+1][2],
                         'En': tr(format_utm.format(pnts_UTM[k+1][0].x()), format_utm.format(pnts_UTM[k+1][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
                         'Nn': tr(format_utm.format(pnts_UTM[k+1][0].y()), format_utm.format(pnts_UTM[k+1][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.')),
