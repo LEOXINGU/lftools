@@ -686,8 +686,8 @@ class DescriptiveMemorial(QgisAlgorithm):
                 Xn = self.tr(format_utm.format(x), format_utm.format(x).replace(',', 'X').replace('.', ',').replace('X', '.'))
                 Yn = self.tr(format_utm.format(y), format_utm.format(y).replace(',', 'X').replace('.', ',').replace('X', '.'))
             if coordenadas in (4,5,6,7):
-                Xn = str2HTML(self.tr(dd2dms(x,decimal_geo), dd2dms(x,decimal_geo).replace('.', ','))).replace('-','') + 'W' if x < 0 else 'E'
-                Yn = str2HTML(self.tr(dd2dms(y,decimal_geo), dd2dms(y,decimal_geo).replace('.', ','))).replace('-','') + 'S' if y < 0 else 'N'
+                Xn = str2HTML(self.tr(dd2dms(x,decimal_geo), dd2dms(x,decimal_geo).replace('.', ','))).replace('-','') + str('W' if x < 0 else 'E')
+                Yn = str2HTML(self.tr(dd2dms(y,decimal_geo), dd2dms(y,decimal_geo).replace('.', ','))).replace('-','') + str('S' if y < 0 else 'N')
             if coordenadas in (8,9,10,11):
                 Xn = str2HTML(self.tr(dd2dms(x,decimal_geo), dd2dms(x,decimal_geo).replace('.', ',')))
                 Yn = str2HTML(self.tr(dd2dms(y,decimal_geo), dd2dms(y,decimal_geo).replace('.', ',')))
