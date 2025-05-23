@@ -663,8 +663,8 @@ class DescriptiveTable(QgsProcessingAlgorithm):
                 longitude = pnts_GEO[k+1][0].x()
                 latitude = pnts_GEO[k+1][0].y()
                 if modelo not in (8,9,10,11): # sem sufixo
-                    longitude = self.tr(dd2dms(longitude,decimal_geo), dd2dms(longitude,decimal_geo).replace('.', ',')).replace('-','') + 'W' if longitude < 0 else 'E'
-                    latitude = self.tr(dd2dms(latitude,decimal_geo), dd2dms(latitude,decimal_geo).replace('.', ',')).replace('-','') + 'S' if latitude < 0 else 'N'
+                    longitude = self.tr(dd2dms(longitude,decimal_geo), dd2dms(longitude,decimal_geo).replace('.', ',')).replace('-','') + str('W' if longitude < 0 else 'E')
+                    latitude = self.tr(dd2dms(latitude,decimal_geo), dd2dms(latitude,decimal_geo).replace('.', ',')).replace('-','') + str('S' if latitude < 0 else 'N')
                 else:
                     longitude = self.tr(dd2dms(longitude,decimal_geo), dd2dms(longitude,decimal_geo).replace('.', ','))
                     latitude = self.tr(dd2dms(latitude,decimal_geo), dd2dms(latitude,decimal_geo).replace('.', ','))
