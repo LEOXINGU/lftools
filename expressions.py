@@ -2212,8 +2212,8 @@ def deedtext(description, estilo, prefix, decimal, calculation, fontsize, featur
                 Yn = tr(format_utm.format(PtsUTM[0].y()), format_utm.format(PtsUTM[0].y()).replace(',', 'X').replace('.', ',').replace('X', '.'))
             else: # coordenadas geodesicas
                 if 'suffix' in estilo:
-                    Xn = str2HTML(tr(DD2DMS(PtsGEO[0].x(),prec_geo), DD2DMS(PtsGEO[0].x(),prec_geo).replace('.', ','))).replace('-','') + 'W' if PtsGEO[0].x() < 0 else 'E'
-                    Yn = str2HTML(tr(DD2DMS(PtsGEO[0].y(),prec_geo), DD2DMS(PtsGEO[0].y(),prec_geo).replace('.', ','))).replace('-','') + 'S' if PtsGEO[0].y() < 0 else 'N'
+                    Xn = str2HTML(tr(DD2DMS(PtsGEO[0].x(),prec_geo), DD2DMS(PtsGEO[0].x(),prec_geo).replace('.', ','))).replace('-','') + str('W' if PtsGEO[0].x() < 0 else 'E')
+                    Yn = str2HTML(tr(DD2DMS(PtsGEO[0].y(),prec_geo), DD2DMS(PtsGEO[0].y(),prec_geo).replace('.', ','))).replace('-','') + str('S' if PtsGEO[0].y() < 0 else 'N')
                 else:
                     Xn = str2HTML(tr(DD2DMS(PtsGEO[0].x(),prec_geo), DD2DMS(PtsGEO[0].x(),prec_geo).replace('.', ',')))
                     Yn = str2HTML(tr(DD2DMS(PtsGEO[0].y(),prec_geo), DD2DMS(PtsGEO[0].y(),prec_geo).replace('.', ',')))
@@ -2729,8 +2729,8 @@ def geoneighbors(layer_name, testada, borderer_field, prefix, decimal, fontsize,
             linha0 = linha
             LAT = tr(DD2DMS(pnts_GEO[k+1][0].y(),decimal + 3), DD2DMS(pnts_GEO[k+1][0].y(),decimal + 3).replace('.', ','))
             LON = tr(DD2DMS(pnts_GEO[k+1][0].x(),decimal + 3), DD2DMS(pnts_GEO[k+1][0].x(),decimal + 3).replace('.', ','))
-            LAT = LAT + 'N' if LAT[0] != '-' else LAT[1:] + 'S'
-            LON = LON + 'E' if LON[0] != '-' else LON[1:] + 'W'
+            LAT = LAT + str('N' if LAT[0] != '-' else LAT[1:] + 'S')
+            LON = LON + str('E' if LON[0] != '-' else LON[1:] + 'W')
 
             itens = {'[Vn]': pnts_UTM[k+1][2],
                      '[LON]': LON,
