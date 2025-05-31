@@ -956,8 +956,8 @@ class DescriptiveMemorial(QgisAlgorithm):
                     '[RESP_TEC]': str2HTML(tech_manager.upper()),
                     '[CREA]': str2HTML(prof_id),
                     '[LOCAL]': str2HTML((county) +' - ' + (state).upper()),
-                    '[DATA]': self.tr((survey_date.toPyDate()).strftime("%b %d, %Y"),
-                                       (survey_date.toPyDate()).strftime("%d de {} de %Y").format(str2HTML(self.tr(meses[survey_date.month()]))))
+                    '[DATA]': self.tr((survey_date.toPyDate()).strftime(f"%B %d{self.get_day_suffix(survey_date.toPyDate().day)}, %Y"),
+                                       (survey_date.toPyDate()).strftime("%d de {} de %Y").format(str2HTML(meses[survey_date.month()])))
                     }
 
         for item in itens:
@@ -978,3 +978,10 @@ class DescriptiveMemorial(QgisAlgorithm):
         feedback.pushInfo(self.tr('Leandro França - Cartographic Engineer', 'Leandro França - Eng Cart'))
 
         return {self.HTML: output}
+    
+    def get_day_suffix(self, day):
+        if 11 <= day <= 13:
+            return 'th'
+        else:
+            return {1: 'st', 2: 'nd', 3: 'rd'}.get(day % 10, 'th')
+
