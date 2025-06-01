@@ -264,6 +264,8 @@ class LFToolsPlugin(object):
                     # Armazenar id da camada
                     self.layerid = self.layer.id()
 
+                # Transformar SRC, se necessário
+                
                 # Adicionar feição
                 fields = self.layer.fields()
                 feat = QgsFeature(fields)
