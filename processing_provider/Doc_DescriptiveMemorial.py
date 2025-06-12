@@ -301,18 +301,19 @@ class DescriptiveMemorial(QgisAlgorithm):
         if not validar_precisoes(decimal,[1,5]):
             raise QgsProcessingException(self.invalidSourceError(parameters, self.DECIMAL))
         format_utm = '{:,.Xf}'.replace('X', decimal[0])
-        decimal_geo = int(decimal[0])+3
         if len(decimal) == 1:
             decimal_azim = 1
+            decimal_geo = int(decimal[0]) +2
             format_dist = '{:,.Xf}'.replace('X', decimal[0])
             decimal_area = int(decimal[0])
             format_perim =  '{:,.Xf}'.replace('X', decimal[0])
         elif len(decimal) == 5:
+            decimal_geo = int(decimal[0])
             decimal_azim = int(decimal[1])
             format_dist = '{:,.Xf}'.replace('X', decimal[2])
             decimal_area = int(decimal[3])
             format_perim =  '{:,.Xf}'.replace('X', decimal[4])
-        if calculo in (1,3,5): # Hectares
+        if calculo in (1,3,5) and len(decimal) == 1: # Hectares
             format_area = '{:,.Xf}'.replace('X', str(decimal_area+2))
         else:
             format_area = '{:,.Xf}'.replace('X', str(decimal_area))
@@ -978,10 +979,9 @@ class DescriptiveMemorial(QgisAlgorithm):
         feedback.pushInfo(self.tr('Leandro França - Cartographic Engineer', 'Leandro França - Eng Cart'))
 
         return {self.HTML: output}
-    
+
     def get_day_suffix(self, day):
         if 11 <= day <= 13:
             return 'th'
         else:
             return {1: 'st', 2: 'nd', 3: 'rd'}.get(day % 10, 'th')
-
