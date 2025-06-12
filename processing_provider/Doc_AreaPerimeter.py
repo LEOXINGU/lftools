@@ -256,13 +256,14 @@ class AreaPerimterReport(QgsProcessingAlgorithm):
         if not validar_precisoes(decimal,[1,5]):
             raise QgsProcessingException(self.invalidSourceError(parameters, self.DECIMAL))
         format_utm = '{:,.Xf}'.replace('X', decimal[0])
-        decimal_geo = int(decimal[0])+3
         if len(decimal) == 1:
             decimal_azim = 1
+            decimal_geo = int(decimal[0])+2
             format_dist = '{:,.Xf}'.replace('X', decimal[0])
             decimal_area = int(decimal[0])
             format_perim =  '{:,.Xf}'.replace('X', decimal[0])
         elif len(decimal) == 5:
+            decimal_geo = int(decimal[0])
             decimal_azim = int(decimal[1])
             format_dist = '{:,.Xf}'.replace('X', decimal[2])
             decimal_area = int(decimal[3])
