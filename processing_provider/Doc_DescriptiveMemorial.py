@@ -735,7 +735,7 @@ class DescriptiveMemorial(QgisAlgorithm):
     <br></div>
     <p class="western"
      style="margin-bottom: 0.0001pt; text-align: center;"
-     align="center"><b><u><span style="font-size: 12pt;">'''+ str2HTML(self.tr('DESCRIPTIVE MEMORIAL','MEMORIAL DESCRITIVO')) + '''</span></u></b><o:p></o:p></p>
+     align="center"><b><u><span style="font-size: 12pt;">'''+ str2HTML(self.tr('DESCRIPTIVE MEMORIAL','MEMORIAL DESCRITIVO')) + '''</span></u></b></p>
     <p class="western" style="margin-bottom: 0.0001pt;"><o:p>&nbsp;</o:p></p>
     <table class="MsoTableGrid"
      style="border: medium none ; border-collapse: collapse;"
@@ -744,12 +744,12 @@ class DescriptiveMemorial(QgisAlgorithm):
         <tr style="">
           <td style="padding: 0cm 5.4pt; width: 247.85pt;"
      valign="top" width="330">
-          <p class="western" style="margin-bottom: 0.0001pt;"><b>'''+ str2HTML(self.tr('Property','Imóvel')) + ''': </b>[IMOVEL]<o:p></o:p></p>
+          <p class="western" style="margin-bottom: 0.0001pt;"><b>'''+ str2HTML(self.tr('Property','Imóvel')) + ''': </b>[IMOVEL]</p>
           </td>
           <td style="padding: 0cm 5.4pt; width: 176.85pt;"
      valign="top" width="236">
           <p class="western" style="margin-bottom: 0.0001pt;"><b>''' + str2HTML(self.tr('Real estate registry', 'Registro')) + ''':</b>
-    [REGISTRO]<o:p></o:p></p>
+    [REGISTRO]</p>
           </td>
         </tr>
         <tr style="">
@@ -757,19 +757,19 @@ class DescriptiveMemorial(QgisAlgorithm):
      style="padding: 0cm 5.4pt; width: 424.7pt;" valign="top"
      width="566">
           <p class="western" style="margin-bottom: 0.0001pt;"><b>''' + str2HTML(self.tr('Owner', 'Proprietário')) + ''':</b>
-    [PROPRIETARIO]<o:p></o:p></p>
+    [PROPRIETARIO]</p>
           </td>
         </tr>
         <tr style="">
           <td style="padding: 0cm 5.4pt; width: 247.85pt;"
      valign="top" width="330">
           <p class="western" style="margin-bottom: 0.0001pt;"><b>''' + str2HTML(self.tr('County', 'Município')) + ''':</b>
-    [MUNICIPIO]<b><o:p></o:p></b></p>
+    [MUNICIPIO]<b></b></p>
           </td>
           <td style="padding: 0cm 5.4pt; width: 176.85pt;"
      valign="top" width="236">
           <p class="western" style="margin-bottom: 0.0001pt;"><b>''' + str2HTML(self.tr('State', 'Estado')) + ''':
-          </b>[UF]<o:p></o:p></p>
+          </b>[UF]</p>
           </td>
         </tr>
         <tr style="">
@@ -777,24 +777,24 @@ class DescriptiveMemorial(QgisAlgorithm):
      style="padding: 0cm 5.4pt; width: 424.7pt;" valign="top"
      width="566">
           <p class="western" style="margin-bottom: 0.0001pt;"><b>''' + str2HTML(self.tr('Registration(s)', 'Matrícula(s)')) + ''':</b>
-    [MATRICULAS]<o:p></o:p></p>
+    [MATRICULAS]</p>
           </td>
         </tr>
         <tr style="">
           <td style="padding: 0cm 5.4pt; width: 247.85pt;"
      valign="top" width="330">
-          <p class="western" style="margin-bottom: 0.0001pt;"><b>''' + str2HTML(self.tr('Area ({})', 'Área ({})').format('m²' if calculo in (0,2,4) else 'ha') ) + ''': </b>[AREA]<o:p></o:p></p>
+          <p class="western" style="margin-bottom: 0.0001pt;"><b>''' + str2HTML(self.tr('Area ({})', 'Área ({})').format('m²' if calculo in (0,2,4) else 'ha') ) + ''': </b>[AREA]</p>
           </td>
           <td style="padding: 0cm 5.4pt; width: 176.85pt;"
      valign="top" width="236">
-          <p class="western" style="margin-bottom: 0.0001pt;"><b>''' + str2HTML(self.tr('Perimeter', 'Perímetro')) + ''' (m):</b> [PERIMETRO]<o:p></o:p></p>
+          <p class="western" style="margin-bottom: 0.0001pt;"><b>''' + str2HTML(self.tr('Perimeter', 'Perímetro')) + ''' (m):</b> [PERIMETRO]</p>
           </td>
         </tr>
         <tr style="">
           <td colspan="2"
      style="padding: 0cm 5.4pt; width: 424.7pt;" valign="top"
      width="566">
-          <p class="western" style="margin-bottom: 0.0001pt;"><b>''' + str2HTML(self.tr('Coordinate Reference System', 'Sistema de Referência de Coordenadas')) + ''':</b> [SRC]<b><o:p></o:p></b></p>
+          <p class="western" style="margin-bottom: 0.0001pt;"><b>''' + str2HTML(self.tr('Coordinate Reference System', 'Sistema de Referência de Coordenadas')) + ''':</b> [SRC]<b></b></p>
           </td>
         </tr>
       </tbody>
@@ -832,38 +832,38 @@ class DescriptiveMemorial(QgisAlgorithm):
     ''' + str2HTML(self.tr('the starting point for the description of this perimeter. All coordinates described here are georeferenced to the Geodetic Reference System (GRS)',
          'ponto inicial da descrição deste perímetro. Todas as coordenadas aqui descritas estão georreferenciadas ao Sistema Geodésico de Referência (SGR)')) + ''' <b>[GRS]</b>
     ''' + str2HTML(texto_calculo) + '''
-     <o:p></o:p></p>
+     </p>
     <p class="western"
      style="margin-bottom: 0.0001pt; text-align: right;"
-     align="right">[LOCAL], [DATA].<o:p></o:p></p>
+     align="right">[LOCAL], [DATA].</p>
 
      <p class="western" style="margin-bottom: 0.0001pt;"><o:p>&nbsp;</o:p></p>
      <p class="western"
       style="margin: 0cm 0cm 0.0001pt; text-align: center;"
-      align="center">___________________________________________<o:p></o:p></p>
+      align="center">___________________________________________</p>
      <p class="western"
       style="margin: 0cm 0cm 0.0001pt; text-align: center;"
-      align="center">[OWNER]<o:p></o:p></p>
+      align="center">[OWNER]</p>
      <p class="western"
       style="margin: 0cm 0cm 0.0001pt; text-align: center;"
-      align="center">[CPF]<o:p></o:p></p>
+      align="center">[CPF]</p>
      <p class="western"
       style="margin: 0cm 0cm 0.0001pt; text-align: center;"
-      align="center">''' + str2HTML(self.tr('PROPERTY OWNER', 'PROPRIETÁRIO DO IMÓVEL')) + '''<o:p></o:p></p>
+      align="center">''' + str2HTML(self.tr('PROPERTY OWNER', 'PROPRIETÁRIO DO IMÓVEL')) + '''</p>
 
     <p class="western" style="margin-bottom: 0.0001pt;"><o:p>&nbsp;</o:p></p>
     <p class="western"
      style="margin: 0cm 0cm 0.0001pt; text-align: center;"
-     align="center">___________________________________________<o:p></o:p></p>
+     align="center">___________________________________________</p>
     <p class="western"
      style="margin: 0cm 0cm 0.0001pt; text-align: center;"
-     align="center">[RESP_TEC]<o:p></o:p></p>
+     align="center">[RESP_TEC]</p>
     <p class="western"
      style="margin: 0cm 0cm 0.0001pt; text-align: center;"
-     align="center">[CREA]<o:p></o:p></p>
+     align="center">[CREA]</p>
     <p class="western"
      style="margin: 0cm 0cm 0.0001pt; text-align: center;"
-     align="center">''' + str2HTML(self.tr('TECHNICAL MANAGER', 'RESPONSÁVEL TÉCNICO')) + '''<o:p></o:p></p>
+     align="center">''' + str2HTML(self.tr('TECHNICAL MANAGER', 'RESPONSÁVEL TÉCNICO')) + '''</p>
     <p class="MsoNormal"><o:p>&nbsp;</o:p></p>
     </body>
     </html>
