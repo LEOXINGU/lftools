@@ -710,13 +710,13 @@ class DescriptiveMemorial(QgisAlgorithm):
             elif coordenadas == 7:
                 txt = '''<b> [Xn]</b>, <b> [Yn]</b> ''' + self.tr('and','e') +''' <b>h [Zn]m</b>'''
             elif coordenadas == 8:
-                txt = '''<b>longitude  [Xn]</b> ''' + self.tr('and','e') + ''' <b>latitude  [Yn]</b>'''
+                txt = '''<b>longitude [Xn]</b> ''' + self.tr('and','e') + ''' <b>latitude [Yn]</b>'''
             elif coordenadas == 9:
-                txt = '''<b>latitude  [Yn]</b> ''' + self.tr('and','e') + ''' <b>longitude  [Xn]</b>'''
+                txt = '''<b>latitude [Yn]</b> ''' + self.tr('and','e') + ''' <b>longitude [Xn]</b>'''
             elif coordenadas == 10:
-                txt = '''<b>longitude  [Xn]</b>, <b>latitude  [Yn]</b> ''' + self.tr('and','e') +''' <b>h [Zn]m</b>'''
+                txt = '''<b>longitude [Xn]</b>, <b>latitude [Yn]</b> ''' + self.tr('and','e') +''' <b>h [Zn]m</b>'''
             elif coordenadas == 11:
-                txt = '''<b>latitude  [Yn]</b>, <b>longitude  [Xn]</b> ''' + self.tr('and','e') +''' <b>h [Zn]m</b>'''
+                txt = '''<b>latitude [Yn]</b>, <b>longitude [Xn]</b> ''' + self.tr('and','e') +''' <b>h [Zn]m</b>'''
             return txt.replace('[Yn]', Yn).replace('[Xn]', Xn).replace('[Zn]', Zn)
 
         texto_inicial = '''
