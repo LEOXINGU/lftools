@@ -24,7 +24,7 @@ import colorsys
 from pyproj.crs import CRS
 from lftools.geocapt.topogeo import azimute, geod2geoc, geoc2enu
 from qgis.core import (QgsGeometry,
-                       QgsPointXY, QgsPoint,
+                       QgsPointXY, QgsPoint, QgsLineString, QgsPolygon, QgsMultiPoint, QgsMultiLineString, QgsMultiPolygon,
                        QgsEllipsoidUtils,
                        QgsCoordinateTransform,
                        QgsProject,
@@ -427,132 +427,119 @@ def reprojectPoints(geom, xform):
 
 
 def geom2PointList(geom):
-    if geom.type() == 0: #Point
+    """
+    Converte uma QgsGeometry em listas de QgsPoint, considerando seu tipo:
+    - Point: retorna QgsPoint ou lista de QgsPoint
+    - Line: retorna lista de pontos ou lista de listas de pontos
+    - Polygon: retorna lista de anéis, cada um como lista de QgsPoint
+    """
+    tipo = geom.type()
+
+    if tipo == 0:  # Ponto
         if geom.isMultipart():
-            tam = len(geom.asMultiPoint())
             const1 = geom.constGet()
-            newPnts = []
-            for k in range(tam):
-                newPnts += [const1.childGeometry(k)]
-            return newPnts
+            return [const1.childGeometry(k) for k in range(len(geom.asMultiPoint()))]
         else:
             return geom.constGet()
-    elif geom.type() == 1: #Line
+
+    elif tipo == 1:  # Linha
+        const1 = geom.constGet()
         if geom.isMultipart():
-            linhas = geom.asMultiPolyline()
-            tam1 = len(linhas)
-            const1 = geom.constGet()
-            newLines = []
-            for k in range(tam1):
-                linha = linhas[k]
-                tam2 = len(linha)
-                const2 = const1.childGeometry(k)
-                newLine =[]
-                for m in range(tam2):
-                    newLine += [const2.childPoint(m)]
-                newLines += [newLine]
-            return newLines
+            return [
+                [const1.childGeometry(k).childPoint(m) for m in range(len(linha))]
+                for k, linha in enumerate(geom.asMultiPolyline())
+            ]
         else:
-            linha = geom.asPolyline()
-            newLine =[]
-            tam1 = len(linha)
-            const1 = geom.constGet()
-            for k in range(tam1):
-                newLine += [const1.childPoint(k)]
-            return newLine
-    elif geom.type() == 2: #Polygon
+            return [const1.childPoint(k) for k in range(len(geom.asPolyline()))]
+
+    elif tipo == 2:  # Polígono
+        const1 = geom.constGet()
         if geom.isMultipart():
-            poligonos = geom.asMultiPolygon()
-            tam1 = len(poligonos)
-            const1 = geom.constGet()
-            newPolygons = []
-            for k in range(tam1):
-                aneis = poligonos[k]
-                tam2 = len(aneis)
-                const2 = const1.childGeometry(k)
-                newPol = []
-                for m in range(tam2):
-                    anel = aneis[m]
-                    tam3 = len(anel)
-                    const3 = const2.childGeometry(m)
-                    newAnel = []
-                    for n in range(tam3):
-                        newAnel += [const3.childPoint(n)]
-                    newPol += [newAnel]
-                newPolygons += [newPol]
-            return newPolygons
+            return [
+                [
+                    [const1.childGeometry(k).childGeometry(m).childPoint(n)
+                     for n in range(len(anel))]
+                    for m, anel in enumerate(poligono)
+                ]
+                for k, poligono in enumerate(geom.asMultiPolygon())
+            ]
         else:
-            aneis = geom.asPolygon()
-            tam1 = len(aneis)
-            const1 = geom.constGet()
-            newPol = []
-            for k in range(tam1):
-                anel = aneis[k]
-                tam2 = len(anel)
-                const2 = const1.childGeometry(k)
-                newAnel = []
-                for m in range(tam2):
-                    newAnel += [const2.childPoint(m)]
-                newPol += [newAnel]
-            return newPol
+            return [
+                [const1.childGeometry(k).childPoint(m)
+                 for m in range(len(anel))]
+                for k, anel in enumerate(geom.asPolygon())
+            ]
+
 
 
 # Orientar polígono
 def OrientarPoligono(coords, primeiro, sentido):
-    # definir primeiro vértice
-    if primeiro == 1: # Mais ao norte
-        ind = None
+    """
+    Reorganiza os vértices do polígono com base em um ponto inicial e sentido de orientação desejado.
+
+    Parâmetros:
+        coords   : lista de pontos (com métodos .x() e .y())
+        primeiro : int
+                   0 = não altera ponto inicial
+                   1 = começa pelo ponto mais ao norte (maior Y, depois menor X)
+                   2 = começa pelo ponto mais ao sul (menor Y, depois maior X)
+                   3 = começa pelo ponto mais ao leste (maior X)
+                   4 = começa pelo ponto mais ao oeste (menor X)
+        sentido  : int
+                   0 = sentido horário
+                   1 = sentido anti-horário
+
+    Retorna:
+        Lista de coordenadas reorganizada e fechada (primeiro ponto repetido no final).
+    """
+
+    ind = None
+    if primeiro == 1:  # Mais ao norte
         ymax = -1e10
         x_ymax = 1e10
         for k, pnt in enumerate(coords):
-            if pnt.y() > ymax:
+            if pnt.y() > ymax or (pnt.y() == ymax and pnt.x() < x_ymax):
                 ymax = pnt.y()
                 x_ymax = pnt.x()
                 ind = k
-            elif pnt.y() == ymax:
-                if pnt.x() < x_ymax:
-                    ymax = pnt.y()
-                    x_ymax = pnt.x()
-                    ind = k
-    elif primeiro == 2: # Mais ao sul
-        ind = None
+    elif primeiro == 2:  # Mais ao sul
         ymin = 1e10
-        x_ymim = -1e10
+        x_ymin = -1e10
         for k, pnt in enumerate(coords):
-            if pnt.y() < ymin:
+            if pnt.y() < ymin or (pnt.y() == ymin and pnt.x() > x_ymin):
                 ymin = pnt.y()
-                x_ymim = pnt.x()
+                x_ymin = pnt.x()
                 ind = k
-            elif pnt.y() == ymin:
-                if pnt.x() > x_ymim:
-                    ymin = pnt.y()
-                    x_ymim = pnt.x()
-                    ind = k
-    elif primeiro == 3: # Mais ao Leste
-        ind = None
+    elif primeiro == 3:  # Mais ao leste
         xmax = -1e10
         for k, pnt in enumerate(coords):
             if pnt.x() > xmax:
                 xmax = pnt.x()
                 ind = k
-    elif primeiro == 4: # Mais ao Oeste
-        ind = None
+    elif primeiro == 4:  # Mais ao oeste
         xmin = 1e10
         for k, pnt in enumerate(coords):
             if pnt.x() < xmin:
                 xmin = pnt.x()
                 ind = k
-    if primeiro != 0:
-        coords = coords[ind :] + coords[0 : ind]
 
-    #rotacionar
-    coords = coords +[coords[0]]
-    areaG = areaGauss(coords)
-    if areaG < 0 and sentido == 0:
+    # Reorganiza a lista para iniciar no ponto escolhido
+    if primeiro != 0 and ind is not None:
+        coords = coords[ind:] + coords[:ind]
+
+    # Fecha temporariamente para calcular a área
+    temp_coords = coords + [coords[0]]
+    areaG = areaGauss(temp_coords)
+
+    # Inverte o sentido se necessário
+    if (areaG < 0 and sentido == 0) or (areaG > 0 and sentido == 1):
         coords = coords[::-1]
-    elif areaG > 0 and sentido == 1:
-        coords = coords[::-1]
+
+    # Fecha o polígono no final
+    coords = coords + [coords[0]]
+
     return coords
+
 
 
 # Azimute principal das feições
