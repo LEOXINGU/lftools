@@ -193,25 +193,50 @@ class PolygonOrientation(QgsProcessingAlgorithm):
         total = 100.0 / camada.featureCount() if camada.featureCount() else 0
 
         for current, feat in enumerate(camada.getSelectedFeatures() if selecionados else camada.getFeatures()):
+            
             geom = feat.geometry()
+            
             if geom.isMultipart():
-                poligonos = geom2PointList(geom)
+                multipol = geom2PointList(geom)  # lista de polígonos (com anéis)
                 mPol = QgsMultiPolygon()
-                for pol in poligonos:
-                    coords = pol[0]
-                    coords = coords[:-1]
-                    coords = OrientarPoligono(coords, primeiro, sentido)
-                    anel = QgsLineString(coords)
-                    pol = QgsPolygon(anel)
-                    mPol.addGeometry(pol)
+
+                for pol in multipol:
+                    if not pol:  # segurança contra geometria vazia
+                        continue
+
+                    # Anel exterior
+                    ext_coords = pol[0][:-1]
+                    ext_coords = OrientarPoligono(ext_coords, primeiro, sentido)
+                    ext_ring = QgsLineString(ext_coords)
+                    qgs_pol = QgsPolygon(ext_ring)
+
+                    # Anéis internos
+                    for ring in pol[1:]:
+                        int_coords = ring[:-1]
+                        int_coords = OrientarPoligono(int_coords, primeiro, sentido)
+                        int_ring = QgsLineString(int_coords)
+                        qgs_pol.addInteriorRing(int_ring)
+
+                    mPol.addGeometry(qgs_pol)
+
                 newGeom = QgsGeometry(mPol)
+
             else:
-                coords = geom2PointList(geom)[0]
-                coords = coords[:-1]
-                coords = OrientarPoligono(coords, primeiro, sentido)
-                anel = QgsLineString(coords)
-                pol = QgsPolygon(anel)
-                newGeom = QgsGeometry(pol)
+                pol = geom2PointList(geom)
+                if not pol:
+                    continue
+                ext_coords = pol[0][:-1]
+                ext_coords = OrientarPoligono(ext_coords, primeiro, sentido)
+                ext_ring = QgsLineString(ext_coords)
+                qgs_pol = QgsPolygon(ext_ring)
+
+                for ring in pol[1:]:
+                    int_coords = ring[:-1]
+                    int_coords = OrientarPoligono(int_coords, primeiro, sentido)
+                    int_ring = QgsLineString(int_coords)
+                    qgs_pol.addInteriorRing(int_ring)
+
+                newGeom = QgsGeometry(qgs_pol)
 
             camada.changeGeometry(feat.id(), newGeom)
 
