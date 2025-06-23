@@ -32,12 +32,14 @@ from qgis.core import (QgsProcessing,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
                        QgsFeatureRequest,
+                       QgsProcessingUtils,
                        QgsProcessingParameterFeatureSource,
                        QgsProcessingParameterFeatureSink)
 import re, os
 from lftools.geocapt.imgs import *
 from lftools.translations.translate import translate
 from lftools.geocapt.topogeo import dd2dms, dd2dms
+from lftools.geocapt.cartography import LabelConf, SymbolSimplePoint
 from qgis.PyQt.QtGui import QIcon
 import numpy as np
 
@@ -188,7 +190,7 @@ class ValidateTopology(QgsProcessingAlgorithm):
         validarGeometria(vertices, self.tr('Vertices (points)', 'Vértices (pontos)'))
         validarGeometria(limites, self.tr('Limits (lines)', 'Limites (linhas)'))
         validarGeometria(area, self.tr('Area (polygon)', 'Área (polígono)'))
-                
+
 
         feedback.pushInfo(self.tr('Checking if each vertex of the Limit layer (line) has the corresponding one of the Vertex layer (point)...', 'Verificando se cada vértice da camada Limite (linha) tem o correspondente da camada Vértice (ponto)...'))
         for feat1 in limites.getFeatures():
@@ -332,22 +334,25 @@ class ValidateTopology(QgsProcessingAlgorithm):
         for feat1 in area.getFeatures():
             geom1 = feat1.geometry()
             if geom1.isMultipart():
-                pol = feat1.geometry().asMultiPolygon()[0][0]
+                pols = geom1.asMultiPolygon()
             else:
-                pol = feat1.geometry().asPolygon()[0]
-            pontos = []
-            for pnt in pol[:-1]:
-                if pnt not in pontos:
-                    pontos += [pnt]
-                else:
-                    cont += 1
-                    X, Y = pnt.x(), pnt.y()
-                    erro = self.tr('Vertex of the "area" layer is duplicated!',
-                                   'Vértice da camada "área" está duplicado!')
-                    fet = QgsFeature(Fields)
-                    fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(X,Y)))
-                    fet.setAttributes([cont, feat1.id(), erro])
-                    sink.addFeature(fet, QgsFeatureSink.FastInsert)
+                pols = [geom1.asPolygon()]
+            for aneis in pols:
+                for anel in aneis:
+                    pontos = []
+                    for pnt in anel[:-1]:
+                        if pnt not in pontos:
+                            pontos += [pnt]
+                        else:
+                            cont += 1
+                            X, Y = pnt.x(), pnt.y()
+                            erro = self.tr('Vertex of the "area" layer is duplicated!',
+                                           'Vértice da camada "área" está duplicado!')
+                            fet = QgsFeature(Fields)
+                            fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(X,Y)))
+                            fet.setAttributes([cont, feat1.id(), erro])
+                            sink.addFeature(fet, QgsFeatureSink.FastInsert)
+
 
         feedback.pushInfo(self.tr('Checking line layer orientation...', 'Verificando orientação da camada linha...'))
         for feat1 in limites.getFeatures():
@@ -426,8 +431,36 @@ class ValidateTopology(QgsProcessingAlgorithm):
                 fet.setAttributes([cont, feat1.id(), erro])
                 sink.addFeature(fet, QgsFeatureSink.FastInsert)
 
+        def avaliar_erros(cont):
+            if cont == 0:
+                return "🎉"
+            elif 1 <= cont <= 5:
+                return "🙁"
+            elif 6 <= cont <= 20:
+                return "😢"
+            else:
+                return "😱"
+
+        if cont > 0:
+            feedback.reportError(avaliar_erros(cont) + self.tr(' {} topological inconsistencies detected!', ' Foram encontradas {} inconsistências topológicas!').format(cont))
+        else:
+            feedback.pushInfo(avaliar_erros(cont) + self.tr(' Congratulations! No topological inconsistency was detected.', ' Parabéns! Nenhuma inconsistência topológica detectada.'))
 
         feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
         feedback.pushInfo('Leandro França - Eng Cart')
-
+        self.SAIDA = dest_id
         return {self.OUTPUT: dest_id}
+
+    def postProcessAlgorithm(self, context, feedback):
+        layer = QgsProcessingUtils.mapLayerFromString(self.SAIDA, context)
+        # Rotulação
+        labeling = LabelConf(self.tr('type','tipo'))
+        layer.setLabeling(labeling)
+        layer.setLabelsEnabled(True)
+        layer.triggerRepaint()
+        # Simbologia
+        renderer = SymbolSimplePoint(layer)
+        layer.setRenderer(renderer)
+        layer.triggerRepaint()
+
+        return {}
