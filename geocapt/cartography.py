@@ -23,13 +23,8 @@ import random
 import colorsys
 from pyproj.crs import CRS
 from lftools.geocapt.topogeo import azimute, geod2geoc, geoc2enu
-from qgis.core import (QgsGeometry,
-                       QgsPointXY, QgsPoint, QgsLineString, QgsPolygon, QgsMultiPoint, QgsMultiLineString, QgsMultiPolygon,
-                       QgsEllipsoidUtils,
-                       QgsCoordinateTransform,
-                       QgsProject,
-                       QgsClassificationJenks,
-                       QgsCoordinateReferenceSystem)
+from qgis.core import *
+from qgis.PyQt.QtGui import QFont, QColor
 
 
 def FusoHemisf(pnt):
@@ -806,6 +801,48 @@ def gerar_paleta_tematica(tema, n=10):
         cores.append((int(r * 255), int(g * 255), int(b * 255)))
 
     return cores
+
+
+def LabelConf(nome, fonte="Arial", tam=10, bold=True, cor="white", buffer_tam = 0.5, buffer_cor = "black"):
+    # Configurar as propriedades de rótulo
+    label_settings = QgsPalLayerSettings()
+    label_settings.fieldName = '"[nome]"'.replace('[nome]',nome)
+    label_settings.isExpression = True
+    label_settings.placement = QgsPalLayerSettings.AroundPoint
+    label_settings.enabled = True
+    # Configurar o estilo do texto
+    text_format = QgsTextFormat()
+    font = QFont(fonte, tam)
+    font.setBold(bold)
+    text_format.setFont(font)
+    text_format.setSize(tam)
+    text_format.setColor(QColor(cor))
+    # Configurar o buffer
+    buffer_settings = QgsTextBufferSettings()
+    buffer_settings.setEnabled(True)
+    buffer_settings.setSize(buffer_tam)
+    buffer_settings.setColor(QColor(buffer_cor))
+    text_format.setBuffer(buffer_settings)
+    # Aplicar o estilo de texto no rótulo
+    label_settings.setFormat(text_format)
+    # Configurar e ativar os rótulos
+    labeling = QgsVectorLayerSimpleLabeling(label_settings)
+    return labeling
+
+
+def SymbolSimplePoint(layer, cor=QColor(255, 0, 0), tamanho=3.0, tipo='circle',
+                      cor_borda=QColor(0, 0, 0), largura_borda=0.3, opacidade=1.0):
+    symbol = QgsMarkerSymbol.createSimple({
+        'name': tipo,
+        'color': cor.name(),               # QColor(255, 0, 0, 100) # vermelho com 100 de opacidade (0 a 255)
+        'size': str(tamanho),
+        'outline_color': cor_borda.name(),
+        'outline_width': str(largura_borda)
+    })
+    # Aplica opacidade (0 totalmente transparente, 1 totalmente opaco)
+    symbol.setOpacity(opacidade)
+    return QgsSingleSymbolRenderer(symbol)
+
 
 
 def map_sistem(lon, lat, ScaleD=1e6):
