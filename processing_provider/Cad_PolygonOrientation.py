@@ -193,121 +193,123 @@ class PolygonOrientation(QgsProcessingAlgorithm):
         total = 100.0 / camada.featureCount() if camada.featureCount() else 0
 
         for current, feat in enumerate(camada.getSelectedFeatures() if selecionados else camada.getFeatures()):
-            
+
             geom = feat.geometry()
-            
-            if geom.isMultipart():
-                multipol = geom2PointList(geom)  # lista de polígonos (com anéis)
-                mPol = QgsMultiPolygon()
+            if geom.isEmpty() or geom is None:
+                continue
+            else:
+                if geom.isMultipart():
+                    multipol = geom2PointList(geom)  # lista de polígonos (com anéis)
+                    mPol = QgsMultiPolygon()
 
-                for pol in multipol:
-                    if not pol:  # segurança contra geometria vazia
+                    for pol in multipol:
+                        if not pol:  # segurança contra geometria vazia
+                            continue
+
+                        # Anel exterior
+                        ext_coords = pol[0][:-1]
+                        ext_coords = OrientarPoligono(ext_coords, primeiro, sentido)
+                        ext_ring = QgsLineString(ext_coords)
+                        qgs_pol = QgsPolygon(ext_ring)
+
+                        # Anéis internos
+                        for ring in pol[1:]:
+                            int_coords = ring[:-1]
+                            int_coords = OrientarPoligono(int_coords, primeiro, sentido)
+                            int_ring = QgsLineString(int_coords)
+                            qgs_pol.addInteriorRing(int_ring)
+
+                        mPol.addGeometry(qgs_pol)
+
+                    newGeom = QgsGeometry(mPol)
+
+                else:
+                    pol = geom2PointList(geom)
+                    if not pol:
                         continue
-
-                    # Anel exterior
                     ext_coords = pol[0][:-1]
                     ext_coords = OrientarPoligono(ext_coords, primeiro, sentido)
                     ext_ring = QgsLineString(ext_coords)
                     qgs_pol = QgsPolygon(ext_ring)
 
-                    # Anéis internos
                     for ring in pol[1:]:
                         int_coords = ring[:-1]
                         int_coords = OrientarPoligono(int_coords, primeiro, sentido)
                         int_ring = QgsLineString(int_coords)
                         qgs_pol.addInteriorRing(int_ring)
 
-                    mPol.addGeometry(qgs_pol)
+                    newGeom = QgsGeometry(qgs_pol)
 
-                newGeom = QgsGeometry(mPol)
+                camada.changeGeometry(feat.id(), newGeom)
 
-            else:
-                pol = geom2PointList(geom)
-                if not pol:
-                    continue
-                ext_coords = pol[0][:-1]
-                ext_coords = OrientarPoligono(ext_coords, primeiro, sentido)
-                ext_ring = QgsLineString(ext_coords)
-                qgs_pol = QgsPolygon(ext_ring)
+                if feedback.isCanceled():
+                    break
+                feedback.setProgress(int((current+1) * total))
 
-                for ring in pol[1:]:
-                    int_coords = ring[:-1]
-                    int_coords = OrientarPoligono(int_coords, primeiro, sentido)
-                    int_ring = QgsLineString(int_coords)
-                    qgs_pol.addInteriorRing(int_ring)
+            if rua:
+                feedback.pushInfo(self.tr('Identifying the first forward point for road access...', 'Identificando primeiro ponto com vante para o acesso viário...'))
+                for feat1 in camada.getSelectedFeatures() if selecionados else camada.getFeatures():
+                    # Pegar vizinhos
+                    geom1 = feat1.geometry()
+                    if not geom1.isMultipart():
+                        COORDS = geom2PointList(geom1)[0]
+                        COORDS  = COORDS[:-1]
+                        coords = geom1.asPolygon()[0]
+                        coords = coords[:-1]
+                        confront = {}
+                        for feat2 in camada.getSelectedFeatures() if selecionados else camada.getFeatures():
+                            geom2 = feat2.geometry()
+                            cd_lote2 = feat2.id()
+                            if feat1 != feat2:
+                                if geom1.intersects(geom2):
+                                    inters = geom1.intersection(geom2)
+                                    if inters.isMultipart():
+                                        partes = inters.asMultiPolyline()
+                                        parte1 = QgsGeometry.fromPolylineXY(partes[0])
+                                        k = 1
+                                        cont = 1
+                                        while len(partes) > 1:
+                                            # print(k, cont, len(partes), parte1)
+                                            parte2 = QgsGeometry.fromPolylineXY(partes[k])
+                                            if  parte1.intersects(parte2):
+                                                parte1 = parte1.combine(parte2)
+                                                del partes[k]
+                                            else:
+                                                k += 1
+                                            cont +=1
+                                            if cont > 10:
+                                                # print('erro no loop',cont)
+                                                break
+                                        inters = parte1
+                                    confront[feat2.id()] = [cd_lote2, inters]
 
-                newGeom = QgsGeometry(qgs_pol)
+                        lista = []
+                        # Fazer um teste para todos os pontos (sim ou não)
+                        vante = []
+                        for pnt in coords:
+                            geom1 = QgsGeometry.fromPointXY(pnt)
+                            for item in confront:
+                                geom2 = confront[item][1]
+                                if geom2.type() == 1 and geom1.intersects(geom2): #Line
+                                    coord_lin = geom2.asPolyline()
+                                    if pnt != coord_lin[-1]:
+                                        vante += [True]
+                                        break
+                            else:
+                                vante += [False]
 
-            camada.changeGeometry(feat.id(), newGeom)
+                        for k in range(len(vante)):
+                            anterior = vante[k-1 if k-1 > 0 else -1]
+                            posterior = vante[k]
+                            if anterior and not posterior:
+                                ind = k
+                                COORDS = COORDS[ind :] + COORDS[0 : ind]
+                                break
 
-            if feedback.isCanceled():
-                break
-            feedback.setProgress(int((current+1) * total))
-
-        if rua:
-            feedback.pushInfo(self.tr('Identifying the first forward point for road access...', 'Identificando primeiro ponto com vante para o acesso viário...'))
-            for feat1 in camada.getSelectedFeatures() if selecionados else camada.getFeatures():
-                # Pegar vizinhos
-                geom1 = feat1.geometry()
-                if not geom1.isMultipart():
-                    COORDS = geom2PointList(geom1)[0]
-                    COORDS  = COORDS[:-1]
-                    coords = geom1.asPolygon()[0]
-                    coords = coords[:-1]
-                    confront = {}
-                    for feat2 in camada.getSelectedFeatures() if selecionados else camada.getFeatures():
-                        geom2 = feat2.geometry()
-                        cd_lote2 = feat2.id()
-                        if feat1 != feat2:
-                            if geom1.intersects(geom2):
-                                inters = geom1.intersection(geom2)
-                                if inters.isMultipart():
-                                    partes = inters.asMultiPolyline()
-                                    parte1 = QgsGeometry.fromPolylineXY(partes[0])
-                                    k = 1
-                                    cont = 1
-                                    while len(partes) > 1:
-                                        # print(k, cont, len(partes), parte1)
-                                        parte2 = QgsGeometry.fromPolylineXY(partes[k])
-                                        if  parte1.intersects(parte2):
-                                            parte1 = parte1.combine(parte2)
-                                            del partes[k]
-                                        else:
-                                            k += 1
-                                        cont +=1
-                                        if cont > 10:
-                                            # print('erro no loop',cont)
-                                            break
-                                    inters = parte1
-                                confront[feat2.id()] = [cd_lote2, inters]
-
-                    lista = []
-                    # Fazer um teste para todos os pontos (sim ou não)
-                    vante = []
-                    for pnt in coords:
-                        geom1 = QgsGeometry.fromPointXY(pnt)
-                        for item in confront:
-                            geom2 = confront[item][1]
-                            if geom2.type() == 1 and geom1.intersects(geom2): #Line
-                                coord_lin = geom2.asPolyline()
-                                if pnt != coord_lin[-1]:
-                                    vante += [True]
-                                    break
-                        else:
-                            vante += [False]
-
-                    for k in range(len(vante)):
-                        anterior = vante[k-1 if k-1 > 0 else -1]
-                        posterior = vante[k]
-                        if anterior and not posterior:
-                            ind = k
-                            COORDS = COORDS[ind :] + COORDS[0 : ind]
-                            break
-
-                    anel = QgsLineString(COORDS)
-                    pol = QgsPolygon(anel)
-                    newGeom = QgsGeometry(pol)
-                    ok = camada.changeGeometry(feat1.id(), newGeom)
+                        anel = QgsLineString(COORDS)
+                        pol = QgsPolygon(anel)
+                        newGeom = QgsGeometry(pol)
+                        ok = camada.changeGeometry(feat1.id(), newGeom)
 
         if salvar:
             camada.commitChanges() # salva as edições
