@@ -29,6 +29,7 @@ from qgis.core import (QgsApplication,
                        QgsProcessingParameterFeatureSource,
                        QgsProcessingParameterFeatureSink)
 from lftools.geocapt.imgs import Imgs
+from lftools.geocapt.cartography import inv_vertex_order
 from lftools.translations.translate import translate
 import os
 from qgis.PyQt.QtGui import QIcon
@@ -143,7 +144,7 @@ class ReverseVertexOrder(QgsProcessingAlgorithm):
             for current, feat in enumerate(camada.getFeatures()):
                 cont = 0
                 geom = feat.geometry()
-                new_geom = self.inv_vertex_order(geom)
+                new_geom = inv_vertex_order(geom)
                 camada.changeGeometry(feat.id(), new_geom)
                 feedback.setProgress(int(current * total))
         else:
@@ -151,7 +152,7 @@ class ReverseVertexOrder(QgsProcessingAlgorithm):
             for current, feat in enumerate(camada.getSelectedFeatures()):
                 cont = 0
                 geom = feat.geometry()
-                new_geom = self.inv_vertex_order(geom)
+                new_geom = inv_vertex_order(geom)
                 camada.changeGeometry(feat.id(), new_geom)
                 feedback.setProgress(int(current * total))
 
@@ -162,41 +163,3 @@ class ReverseVertexOrder(QgsProcessingAlgorithm):
         feedback.pushInfo(self.tr('Leandro Franca - Cartographic Engineer', 'Leandro França - Eng Cart'))
 
         return {}
-
-    def inv_vertex_order(self, geom):
-        if geom.type() == 1: #Line
-            if geom.isMultipart():
-                linhas = geom.asMultiPolyline()
-                newLines = []
-                for linha in linhas:
-                    newLine = linha[::-1]
-                    newLines += [newLine]
-                newGeom = QgsGeometry.fromMultiPolylineXY(newLines)
-                return newGeom
-            else:
-                linha = geom.asPolyline()
-                newLine = linha[::-1]
-                newGeom = QgsGeometry.fromPolylineXY(newLine)
-                return newGeom
-        elif geom.type() == 2: #Polygon
-            if geom.isMultipart():
-                poligonos = geom.asMultiPolygon()
-                newPolygons = []
-                for pol in poligonos:
-                    newPol = []
-                    for anel in pol:
-                        newAnel = anel[::-1]
-                        newPol += [newAnel]
-                    newPolygons += [newPol]
-                newGeom = QgsGeometry.fromMultiPolygonXY(newPolygons)
-                return newGeom
-            else:
-                pol = geom.asPolygon()
-                newPol = []
-                for anel in pol:
-                    newAnel = anel[::-1]
-                    newPol += [newAnel]
-                newGeom = QgsGeometry.fromPolygonXY(newPol)
-                return newGeom
-        else:
-            return None
