@@ -1289,5 +1289,7 @@ Nota: Introduzca el nombre del campo de clave externa si no es el mismo que el n
 'Interior angle lines': {'es': 'Líneas de ángulos interiores'},
 'Exterior angle lines': {'es': 'Líneas de ángulos exteriores'},
 'Angle line outside polygon bounds! Reduce radius size (distance).': {'es': '¡Línea angular fuera de los límites del polígono! Reducir el radio (distancia).'},
+' {} topological inconsistencies detected!': {'es': '{} inconsistencias topológicas detectadas!'},
+' Congratulations! No topological inconsistency was detected.': {'es': ' ¡Enhorabuena! No se encontró ninguna inconsistencia topológica.'},
 
  }
