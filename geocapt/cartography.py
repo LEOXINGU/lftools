@@ -536,52 +536,59 @@ def OrientarPoligono(coords, primeiro, sentido):
     Retorna:
         Lista de coordenadas reorganizada e fechada (primeiro ponto repetido no final).
     """
-
-    ind = None
-    if primeiro == 1:  # Mais ao norte
+    # definir primeiro vértice
+    if primeiro == 1: # Mais ao norte
+        ind = None
         ymax = -1e10
         x_ymax = 1e10
         for k, pnt in enumerate(coords):
-            if pnt.y() > ymax or (pnt.y() == ymax and pnt.x() < x_ymax):
+            if pnt.y() > ymax:
                 ymax = pnt.y()
                 x_ymax = pnt.x()
                 ind = k
-    elif primeiro == 2:  # Mais ao sul
+            elif pnt.y() == ymax:
+                if pnt.x() < x_ymax:
+                    ymax = pnt.y()
+                    x_ymax = pnt.x()
+                    ind = k
+    elif primeiro == 2: # Mais ao sul
+        ind = None
         ymin = 1e10
-        x_ymin = -1e10
+        x_ymim = -1e10
         for k, pnt in enumerate(coords):
-            if pnt.y() < ymin or (pnt.y() == ymin and pnt.x() > x_ymin):
+            if pnt.y() < ymin:
                 ymin = pnt.y()
-                x_ymin = pnt.x()
+                x_ymim = pnt.x()
                 ind = k
-    elif primeiro == 3:  # Mais ao leste
+            elif pnt.y() == ymin:
+                if pnt.x() > x_ymim:
+                    ymin = pnt.y()
+                    x_ymim = pnt.x()
+                    ind = k
+    elif primeiro == 3: # Mais ao Leste
+        ind = None
         xmax = -1e10
         for k, pnt in enumerate(coords):
             if pnt.x() > xmax:
                 xmax = pnt.x()
                 ind = k
-    elif primeiro == 4:  # Mais ao oeste
+    elif primeiro == 4: # Mais ao Oeste
+        ind = None
         xmin = 1e10
         for k, pnt in enumerate(coords):
             if pnt.x() < xmin:
                 xmin = pnt.x()
                 ind = k
+    if primeiro != 0:
+        coords = coords[ind :] + coords[0 : ind]
 
-    # Reorganiza a lista para iniciar no ponto escolhido
-    if primeiro != 0 and ind is not None:
-        coords = coords[ind:] + coords[:ind]
-
-    # Fecha temporariamente para calcular a área
-    temp_coords = coords + [coords[0]]
-    areaG = areaGauss(temp_coords)
-
-    # Inverte o sentido se necessário
-    if (areaG < 0 and sentido == 0) or (areaG > 0 and sentido == 1):
+    #rotacionar
+    coords = coords +[coords[0]]
+    areaG = areaGauss(coords)
+    if areaG < 0 and sentido == 0:
         coords = coords[::-1]
-
-    # Fecha o polígono no final
-    coords = coords + [coords[0]]
-
+    elif areaG > 0 and sentido == 1:
+        coords = coords[::-1]
     return coords
 
 
