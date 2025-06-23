@@ -91,6 +91,7 @@ class ImportRaster(QgsProcessingAlgorithm):
     NAMECOL = 'NAMECOL'
     TILING = 'TILING'
     OVERVIEW = 'OVERVIEW'
+    COPYPARAM = 'COPYPARAM'
     versions = ['9.5', '9.6', '10', '11', '12', '13', '14', '15', '16', '17']
 
     def initAlgorithm(self, config=None):
@@ -196,6 +197,13 @@ class ImportRaster(QgsProcessingAlgorithm):
             )
         )
 
+        self.addParameter(
+            QgsProcessingParameterBoolean(
+            self.COPYPARAM,
+            self.tr('Use Copy statements instead of insert statements'),
+            defaultValue=False
+            )
+        )
 
 
     def processAlgorithm(self, parameters, context, feedback):
@@ -291,11 +299,18 @@ class ImportRaster(QgsProcessingAlgorithm):
         else:
             ovr = ''
 
+        copy_param = self.parameterAsBool(
+            parameters,
+            self.COPYPARAM,
+            context
+        )
+        copy_param = ' -Y ' if copy_param else ''
+
         # Preparando parâmetros
         projection = raster.crs().authid().split(":")[1]
         projection = ' -s ' + projection + ' '
         raster_path = raster.dataProvider().dataSourceUri()
-        comando = 'raster2pgsql' + projection + tiling + tipo + namecol + ovr + '-I -C -M "'+ raster_path + '" ' + schema +'.'+ table + ' | psql -U '+user+' -d '+database+' -h '+host+' -p '+port
+        comando = 'raster2pgsql' + copy_param + projection + tiling + tipo + namecol + ovr + '-I -C -M "'+ raster_path + '" ' + schema +'.'+ table + ' | psql -U '+user+' -d '+database+' -h '+host+' -p '+port
         feedback.pushInfo('\n' + self.tr('Command: ','Comando: ') + comando)
 
         # Procurando arquivo psql
