@@ -470,7 +470,56 @@ def geom2PointList(geom):
                 for k, anel in enumerate(geom.asPolygon())
             ]
 
+# Inverter ordem dos vértices linha e polígono
+def inv_vertex_order(geom):
+    if geom.type() == 1: #Line
+        if geom.isMultipart():
+            linhas = geom2PointList(geom)
+            mLines = QgsMultiLineString()
+            for linha in linhas:
+                newLine = linha[::-1]
+                Line = QgsLineString(newLine)
+                mLines.addGeometry(Line)
+            newGeom = QgsGeometry(mLines)
+            return newGeom
+        else:
+            linha = geom2PointList(geom)
+            newLine = linha[::-1]
+            Line = QgsLineString(newLine)
+            newGeom = QgsGeometry(Line)
+            return newGeom
+    elif geom.type() == 2: #Polygon
+        if geom.isMultipart():
+            poligonos = geom2PointList(geom)
+            mPol = QgsMultiPolygon()
+            for pol in poligonos:
+                ext_coords = pol[0]
+                ext_ring = QgsLineString(ext_coords[::-1])
+                qgs_pol = QgsPolygon(ext_ring)
 
+                # Anéis internos
+                for ring in pol[1:]:
+                    int_coords = ring
+                    int_ring = QgsLineString(int_coords[::-1])
+                    qgs_pol.addInteriorRing(int_ring)
+
+                mPol.addGeometry(qgs_pol)
+
+            newGeom = QgsGeometry(mPol)
+            return newGeom
+        else:
+            pol = geom2PointList(geom)
+            ext_coords = pol[0]
+            ext_ring = QgsLineString(ext_coords[::-1])
+            qgs_pol = QgsPolygon(ext_ring)
+            for ring in pol:
+                int_coords = ring
+                int_ring = QgsLineString(int_coords[::-1])
+                qgs_pol.addInteriorRing(int_ring)
+            newGeom = QgsGeometry(qgs_pol)
+            return newGeom
+    else:
+        return None
 
 # Orientar polígono
 def OrientarPoligono(coords, primeiro, sentido):
