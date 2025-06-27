@@ -286,6 +286,8 @@ class ImportRaster(QgsProcessingAlgorithm):
         )
         if len(tiling)>2 and 'x' in tiling:
             tiling = '-t {} '.format(tiling)
+        elif tiling == 'auto':
+            tiling = '-t auto '		
         else:
             tiling = ''
 
