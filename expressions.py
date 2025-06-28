@@ -2458,9 +2458,9 @@ def geoneighbors(prefix, testada, borderer_field, coord_type, precision, fontsiz
     SGR = QgsCoordinateReferenceSystem(SRC.geographicCrsAuthId())
 
     if isinstance(precision, list):
-        format_dist = '{:,.Xf}'.replace('X', str(precision[0]))
-        format_coord = '{:,.Xf}'.replace('X', str(precision[1]))
-        decimal_geo = precision
+        format_coord = '{:,.Xf}'.replace('X', str(precision[0]))
+        format_dist = '{:,.Xf}'.replace('X', str(precision[1]))
+        decimal_geo = precision[0]
     elif isinstance(precision, int):
         format_coord = '{:,.Xf}'.replace('X', str(precision))
         format_dist = '{:,.Xf}'.replace('X', str(precision))
