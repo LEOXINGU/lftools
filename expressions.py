@@ -2421,36 +2421,54 @@ def deedtext(description, estilo, prefix, decimal, calculation, fontsize, featur
 
 
 @qgsfunction(args='auto', group='LF Tools')
-def geoneighbors(layer_name, testada, borderer_field, prefix, decimal, fontsize, feature, parent):
+def geoneighbors(prefix, testada, borderer_field, coord_type, precision, fontsize, feature, parent, context):
     """
-    Generates a table of coordinates with neighbors (boundaries) and a polygon and distances.
-    <p>Note: A layer or QGIS Project with a projected CRS is required.</p>
-
-    <h2>Exemples:</h2>
+    This function automatically generates a table listing the vertex codes, their coordinates, the distances between each perimeter segment, and the linear and pointwise boundary neighbors, based on a polygon layer representing land lots or parcels.
+    <h3>Parameters:</h3>
     <ul>
-      <li>geoneighbors('layer_name', 'front_lot_name', 'borderer_name_field', 'preffix', precision, fontsize) = HTML</li>
-      <li>geoneighbors('layer_name', 'street', 'name' , 'V-', 2, 12) = HTML</li>
+      <li><b>preffix</b> – A letter or code to preffix the vertex numbering. This can also be a reference to a field or layer.</li>
+      <li><b>front_lot_name</b> – Front lot name or a reference to a layer containing front lot lines.</li>
+      <li><b>borderer_field</b> – Field name containing the textual description of the neighboring boundary (to be included in the generated table).</li>
+      <li><b>precision</b> – Either a single number (e.g., 2) defining the number of decimal places for coordinates and distances, or a list of two values: array(4,2).</li>
+      <li><b>coord_type</b> – Coordinate type: 'geo' for geographic (latitude/longitude) or 'proj' for projected coordinates.</li>
+      <li><b>fontsize</b> – Font size used in the output table.</li>
+    </ul>
+    <p><b>Note:</b> This function requires the project or layer to use a projected Coordinate Reference System (CRS).</p>
+
+    <h2>Examples:</h2>
+    <ul>
+      <li>geoneighbors('preffix', 'front_lot_field', 'borderer_name_field', coord_type, precision, fontsize) = HTML</li>
+      <li>geoneighbors('V-', "road" , 'parcel_code', 'geo', 2, 12) = HTML</li>
     </ul>
     <h2>Exemples with vertex layer:</h2>
     <ul>
-      <li>geoneighbors('layer_name', 'front_lot_name', 'borderer_name_field', 'vertex_point_layer,ID,name', precision, fontsize) = HTML</li>
-      <li>geoneighbors('layer_name', 'street', 'name' , 'Vertex,id,name', 2, 12) = HTML</li>
+      <li>geoneighbors('vertex_point_layer,ID,name', 'front_lot_name', 'borderer_name_field', coord_type, precision, fontsize) = HTML</li>
+      <li>geoneighbors('Vertex,id,name', "street" , 'parcel', 'proj', 2, 10) = HTML</li>
     </ul>
     <h2>Exemples with a line Front Lot layer:</h2>
     <ul>
-      <li>geoneighbors('layer_name', 'front_line_layer,id,name', 'borderer_name_field', 'preffix', precision, fontsize) = HTML</li>
-      <li>geoneighbors('layer_name', 'FrontLot,featID,name', 'name' , 'V-', 2, 12) = HTML</li>
+      <li>geoneighbors('preffix', 'front_line_layer,id,name', 'borderer_name_field', coord_type, precision, fontsize) = HTML</li>
+      <li>geoneighbors('V-', 'FrontLot,featID,name' , 'parcel_code', 'geo', array(3,2), 12) = HTML</li>
     </ul>
     """
-    if len(QgsProject.instance().mapLayersByName(layer_name)) == 1:
-        layer = QgsProject.instance().mapLayersByName(layer_name)[0]
-    else:
-        layer = QgsProject.instance().mapLayer(layer_name)
 
+    layer_id = context.variable('layer_id')
+    layer = QgsProject.instance().mapLayer(layer_id)
     SRC = layer.crs()
     SGR = QgsCoordinateReferenceSystem(SRC.geographicCrsAuthId())
 
-    format_num = '{:,.Xf}'.replace('X', str(decimal))
+    if isinstance(precision, list):
+        format_dist = '{:,.Xf}'.replace('X', str(precision[0]))
+        format_coord = '{:,.Xf}'.replace('X', str(precision[1]))
+        decimal_geo = precision
+    elif isinstance(precision, int):
+        format_coord = '{:,.Xf}'.replace('X', str(precision))
+        format_dist = '{:,.Xf}'.replace('X', str(precision))
+        decimal_geo = precision + 2
+    else:
+        return tr('Invalid precision!')
+
+    coord_type = coord_type.lower()
 
     geom = feature.geometry()
     if geom.type() == 2 and geom:
@@ -2639,14 +2657,14 @@ def geoneighbors(layer_name, testada, borderer_field, prefix, decimal, fontsize,
  width="11%">
       <p class="MsoNormal"
  style="margin-bottom: 0cm; text-align: center; line-height: normal;"
- align="center"><b>Latitude<o:p></o:p></b></p>
+ align="center"><b>[Y_COORD]<o:p></o:p></b></p>
       </td>
       <td
  style="border-style: solid solid solid none; border-color: windowtext windowtext windowtext -moz-use-text-color; border-width: 1pt 1pt 1pt medium; padding: 0cm 5.4pt; width: 13.06%;"
  width="13%">
       <p class="MsoNormal"
  style="margin-bottom: 0cm; text-align: center; line-height: normal;"
- align="center"><b>Longitude<o:p></o:p></b></p>
+ align="center"><b>[X_COORD]<o:p></o:p></b></p>
       </td>
       <td
  style="border-style: solid solid solid none; border-color: windowtext windowtext windowtext -moz-use-text-color; border-width: 1pt 1pt 1pt medium; padding: 0cm 5.4pt; width: 20%;"
@@ -2727,26 +2745,26 @@ def geoneighbors(layer_name, testada, borderer_field, prefix, decimal, fontsize,
         LINHAS = ''
         for k in range(tam):
             linha0 = linha
-            LAT = tr(DD2DMS(pnts_GEO[k+1][0].y(),decimal + 3), DD2DMS(pnts_GEO[k+1][0].y(),decimal + 3).replace('.', ','))
-            LON = tr(DD2DMS(pnts_GEO[k+1][0].x(),decimal + 3), DD2DMS(pnts_GEO[k+1][0].x(),decimal + 3).replace('.', ','))
-            LAT = LAT + str('N' if LAT[0] != '-' else LAT[1:] + 'S')
-            LON = LON + str('E' if LON[0] != '-' else LON[1:] + 'W')
+            Este = tr(format_coord.format(pnts_UTM[k+1][0].x()), format_coord.format(pnts_UTM[k+1][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+            Norte = tr(format_coord.format(pnts_UTM[k+1][0].y()), format_coord.format(pnts_UTM[k+1][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+            LAT = tr(DD2DMS(pnts_GEO[k+1][0].y(), decimal_geo), DD2DMS(pnts_GEO[k+1][0].y(), decimal_geo).replace('.', ','))
+            LON = tr(DD2DMS(pnts_GEO[k+1][0].x(), decimal_geo), DD2DMS(pnts_GEO[k+1][0].x(), decimal_geo).replace('.', ','))
+            LAT = str(LAT + 'N') if LAT[0] != '-' else str(LAT[1:] + 'S')
+            LON = str(LON + 'E') if LON[0] != '-' else str(LON[1:] + 'W')
 
             itens = {'[Vn]': pnts_UTM[k+1][2],
-                     '[LON]': LON,
-                     '[LAT]': LAT,
-                     '[h]': tr(format_num.format(pnts_GEO[k+1][0].z()), format_num.format(pnts_GEO[k+1][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                     '[LON]': LON if coord_type == 'geo' else Este[0],
+                     '[LAT]': LAT if coord_type == 'geo' else Norte[0],
                      '[confr]': vizinhos[k][0],
-                     '[dist]': tr(format_num.format(Dist[k]), format_num.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                     '[dist]': tr(format_dist.format(Dist[k]), format_dist.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.')),
                      '[comp]': tr('Punctual neighbor with ' + vizinhos[k][1], 'Confrontação pontual com ' + vizinhos[k][1]) if vizinhos[k][1] else '-',
                         }
-
             for item in itens:
                 linha0 = linha0.replace(item, itens[item])
             LINHAS += linha0
 
         # Resultado final
-        return texto.replace('[LINHAS]', LINHAS).replace('[FONTSIZE]', str(fontsize))
+        return texto.replace('[LINHAS]', LINHAS).replace('[FONTSIZE]', str(fontsize)).replace('[X_COORD]', 'Longitude' if coord_type == 'geo' else 'Este (m)').replace('[Y_COORD]', 'Latitude' if coord_type == 'geo' else tr('North', 'Norte') + '(m)')
 
     else:
         return tr('Check if the geometry is null or invalid! Or if Atlas is on!', 'Verifique se a geometria é nula ou inválida! Ou se o Atlas está ligado!')
