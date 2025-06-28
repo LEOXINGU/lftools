@@ -2270,8 +2270,8 @@ def deedtext(description, estilo, prefix, decimal, calculation, fontsize, featur
             descr_pnt_ini = str(descr_pnt_ini)
 
             # conteudo do memorial
-            text_ini = tr('<p style="text-align: justify; font-size: [FONTSIZE]px; ">The description of this perimeter begins at the vertex <b>[Vn]</b>, with coordinates [XXX], [descr_pnt_ini] from this, with the following flat azimuths and distances: ',
-                          '<p style="text-align: justify; font-size: [FONTSIZE]px; ">Inicia-se a descrição deste perímetro no vértice <b>[Vn]</b>, de coordenadas [XXX], [descr_pnt_ini] deste, segue com os seguintes azimutes planos e distâncias: ').replace('[XXX]', estilo_vertices)
+            text_ini = tr('<p style="text-align: justify; font-size: [FONTSIZE]px; ">The description of this perimeter begins at the vertex <b>[Vn]</b>, with coordinates [XXX], [descr_pnt_ini] from this, with the following azimuths and distances: ',
+                          '<p style="text-align: justify; font-size: [FONTSIZE]px; ">Inicia-se a descrição deste perímetro no vértice <b>[Vn]</b>, de coordenadas [XXX], [descr_pnt_ini] deste, segue com os seguintes azimutes e distâncias: ').replace('[XXX]', estilo_vertices)
 
             text_meio = tr('[Azn] and [Dn]m up to the vertex <b>[Vn]</b>, with coordinates [XXX], ',
                            '[Azn] e [Dn]m até o vértice <b>[Vn]</b>, de coordenadas [XXX], ').replace('[XXX]', estilo_vertices)
