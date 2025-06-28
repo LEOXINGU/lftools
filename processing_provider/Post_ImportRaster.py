@@ -184,8 +184,8 @@ class ImportRaster(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterString(
                 self.TILING,
-                self.tr('Tiling'),
-                defaultValue = '100x100'
+                self.tr('Tiling - Width x Height'),
+                defaultValue = 'auto'
             )
         )
 
@@ -285,9 +285,9 @@ class ImportRaster(QgsProcessingAlgorithm):
             context
         )
         if len(tiling)>2 and 'x' in tiling:
-            tiling = '-t {} '.format(tiling)
+            tiling = '-t {} '.format(tiling.lower().replace(' ', ''))
         elif tiling == 'auto':
-            tiling = '-t auto '		
+            tiling = '-t auto '
         else:
             tiling = ''
 
