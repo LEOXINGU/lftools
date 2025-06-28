@@ -804,8 +804,8 @@ class DescriptiveMemorial(QgisAlgorithm):
      style="margin-bottom: 0.0001pt; text-align: justify;">'''+ str2HTML(self.tr('The description of this perimeter begins ', 'Inicia-se a descrição deste perímetro n'))
 
         texto_var1 = str2HTML(self.tr('at the vertex ', 'o vértice ')) + '''<b>[Vn]</b>, '''+ str2HTML(self.tr('with coordinates ', 'de coordenadas ')) + '''[Coordn],
-    [Descr_k]'''+ str2HTML(self.tr('from this, it continues to confront [Confront_k], with the following flat azimuths and distances: [Az_n] and [Dist_n]m up to ',
-                                   'deste, segue confrontando com [Confront_k], com os seguintes azimutes planos e distâncias: [Az_n] e [Dist_n]m até '))
+    [Descr_k]'''+ str2HTML(self.tr('from this, it continues to confront [Confront_k], with the following azimuths and distances: [Az_n] and [Dist_n]m up to ',
+                                   'deste, segue confrontando com [Confront_k], com os seguintes azimutes e distâncias: [Az_n] e [Dist_n]m até '))
 
         texto_var2 = str2HTML(self.tr('the vertex ', 'o vértice ')) + '''<span> </span><b>[Vn]</b>, '''+ str2HTML(self.tr('with coordinates ', 'de coordenadas ')) + '''[Coordn]; '''+ str2HTML(self.tr('[Az_n] and [Dist_n]m up to ', '[Az_n] e [Dist_n]m até '))
 
