@@ -31,8 +31,8 @@ import os
 import sys
 import inspect
 
-from qgis.core import (QgsProcessingAlgorithm,
-                       QgsProject,
+from qgis.core import (QgsProject,
+                       QgsCoordinateTransform,
                        QgsApplication,
                        QgsExpression)
 from qgis.PyQt.QtCore import QVariant
@@ -40,7 +40,8 @@ from PyQt5.QtCore import QCoreApplication
 from PyQt5.QtWidgets import QMessageBox
 from .lftools_provider import LFToolsProvider
 from .translations.translate import translate
-from lftools.geocapt.topogeo import dms2dd as DMS2DD
+from .geocapt.topogeo import dms2dd as DMS2DD
+from .geocapt.cartography import LabelConf, SymbolSimplePoint
 from .geocapt.tools import *
 from .expressions import *
 from .LFTools_Dialog import ImportXYZ_Dialog
@@ -219,19 +220,22 @@ class LFToolsPlugin(object):
         # Quando pressionado
         if result == 1:
             try:
-                coordX = dlg.coordX.text().replace(',', '.')
-                coordY = dlg.coordY.text().replace(',', '.')
-                coordZ = dlg.coordZ.text().replace(',', '.')
+                coordX = dlg.coordX.text().replace(',', '.').strip()
+                coordY = dlg.coordY.text().replace(',', '.').strip()
+                coordZ = dlg.coordZ.text().replace(',', '.').strip()
                 crs = dlg.CRS.crs()
                 nome = dlg.Name.text()
                 nome_campo = tr('name', 'nome')
 
                 # Identificação e validação dos dados de entrada
                 if crs.isGeographic():
-                    # GMS para graus decimais
-                    X = DMS2DD(coordX)
-                    Y = DMS2DD(coordY)
-                else:
+                    try: # Se coordenadas estão em GMS, levar para graus decimais
+                        X = DMS2DD(coordX)
+                        Y = DMS2DD(coordY)
+                    except: # Testar se as coordenadas estão em graus decimais
+                        X = float(coordX)
+                        Y = float(coordY)
+                else: # Coordenadas projetadas
                     X = float(coordX)
                     Y = float(coordY)
 
@@ -241,31 +245,31 @@ class LFToolsPlugin(object):
                 if not projeto.mapLayer(self.layerid):
                     self.layer = QgsVectorLayer("PointZ?crs=" + crs.authid(), tr('Points XYZ', 'Pontos XYZ'), "memory")
                     self.DP = self.layer.dataProvider()
+                    crs0 = crs
                     # adicionar campos
                     campos = [QgsField(nome_campo, QVariant.String),
                               QgsField('X', QVariant.String),
                               QgsField('Y', QVariant.String),
-                              QgsField('Z', QVariant.String)]
+                              QgsField('Z', QVariant.String),
+                              QgsField('CRS', QVariant.String)]
                     self.DP.addAttributes(campos)
                     self.layer.updateFields()
-                    # Rotular pelo nome
-                    try:
-                        layer_settings = QgsPalLayerSettings()
-                        layer_settings.fieldName = nome_campo
-                        self.layer.setLabeling(QgsVectorLayerSimpleLabeling(layer_settings))
-                        self.layer.setLabelsEnabled(True)
-                    except:
-                        self.layer.setCustomProperty("labeling", "pal")
-                        self.layer.setCustomProperty("labeling/enabled", "true")
-                        self.layer.setCustomProperty("labeling/fieldName", nome_campo)
+                    # Estilizar camada
+                    labeling = LabelConf(nome_campo)
+                    self.layer.setLabeling(labeling)
+                    self.layer.setLabelsEnabled(True)
+                    self.layer.triggerRepaint()
+                    renderer = SymbolSimplePoint(self.layer)
+                    self.layer.setRenderer(renderer)
+                    self.layer.triggerRepaint()
 
                     # Adicionar camada
                     projeto.addMapLayer(self.layer)
                     # Armazenar id da camada
                     self.layerid = self.layer.id()
+                else:
+                    crs0 = self.layer.crs()
 
-                # Transformar SRC, se necessário
-                
                 # Adicionar feição
                 fields = self.layer.fields()
                 feat = QgsFeature(fields)
@@ -273,7 +277,13 @@ class LFToolsPlugin(object):
                 feat['X'] = str(coordX)
                 feat['Y'] = str(coordY)
                 feat['Z'] = str(coordZ)
+                feat['CRS'] = str(crs.description())
                 geom = QgsGeometry(QgsPoint(X, Y, Z))
+                if crs0 != crs: # Transformar SRC, se necessário
+                    coordinateTransformer = QgsCoordinateTransform()
+                    coordinateTransformer.setDestinationCrs(crs0)
+                    coordinateTransformer.setSourceCrs(crs)
+                    geom.transform(coordinateTransformer)
                 feat.setGeometry(geom)
                 self.layer.startEditing()
                 self.layer.addFeatures([ feat ])
