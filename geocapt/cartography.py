@@ -810,12 +810,13 @@ def gerar_paleta_tematica(tema, n=10):
     return cores
 
 
-def LabelConf(nome, fonte="Arial", tam=10, bold=True, cor="white", buffer_tam = 0.5, buffer_cor = "black"):
+def LabelConf(nome, fonte="Arial", tam=10, bold=True, cor="white", buffer_tam = 0.5, buffer_cor = "black", dist=2):
     # Configurar as propriedades de rótulo
     label_settings = QgsPalLayerSettings()
     label_settings.fieldName = '"[nome]"'.replace('[nome]',nome)
     label_settings.isExpression = True
     label_settings.placement = QgsPalLayerSettings.AroundPoint
+    label_settings.dist = dist
     label_settings.enabled = True
     # Configurar o estilo do texto
     text_format = QgsTextFormat()
