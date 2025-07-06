@@ -63,10 +63,6 @@ cmd_folder = os.path.split(inspect.getfile(inspect.currentframe()))[0]
 if cmd_folder not in sys.path:
     sys.path.insert(0, cmd_folder)
 
-LOC = QgsApplication.locale()[:2]
-def tr(*string):
-    return translate(string, LOC)
-
 class LFToolsPlugin(object):
 
     def __init__(self):
@@ -76,6 +72,10 @@ class LFToolsPlugin(object):
         self.camada_copiada = None
         self.plugin_dir = os.path.dirname(__file__)
         self.layerid = ''
+        self.layerid2 = ''
+
+    def tr(self, *string):
+        return translate(string, QgsApplication.locale()[:2])
 
     def initProcessing(self):
         """Init Processing provider for QGIS >= 3.8."""
@@ -95,28 +95,35 @@ class LFToolsPlugin(object):
 
         # Definir SRC
         icon = QIcon(self.plugin_dir + '/images/tools/UTM.svg')
-        self.UTM_Action = QAction(icon, tr('Set CRS in UTM', 'Definir SRC em UTM'), self.iface.mainWindow())
+        self.UTM_Action = QAction(icon, self.tr('Set CRS in UTM', 'Definir SRC em UTM'), self.iface.mainWindow())
         self.UTM_Action.setObjectName('DefineUTM')
         self.UTM_Action.triggered.connect(self.runUTM)
         self.toolbar.addAction(self.UTM_Action)
 
         # Importar X,Y,Z
         icon = QIcon(self.plugin_dir + '/images/tools/XYZ.svg')
-        self.ImportXYZ_Action = QAction(icon, tr('Import XYZ', 'Importar XYZ'), self.iface.mainWindow())
+        self.ImportXYZ_Action = QAction(icon, self.tr('Import XYZ', 'Importar XYZ'), self.iface.mainWindow())
         self.ImportXYZ_Action.setObjectName('ImportXYZ')
         self.ImportXYZ_Action.triggered.connect(self.runImportXYZ)
         self.toolbar.addAction(self.ImportXYZ_Action)
 
+        # Linhas de Cotagem (Dimensioning)
+        icon = QIcon(self.plugin_dir + '/images/tools/DIMENSIONING.svg')
+        self.Dimensioning_Action = QAction(icon, self.tr('Dimensioning', 'Cotagem'), self.iface.mainWindow())
+        self.Dimensioning_Action.setObjectName('Dimensioning')
+        self.Dimensioning_Action.triggered.connect(self.runDimensioning)
+        self.toolbar.addAction(self.Dimensioning_Action)
+
         # Copiar estilo da camada ativa
         icon = QIcon(self.plugin_dir + '/images/tools/COPY_STYLE.svg')
-        self.CopiarEstilo_Action = QAction(icon, tr('Copy layer style', 'Copiar estilo da camada'), self.iface.mainWindow())
+        self.CopiarEstilo_Action = QAction(icon, self.tr('Copy layer style', 'Copiar estilo da camada'), self.iface.mainWindow())
         self.CopiarEstilo_Action.setObjectName('ImportXYZ')
         self.CopiarEstilo_Action.triggered.connect(self.runCopiarEstilo)
         self.toolbar.addAction(self.CopiarEstilo_Action)
 
         # Colar estilo
         icon = QIcon(self.plugin_dir + '/images/tools/PASTE_STYLE.svg')
-        self.ColarEstilo_Action = QAction(icon, tr('Paste style to the layer', 'Colar estilo na camada'), self.iface.mainWindow())
+        self.ColarEstilo_Action = QAction(icon, self.tr('Paste style to the layer', 'Colar estilo na camada'), self.iface.mainWindow())
         self.ColarEstilo_Action.setObjectName('ImportXYZ')
         self.ColarEstilo_Action.triggered.connect(self.runColarEstilo)
         self.toolbar.addAction(self.ColarEstilo_Action)
@@ -126,18 +133,18 @@ class LFToolsPlugin(object):
         menu.setObjectName('MainLFTools')
         # Adicionando principais ferramentas
         icon = QIcon(self.plugin_dir + '/images/easy.png')
-        self.Coord2Layer_Action = menu.addAction(icon, tr('Table to point layer', 'Planilha para camada de pontos'), self.Coord2Layer)
+        self.Coord2Layer_Action = menu.addAction(icon, self.tr('Table to point layer', 'Planilha para camada de pontos'), self.Coord2Layer)
         self.Coord2Layer_Action.setObjectName('CoordToLayer')
         icon = QIcon(self.plugin_dir + '/images/easy.png')
-        self.GetAttribute_Action = menu.addAction(icon, tr('Get attribute by location', 'Pegar atributo pela localização'), self.GetAttribute)
+        self.GetAttribute_Action = menu.addAction(icon, self.tr('Get attribute by location', 'Pegar atributo pela localização'), self.GetAttribute)
         self.GetAttribute_Action.setObjectName('GetAttribute')
         icon = QIcon(self.plugin_dir + '/images/easy.png')
-        self.MeasureLayer_Action = menu.addAction(icon, tr('Measure layers', 'Medir camadas'), self.MeasureLayer)
+        self.MeasureLayer_Action = menu.addAction(icon, self.tr('Measure layers', 'Medir camadas'), self.MeasureLayer)
         self.MeasureLayer_Action.setObjectName('MeasureLayer')
         icon = QIcon(self.plugin_dir + '/images/easy.png')
-        self.ExportASCII_Action = menu.addAction(icon, tr('Export expression as ASCII', 'Exportar expressão como ASCII'), self.ExportASCII)
+        self.ExportASCII_Action = menu.addAction(icon, self.tr('Export expression as ASCII', 'Exportar expressão como ASCII'), self.ExportASCII)
         self.ExportASCII_Action.setObjectName('ExportASCII')
-        self.SelectByKeyAtt_Action = menu.addAction(icon, tr('Select by key attribute', 'Selecionar por atributo chave'), self.SelectByKeyAtt)
+        self.SelectByKeyAtt_Action = menu.addAction(icon, self.tr('Select by key attribute', 'Selecionar por atributo chave'), self.SelectByKeyAtt)
         self.SelectByKeyAtt_Action.setObjectName('SelectByKeyAtt')
 
         # Adicionando conjunto de botões
@@ -151,7 +158,7 @@ class LFToolsPlugin(object):
 
         # Ajuda do LFTools
         icon = QIcon(self.plugin_dir + '/images/tools/GEOONE.svg')
-        self.Tutoriais_Action = QAction(icon, tr('Tutorials', 'Tutoriais'), self.iface.mainWindow())
+        self.Tutoriais_Action = QAction(icon, self.tr('Tutorials', 'Tutoriais'), self.iface.mainWindow())
         self.Tutoriais_Action.setObjectName('Tutorials')
         self.Tutoriais_Action.triggered.connect(self.runTutoriais)
         self.toolbar.addAction(self.Tutoriais_Action)
@@ -165,6 +172,7 @@ class LFToolsPlugin(object):
         # Remove from toolbar
         self.iface.removeToolBarIcon(self.UTM_Action)
         self.iface.removeToolBarIcon(self.ImportXYZ_Action)
+        self.iface.removeToolBarIcon(self.Dimensioning_Action)
         self.iface.removeToolBarIcon(self.CopiarEstilo_Action)
         self.iface.removeToolBarIcon(self.ColarEstilo_Action)
         self.iface.removeToolBarIcon(self.Coord2Layer_Action)
@@ -225,7 +233,7 @@ class LFToolsPlugin(object):
                 coordZ = dlg.coordZ.text().replace(',', '.').strip()
                 crs = dlg.CRS.crs()
                 nome = dlg.Name.text()
-                nome_campo = tr('name', 'nome')
+                nome_campo = self.tr('name', 'nome')
 
                 # Identificação e validação dos dados de entrada
                 if crs.isGeographic():
@@ -243,7 +251,7 @@ class LFToolsPlugin(object):
 
                 # Criando camada pela primeira vez
                 if not projeto.mapLayer(self.layerid):
-                    self.layer = QgsVectorLayer("PointZ?crs=" + crs.authid(), tr('Points XYZ', 'Pontos XYZ'), "memory")
+                    self.layer = QgsVectorLayer("PointZ?crs=" + crs.authid(), self.tr('Points XYZ', 'Pontos XYZ'), "memory")
                     self.DP = self.layer.dataProvider()
                     crs0 = crs
                     # adicionar campos
@@ -291,5 +299,43 @@ class LFToolsPlugin(object):
                 self.canvas.setCenter(QgsPointXY(X, Y))
 
             except Exception as e:
-                QMessageBox.information(self.iface.mainWindow(), QCoreApplication.translate('LFTools', "LFTools plugin error"), QCoreApplication.translate('LFTools', tr("There was an error with the input parameter:<br><strong>{}</strong>").format(e)))
+                QMessageBox.information(self.iface.mainWindow(), QCoreApplication.translate('LFTools', "LFTools plugin error"), QCoreApplication.translate('LFTools', "There was an error with the input parameter:<br><strong>{}</strong>".format(e)))
                 return
+    
+    def runDimensioning(self):
+        self.iface.messageBar().pushMessage(self.tr('Use snapping, if possible.', 'Use a Aderência, se possível.'), level=Qgis.Info, duration=10)
+        projeto = QgsProject.instance()
+        crs = projeto.crs()
+        # Criando camada pela primeira vez
+        if not projeto.mapLayer(self.layerid2):
+            #criar camada
+            layer = QgsVectorLayer("LineStringZ?crs=" + crs.authid(), self.tr('Dimensioning', 'Cotagem'), "memory")
+            self.layerid2 = layer.id()
+
+            # Adicionar estilos
+            if crs.isGeographic():
+                estilo = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'lftools/styles/cotagem_GEO_prof_leandro.qml' )
+            else:
+                estilo = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'lftools/styles/cotagem_UTM_prof_leandro.qml' )
+            layer.loadNamedStyle(estilo)
+
+            # Adicionar camada
+            projeto.addMapLayer(layer)
+            # Obter o nó da camada
+            layer_tree = projeto.layerTreeRoot()
+            layer_node = layer_tree.findLayer(layer.id())
+            if layer_node:
+                # Clonar e mover para o topo
+                parent = layer_node.parent()
+                clone_node = layer_node.clone()
+                parent.insertChildNode(0, clone_node)
+                layer_tree.removeChildNode(layer_node)
+        else:
+            layer = projeto.mapLayer(self.layerid2)
+        # Ativar camada
+        self.iface.setActiveLayer(layer)
+        # colocar no modo edição
+        layer.startEditing()
+        # habilitar ferramenta de vetorização
+        self.iface.actionAddFeature().trigger()
+        return
