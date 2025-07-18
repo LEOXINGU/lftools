@@ -195,241 +195,257 @@ class ValidateTopology(QgsProcessingAlgorithm):
         feedback.pushInfo(self.tr('Checking if each vertex of the Limit layer (line) has the corresponding one of the Vertex layer (point)...', 'Verificando se cada vértice da camada Limite (linha) tem o correspondente da camada Vértice (ponto)...'))
         for feat1 in limites.getFeatures():
             geom1 = feat1.geometry()
-            if geom1.isMultipart():
-                linha = feat1.geometry().asMultiPolyline()[0]
-            else:
-                linha = feat1.geometry().asPolyline()
-            for pnt in linha:
-                corresp = False
-                for feat2 in vertices.getFeatures():
-                    vert = feat2.geometry().asPoint()
-                    if vert == pnt:
-                        corresp = True
-                        continue
-                if not corresp:
-                    cont += 1
-                    X, Y = pnt.x(), pnt.y()
-                    erro = self.tr('Point of the "line" layer has no correspondent in the "point" layer!',
-                                   'Ponto de camada "linha" não possui correspondente na camada "ponto"!')
-                    fet = QgsFeature(Fields)
-                    fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(X,Y)))
-                    fet.setAttributes([cont, feat1.id(), erro])
-                    sink.addFeature(fet, QgsFeatureSink.FastInsert)
-
-        feedback.pushInfo(self.tr('Checking if each vertex of the Area layer (polygon) has the corresponding one of the Vertex layer (point)...', 'Verificando se cada vértice da camada Área (polígono) tem o correspondente da camada Vértice (ponto)...'))
-        for feat1 in area.getFeatures():
-            geom1 = feat1.geometry()
-            if geom1.isMultipart():
-                pols = geom1.asMultiPolygon()
-            else:
-                pols = [geom1.asPolygon()]
-            for aneis in pols:
-                for anel in aneis:
-                    for pnt in anel:
-                        corresp = False
-                        for feat2 in vertices.getFeatures():
-                            vert = feat2.geometry().asPoint()
-                            if vert == pnt:
-                                corresp = True
-                                continue
-                        if not corresp:
-                            cont += 1
-                            X, Y = pnt.x(), pnt.y()
-                            erro = self.tr('Point of the "area" layer has no correspondent in the "point" layer!',
-                                        'Ponto de camada "área" não possui correspondente na camada "ponto"!')
-                            fet = QgsFeature(Fields)
-                            fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(X,Y)))
-                            fet.setAttributes([cont, feat1.id(), erro])
-                            sink.addFeature(fet, QgsFeatureSink.FastInsert)
-
-        feedback.pushInfo(self.tr('Checking if each vertex of the Vertex layer (point) has the corresponding one of the Area layer (polygon)...', 'Verificando se cada vértice da camada Vértice (ponto) tem o correspondente da camada Área (polígono)...'))
-        for feat1 in vertices.getFeatures():
-            vert = feat1.geometry().asPoint()
-            corresp = False
-            for feat2 in area.getFeatures():
-                geom2 = feat2.geometry()
-                if geom2.isMultipart():
-                    pols = geom2.asMultiPolygon()
+            if geom1:
+                if geom1.isMultipart():
+                    linha = feat1.geometry().asMultiPolyline()[0]
                 else:
-                    pols = [geom2.asPolygon()]
-                for aneis in pols:
-                    for anel in aneis:
-                        for pnt in anel:
-                            if vert == pnt:
-                                corresp = True
-                                break
-                    if corresp:
-                        break
-            if not corresp:
-                cont += 1
-                X, Y = vert.x(), vert.y()
-                erro = self.tr('Point of the "point" layer has no correspondent in the "area" layer!',
-                               'Ponto da camada "ponto" não possui correspondente na camada "área"!')
-                fet = QgsFeature(Fields)
-                fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(X,Y)))
-                fet.setAttributes([cont, feat1.id(), erro])
-                sink.addFeature(fet, QgsFeatureSink.FastInsert)
-
-        feedback.pushInfo(self.tr('Checking if each vertex of the Vertex layer (point) has the corresponding one of the limit layer (line)...', 'Verificando se cada vértice da camada Vértice (ponto) tem o correspondente da camada Limite (linha)...'))
-        for feat1 in vertices.getFeatures():
-            geom1 = feat1.geometry()
-            vert = geom1.asPoint()
-            geom1 = geom1.buffer(0.001/110000,5)
-            corresp = False
-            for feat2 in limites.getFeatures():
-                geom2 = feat2.geometry()
-                if geom2.intersects(geom1):
-                    corresp = True
-                    break
-            if not corresp:
-                cont += 1
-                X, Y = vert.x(), vert.y()
-                erro = self.tr('Point of the "point" layer has no correspondent in the "line" layer!',
-                               'Ponto de camada "ponto" não possui correspondente na camada "linha"!')
-                fet = QgsFeature(Fields)
-                fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(X,Y)))
-                fet.setAttributes([cont, feat1.id(), erro])
-                sink.addFeature(fet, QgsFeatureSink.FastInsert)
-
-        feedback.pushInfo(self.tr('Checking for duplicate vertices inside the vertex (point) layer...', 'Verificando vértices duplicados dentro da camada vértice (ponto)...'))
-        pontos = []
-        for feat1 in vertices.getFeatures():
-            vert = feat1.geometry().asPoint()
-            if vert not in pontos:
-                pontos += [vert]
-            else:
-                cont += 1
-                X, Y = vert.x(), vert.y()
-                erro = self.tr('Vertex of the "point" layer is duplicated!',
-                               'Vértice da camada "ponto" está duplicado!')
-                fet = QgsFeature(Fields)
-                fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(X,Y)))
-                fet.setAttributes([cont, feat1.id(), erro])
-                sink.addFeature(fet, QgsFeatureSink.FastInsert)
-
-        feedback.pushInfo(self.tr('Checking for duplicate vertices inside the limit (line) layer...', 'Verificando vértices duplicados dentro da camada limite (linha)...'))
-        for feat1 in limites.getFeatures():
-            geom1 = feat1.geometry()
-            if geom1.isMultipart():
-                linha = feat1.geometry().asMultiPolyline()[0]
-            else:
-                linha = feat1.geometry().asPolyline()
-            pontos = []
-            for pnt in linha:
-                if pnt not in pontos:
-                    pontos += [pnt]
-                else:
-                    if not pnt == linha[-1]: # fechamento de anel linear
+                    linha = feat1.geometry().asPolyline()
+                for pnt in linha:
+                    corresp = False
+                    for feat2 in vertices.getFeatures():
+                        vert = feat2.geometry().asPoint()
+                        if vert == pnt:
+                            corresp = True
+                            continue
+                    if not corresp:
                         cont += 1
                         X, Y = pnt.x(), pnt.y()
-                        erro = self.tr('Vertex of the "line" layer is duplicated!',
-                                    'Vértice da camada "linha" está duplicado!')
+                        erro = self.tr('Point of the "line" layer has no correspondent in the "point" layer!',
+                                    'Ponto de camada "linha" não possui correspondente na camada "ponto"!')
                         fet = QgsFeature(Fields)
                         fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(X,Y)))
                         fet.setAttributes([cont, feat1.id(), erro])
                         sink.addFeature(fet, QgsFeatureSink.FastInsert)
 
-
-        feedback.pushInfo(self.tr('Checking for duplicate vertices inside the area (polygon) layer...', 'Verificando vértices duplicados dentro da camada área (polígono)...'))
+        feedback.pushInfo(self.tr('Checking if each vertex of the Area layer (polygon) has the corresponding one of the Vertex layer (point)...', 'Verificando se cada vértice da camada Área (polígono) tem o correspondente da camada Vértice (ponto)...'))
         for feat1 in area.getFeatures():
             geom1 = feat1.geometry()
-            if geom1.isMultipart():
-                pols = geom1.asMultiPolygon()
-            else:
-                pols = [geom1.asPolygon()]
-            for aneis in pols:
-                for anel in aneis:
-                    pontos = []
-                    for pnt in anel[:-1]:
-                        if pnt not in pontos:
-                            pontos += [pnt]
+            if geom1:
+                if geom1.isMultipart():
+                    pols = geom1.asMultiPolygon()
+                else:
+                    pols = [geom1.asPolygon()]
+                for aneis in pols:
+                    for anel in aneis:
+                        for pnt in anel:
+                            corresp = False
+                            for feat2 in vertices.getFeatures():
+                                vert = feat2.geometry().asPoint()
+                                if vert == pnt:
+                                    corresp = True
+                                    continue
+                            if not corresp:
+                                cont += 1
+                                X, Y = pnt.x(), pnt.y()
+                                erro = self.tr('Point of the "area" layer has no correspondent in the "point" layer!',
+                                            'Ponto de camada "área" não possui correspondente na camada "ponto"!')
+                                fet = QgsFeature(Fields)
+                                fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(X,Y)))
+                                fet.setAttributes([cont, feat1.id(), erro])
+                                sink.addFeature(fet, QgsFeatureSink.FastInsert)
+
+        feedback.pushInfo(self.tr('Checking if each vertex of the Vertex layer (point) has the corresponding one of the Area layer (polygon)...', 'Verificando se cada vértice da camada Vértice (ponto) tem o correspondente da camada Área (polígono)...'))
+        for feat1 in vertices.getFeatures():
+            geom1 = feat1.geometry()
+            if geom1:
+                vert = geom1.asPoint()
+                corresp = False
+                for feat2 in area.getFeatures():
+                    geom2 = feat2.geometry()
+                    if geom2:
+                        if geom2.isMultipart():
+                            pols = geom2.asMultiPolygon()
                         else:
+                            pols = [geom2.asPolygon()]
+                        for aneis in pols:
+                            for anel in aneis:
+                                for pnt in anel:
+                                    if vert == pnt:
+                                        corresp = True
+                                        break
+                            if corresp:
+                                break
+                if not corresp:
+                    cont += 1
+                    X, Y = vert.x(), vert.y()
+                    erro = self.tr('Point of the "point" layer has no correspondent in the "area" layer!',
+                                'Ponto da camada "ponto" não possui correspondente na camada "área"!')
+                    fet = QgsFeature(Fields)
+                    fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(X,Y)))
+                    fet.setAttributes([cont, feat1.id(), erro])
+                    sink.addFeature(fet, QgsFeatureSink.FastInsert)
+
+        feedback.pushInfo(self.tr('Checking if each vertex of the Vertex layer (point) has the corresponding one of the limit layer (line)...', 'Verificando se cada vértice da camada Vértice (ponto) tem o correspondente da camada Limite (linha)...'))
+        for feat1 in vertices.getFeatures():
+            geom1 = feat1.geometry()
+            if geom1:
+                vert = geom1.asPoint()
+                geom1 = geom1.buffer(0.001/110000,5)
+                corresp = False
+                for feat2 in limites.getFeatures():
+                    geom2 = feat2.geometry()
+                    if geom2:
+                        if geom2.intersects(geom1):
+                            corresp = True
+                            break
+                if not corresp:
+                    cont += 1
+                    X, Y = vert.x(), vert.y()
+                    erro = self.tr('Point of the "point" layer has no correspondent in the "line" layer!',
+                                'Ponto de camada "ponto" não possui correspondente na camada "linha"!')
+                    fet = QgsFeature(Fields)
+                    fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(X,Y)))
+                    fet.setAttributes([cont, feat1.id(), erro])
+                    sink.addFeature(fet, QgsFeatureSink.FastInsert)
+
+        feedback.pushInfo(self.tr('Checking for duplicate vertices inside the vertex (point) layer...', 'Verificando vértices duplicados dentro da camada vértice (ponto)...'))
+        pontos = []
+        for feat1 in vertices.getFeatures():
+            geom1 = feat1.geometry()
+            if geom1:
+                vert = geom1.asPoint()
+                if vert not in pontos:
+                    pontos += [vert]
+                else:
+                    cont += 1
+                    X, Y = vert.x(), vert.y()
+                    erro = self.tr('Vertex of the "point" layer is duplicated!',
+                                'Vértice da camada "ponto" está duplicado!')
+                    fet = QgsFeature(Fields)
+                    fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(X,Y)))
+                    fet.setAttributes([cont, feat1.id(), erro])
+                    sink.addFeature(fet, QgsFeatureSink.FastInsert)
+
+        feedback.pushInfo(self.tr('Checking for duplicate vertices inside the limit (line) layer...', 'Verificando vértices duplicados dentro da camada limite (linha)...'))
+        for feat1 in limites.getFeatures():
+            geom1 = feat1.geometry()
+            if geom1:
+                if geom1.isMultipart():
+                    linha = feat1.geometry().asMultiPolyline()[0]
+                else:
+                    linha = feat1.geometry().asPolyline()
+                pontos = []
+                for pnt in linha:
+                    if pnt not in pontos:
+                        pontos += [pnt]
+                    else:
+                        if not pnt == linha[-1]: # fechamento de anel linear
                             cont += 1
                             X, Y = pnt.x(), pnt.y()
-                            erro = self.tr('Vertex of the "area" layer is duplicated!',
-                                           'Vértice da camada "área" está duplicado!')
+                            erro = self.tr('Vertex of the "line" layer is duplicated!',
+                                        'Vértice da camada "linha" está duplicado!')
                             fet = QgsFeature(Fields)
                             fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(X,Y)))
                             fet.setAttributes([cont, feat1.id(), erro])
                             sink.addFeature(fet, QgsFeatureSink.FastInsert)
 
 
+        feedback.pushInfo(self.tr('Checking for duplicate vertices inside the area (polygon) layer...', 'Verificando vértices duplicados dentro da camada área (polígono)...'))
+        for feat1 in area.getFeatures():
+            geom1 = feat1.geometry()
+            if geom1:
+                if geom1.isMultipart():
+                    pols = geom1.asMultiPolygon()
+                else:
+                    pols = [geom1.asPolygon()]
+                for aneis in pols:
+                    for anel in aneis:
+                        pontos = []
+                        for pnt in anel[:-1]:
+                            if pnt not in pontos:
+                                pontos += [pnt]
+                            else:
+                                cont += 1
+                                X, Y = pnt.x(), pnt.y()
+                                erro = self.tr('Vertex of the "area" layer is duplicated!',
+                                            'Vértice da camada "área" está duplicado!')
+                                fet = QgsFeature(Fields)
+                                fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(X,Y)))
+                                fet.setAttributes([cont, feat1.id(), erro])
+                                sink.addFeature(fet, QgsFeatureSink.FastInsert)
+
+
         feedback.pushInfo(self.tr('Checking line layer orientation...', 'Verificando orientação da camada linha...'))
         for feat1 in limites.getFeatures():
             geom1 =  feat1.geometry()
-            if geom1.isMultipart():
-                ultimo_pnt = geom1.asMultiPolyline()[0][-1]
-                p0 = geom1.asMultiPolyline()[0][0]
-            else:
-                ultimo_pnt = geom1.asPolyline()[-1]
-                p0 = geom1.asPolyline()[0]
-            for feat2 in limites.getFeatures():
-                if feat1.id() != feat2.id():
-                    geom2 = feat2.geometry()
-                    if geom2.isMultipart():
-                        primeiro_pnt = geom2.asMultiPolyline()[0][0]
-                    else:
-                        primeiro_pnt = geom2.asPolyline()[0]
-                    if ultimo_pnt == primeiro_pnt:
-                        break
-            else:
-                if ultimo_pnt != p0: # não for fechamento de anel linear
-                    X, Y = ultimo_pnt.x(), ultimo_pnt.y()
-                    erro = self.tr('Problem with the orientation of the vertices of the line layer!',
-                                'Problema na orientação dos vértices da camada de linhas!')
-                    fet = QgsFeature(Fields)
-                    fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(X,Y)))
-                    fet.setAttributes([cont, feat1.id(), erro])
-                    sink.addFeature(fet, QgsFeatureSink.FastInsert)
+            if geom1:
+                if geom1.isMultipart():
+                    ultimo_pnt = geom1.asMultiPolyline()[0][-1]
+                    p0 = geom1.asMultiPolyline()[0][0]
+                else:
+                    ultimo_pnt = geom1.asPolyline()[-1]
+                    p0 = geom1.asPolyline()[0]
+                for feat2 in limites.getFeatures():
+                    if feat1.id() != feat2.id():
+                        geom2 = feat2.geometry()
+                        if geom2:
+                            if geom2.isMultipart():
+                                primeiro_pnt = geom2.asMultiPolyline()[0][0]
+                            else:
+                                primeiro_pnt = geom2.asPolyline()[0]
+                            if ultimo_pnt == primeiro_pnt:
+                                break
+                else:
+                    if ultimo_pnt != p0: # não for fechamento de anel linear
+                        X, Y = ultimo_pnt.x(), ultimo_pnt.y()
+                        erro = self.tr('Problem with the orientation of the vertices of the line layer!',
+                                    'Problema na orientação dos vértices da camada de linhas!')
+                        fet = QgsFeature(Fields)
+                        fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(X,Y)))
+                        fet.setAttributes([cont, feat1.id(), erro])
+                        sink.addFeature(fet, QgsFeatureSink.FastInsert)
 
         # Checar geometrias duplicadas para linhas
         feedback.pushInfo(self.tr('Checking for duplicate geometry line layer...', 'Verificando geometria duplicada na camada de linhas...'))
         geoms = []
         for feat1 in limites.getFeatures():
             geom = feat1.geometry()
-            if geom.asWkt() not in geoms:
-                geoms += [geom.asWkt()]
-            else:
-                pnt = geom.centroid().asPoint()
-                X, Y = pnt.x(), pnt.y()
-                erro = self.tr('Duplicated line geometry in feature ID {}!'.format(feat1.id()),
-                               'Geometria linha duplicada na feição de ID {}!'.format(feat1.id()))
-                fet = QgsFeature(Fields)
-                fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(X,Y)))
-                fet.setAttributes([cont, feat1.id(), erro])
-                sink.addFeature(fet, QgsFeatureSink.FastInsert)
+            if geom:
+                if geom.asWkt() not in geoms:
+                    geoms += [geom.asWkt()]
+                else:
+                    pnt = geom.centroid().asPoint()
+                    X, Y = pnt.x(), pnt.y()
+                    erro = self.tr('Duplicated line geometry in feature ID {}!'.format(feat1.id()),
+                                'Geometria linha duplicada na feição de ID {}!'.format(feat1.id()))
+                    fet = QgsFeature(Fields)
+                    fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(X,Y)))
+                    fet.setAttributes([cont, feat1.id(), erro])
+                    sink.addFeature(fet, QgsFeatureSink.FastInsert)
 
         # Checar geometrias duplicadas para polígono
         feedback.pushInfo(self.tr('Checking for duplicate geometry polygon layer...', 'Verificando geometria duplicada na camada de polígonos...'))
         geoms = []
         for feat1 in area.getFeatures():
             geom = feat1.geometry()
-            if geom.asWkt() not in geoms:
-                geoms += [geom.asWkt()]
-            else:
-                pnt = geom.centroid().asPoint()
-                X, Y = pnt.x(), pnt.y()
-                erro = self.tr('Duplicated polygon geometry in feature ID {}!'.format(feat1.id()),
-                               'Geometria polígono duplicada na feição de ID {}!'.format(feat1.id()))
-                fet = QgsFeature(Fields)
-                fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(X,Y)))
-                fet.setAttributes([cont, feat1.id(), erro])
-                sink.addFeature(fet, QgsFeatureSink.FastInsert)
+            if geom:
+                if geom.asWkt() not in geoms:
+                    geoms += [geom.asWkt()]
+                else:
+                    pnt = geom.centroid().asPoint()
+                    X, Y = pnt.x(), pnt.y()
+                    erro = self.tr('Duplicated polygon geometry in feature ID {}!'.format(feat1.id()),
+                                'Geometria polígono duplicada na feição de ID {}!'.format(feat1.id()))
+                    fet = QgsFeature(Fields)
+                    fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(X,Y)))
+                    fet.setAttributes([cont, feat1.id(), erro])
+                    sink.addFeature(fet, QgsFeatureSink.FastInsert)
 
         # Verificar coordenada Z igual a Zero
         feedback.pushInfo(self.tr('Checking if any vertex has a dimension-Z equal to Zero...', 'Verificando se algum vértice tem cota Z igual a Zero...'))
         for feat1 in vertices.getFeatures():
             geom1 =  feat1.geometry()
-            z = float(geom1.constGet().z())
-            pnt = geom1.asPoint()
-            if str(z) == 'nan' or z == 0:
-                X, Y = pnt.x(), pnt.y()
-                erro = self.tr('Z altitude not filled in correctly!',
-                               'Altitude Z não preenchida corretamente!')
-                fet = QgsFeature(Fields)
-                fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(X,Y)))
-                fet.setAttributes([cont, feat1.id(), erro])
-                sink.addFeature(fet, QgsFeatureSink.FastInsert)
+            if geom1:
+                z = float(geom1.constGet().z())
+                pnt = geom1.asPoint()
+                if str(z) == 'nan' or z == 0:
+                    X, Y = pnt.x(), pnt.y()
+                    erro = self.tr('Z altitude not filled in correctly!',
+                                'Altitude Z não preenchida corretamente!')
+                    fet = QgsFeature(Fields)
+                    fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(X,Y)))
+                    fet.setAttributes([cont, feat1.id(), erro])
+                    sink.addFeature(fet, QgsFeatureSink.FastInsert)
 
         def avaliar_erros(cont):
             if cont == 0:
