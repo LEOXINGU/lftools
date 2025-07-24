@@ -16,7 +16,7 @@ __copyright__ = '(C) 2021, Leandro França'
 
 from numpy import radians, arctan, pi, sin, cos, sqrt, degrees, array, diag, ones, zeros, floor
 from numpy.linalg import norm, pinv, inv
-from pyproj.crs import CRS
+from qgis.core import QgsEllipsoidUtils
 import datetime as dt
 import numpy as np
 
@@ -262,10 +262,11 @@ def enu2geoc(E, N, U, lon0, lat0, Xo, Yo, Zo):
 
 # Transformar distancia em metros para graus
 def meters2degrees(dist, lat, SRC):
-    EPSG = int(SRC.authid().split(':')[-1])
-    proj_crs = CRS.from_epsg(EPSG)
-    a=proj_crs.ellipsoid.semi_major_metre
-    f=1/proj_crs.ellipsoid.inverse_flattening
+    ellipsoid_id = SRC.ellipsoidAcronym()
+    ellipsoid = QgsEllipsoidUtils.ellipsoidParameters(ellipsoid_id)
+    a = ellipsoid.semiMajor
+    f_inv = ellipsoid.inverseFlattening
+    f=1/f_inv
     e2 = f*(2-f)
     N = a/np.sqrt(1-e2*(np.sin(lat))**2) # Raio de curvatura 1º vertical
     M = a*(1-e2)/(1-e2*(np.sin(lat))**2)**(3/2.) # Raio de curvatura meridiana
@@ -277,10 +278,11 @@ def meters2degrees(dist, lat, SRC):
 
 # Transformar de graus para metros
 def degrees2meters(theta, lat, SRC):
-    EPSG = int(SRC.authid().split(':')[-1])
-    proj_crs = CRS.from_epsg(EPSG)
-    a=proj_crs.ellipsoid.semi_major_metre
-    f=1/proj_crs.ellipsoid.inverse_flattening
+    ellipsoid_id = SRC.ellipsoidAcronym()
+    ellipsoid = QgsEllipsoidUtils.ellipsoidParameters(ellipsoid_id)
+    a = ellipsoid.semiMajor
+    f_inv = ellipsoid.inverseFlattening
+    f=1/f_inv
     e2 = f*(2-f)
     N = a/np.sqrt(1-e2*(np.sin(lat))**2) # Raio de curvatura 1º vertical
     M = a*(1-e2)/(1-e2*(np.sin(lat))**2)**(3/2.) # Raio de curvatura meridiana
