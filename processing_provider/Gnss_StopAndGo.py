@@ -48,6 +48,7 @@ from qgis.core import (QgsProcessing,
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
 from lftools.geocapt.cartography import raioMedioGauss
+from lftools.geocapt.topogeo import meters2degrees
 import numpy as np
 from pyproj.crs import CRS
 from datetime import datetime
@@ -182,22 +183,12 @@ Dados de entrada:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.DIST))
         dist_max /= 1e2 # metros
 
-        itens  = {"ord": QVariant.Int,
-                  "lat": QVariant.Double,
-                  "lon": QVariant.Double,
-                  "h": QVariant.Double,
-                  self.tr("datetime","datahora"): QVariant.String,
-                  "sigma_x": QVariant.Double,
-                  "sigma_y": QVariant.Double,
-                  "sigma_z": QVariant.Double,
-                  "num_sat": QVariant.Int,
-                  "quality": QVariant.String,
-                  "start_time": QVariant.String,
+        Fields = layer.fields()
+        itens  = {"start_time": QVariant.String,
                   "end_time": QVariant.String,
                   "count": QVariant.Int,
                   "group": QVariant.Int
              }
-        Fields = QgsFields()
         for item in itens:
             Fields.append(QgsField(item, itens[item]))
 
@@ -211,16 +202,7 @@ Dados de entrada:
         SRC = layer.sourceCrs()
         y_max = extensao.yMaximum()
         y_min = extensao.yMinimum()
-        EPSG = int(SRC.authid().split(':')[-1])
-        proj_crs = CRS.from_epsg(EPSG)
-        a=proj_crs.ellipsoid.semi_major_metre
-        f=1/proj_crs.ellipsoid.inverse_flattening
-        e2 = f*(2-f)
-        N = a/np.sqrt(1-e2*(np.sin((y_min+y_max)/2))**2) # Raio de curvatura 1º vertical
-        M = a*(1-e2)/(1-e2*(np.sin((y_min+y_max)/2))**2)**(3/2.) # Raio de curvatura meridiana
-        R = np.sqrt(M*N) # Raio médio de Gauss
-        theta = dist_max/R
-        dist_max = np.degrees(theta) # Radianos para graus
+        dist_max = meters2degrees(dist_max, (y_min+y_max)/2, SRC)
 
         x, y = [],[]
         pontos = []
