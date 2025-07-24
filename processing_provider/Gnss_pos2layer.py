@@ -229,7 +229,8 @@ Tipos:
                   "sigma_y": QVariant.Double,
                   "sigma_z": QVariant.Double,
                   "num_sat": QVariant.Int,
-                  "quality": QVariant.String
+                  "quality": QVariant.String,
+                  "h_reduction": QVariant.Double,
              }
         Fields = QgsFields()
         for item in itens:
@@ -336,6 +337,7 @@ Tipos:
             feat['sigma_z'] = sh
             feat['num_sat'] = nsat
             feat['quality'] = quality
+            feat['h_reduction'] = aa
 
             if model_vel > 0 and saida == 0:
                 vlat, vlon = vemos(lat, lon, ['vemos2009','vemos2017','vemos2022'][model_vel-1])
