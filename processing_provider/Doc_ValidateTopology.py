@@ -160,17 +160,17 @@ class ValidateTopology(QgsProcessingAlgorithm):
             for feat in layer.getFeatures():
                 geom = feat.geometry()
 
-                if geom is None:
-                    erro = self.tr(
-                        'Null geometry in feature ID {} of layer "{}"!',
-                        'Geometria nula na feição de ID {} da camada "{}"!'
-                    ).format(feat.id(), nome_camada)
-                    feedback.reportError(erro)
-
-                elif geom.isEmpty():
+                if geom.isEmpty():
                     erro = self.tr(
                         'Empty geometry in feature ID {} of layer "{}"!',
                         'Geometria vazia na feição de ID {} da camada "{}"!'
+                    ).format(feat.id(), nome_camada)
+                    feedback.reportError(erro)
+
+                elif geom is None:
+                    erro = self.tr(
+                        'Null geometry in feature ID {} of layer "{}"!',
+                        'Geometria nula na feição de ID {} da camada "{}"!'
                     ).format(feat.id(), nome_camada)
                     feedback.reportError(erro)
 
