@@ -1412,12 +1412,24 @@ def deedtable(layer_name, ini, fim, titulo, decimal, fontsize, tipo, azimuth_dis
     tipo = tipo.lower()
 
     if isinstance(decimal, list):
+        if not isinstance(decimal[0], int):
+            prec_h = round(10*float(decimal[0] - np.floor(decimal[0])))
+            decimal[0] = int(decimal[0])
+        else:
+            prec_h = decimal[0]
         format_utm = '{:,.Xf}'.replace('X', str(decimal[0]))
+        format_h = '{:,.Xf}'.replace('X', str(prec_h))
         prec_geo = decimal[0]
         prec_Azimute = decimal[1]
         format_dist = '{:,.Xf}'.replace('X', str(decimal[2]))
     else:
+        if not isinstance(decimal, int):
+            prec_h = round(10*float(decimal - np.floor(decimal)))
+            decimal = int(decimal)
+        else:
+            prec_h = decimal
         format_utm = '{:,.Xf}'.replace('X', str(decimal))
+        format_h = '{:,.Xf}'.replace('X', str(prec_h))
         prec_geo = decimal + 2
         prec_Azimute = 1
         format_dist = '{:,.Xf}'.replace('X', str(decimal))
@@ -1493,7 +1505,7 @@ def deedtable(layer_name, ini, fim, titulo, decimal, fontsize, tipo, azimuth_dis
         itens = {'Vn': pnts_UTM[k+1][2],
                  'En': tr(format_utm.format(pnts_UTM[k+1][0].x()), format_utm.format(pnts_UTM[k+1][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
                  'Nn': tr(format_utm.format(pnts_UTM[k+1][0].y()), format_utm.format(pnts_UTM[k+1][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                 'hn': tr(format_utm.format(pnts_GEO[k+1][0].z()), format_utm.format(pnts_GEO[k+1][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                 'hn': tr(format_h.format(pnts_GEO[k+1][0].z()), format_h.format(pnts_GEO[k+1][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.')),
                  'lonn': lonn,
                  'latn': latn,
                  'Ln': pnts_UTM[k+1][2] + '/' + pnts_UTM[1 if k+2 > tam else k+2][2],
@@ -1553,12 +1565,24 @@ def deedtable2(prefix, titulo, decimal, fontsize, tipo, azimuth_dist, feature, p
     tipo = tipo.lower()
 
     if isinstance(decimal, list):
+        if not isinstance(decimal[0], int):
+            prec_h = round(10*float(decimal[0] - np.floor(decimal[0])))
+            decimal[0] = int(decimal[0])
+        else:
+            prec_h = decimal[0]
         format_utm = '{:,.Xf}'.replace('X', str(decimal[0]))
+        format_h = '{:,.Xf}'.replace('X', str(prec_h))
         prec_geo = decimal[0]
         prec_Azimute = decimal[1]
         format_dist = '{:,.Xf}'.replace('X', str(decimal[2]))
     else:
+        if not isinstance(decimal, int):
+            prec_h = round(10*float(decimal - np.floor(decimal)))
+            decimal = int(decimal)
+        else:
+            prec_h = decimal
         format_utm = '{:,.Xf}'.replace('X', str(decimal))
+        format_h = '{:,.Xf}'.replace('X', str(prec_h))
         prec_geo = decimal + 2
         prec_Azimute = 1
         format_dist = '{:,.Xf}'.replace('X', str(decimal))
@@ -1800,12 +1824,24 @@ def deedtable3(prefix, titulo, decimal, fontsize, tipo, azimuth_dist, feature, p
     tipo = tipo.lower()
 
     if isinstance(decimal, list):
+        if not isinstance(decimal[0], int):
+            prec_h = round(10*float(decimal[0] - np.floor(decimal[0])))
+            decimal[0] = int(decimal[0])
+        else:
+            prec_h = decimal[0]
         format_utm = '{:,.Xf}'.replace('X', str(decimal[0]))
+        format_h = '{:,.Xf}'.replace('X', str(prec_h))
         prec_geo = decimal[0]
         prec_Azimute = decimal[1]
         format_dist = '{:,.Xf}'.replace('X', str(decimal[2]))
     else:
+        if not isinstance(decimal, int):
+            prec_h = round(10*float(decimal - np.floor(decimal)))
+            decimal = int(decimal)
+        else:
+            prec_h = decimal
         format_utm = '{:,.Xf}'.replace('X', str(decimal))
+        format_h = '{:,.Xf}'.replace('X', str(prec_h))
         prec_geo = decimal + 2
         prec_Azimute = 1
         format_dist = '{:,.Xf}'.replace('X', str(decimal))
@@ -1955,7 +1991,7 @@ def deedtable3(prefix, titulo, decimal, fontsize, tipo, azimuth_dist, feature, p
             itens = {'Vn': pnts_UTM[k+1][2],
                         'En': tr(format_utm.format(pnts_UTM[k+1][0].x()), format_utm.format(pnts_UTM[k+1][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
                         'Nn': tr(format_utm.format(pnts_UTM[k+1][0].y()), format_utm.format(pnts_UTM[k+1][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                        'hn': tr(format_utm.format(pnts_UTM[k+1][0].z()), format_utm.format(pnts_UTM[k+1][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                        'hn': tr(format_h.format(pnts_UTM[k+1][0].z()), format_h.format(pnts_UTM[k+1][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.')),
                         'lonn': lonn,
                         'latn': latn,
                         'Ln': '-' if TipoGeometria == 1 and k+1 == tam else pnts_UTM[k+1][2] + '/' + pnts_UTM[1 if k+2 > tam else k+2][2],
@@ -2018,12 +2054,24 @@ def deedtext(description, estilo, prefix, decimal, calculation, fontsize, featur
     SGR = QgsCoordinateReferenceSystem(SRC.geographicCrsAuthId())
 
     if isinstance(decimal, list):
+        if not isinstance(decimal[0], int):
+            prec_h = round(10*float(decimal[0] - np.floor(decimal[0])))
+            decimal[0] = int(decimal[0])
+        else:
+            prec_h = decimal[0]
         format_utm = '{:,.Xf}'.replace('X', str(decimal[0]))
+        format_h = '{:,.Xf}'.replace('X', str(prec_h))
         prec_geo = decimal[0]
         prec_Azimute = decimal[1]
         format_dist = '{:,.Xf}'.replace('X', str(decimal[2]))
     else:
+        if not isinstance(decimal, int):
+            prec_h = round(10*float(decimal - np.floor(decimal)))
+            decimal = int(decimal)
+        else:
+            prec_h = decimal
         format_utm = '{:,.Xf}'.replace('X', str(decimal))
+        format_h = '{:,.Xf}'.replace('X', str(prec_h))
         prec_geo = decimal + 2
         prec_Azimute = 1
         format_dist = '{:,.Xf}'.replace('X', str(decimal))
@@ -2283,7 +2331,7 @@ def deedtext(description, estilo, prefix, decimal, calculation, fontsize, featur
                      '[descr_pnt_ini]': descr_pnt_ini + ', ' if descr_pnt_ini else ''
                         }
             if 'h' in estilo:
-                itens['[hn]'] = tr(format_utm.format(pnts_UTM[1][0].z()), format_utm.format(pnts_UTM[1][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.'))
+                itens['[hn]'] = tr(format_h.format(pnts_UTM[1][0].z()), format_h.format(pnts_UTM[1][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.'))
             for item in itens:
                 text_ini = text_ini.replace(item, itens[item]).replace('[FONTSIZE]', str(fontsize))
 
@@ -2300,8 +2348,8 @@ def deedtext(description, estilo, prefix, decimal, calculation, fontsize, featur
                              '[Dn]': tr(format_dist.format(Dist[k]), format_dist.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'))
                                 }
                     if 'h' in estilo:
-                        itens['[hn]'] = tr(format_utm.format(pnts_UTM[indice][0].z()),
-                                           format_utm.format(pnts_UTM[indice][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.'))
+                        itens['[hn]'] = tr(format_h.format(pnts_UTM[indice][0].z()),
+                                           format_h.format(pnts_UTM[indice][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.'))
                     for item in itens:
                         linha0 = linha0.replace(item, itens[item])
                     LINHAS += linha0
@@ -2317,8 +2365,8 @@ def deedtext(description, estilo, prefix, decimal, calculation, fontsize, featur
                              '[Dn]': tr(format_dist.format(Dist[k]), format_dist.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'))
                                 }
                     if 'h' in estilo:
-                        itens['[hn]'] = tr(format_utm.format(pnts_UTM[indice][0].z()),
-                                           format_utm.format(pnts_UTM[indice][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.'))
+                        itens['[hn]'] = tr(format_h.format(pnts_UTM[indice][0].z()),
+                                           format_h.format(pnts_UTM[indice][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.'))
                     for item in itens:
                         linha0 = linha0.replace(item, itens[item])
                     LINHAS += linha0
@@ -2353,7 +2401,7 @@ def deedtext(description, estilo, prefix, decimal, calculation, fontsize, featur
                      '[Yn]': CoordenadaN (pnts_UTM[1], pnts_GEO[1], estilo, decimal)[1]
                         }
             if 'h' in estilo:
-                itens['[hn]'] = tr(format_utm.format(pnts_UTM[1][0].z()), format_utm.format(pnts_UTM[1][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.'))
+                itens['[hn]'] = tr(format_h.format(pnts_UTM[1][0].z()), format_h.format(pnts_UTM[1][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.'))
             for item in itens:
                 text_ini = text_ini.replace(item, itens[item]).replace('[FONTSIZE]', str(fontsize))
 
@@ -2393,8 +2441,8 @@ def deedtext(description, estilo, prefix, decimal, calculation, fontsize, featur
                          '[ADJOINER]': Confrontante,
                             }
                 if 'h' in estilo:
-                    itens['[hn]'] = tr(format_utm.format(pnts_UTM[indice][0].z()),
-                                       format_utm.format(pnts_UTM[indice][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.'))
+                    itens['[hn]'] = tr(format_h.format(pnts_UTM[indice][0].z()),
+                                       format_h.format(pnts_UTM[indice][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.'))
 
                 for item in itens:
                     try:
