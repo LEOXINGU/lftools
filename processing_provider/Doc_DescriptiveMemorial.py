@@ -300,19 +300,27 @@ class DescriptiveMemorial(QgisAlgorithm):
         decimal = decimal.replace(' ','').split(',')
         if not validar_precisoes(decimal,[1,5]):
             raise QgsProcessingException(self.invalidSourceError(parameters, self.DECIMAL))
+
+        if not isinstance(decimal[0], int):
+            prec_h = round(10*(decimal[0] - np.floor(decimal[0])))
+            decimal[0] = int(decimal[0])
+        else:
+            prec_h = decimal[0]
         format_utm = '{:,.Xf}'.replace('X', decimal[0])
+        format_h = '{:,.Xf}'.replace('X', str(prec_h))
         if len(decimal) == 1:
-            decimal_azim = 1
-            decimal_geo = int(decimal[0]) +2
+            decimal_geo = round(decimal[0]) + 2
             format_dist = '{:,.Xf}'.replace('X', decimal[0])
-            decimal_area = int(decimal[0])
+            decimal_area = round(decimal[0])
             format_perim =  '{:,.Xf}'.replace('X', decimal[0])
+            decimal_azim = 1
         elif len(decimal) == 5:
-            decimal_geo = int(decimal[0])
-            decimal_azim = int(decimal[1])
+            decimal_geo = round(decimal[0])
+            decimal_azim = round(decimal[1])
             format_dist = '{:,.Xf}'.replace('X', decimal[2])
-            decimal_area = int(decimal[3])
+            decimal_area = round(decimal[3])
             format_perim =  '{:,.Xf}'.replace('X', decimal[4])
+
         if calculo in (1,3,5) and len(decimal) == 1: # Hectares
             format_area = '{:,.Xf}'.replace('X', str(decimal_area+2))
         else:
@@ -692,7 +700,7 @@ class DescriptiveMemorial(QgisAlgorithm):
             if coordenadas in (8,9,10,11):
                 Xn = str2HTML(self.tr(dd2dms(x,decimal_geo), dd2dms(x,decimal_geo).replace('.', ',')))
                 Yn = str2HTML(self.tr(dd2dms(y,decimal_geo), dd2dms(y,decimal_geo).replace('.', ',')))
-            Zn = self.tr(format_utm.format(z), format_utm.format(z).replace(',', 'X').replace('.', ',').replace('X', '.'))
+            Zn = self.tr(format_h.format(z), format_h.format(z).replace(',', 'X').replace('.', ',').replace('X', '.'))
             if coordenadas == 0:
                 txt = '''<b>N [Yn]m </b>''' + self.tr('and','e') +''' <b>E [Xn]m</b>'''
             elif coordenadas == 1:
