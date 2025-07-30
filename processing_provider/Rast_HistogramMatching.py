@@ -78,7 +78,7 @@ class HistogramMatching(QgsProcessingAlgorithm):
         return 'raster'
 
     def tags(self):
-        return self.tr('estatísticas,histograma,matching,statistics,zonal,zonais,amostra,sample,mean,average,std,bands,values').split(',')
+        return 'GeoOne,estatísticas,histograma,matching,statistics,zonal,zonais,amostra,sample,mean,average,std,bands,values'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/raster.png'))
