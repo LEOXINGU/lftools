@@ -58,7 +58,7 @@ class ImportRaster(QgsProcessingAlgorithm):
         return 'postgis'
 
     def tags(self):
-        return self.tr('postgis,postgresql,database,BD,DB,import,raster,overview,tiling').split(',')
+        return 'GeoOne,postgis,postgresql,database,BD,DB,import,raster,overview,tiling'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/postgis.png'))
