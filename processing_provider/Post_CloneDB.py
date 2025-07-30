@@ -58,7 +58,7 @@ class CloneDB(QgsProcessingAlgorithm):
         return 'postgis'
 
     def tags(self):
-        return self.tr('postgis,postgresql,database,BD,DB,clone,backup,manager,copy,version,control').split(',')
+        return 'GeoOne,postgis,postgresql,database,BD,DB,clone,backup,manager,copy,version,control'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/postgis.png'))
