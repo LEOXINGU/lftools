@@ -67,7 +67,7 @@ class RandomDist(QgsProcessingAlgorithm):
         return self.tr('Gaussian random points', 'Pontos aleatórios gaussiano')
 
     def tags(self):
-        return self.tr('gaussian,random,distribution,normal,mean,variance').split(',')
+        return 'GeoOne,gaussian,random,distribution,normal,mean,variance'.split(',')
 
     def group(self):
         return self.tr('Spatial Statistics', 'Estatística Espacial')
