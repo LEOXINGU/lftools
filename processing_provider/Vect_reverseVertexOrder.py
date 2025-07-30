@@ -57,7 +57,7 @@ class ReverseVertexOrder(QgsProcessingAlgorithm):
         return 'vector'
 
     def tags(self):
-        return self.tr('sequence,reverse,vertex,point,organize,orientar,orientation,topography').split(',')
+        return 'GeoOne,sequence,reverse,vertex,point,organize,orientar,orientation,topography'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/vetor.png'))

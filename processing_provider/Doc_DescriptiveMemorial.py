@@ -91,7 +91,7 @@ class DescriptiveMemorial(QgisAlgorithm):
         return 'documents'
 
     def tags(self):
-        return self.tr('area,perimeter,deed,description,descriptive,memorial,3 cliques,property,topography,survey,real,estate,georreferencing,plan,cadastral,cadastre,documnt').split(',')
+        return 'GeoOne,area,perimeter,deed,description,descriptive,memorial,3 cliques,property,topography,survey,real,estate,georreferencing,plan,cadastral,cadastre,document'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/document.png'))

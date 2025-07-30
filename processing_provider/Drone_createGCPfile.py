@@ -59,7 +59,7 @@ class CreateGCPfile(QgsProcessingAlgorithm):
         return 'drones'
 
     def tags(self):
-        return self.tr('drones,fotografia,webodm,opendronemap,odm,photography,gcp,copy,points,control,ground,quality,homologous,controle,terreno').split(',')
+        return 'GeoOne,drones,fotografia,webodm,opendronemap,odm,photography,gcp,copy,points,control,ground,quality,homologous,controle,terreno'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/drone.png'))

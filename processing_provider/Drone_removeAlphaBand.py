@@ -77,7 +77,7 @@ class RemoveAlphaBand(QgsProcessingAlgorithm):
         return 'drones'
 
     def tags(self):
-        return self.tr('alpha,band,remove,reduce,bands,compact,compress').split(',')
+        return 'GeoOne,alpha,band,remove,reduce,bands,compact,compress'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/drone.png'))

@@ -49,7 +49,7 @@ class SelectByKeyAtt(QgsProcessingAlgorithm):
         return 'easy'
 
     def tags(self):
-        return self.tr('selecionar,pimary,key,foreing,estrangeira,chave,selected,relação,relation').split(',')
+        return 'GeoOne,selecionar,pimary,key,foreing,estrangeira,chave,selected,relação,relation'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/easy.png'))

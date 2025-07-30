@@ -77,7 +77,7 @@ class PointsFromText(QgsProcessingAlgorithm):
         return 'documents'
 
     def tags(self):
-        return self.tr('deed,regex,regular,expression,expressão,description,descriptive,memorial,property,topography,surveying,real,estate,georreferencing,plan,cadastral,cadastre,document').split(',')
+        return 'GeoOne,deed,regex,regular,expression,expressão,description,descriptive,memorial,property,topography,surveying,real,estate,georreferencing,plan,cadastral,cadastre,document'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/document.png'))

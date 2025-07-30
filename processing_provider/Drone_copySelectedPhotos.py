@@ -46,7 +46,7 @@ class CopySelectedPhotos(QgsProcessingAlgorithm):
         return 'drones'
 
     def tags(self):
-        return self.tr('drones,fotografia,photography,blocks,copy,copiar,separate,separar,organize,organizar,filtrar,filter').split(',')
+        return 'GeoOne,drones,fotografia,photography,blocks,copy,copiar,separate,separar,organize,organizar,filtrar,filter'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/drone.png'))
@@ -163,7 +163,7 @@ class CopySelectedPhotos(QgsProcessingAlgorithm):
                     shutil.move(origem, os.path.join(destino, nome))
             else:
                 feedback.reportError('📢 ' + self.tr('Path {} does not exist!', 'Caminho {} não exite!').format(origem))
-                
+
             if feedback.isCanceled():
                 break
             feedback.setProgress(int((cont) * total))

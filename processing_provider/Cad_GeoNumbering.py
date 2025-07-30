@@ -58,7 +58,7 @@ class GeoNumbering(QgsProcessingAlgorithm):
         return 'cadastro'
 
     def tags(self):
-        return self.tr('cadastro,geographic,sequence,north,south,east,west,number,code,codificar,organize,system').split(',')
+        return 'GeoOne,cadastro,geographic,sequence,north,south,east,west,number,code,codificar,organize,system'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/cadastre.png'))

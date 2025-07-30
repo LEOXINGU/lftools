@@ -48,7 +48,7 @@ class GetAttributeByLocation(QgsProcessingAlgorithm):
         return 'easy'
 
     def tags(self):
-        return self.tr('easy,topologia,centroide,quadra,lote,parcel,setor,cadastro,cadastre,parcela,polígono').split(',')
+        return 'GeoOne,easy,topologia,centroide,quadra,lote,parcel,setor,cadastro,cadastre,parcela,polígono'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/easy.png'))
@@ -243,7 +243,7 @@ Os campos de origem e de destino devem ser indicadas para preenchimento dos atri
         feedback.pushInfo(self.tr('Filling attributes...', 'Preenchendo atributos...'))
         if topologia == 0:
             feicoes = {}
-            for feat in lotes.getSelectedFeatures() if selec_origem else lotes.getFeatures(): 
+            for feat in lotes.getSelectedFeatures() if selec_origem else lotes.getFeatures():
                 feicoes[feat.id()] = feat
 
             for feat1 in edif.getSelectedFeatures() if selec_dest else edif.getFeatures():

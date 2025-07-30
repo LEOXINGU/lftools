@@ -81,7 +81,7 @@ class GeorrefAdjust(QgsProcessingAlgorithm):
         return 'drones'
 
     def tags(self):
-        return self.tr('drone,mosaic,adjustment,raster,combine,mosaik,mosaico,georreferencing,georreferenciamento,ajuste,registry,registro,GCP,planimetrico,ground control points,pontos de controle').split(',')
+        return 'GeoOne,drone,mosaic,adjustment,raster,combine,mosaik,mosaico,georreferencing,georreferenciamento,ajuste,registry,registro,GCP,planimetrico,ground control points,pontos de controle'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/drone.png'))

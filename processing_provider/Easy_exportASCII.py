@@ -49,7 +49,7 @@ class ExportASCII(QgsProcessingAlgorithm):
         return 'easy'
 
     def tags(self):
-        return self.tr('mão na roda,easy,fácil,ASCII,atributos,attributes,expressions,expressão,concatenar,concatenate,functions,funções').split(',')
+        return 'GeoOne,mão na roda,easy,fácil,ASCII,atributos,attributes,expressions,expressão,concatenar,concatenate,functions,funções'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/easy.png'))
@@ -147,7 +147,7 @@ class ExportASCII(QgsProcessingAlgorithm):
         )
         if layer is None:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.LAYER))
-        
+
         layer_real = self.parameterAsVectorLayer(parameters, self.LAYER, context)
 
         campo = self.parameterAsFields(
@@ -214,7 +214,7 @@ class ExportASCII(QgsProcessingAlgorithm):
         for current, feat in enumerate(layer.getFeatures()):
             nome = str(feat[campo]) + formato
             att = feat.attributes()
-            
+
             contexto = QgsExpressionContext()
 
             scope_feat = QgsExpressionContextScope("feature")

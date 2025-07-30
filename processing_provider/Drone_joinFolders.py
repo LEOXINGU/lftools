@@ -58,7 +58,7 @@ class JoinFolders(QgsProcessingAlgorithm):
         return 'drones'
 
     def tags(self):
-        return self.tr('drones,fotografia,photography,blocks,join,juntar,organize,organizar').split(',')
+        return 'GeoOne,drones,fotografia,photography,blocks,join,juntar,organize,organizar'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/drone.png'))

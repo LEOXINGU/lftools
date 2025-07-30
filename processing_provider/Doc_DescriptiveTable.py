@@ -73,7 +73,7 @@ class DescriptiveTable(QgsProcessingAlgorithm):
         return 'documents'
 
     def tags(self):
-        return self.tr('monograph,table,deed,description,geodetic,descriptive,syntetic,memorial,property,topography,survey,real,estate,georreferencing,plan,cadastral,cadastre,documnt').split(',')
+        return 'GeoOne,monograph,table,deed,description,geodetic,descriptive,syntetic,memorial,property,topography,survey,real,estate,georreferencing,plan,cadastral,cadastre,document'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/document.png'))

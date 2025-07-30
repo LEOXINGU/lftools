@@ -76,7 +76,7 @@ class OverviewsJPEG(QgsProcessingAlgorithm):
         return 'drones'
 
     def tags(self):
-        return self.tr('drone,compression,reduce,size,JPEG,JPG,photometric,compact,image,overviews,piramides,faster,velocity').split(',')
+        return 'GeoOne,drone,compression,reduce,size,JPEG,JPG,photometric,compact,image,overviews,piramides,faster,velocity'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/drone.png'))

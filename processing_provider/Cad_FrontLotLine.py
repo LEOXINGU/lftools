@@ -61,7 +61,7 @@ class FrontLotLine(QgsProcessingAlgorithm):
         return 'cadastro'
 
     def tags(self):
-        return self.tr('cadastro,parcela,sequence,number,code,codificar,organize,system,lot,line,front,cadastre,street,borderer,testada,linha,loteamento').split(',')
+        return 'GeoOne,cadastro,parcela,sequence,number,code,codificar,organize,system,lot,line,front,cadastre,street,borderer,testada,linha,loteamento'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/cadastre.png'))

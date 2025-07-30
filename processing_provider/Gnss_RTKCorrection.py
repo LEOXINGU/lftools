@@ -81,7 +81,7 @@ class RTKCorrection(QgsProcessingAlgorithm):
         return 'gnss'
 
     def tags(self):
-        return self.tr('gps,position,ibge,ppp,ppk,navigation,ajdusted,ajustar,ajustado,ajustada,satellites,corrected,corrigir,surveying,rinex,glonass,beidou,compass,galileu,track,kinematic,rtk,ntrip,static,real').split(',')
+        return 'GeoOne,gps,position,ibge,ppp,ppk,navigation,ajdusted,ajustar,ajustado,ajustada,satellites,corrected,corrigir,surveying,rinex,glonass,beidou,compass,galileu,track,kinematic,rtk,ntrip,static,real'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/satellite.png'))

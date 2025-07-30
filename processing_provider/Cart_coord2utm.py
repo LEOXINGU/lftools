@@ -52,7 +52,7 @@ class Coord2UTMGrid(QgsProcessingAlgorithm):
         return 'cartography'
 
     def tags(self):
-        return self.tr('name,coordinates,carta,folha,frame,utm,grid,system,map,inom,mi,sistemático,índice,nomenclatura,grade,mapeamento,moldura').split(',')
+        return 'GeoOne,name,coordinates,carta,folha,frame,utm,grid,system,map,inom,mi,sistemático,índice,nomenclatura,grade,mapeamento,moldura'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/cart_frame.png'))

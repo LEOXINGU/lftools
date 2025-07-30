@@ -66,7 +66,7 @@ class ValidateTopology(QgsProcessingAlgorithm):
         return 'documents'
 
     def tags(self):
-        return self.tr('validate,validar,topology,topologia,contains,contém,aggregate,vertex,duplicate,connect,conectividade,topografia,imóvel,memorial,deed description').split(',')
+        return 'GeoOne,validate,validar,topology,topologia,contains,contém,aggregate,vertex,duplicate,connect,conectividade,topografia,imóvel,memorial,deed description'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/document.png'))

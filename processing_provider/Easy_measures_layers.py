@@ -45,7 +45,7 @@ class MeasureLayers(QgsProcessingAlgorithm):
         return 'easy'
 
     def tags(self):
-        return self.tr('measure,layer,area,perimeter,length,area,área,perímetro,comprimento,hectares,metros,meters,multiple,feet,meters,km,square,SGL,LTP,units').split(',')
+        return 'GeoOne,measure,layer,area,perimeter,length,area,área,perímetro,comprimento,hectares,metros,meters,multiple,feet,meters,km,square,SGL,LTP,units'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/easy.png'))

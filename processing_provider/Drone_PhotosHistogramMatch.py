@@ -80,7 +80,7 @@ class PhotosHistogramMatch(QgsProcessingAlgorithm):
         return 'drones'
 
     def tags(self):
-        return self.tr('drone,match,mosaic,casar,ajuste,casamento,ajustamento,equalização,equalization,adjustment,histograma,fotos').split(',')
+        return 'GeoOne,drone,match,mosaic,casar,ajuste,casamento,ajustamento,equalização,equalization,adjustment,histograma,fotos'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/drone.png'))

@@ -54,7 +54,7 @@ class CoordinatesToLayer(QgsProcessingAlgorithm):
         return 'easy'
 
     def tags(self):
-        return self.tr('easy,coordinate,table,layer,spreadsheet,excel,calc,csv,import,points').split(',')
+        return 'GeoOne,easy,coordinate,table,layer,spreadsheet,excel,calc,csv,import,points'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/easy.png'))

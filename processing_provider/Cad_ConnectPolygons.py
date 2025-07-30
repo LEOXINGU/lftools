@@ -60,7 +60,7 @@ class ConnectFeatures(QgsProcessingAlgorithm):
         return 'cadastro'
 
     def tags(self):
-        return self.tr('connect,polygons,polígonos,conectar,validation,topology,cadastro,parcela,organize,system,cadastre,borderer,testada,linha,loteamento,adjacency,adjacência,dangle,lacuna,overlap,validação,qualidade,quality').split(',')
+        return 'GeoOne,connect,polygons,polígonos,conectar,validation,topology,cadastro,parcela,organize,system,cadastre,borderer,testada,linha,loteamento,adjacency,adjacência,dangle,lacuna,overlap,validação,qualidade,quality'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/cadastre.png'))

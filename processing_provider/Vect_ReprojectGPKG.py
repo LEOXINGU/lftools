@@ -76,7 +76,7 @@ class ReprojectGPKG(QgsProcessingAlgorithm):
         return 'vector'
 
     def tags(self):
-        return self.tr('GPKG,GeoPackage,TopoGeo,convert,reprojetar,transform,coordinate,CRS,SRC,pacote').split(',')
+        return 'GeoOne,GPKG,GeoPackage,TopoGeo,convert,reprojetar,transform,coordinate,CRS,SRC,pacote'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/vetor.png'))

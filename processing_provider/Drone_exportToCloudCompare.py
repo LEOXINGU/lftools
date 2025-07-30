@@ -62,7 +62,7 @@ class ExportToCloudCompare(QgsProcessingAlgorithm):
         return 'drones'
 
     def tags(self):
-        return self.tr('drones,cc,fotografia,photography,gcp,copy,points,control,ground,quality,homologous,controle,terreno').split(',')
+        return 'GeoOne,drones,cc,fotografia,photography,gcp,copy,points,control,ground,quality,homologous,controle,terreno'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/drone.png'))
@@ -132,12 +132,12 @@ class ExportToCloudCompare(QgsProcessingAlgorithm):
         )
         if pontos is None:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.POINTS))
-        
+
         # Verificar se a camada de entrada é do tipo PointZ
         if pontos.wkbType() != QgsWkbTypes.PointZ:
             raise QgsProcessingException(self.tr('Input point layer must have PointZ geometry!', 'Camada de pontos de entrada deve ter geometria do tipo PointZ!'))
 
-        
+
         decimal = self.parameterAsInt(
             parameters,
             self.DECIMAL,
@@ -184,7 +184,7 @@ class ExportToCloudCompare(QgsProcessingAlgorithm):
         )
         if sink is None:
             raise QgsProcessingException(self.invalidSinkError(parameters, self.ANGLES))
-        
+
         # Lista de Cores
         if pontos.featureCount() > 0:
             lista_cores = gerar_paleta_tematica('vibrante', pontos.featureCount())
@@ -215,7 +215,7 @@ class ExportToCloudCompare(QgsProcessingAlgorithm):
 
     def postProcessAlgorithm(self, context, feedback):
         layer = QgsProcessingUtils.mapLayerFromString(self.SAIDA, context)
-        
+
         # Criar expressão RGB como string: "R,G,B"
         expr = 'concat("R", \',\', "G", \',\', "B")'
         layer.startEditing()
