@@ -56,7 +56,7 @@ class CoordTransf2D(QgsProcessingAlgorithm):
         return 'survey'
 
     def tags(self):
-        return self.tr('survey,agrimensura,helmert,2D,georreferencing,tranformation,conformal,register,adjustment,least squares,spatial').split(',')
+        return 'GeoOne,survey,agrimensura,helmert,2D,georreferencing,tranformation,conformal,register,adjustment,least squares,spatial'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/total_station.png'))
