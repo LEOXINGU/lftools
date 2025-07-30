@@ -60,7 +60,7 @@ class LineSequence(QgsProcessingAlgorithm):
         return 'vector'
 
     def tags(self):
-        return self.tr('sequence,lines,order,ordenar,orientar').split(',')
+        return 'GeoOne,sequence,lines,order,ordenar,orientar'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/vetor.png'))
