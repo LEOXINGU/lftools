@@ -77,7 +77,7 @@ class InventoryRaster(QgsProcessingAlgorithm):
         return 'raster'
 
     def tags(self):
-        return self.tr('list,raster,load,detect,organize,inventory,bounding').split(',')
+        return 'GeoOne,list,raster,load,detect,organize,inventory,bounding'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/raster.png'))
