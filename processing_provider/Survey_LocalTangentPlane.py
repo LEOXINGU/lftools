@@ -62,7 +62,7 @@ class LocalTangentPlane(QgsProcessingAlgorithm):
         return 'survey'
 
     def tags(self):
-        return self.tr('survey,agrimensura,LGS,SGL,tangent,transform,geocentric,topocentric,ECEF,geodetic,geodesic,brazil').split(',')
+        return 'GeoOne,survey,agrimensura,LGS,SGL,tangent,transform,geocentric,topocentric,ECEF,geodetic,geodesic,brazil'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/total_station.png'))
