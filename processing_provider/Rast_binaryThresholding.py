@@ -79,7 +79,7 @@ class BinaryThresholding(QgsProcessingAlgorithm):
         return 'raster'
 
     def tags(self):
-        return self.tr('thresholding,binary,supervised,variance,mean,average,histogram,standard,statistics').split(',')
+        return 'GeoOne,thresholding,binary,supervised,variance,mean,average,histogram,standard,statistics'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/raster.png'))
