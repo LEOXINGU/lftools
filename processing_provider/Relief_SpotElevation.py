@@ -80,7 +80,7 @@ class SpotElevation(QgsProcessingAlgorithm):
         return 'relief'
 
     def tags(self):
-        return self.tr('dem,dsm,dtm,mde,mdt,mds,terreno,relevo,contours,curvas,nível,isoline,isolinha,ponto,cotado,spot,elevation,height').split(',')
+        return 'GeoOne,dem,dsm,dtm,mde,mdt,mds,terreno,relevo,contours,curvas,nível,isoline,isolinha,ponto,cotado,spot,elevation,height'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/contours.png'))
