@@ -63,7 +63,7 @@ class KmlPhotos(QgsProcessingAlgorithm):
         return 'reambulation'
 
     def tags(self):
-        return self.tr('resized','photo', 'kmz','reambulation','redimensionar','geophoto','reambulação','fotografia','photography','diminuir','reduzir','compactar','foto', 'kml', 'google', 'earth').split(',')
+        return 'GeoOne,resized,photo,kmz,reambulation,redimensionar,geophoto,reambulação,fotografia,photography,diminuir,reduzir,compactar,foto,kml,google,earth'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/reamb_camera.png'))
