@@ -74,7 +74,7 @@ class ExtractRasterBand(QgsProcessingAlgorithm):
         return 'raster'
 
     def tags(self):
-        return self.tr('bands,raster,extract,color,spectral,frequency,RGB,composite,channel').split(',')
+        return 'GeoOne,bands,raster,extract,color,spectral,frequency,RGB,composite,channel'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/raster.png'))
