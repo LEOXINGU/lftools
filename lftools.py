@@ -301,7 +301,7 @@ class LFToolsPlugin(object):
             except Exception as e:
                 QMessageBox.information(self.iface.mainWindow(), QCoreApplication.translate('LFTools', "LFTools plugin error"), QCoreApplication.translate('LFTools', "There was an error with the input parameter:<br><strong>{}</strong>".format(e)))
                 return
-    
+
     def runDimensioning(self):
         self.iface.messageBar().pushMessage(self.tr('Use snapping, if possible.', 'Use a Aderência, se possível.'), level=Qgis.Info, duration=10)
         projeto = QgsProject.instance()
@@ -328,8 +328,8 @@ class LFToolsPlugin(object):
                 # Clonar e mover para o topo
                 parent = layer_node.parent()
                 clone_node = layer_node.clone()
-                parent.insertChildNode(0, clone_node)
-                layer_tree.removeChildNode(layer_node)
+                layer_tree.insertChildNode(0, clone_node)
+                parent.removeChildNode(layer_node)
         else:
             layer = projeto.mapLayer(self.layerid2)
         # Ativar camada
