@@ -73,7 +73,7 @@ class ConfidenceEllipse(QgsProcessingAlgorithm):
         return 'spatialstatistics'
 
     def tags(self):
-        return self.tr('ellipse,elipse,confidence,deviational,standard,tendency,dispertion,directional,trend,confidence,covariance,mvc').split(',')
+        return 'GeoOne,ellipse,elipse,confidence,deviational,standard,tendency,dispertion,directional,trend,confidence,covariance,mvc'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/statistics.png'))
