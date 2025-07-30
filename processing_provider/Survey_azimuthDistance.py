@@ -49,7 +49,7 @@ class AzimuthDistance(QgsProcessingAlgorithm):
         return 'survey'
 
     def tags(self):
-        return self.tr('survey,agrimensura,azimuth,distance,traverse,analytical,total,station,angle').split(',')
+        return 'GeoOne,survey,agrimensura,azimuth,distance,traverse,analytical,total,station,angle'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/total_station.png'))
