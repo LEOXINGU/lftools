@@ -21,7 +21,6 @@ from math import floor, modf
 import math
 import random
 import colorsys
-from pyproj.crs import CRS
 from lftools.geocapt.topogeo import azimute, geod2geoc, geoc2enu
 from qgis.core import *
 from qgis.PyQt.QtGui import QFont, QColor
@@ -47,7 +46,7 @@ def CentralMeridian(pnt):
     return MC
 
 
-def MeridianConvergence(lon, lat, src):
+def MeridianConvergence(lon, lat, SRC):
     # Calculo do Fuso
     fuso = round((183+lon)/6.0)
     # Calculo do Meridiano Central
@@ -55,10 +54,10 @@ def MeridianConvergence(lon, lat, src):
     # Fator de distorcao inicial
     kappaZero = 0.9996
     # Semi-eixos
-    EPSG = int(src.authid().split(':')[-1])
-    proj_crs = CRS.from_epsg(EPSG)
-    a=proj_crs.ellipsoid.semi_major_metre
-    b=proj_crs.ellipsoid.semi_minor_metre
+    ellipsoid_id = SRC.ellipsoidAcronym()
+    ellipsoid = QgsEllipsoidUtils.ellipsoidParameters(ellipsoid_id)
+    a = ellipsoid.semiMajor
+    b = ellipsoid.semiMinor
     # Calculo da Convergencia Meridiana
     delta_lon = abs( MC - lon )
     p = 0.0001*( delta_lon*3600 )
@@ -161,9 +160,12 @@ def AzimutePuissant(lat1, lon1, lat2, lon2, a = 6378137, f = 1/298.257222101):
 
 
 def raioMedioGauss(lat, EPSG):
-    proj_crs = CRS.from_epsg(EPSG)
-    a=proj_crs.ellipsoid.semi_major_metre
-    f=1/proj_crs.ellipsoid.inverse_flattening
+    SRC = QgsCoordinateReferenceSystem(EPSG)
+    ellipsoid_id = SRC.ellipsoidAcronym()
+    ellipsoid = QgsEllipsoidUtils.ellipsoidParameters(ellipsoid_id)
+    a = ellipsoid.semiMajor
+    f_inv = ellipsoid.inverseFlattening
+    f = 1/f_inv
     e2 = f*(2-f)
     N = a/np.sqrt(1-e2*(np.sin(lat))**2) # Raio de curvatura 1º vertical
     M = a*(1-e2)/(1-e2*(np.sin(lat))**2)**(3/2.) # Raio de curvatura meridiana
