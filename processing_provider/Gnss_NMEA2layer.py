@@ -308,7 +308,7 @@ Modos:
             except:
                 data_hora_ini, data_hora_fim = None
             # Raio Médio de Gauss
-            R = raioMedioGauss(lat, int(self.tr('4326','4674')))
+            R = raioMedioGauss(lat, int(self.tr('EPSG:4326','EPSG:4674')))
             sigma_x = (R+h)*np.radians(s_lon)
             sigma_y = (R+h)*np.radians(s_lat)
 
@@ -343,7 +343,7 @@ Modos:
             except:
                 data_hora_ini, data_hora_fim = None, None
             # Raio Médio de Gauss
-            R = raioMedioGauss(lat, int(self.tr('4326','4674')))
+            R = raioMedioGauss(lat, int(self.tr('EPSG:4326','EPSG:4674')))
             sigma_x = (R+h)*np.radians(s_lon)
             sigma_y = (R+h)*np.radians(s_lat)
 
