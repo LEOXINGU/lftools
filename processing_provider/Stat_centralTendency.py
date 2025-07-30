@@ -58,7 +58,7 @@ class CentralTendency(QgsProcessingAlgorithm):
 
     def tr(self, *string):
         return translate(string, self.LOC)
-        
+
     def createInstance(self):
         return CentralTendency()
 
@@ -75,7 +75,7 @@ class CentralTendency(QgsProcessingAlgorithm):
         return 'spatialstatistics'
 
     def tags(self):
-        return self.tr('deviational,standard,tendency,dispertion,directional,trend,confidence,covariance,mean,average,median,center,distances,centroid').split(',')
+        return 'GeoOne,deviational,standard,tendency,dispertion,directional,trend,confidence,covariance,mean,average,median,center,distances,centroid'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/statistics.png'))
@@ -232,7 +232,7 @@ Observação: Camada em um SRC projetado obtém resultado mais acurados.'''
                     'std_y' : QVariant.Double,
                     'std_z' : QVariant.Double,
                     }
-                
+
         elif estat == 1: # mediana
             if not TemZ:
                 itens  = {
@@ -269,7 +269,7 @@ Observação: Camada em um SRC projetado obtém resultado mais acurados.'''
                     'max_y' : QVariant.Double,
                     'max_z' : QVariant.Double,
                     }
-                
+
         elif estat == 2: # feição central
             itens = {
                     self.tr('group','grupo'): QVariant.String,
