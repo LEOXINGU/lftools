@@ -300,25 +300,26 @@ class DescriptiveMemorial(QgisAlgorithm):
         decimal = decimal.replace(' ','').split(',')
         if not validar_precisoes(decimal,[1,5]):
             raise QgsProcessingException(self.invalidSourceError(parameters, self.DECIMAL))
+        # Precisão da altitude
+        try:
+            prec_h = int(decimal[0]) # teste se precisão das coordenadas é número inteiro
+        except:
+            prec_h = round(10*(float(decimal[0]) - math.floor(float(decimal[0]))))
+            decimal[0] = str(int(float(decimal[0])))
 
-        if not isinstance(decimal[0], int):
-            prec_h = round(10*(decimal[0] - np.floor(decimal[0])))
-            decimal[0] = int(decimal[0])
-        else:
-            prec_h = decimal[0]
         format_utm = '{:,.Xf}'.replace('X', decimal[0])
         format_h = '{:,.Xf}'.replace('X', str(prec_h))
         if len(decimal) == 1:
-            decimal_geo = round(decimal[0]) + 2
+            decimal_geo = int(decimal[0]) + 2
             format_dist = '{:,.Xf}'.replace('X', decimal[0])
-            decimal_area = round(decimal[0])
+            decimal_area = int(decimal[0])
             format_perim =  '{:,.Xf}'.replace('X', decimal[0])
             decimal_azim = 1
         elif len(decimal) == 5:
-            decimal_geo = round(decimal[0])
-            decimal_azim = round(decimal[1])
+            decimal_geo = int(decimal[0])
+            decimal_azim = int(decimal[1])
             format_dist = '{:,.Xf}'.replace('X', decimal[2])
-            decimal_area = round(decimal[3])
+            decimal_area = int(decimal[3])
             format_perim =  '{:,.Xf}'.replace('X', decimal[4])
 
         if calculo in (1,3,5) and len(decimal) == 1: # Hectares
