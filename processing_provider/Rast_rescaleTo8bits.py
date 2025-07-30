@@ -77,7 +77,7 @@ class RescaleTo8bits(QgsProcessingAlgorithm):
         return 'raster'
 
     def tags(self):
-        return self.tr('8bits,rescale,histograma,radiometric,transform,16bits,reduce,compress').split(',')
+        return 'GeoOne,8bits,rescale,histograma,radiometric,transform,16bits,reduce,compress'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/raster.png'))
