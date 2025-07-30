@@ -64,7 +64,7 @@ class Overlapping(QgsProcessingAlgorithm):
         return 'vector'
 
     def tags(self):
-        return self.tr('cadastro,parcela,sequence,confrontante,vizinho,neighbours,sobreposição,overlap,cadastre,borderer,loteamento').split(',')
+        return 'GeoOne,cadastro,parcela,sequence,confrontante,vizinho,neighbours,sobreposição,overlap,cadastre,borderer,loteamento'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/vetor.png'))
