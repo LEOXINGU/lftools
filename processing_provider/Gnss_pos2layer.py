@@ -46,7 +46,6 @@ from qgis.core import (QgsProcessing,
 
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
-from lftools.geocapt.cartography import raioMedioGauss
 from lftools.geocapt.vemos import vemos
 from lftools.geocapt.topogeo import meters2degrees
 import numpy as np
