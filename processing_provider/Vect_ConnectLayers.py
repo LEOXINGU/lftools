@@ -68,7 +68,7 @@ class ConnectLayers(QgsProcessingAlgorithm):
         return 'vector'
 
     def tags(self):
-        return self.tr('conectar,connect,create,vertex,point,topology,topologia,conectividade,connection,connected,polygon,polígono').split(',')
+        return 'GeoOne,conectar,connect,create,vertex,point,topology,topologia,conectividade,connection,connected,polygon,polígono'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/vetor.png'))
