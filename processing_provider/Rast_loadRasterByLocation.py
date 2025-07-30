@@ -78,7 +78,7 @@ class LoadRasterByLocation(QgsProcessingAlgorithm):
         return 'raster'
 
     def tags(self):
-        return self.tr('load,detect,organize,location,bounding').split(',')
+        return 'GeoOne,load,detect,organize,location,bounding'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/raster.png'))
