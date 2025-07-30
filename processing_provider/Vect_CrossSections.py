@@ -69,7 +69,7 @@ class CrossSections(QgsProcessingAlgorithm):
         return 'vector'
 
     def tags(self):
-        return self.tr('cross,section,seção,transversal,paralela,roads,topography,lines,profile,perfil,longitudinal,order,ordenar,hidrography,drenagem,channels,canais').split(',')
+        return 'GeoOne,cross,section,seção,transversal,paralela,roads,topography,lines,profile,perfil,longitudinal,order,ordenar,hidrography,drenagem,channels,canais'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/vetor.png'))
