@@ -73,7 +73,7 @@ class Bands2RGB(QgsProcessingAlgorithm):
         return 'raster'
 
     def tags(self):
-        return self.tr('raster,rgb,composite,composition,bands,color').split(',')
+        return 'GeoOne,raster,rgb,composite,composition,bands,color'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/raster.png'))
