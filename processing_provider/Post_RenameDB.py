@@ -58,7 +58,7 @@ class RenameDB(QgsProcessingAlgorithm):
         return 'postgis'
 
     def tags(self):
-        return self.tr('postgis,postgresql,database,BD,DB,rename,change,manager,name,version,upadate').split(',')
+        return 'GeoOne,postgis,postgresql,database,BD,DB,rename,change,manager,name,version,upadate'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/postgis.png'))
