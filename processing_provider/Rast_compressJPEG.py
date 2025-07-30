@@ -75,7 +75,7 @@ class CompressJPEG(QgsProcessingAlgorithm):
         return 'raster'
 
     def tags(self):
-        return self.tr('compression,reduce,size,JPEG,JPG,photometric,compact,image').split(',')
+        return 'GeoOne,compression,reduce,size,JPEG,JPG,photometric,compact,image'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/raster.png'))
