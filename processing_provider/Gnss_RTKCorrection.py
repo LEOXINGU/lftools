@@ -49,7 +49,6 @@ from qgis.core import (QgsProcessing,
 
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
-from lftools.geocapt.cartography import raioMedioGauss
 from numpy import sqrt
 from lftools.geocapt.topogeo import geod2geoc, geoc2geod
 from pyproj.crs import CRS
