@@ -78,7 +78,7 @@ class DEMdifference(QgsProcessingAlgorithm):
         return 'relief'
 
     def tags(self):
-        return self.tr('dem,dsm,dtm,difference,diferença,height,geoid,geoidal,ellipsoid,elipsoide,ondulação,normal,altitude,ortométrica,elevação,mdt,mds,terreno,relevo,elevation,elevação').split(',')
+        return 'GeoOne,dem,dsm,dtm,difference,diferença,height,geoid,geoidal,ellipsoid,elipsoide,ondulação,normal,altitude,ortométrica,elevação,mdt,mds,terreno,relevo,elevation,elevação'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/contours.png'))
