@@ -76,7 +76,7 @@ class CreateHolesInRaster(QgsProcessingAlgorithm):
         return 'raster'
 
     def tags(self):
-        return self.tr('hole,raster,cloud,remove,drone,patch').split(',')
+        return 'GeoOne,hole,raster,cloud,remove,drone,patch'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/raster.png'))
