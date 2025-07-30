@@ -74,7 +74,7 @@ class BandArithmetic(QgsProcessingAlgorithm):
         return 'raster'
 
     def tags(self):
-        return self.tr('raster,rgb,bands,color,algebra,arithmetic,aritmética,ndvi,gli,ndwi,index,índice').split(',')
+        return 'GeoOne,raster,rgb,bands,color,algebra,arithmetic,aritmética,ndvi,gli,ndwi,index,índice'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/raster.png'))
