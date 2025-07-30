@@ -60,7 +60,7 @@ class DirectionalMerge(QgsProcessingAlgorithm):
         return 'vector'
 
     def tags(self):
-        return self.tr('merge,dissolve,directional,touches,lines,connect,drainage,network').split(',')
+        return 'GeoOne,merge,dissolve,directional,touches,lines,connect,drainage,network'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/vetor.png'))
