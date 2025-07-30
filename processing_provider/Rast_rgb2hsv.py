@@ -76,7 +76,7 @@ class RGB2HSV(QgsProcessingAlgorithm):
         return 'raster'
 
     def tags(self):
-        return self.tr('bands,raster,RGB,color,HSV,composite,hue,saturation,value,intensity,matiz,saturação,intensidade,valor').split(',')
+        return 'GeoOne,bands,raster,RGB,color,HSV,composite,hue,saturation,value,intensity,matiz,saturação,intensidade,valor'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/raster.png'))
