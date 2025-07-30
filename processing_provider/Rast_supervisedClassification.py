@@ -78,7 +78,7 @@ class SupervisedClassification(QgsProcessingAlgorithm):
         return 'raster'
 
     def tags(self):
-        return self.tr('classification,supervised,ellipse,rectangle,mahalanobis,sphefere,covariance,statistics').split(',')
+        return 'GeoOne,classification,supervised,ellipse,rectangle,mahalanobis,sphefere,covariance,statistics'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/raster.png'))
