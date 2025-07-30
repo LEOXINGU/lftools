@@ -70,7 +70,7 @@ class ImportPhotos(QgsProcessingAlgorithm):
         return 'reambulation'
 
     def tags(self):
-        return self.tr('import','photo','reambulation','geotag','geophoto','reambulação','fotografia','photography').split(',')
+        return 'GeoOne,import,photo,reambulation,geotag,geophoto,reambulação,fotografia,photography'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/reamb_camera.png'))
@@ -394,7 +394,7 @@ class ImportPhotos(QgsProcessingAlgorithm):
             if feedback.isCanceled():
                 break
             feedback.setProgress(int((index+1) * Percent))
-        
+
         if CalcAz and len(Atributos) > 0:
             # Calcular azimutes
             for k in range(len(Atributos)-1):
