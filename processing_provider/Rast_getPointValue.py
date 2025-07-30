@@ -62,7 +62,7 @@ class GetPointValue(QgsProcessingAlgorithm):
 
     def tr(self, *string):
         return translate(string, self.LOC)
-        
+
     def createInstance(self):
         return GetPointValue()
 
@@ -79,7 +79,7 @@ class GetPointValue(QgsProcessingAlgorithm):
         return 'raster'
 
     def tags(self):
-        return self.tr('sampling,sample,amostra,pegar,get,interpolate,interpolar,bilinear,cell').split(',')
+        return 'GeoOne,sampling,sample,amostra,pegar,get,interpolate,interpolar,bilinear,cell'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/raster.png'))
