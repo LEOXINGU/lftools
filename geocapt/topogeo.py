@@ -326,15 +326,18 @@ def gpsdate(Y, M, DoM, Hr, Mn, Sc):
 # Validar lista de precisões
 def validar_precisoes(lista, val = [1,5]):
     # Verifica se a lista tem 1 ou 5 elementos
-    if len(lista) != val[0] and len(lista) != val[1]:
+    if len(lista) not in val:
         return False
     for k,item in enumerate(lista):
         # Tenta converter o item para um inteiro
         try:
-            numero = int(item)
+            if k == 0: # o primeiro pode ser float
+                numero = float(item)
+            else: # os demais tem que ser int
+                numero = int(item)
         except ValueError:
             return False
-        # Verifica se o número é menor zero
-        if k!=1 and numero < 0:
+        # Verifica se o número é menor que zero
+        if k!=1 and numero < 0: # apenas a precisão do azimute pode ser negativa
             return False
     return True
