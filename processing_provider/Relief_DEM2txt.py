@@ -80,7 +80,7 @@ class DEM2txt(QgsProcessingAlgorithm):
         return 'relief'
 
     def tags(self):
-        return self.tr('dem,dsm,dtm,txt,texto,nuvem,cloud,notepad,bloco de notas,mde,mdt,mds,terreno,relevo,contour,elevation,height,elevação').split(',')
+        return 'GeoOne,dem,dsm,dtm,txt,texto,nuvem,cloud,notepad,bloco de notas,mde,mdt,mds,terreno,relevo,contour,elevation,height,elevação'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/contours.png'))
