@@ -255,19 +255,30 @@ class AreaPerimterReport(QgsProcessingAlgorithm):
         decimal = decimal.replace(' ','').split(',')
         if not validar_precisoes(decimal,[1,5]):
             raise QgsProcessingException(self.invalidSourceError(parameters, self.DECIMAL))
+
+        # Precisão da altitude
+        try:
+        	prec_h = int(decimal[0]) # teste se precisão das coordenadas é número inteiro
+        except:
+        	prec_h = round(10*(float(decimal[0]) - math.floor(float(decimal[0]))))
+        	decimal[0] = str(int(float(decimal[0])))
+
         format_utm = '{:,.Xf}'.replace('X', decimal[0])
+        format_h = '{:,.Xf}'.replace('X', str(prec_h))
+
         if len(decimal) == 1:
-            decimal_azim = 1
-            decimal_geo = int(decimal[0])+2
-            format_dist = '{:,.Xf}'.replace('X', decimal[0])
-            decimal_area = int(decimal[0])
-            format_perim =  '{:,.Xf}'.replace('X', decimal[0])
+        	decimal_geo = int(decimal[0]) + 2
+        	format_dist = '{:,.Xf}'.replace('X', decimal[0])
+        	decimal_area = int(decimal[0])
+        	format_perim =  '{:,.Xf}'.replace('X', decimal[0])
+        	decimal_azim = 1
         elif len(decimal) == 5:
-            decimal_geo = int(decimal[0])
-            decimal_azim = int(decimal[1])
-            format_dist = '{:,.Xf}'.replace('X', decimal[2])
-            decimal_area = int(decimal[3])
-            format_perim =  '{:,.Xf}'.replace('X', decimal[4])
+        	decimal_geo = int(decimal[0])
+        	decimal_azim = int(decimal[1])
+        	format_dist = '{:,.Xf}'.replace('X', decimal[2])
+        	decimal_area = int(decimal[3])
+        	format_perim =  '{:,.Xf}'.replace('X', decimal[4])
+
         format_area_ha = '{:,.Xf}'.replace('X', str(decimal_area+2))
         format_area = '{:,.Xf}'.replace('X', str(decimal_area))
 
