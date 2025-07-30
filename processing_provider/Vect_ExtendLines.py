@@ -65,7 +65,7 @@ class ExtendLines(QgsProcessingAlgorithm):
         return 'vector'
 
     def tags(self):
-        return self.tr('extend,cross,increase,segment,line,vector').split(',')
+        return 'GeoOne,extend,cross,increase,segment,line,vector'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/vetor.png'))
@@ -177,7 +177,7 @@ class ExtendLines(QgsProcessingAlgorithm):
         extensao = linhas.sourceExtent()
         y_max = extensao.yMaximum()
         y_min = extensao.yMinimum()
-      
+
         # Transformar distancia para graus, se o SRC for Geográfico
         if SRC.isGeographic():
             Distancia = meters2degrees(Distancia, (y_max + y_min)/2, SRC)
