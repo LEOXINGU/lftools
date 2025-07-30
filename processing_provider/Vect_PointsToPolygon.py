@@ -66,7 +66,7 @@ class PointsToPolygon(QgsProcessingAlgorithm):
         return 'vector'
 
     def tags(self):
-        return self.tr('sequence,points,pontos,order,ordenar,orientar,polygon,polígono').split(',')
+        return 'GeoOne,sequence,points,pontos,order,ordenar,orientar,polygon,polígono'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/vetor.png'))
