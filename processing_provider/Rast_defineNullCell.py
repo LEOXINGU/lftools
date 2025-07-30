@@ -77,7 +77,7 @@ class DefineNullCell(QgsProcessingAlgorithm):
         return 'raster'
 
     def tags(self):
-        return self.tr('null,none,empty,cell,pixel,raster').split(',')
+        return 'GeoOne,null,none,empty,cell,pixel,raster'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/raster.png'))
