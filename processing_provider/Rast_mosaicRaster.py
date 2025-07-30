@@ -82,7 +82,7 @@ class MosaicRaster(QgsProcessingAlgorithm):
         return 'raster'
 
     def tags(self):
-        return self.tr('mosaic,merge,raster,combine,mosaik,mosaico,mesclar').split(',')
+        return 'GeoOne,mosaic,merge,raster,combine,mosaik,mosaico,mesclar'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/raster.png'))
