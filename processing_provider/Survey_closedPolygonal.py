@@ -57,7 +57,7 @@ class ClosedPolygonal(QgsProcessingAlgorithm):
         return 'survey'
 
     def tags(self):
-        return self.tr('survey,agrimensura,closed,traverse,polygonal,adjustment,total,station,angle,least square').split(',')
+        return 'GeoOne,survey,agrimensura,closed,traverse,polygonal,adjustment,total,station,angle,least square'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/total_station.png'))
