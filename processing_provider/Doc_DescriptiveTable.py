@@ -42,7 +42,7 @@ from qgis.core import (QgsProcessing,
                        QgsCoordinateTransform,
                        QgsCoordinateReferenceSystem)
 
-import os
+import os, math
 from math import pi, sqrt
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
@@ -265,15 +265,24 @@ class DescriptiveTable(QgsProcessingAlgorithm):
         decimal = decimal.replace(' ','').split(',')
         if not validar_precisoes(decimal,[1,3]):
             raise QgsProcessingException(self.invalidSourceError(parameters, self.DECIMAL))
-        format_utm = '{:,.Xf}'.replace('X', decimal[0])
-        decimal_geo = int(decimal[0])+3
-        if len(decimal) == 1:
-            decimal_azim = 1
-            format_dist = '{:,.Xf}'.replace('X', decimal[0])
-        elif len(decimal) == 3:
-            decimal_azim = int(decimal[1])
-            format_dist = '{:,.Xf}'.replace('X', decimal[2])
 
+        # Precisão da altitude
+        try:
+        	prec_h = int(decimal[0]) # teste se precisão das coordenadas é número inteiro
+        except:
+        	prec_h = round(10*(float(decimal[0]) - math.floor(float(decimal[0]))))
+        	decimal[0] = str(int(float(decimal[0])))
+
+        format_utm = '{:,.Xf}'.replace('X', decimal[0])
+        format_h = '{:,.Xf}'.replace('X', str(prec_h))
+        if len(decimal) == 1:
+        	decimal_geo = int(decimal[0]) + 2
+        	format_dist = '{:,.Xf}'.replace('X', decimal[0])
+        	decimal_azim = 1
+        elif len(decimal) == 3:
+        	decimal_geo = int(decimal[0])
+        	decimal_azim = int(decimal[1])
+        	format_dist = '{:,.Xf}'.replace('X', decimal[2])
 
         modelo = self.parameterAsEnum(
             parameters,
@@ -672,7 +681,7 @@ class DescriptiveTable(QgsProcessingAlgorithm):
                 itens = {'Vn': pnts_UTM[k+1][2],
                             'En': self.tr(format_utm.format(pnts_UTM[k+1][0].x()), format_utm.format(pnts_UTM[k+1][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
                             'Nn': self.tr(format_utm.format(pnts_UTM[k+1][0].y()), format_utm.format(pnts_UTM[k+1][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                            'hn': self.tr(format_utm.format(pnts_GEO[k+1][0].z()), format_utm.format(pnts_GEO[k+1][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.')),
+                            'hn': self.tr(format_h.format(pnts_GEO[k+1][0].z()), format_h.format(pnts_GEO[k+1][0].z()).replace(',', 'X').replace('.', ',').replace('X', '.')),
                             'lonn': longitude,
                             'latn': latitude,
                             'Ln': pnts_UTM[k+1][2] + '/' + pnts_UTM[1 if k+2 > tam else k+2][2],
