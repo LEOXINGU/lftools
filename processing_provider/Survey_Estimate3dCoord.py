@@ -58,7 +58,7 @@ class Estimate3dCoord(QgsProcessingAlgorithm):
         return 'survey'
 
     def tags(self):
-        return self.tr('survey,agrimensura,3D,coordinate,azimuth,zenith,angle,least square,minimum distantce,adjustment,slant').split(',')
+        return 'GeoOne,survey,agrimensura,3D,coordinate,azimuth,zenith,angle,least square,minimum distantce,adjustment,slant'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/total_station.png'))
