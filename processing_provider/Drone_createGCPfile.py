@@ -21,7 +21,7 @@ from qgis.core import (QgsApplication,
                        QgsGeometry,
                        QgsProcessing,
                        QgsProcessingParameterField,
-                       QgsProcessingParameterString,
+                       QgsProcessingParameterCrs,
                        QgsProcessingParameterEnum,
                        QgsProcessingParameterNumber,
                        QgsProcessingParameterBoolean,
@@ -84,6 +84,7 @@ class CreateGCPfile(QgsProcessingAlgorithm):
     NAME = 'NAME'
     FILE = 'FILE'
     DECIMAL = 'DECIMAL'
+    CRS = 'CRS'
 
     def initAlgorithm(self, config=None):
         self.addParameter(
@@ -110,6 +111,14 @@ class CreateGCPfile(QgsProcessingAlgorithm):
                 type = QgsProcessingParameterNumber.Type.Integer,
                 defaultValue = 3,
                 minValue = 1
+                )
+            )
+        
+        self.addParameter(
+            QgsProcessingParameterCrs(
+                self.CRS,
+                self.tr('CRS', 'SRC'),
+                optional = True # QgsProject.instance().crs()
                 )
             )
 
@@ -183,14 +192,14 @@ A coordena Z será definida com 0 (zero)!'''))
         arq.write(pontos.sourceCrs().toProj4()  + '\n')
 
         for feat in pontos.getFeatures():
-            nome = feat[columnIndex]
+            nome = feat[columnIndex].replace(' ', '_')
             geom = feat.geometry()
             if not eh3d:
                 pnt = geom.asPoint()
                 X, Y, Z = pnt.x(), pnt.y(), 0
             else:
                 X, Y, Z = geom.constGet().x(), geom.constGet().y(), geom.constGet().z()
-            arq.write(nome + '\t' + format_num.format(X) + '\t' + format_num.format(Y) + '\t' + format_num.format(Z) + '\n')
+            arq.write(format_num.format(X) + ' ' + format_num.format(Y) + ' ' + format_num.format(Z) + ' 0 0 ' + nome + '\n')
             if feedback.isCanceled():
                 break
 
