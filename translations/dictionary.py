@@ -1291,5 +1291,5 @@ Nota: Introduzca el nombre del campo de clave externa si no es el mismo que el n
 'Angle line outside polygon bounds! Reduce radius size (distance).': {'es': '¡Línea angular fuera de los límites del polígono! Reducir el radio (distancia).'},
 ' {} topological inconsistencies detected!': {'es': ' {} inconsistencias topológicas detectadas!'},
 ' Congratulations! No topological inconsistency was detected.': {'es': ' ¡Enhorabuena! No se encontró ninguna inconsistencia topológica.'},
-
+'Make sure the canvas extent is valid for a UTM projection!' : {'es': '¡Asegúrese de que la extensión del lienzo sea válida para una proyección UTM!'},
  }
