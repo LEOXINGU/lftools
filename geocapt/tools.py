@@ -76,17 +76,20 @@ def DefinirUTM(iface):
             epsg_code = crs_info.code
             break
 
-    # Criar o objeto SRC usando o código EPSG
-    EPSG = "EPSG:{}".format(epsg_code)
-    crs = QgsCoordinateReferenceSystem(EPSG)
+    try:
+        # Criar o objeto SRC usando o código EPSG
+        EPSG = "EPSG:{}".format(epsg_code)
+        crs = QgsCoordinateReferenceSystem(EPSG)
 
-    # Definir o SRC do projeto
-    project.setCrs(crs)
+        # Definir o SRC do projeto
+        project.setCrs(crs)
 
-    # Verificar se o SRC foi alterado corretamente
-    mensagem = tr('New CRS defined to zone {} and hemisphere {}.', 'Novo SRC definido para o Fuso {} e Hemisfério {}').format(fuso, hemisf)
-    iface.messageBar().pushMessage("Projeção", mensagem, level=Qgis.Info)
-    # print(f"O novo SRC do projeto é: {project.crs().authid()}")
+        mensagem = tr('New CRS defined to zone {} and hemisphere {}.', 'Novo SRC definido para o Fuso {} e Hemisfério {}').format(fuso, hemisf)
+        iface.messageBar().pushMessage("Projeção", mensagem, level=Qgis.Info)
+    except:
+        # Verificar se a extensão do mapa é válida para UTM
+        mensagem = tr('Make sure the canvas extent is valid for a UTM projection!', 'Verifique se a extensão da tela é válida para uma projeção UTM!')
+        iface.messageBar().pushMessage("Projeção", mensagem, level=Qgis.Warning)
 
 
 def copiar_estilo_camada_ativa(iface):
