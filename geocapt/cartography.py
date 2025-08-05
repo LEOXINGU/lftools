@@ -680,7 +680,6 @@ def LayerIs3D(camada):
                         break
             if tem_coordenada_Z:
                 break
-
         if tem_coordenada_Z:
             return True
         else:
