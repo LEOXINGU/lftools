@@ -15,9 +15,7 @@ __author__ = 'Leandro França'
 __date__ = '2020-02-07'
 __copyright__ = '(C) 2020, Leandro França'
 
-from PyQt5.QtCore import QCoreApplication, QVariant
 from qgis.core import *
-import qgis.utils
 from numpy import radians, array, sin, cos, sqrt, matrix, zeros, floor, identity, diag
 from numpy.linalg import pinv, norm
 from lftools.geocapt.imgs import Imgs
