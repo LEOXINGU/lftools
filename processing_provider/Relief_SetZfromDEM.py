@@ -15,14 +15,11 @@ __author__ = 'Leandro França'
 __date__ = '2024-11-09'
 __copyright__ = '(C) 2024, Leandro França'
 
-from PyQt5.QtCore import QCoreApplication, QVariant
 from qgis.core import *
 import numpy as np
-from pyproj.crs import CRS
 from lftools.geocapt.imgs import Imgs
 from lftools.geocapt.cartography import LayerIs3D
 from lftools.translations.translate import translate
-from lftools.geocapt.dip import Interpolar
 import os, processing
 from qgis.PyQt.QtGui import QIcon
 
