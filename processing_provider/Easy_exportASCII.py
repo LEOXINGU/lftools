@@ -15,14 +15,9 @@ __author__ = 'Leandro França'
 __date__ = '2023-08-22'
 __copyright__ = '(C) 2023, Leandro França'
 
-from PyQt5.QtCore import QCoreApplication, QVariant
 from qgis.core import *
-import qgis.utils
-from numpy import radians, array, sin, cos, sqrt, matrix, zeros, floor, identity, diag
-from numpy.linalg import pinv, norm
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
-from lftools.geocapt.topogeo import str2HTML, String2CoordList, String2StringList, dms2dd
 import os, subprocess
 from qgis.PyQt.QtGui import QIcon
 
