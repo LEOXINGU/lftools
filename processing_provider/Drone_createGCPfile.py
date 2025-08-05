@@ -15,25 +15,21 @@ __author__ = 'Leandro França'
 __date__ = '2021-11-08'
 __copyright__ = '(C) 2021, Leandro França'
 
-from qgis.PyQt.QtCore import QCoreApplication
 from qgis.core import (QgsApplication,
                        QgsProcessingParameterVectorLayer,
-                       QgsGeometry,
                        QgsProcessing,
                        QgsProcessingParameterField,
                        QgsProcessingParameterCrs,
-                       QgsProcessingParameterEnum,
+                       QgsCoordinateTransform,
                        QgsProcessingParameterNumber,
                        QgsProcessingParameterBoolean,
                        QgsProcessingParameterFileDestination,
-                       QgsFeatureSink,
+                       QgsProject,
                        QgsProcessingException,
-                       QgsProcessingAlgorithm,
-                       QgsProcessingParameterFeatureSource,
-                       QgsProcessingParameterFeatureSink)
+                       QgsProcessingAlgorithm)
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
-import os
+import os, subprocess
 from qgis.PyQt.QtGui import QIcon
 
 class CreateGCPfile(QgsProcessingAlgorithm):
@@ -85,6 +81,7 @@ class CreateGCPfile(QgsProcessingAlgorithm):
     FILE = 'FILE'
     DECIMAL = 'DECIMAL'
     CRS = 'CRS'
+    OPEN = 'OPEN'
 
     def initAlgorithm(self, config=None):
         self.addParameter(
@@ -118,7 +115,7 @@ class CreateGCPfile(QgsProcessingAlgorithm):
             QgsProcessingParameterCrs(
                 self.CRS,
                 self.tr('CRS', 'SRC'),
-                optional = True # QgsProject.instance().crs()
+                optional = True
                 )
             )
 
@@ -127,6 +124,14 @@ class CreateGCPfile(QgsProcessingAlgorithm):
                 self.FILE,
                 self.tr('Ground Control Points (GCP)', 'Pontos de Controle (GCP)'),
                 fileFilter = 'Text (*.txt)'
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterBoolean(
+                self.OPEN,
+                self.tr('Open output file after executing the algorithm', 'Abrir arquivo de saída com GCPs'),
+                defaultValue= True
             )
         )
 
@@ -149,6 +154,16 @@ class CreateGCPfile(QgsProcessingAlgorithm):
             raise QgsProcessingException(self.invalidSourceError(parameters, self.NAME))
 
         columnIndex = pontos.fields().indexFromName(campo[0])
+
+        out_CRS = self.parameterAsCrs(
+            parameters,
+            self.CRS,
+            context
+        )
+
+        if out_CRS.isValid():
+            # Transformação de coordenadas
+            coordinateTransformer = QgsCoordinateTransform(pontos.crs(), out_CRS, QgsProject.instance())
 
         decimal = self.parameterAsInt(
             parameters,
@@ -189,11 +204,16 @@ A coordena Z será definida com 0 (zero)!'''))
         arq = open(filepath, 'w')
 
         # Escrevendo SRC como WKT
-        arq.write(pontos.sourceCrs().toProj4()  + '\n')
+        if out_CRS.isValid():
+            arq.write(out_CRS.toProj4()  + '\n')
+        else:
+            arq.write(pontos.sourceCrs().toProj4()  + '\n')
 
         for feat in pontos.getFeatures():
             nome = feat[columnIndex].replace(' ', '_')
             geom = feat.geometry()
+            if out_CRS.isValid():
+                geom.transform(coordinateTransformer)
             if not eh3d:
                 pnt = geom.asPoint()
                 X, Y, Z = pnt.x(), pnt.y(), 0
@@ -205,7 +225,19 @@ A coordena Z será definida com 0 (zero)!'''))
 
         arq.close()
 
+        Carregar = self.parameterAsBool(
+            parameters,
+            self.OPEN,
+            context
+        )
+
+        if Carregar:
+            try:
+                os.popen(filepath)
+            except Exception as e:
+                feedback.reportError(f"Failed to open File Explorer: {e}")
+
         feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
         feedback.pushInfo(self.tr('Leandro Franca - Cartographic Engineer', 'Leandro França - Eng Cart'))
 
-        return {}
+        return {self.FILE: filepath}
