@@ -301,6 +301,7 @@ dic = {
 'Point Layer' : {'es': 'Capa de puntos'},
 'GCP name' : {'es': 'nombre de GCP'},
 'Ground Control Points (GCP)' : {'es': 'Puntos de control terrestre (GCP)'},
+'TXT with Ground Control Points (GCP)' : {'es': 'TXT con puntos de control terrestre (GCP)'},
 'Georeferencing Adjustment' : {'es': 'Ajuste de Georreferenciación'},
 'Input Raster' : {'es': 'Ráster de entrada'},
 'Vectors Lines (two vertices)' : {'es': 'Líneas de vectores (dos vértices)'},
