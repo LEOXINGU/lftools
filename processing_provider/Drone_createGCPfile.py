@@ -61,7 +61,7 @@ class CreateGCPfile(QgsProcessingAlgorithm):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/drone.png'))
 
     txt_en = 'Generate text file with Ground Control Points (GCP) from a point layer to WebODM.'
-    txt_pt = 'Gera arquivo texto com Pontos de Controle no Terreno (GCP) a partir de uma camada de pontos.'
+    txt_pt = 'Gera arquivo texto com Pontos de Controle no Terreno (GCP) a partir de uma camada de pontos para ser carregado no WebODM.'
     figure = 'images/tutorial/drone_createGCP.jpg'
 
     def shortHelpString(self):
@@ -122,7 +122,7 @@ class CreateGCPfile(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFileDestination(
                 self.FILE,
-                self.tr('Ground Control Points (GCP)', 'Pontos de Controle (GCP)'),
+                self.tr('TXT with Ground Control Points (GCP)', 'TXT com Pontos de Controle (GCP)'),
                 fileFilter = 'Text (*.txt)'
             )
         )
