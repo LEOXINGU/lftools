@@ -126,6 +126,8 @@ from .processing_provider.Vect_ReprojectGPKG import ReprojectGPKG
 from .processing_provider.Relief_SetZfromDEM import SetZfromDEM
 from .processing_provider.Easy_SelectByKeyAtt import SelectByKeyAtt
 from .processing_provider.Drone_exportToCloudCompare import ExportToCloudCompare
+from .processing_provider.Qualy_Accuracy_3D import Accuracy_3D
+
 
 
 class LFToolsProvider(QgsProcessingProvider):
@@ -237,6 +239,8 @@ class LFToolsProvider(QgsProcessingProvider):
         self.addAlgorithm(SetZfromDEM())
         self.addAlgorithm(SelectByKeyAtt())
         self.addAlgorithm(ExportToCloudCompare())
+        self.addAlgorithm(Accuracy_3D())
+
 
     def id(self):
         return 'lftools'
