@@ -23,7 +23,9 @@ from qgis.core import (QgsApplication,
                        QgsFields,
                        QgsField,
                        QgsFeature,
-                       QgsProcessingParameterField,
+                       QgsProcessingParameterCrs,
+                       QgsCoordinateTransform,
+                       QgsProject,
                        QgsProcessingParameterEnum,
                        QgsProcessingParameterNumber,
                        QgsProcessingParameterBoolean,
@@ -69,7 +71,7 @@ class ExportToCloudCompare(QgsProcessingAlgorithm):
 
     txt_en = 'Generate text file with Ground Control Points (GCP) from a point layer to CloudCompare.'
     txt_pt = 'Gera arquivo texto com Pontos de Controle no Terreno (GCP) a partir de uma camada de pontos para o CloudCompare.'
-    figure = 'images/tutorial/drone_createGCP.jpg'
+    figure = 'images/tutorial/drone_createGCPforCC.jpg'
 
     def shortHelpString(self):
         social_BW = Imgs().social_BW
@@ -88,6 +90,7 @@ class ExportToCloudCompare(QgsProcessingAlgorithm):
     FILE = 'FILE'
     DECIMAL = 'DECIMAL'
     LAYER = 'LAYER'
+    CRS = 'CRS'
 
     def initAlgorithm(self, config=None):
         self.addParameter(
@@ -107,11 +110,19 @@ class ExportToCloudCompare(QgsProcessingAlgorithm):
                 minValue = 1
                 )
             )
+        
+        self.addParameter(
+            QgsProcessingParameterCrs(
+                self.CRS,
+                self.tr('CRS', 'SRC'),
+                optional = True
+                )
+            )
 
         self.addParameter(
             QgsProcessingParameterFileDestination(
                 self.FILE,
-                self.tr('Ground Control Points (GCP)', 'Pontos de Controle (GCP)'),
+                self.tr('TXT with Ground Control Points (GCP)', 'TXT com Pontos de Controle (GCP)'),
                 fileFilter = 'Text (*.txt)'
             )
         )
@@ -148,6 +159,16 @@ class ExportToCloudCompare(QgsProcessingAlgorithm):
 
         format_num = '{:.Xf}'.replace('X', str(decimal))
 
+        out_CRS = self.parameterAsCrs(
+            parameters,
+            self.CRS,
+            context
+        )
+
+        if out_CRS.isValid():
+            # Transformação de coordenadas
+            coordinateTransformer = QgsCoordinateTransform(pontos.crs(), out_CRS, QgsProject.instance())
+
         filepath = self.parameterAsFile(
             parameters,
             self.FILE,
@@ -180,7 +201,7 @@ class ExportToCloudCompare(QgsProcessingAlgorithm):
             context,
             Fields,
             pontos.wkbType(),
-            pontos.sourceCrs()
+            out_CRS if out_CRS.isValid() else pontos.sourceCrs()
         )
         if sink is None:
             raise QgsProcessingException(self.invalidSinkError(parameters, self.ANGLES))
@@ -192,6 +213,8 @@ class ExportToCloudCompare(QgsProcessingAlgorithm):
         total = 100.0 / pontos.featureCount() if pontos.featureCount() else 0
         for current, feat in enumerate(pontos.getFeatures()):
             geom = feat.geometry()
+            if out_CRS.isValid():
+                geom.transform(coordinateTransformer)
             X, Y, Z = geom.constGet().x(), geom.constGet().y(), geom.constGet().z()
             R,G,B = lista_cores[current]
             arq.write(format_num.format(X) + ',' + format_num.format(Y) + ',' + format_num.format(Z) + ',' + str(R) + ',' + str(G) + ',' + str(B) + '\n')
