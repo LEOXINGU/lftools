@@ -270,36 +270,38 @@ class Extent2UTMGrid(QgsProcessingAlgorithm):
             crs
         )
 
-        deltas = array([[6.0, 3.0, 1.5, 0.5, 0.25, 0.125, 0.125/2, 0.125/2/2, 0.125/2/2/3, 0.125/2/2/3/2],
+        deltas = np.array([[6.0, 3.0, 1.5, 0.5, 0.25, 0.125, 0.125/2, 0.125/2/2, 0.125/2/2/3, 0.125/2/2/3/2],
                     [4.0, 2.0, 1.0, 0.5, 0.25, 0.125, 0.125/3, 0.125/3/2, 0.125/3/2/2, 0.125/3/2/2/2]])
 
         d_lon = deltas[:, escalas.index(escala)][0]
         d_lat = deltas[:, escalas.index(escala)][1]
 
-        LON = arange(lon_min + 1e-10 - d_lon, lon_max + 1e-10 + d_lon, d_lon)
-        LAT = arange(lat_min + 1e-10 - d_lat, lat_max+ 1e-10 + d_lat, d_lat)
+        LON = np.arange(lon_min + 1e-10 - d_lon, lon_max + 1e-10 + d_lon, d_lon)
+        LAT = np.arange(lat_min + 1e-10 - d_lat, lat_max + 1e-10 + d_lat, d_lat)
 
         Percent = 100.0/(len(LON)*len(LAT))
         current = 0
         for lat in LAT[::-1]:
+            if lat >=0:
+                lat0 = math.modf(lat/d_lat)[1]*d_lat
+            else:
+                lat0 = math.modf(lat/d_lat)[1]*d_lat - d_lat
+            
             for lon in LON:
                 if lon>=0:
-                    lon0 = modf(lon/d_lon)[1]*d_lon
+                    lon0 = math.modf(lon/d_lon)[1]*d_lon
                 else:
-                    lon0 = modf(lon/d_lon)[1]*d_lon - d_lon
-                if lat >=0:
-                    lat0 = modf(lat/d_lat)[1]*d_lat
-                else:
-                    lat0 = modf(lat/d_lat)[1]*d_lat - d_lat
-
+                    lon0 = math.modf(lon/d_lon)[1]*d_lon - d_lon
+                
                 coord = [[QgsPointXY(lon0, lat0),
-                      QgsPointXY(lon0, lat0+d_lat),
-                      QgsPointXY(lon0+d_lon, lat0+d_lat),
-                      QgsPointXY(lon0+d_lon, lat0),
-                      QgsPointXY(lon0, lat0)]]
+                          QgsPointXY(lon0, lat0+d_lat),
+                          QgsPointXY(lon0+d_lon, lat0+d_lat),
+                          QgsPointXY(lon0+d_lon, lat0),
+                          QgsPointXY(lon0, lat0)]]
 
                 feat = QgsFeature(Fields)
                 geom = QgsGeometry.fromPolygonXY(coord)
+                geom = geom.snappedToGrid(1e-10, 1e-10)
                 centroide = geom.centroid().asPoint()
                 inom = map_sistem(lon, lat, escala)
                 # INOM para MI

@@ -14,10 +14,9 @@ __author__ = 'Leandro França'
 __date__ = '2021-03-01'
 __copyright__ = '(C) 2021, Leandro França'
 
-from numpy import sign, array, arange
+from numpy import sign, array
 from numpy.linalg import norm
 import numpy as np
-from math import floor, modf
 import math
 import random
 import colorsys
@@ -863,7 +862,7 @@ def map_sistem(lon, lat, ScaleD=1e6):
     else:
         nome+='N'
     # Determinacao da letra
-    letra = chr(int(65+floor(abs(lat)/4.0)))
+    letra = chr(int(65 + math.floor(abs(lat)/4.0)))
     nome+=letra
     # Calculo do Fuso
     fuso = round((183+lon)/6.0)
@@ -877,7 +876,7 @@ def map_sistem(lon, lat, ScaleD=1e6):
 
     # Escala 1:500.000
     if ScaleD <= 500000:
-        centro = array([MC, 4.0*floor(lat/4.0)+valores[1][0]])
+        centro = array([MC, 4.0*math.floor(lat/4.0)+valores[1][0]])
         sinal = sign(array([lon, lat]) - centro)
         if sinal[0]==-1 and sinal[1]==1:
             nome+='-V'

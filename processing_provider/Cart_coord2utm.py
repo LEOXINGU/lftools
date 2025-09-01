@@ -184,20 +184,20 @@ class Coord2UTMGrid(QgsProcessingAlgorithm):
             crs
         )
 
-        deltas = array([[6.0, 3.0, 1.5, 0.5, 0.25, 0.125, 0.125/2, 0.125/2/2, 0.125/2/2/3, 0.125/2/2/3/2],
+        deltas = np.array([[6.0, 3.0, 1.5, 0.5, 0.25, 0.125, 0.125/2, 0.125/2/2, 0.125/2/2/3, 0.125/2/2/3/2],
                     [4.0, 2.0, 1.0, 0.5, 0.25, 0.125, 0.125/3, 0.125/3/2, 0.125/3/2/2, 0.125/3/2/2/2]])
 
         d_lon = deltas[:, escalas.index(escala)][0]
         d_lat = deltas[:, escalas.index(escala)][1]
 
         if lon>=0:
-            lon0 = modf(lon/d_lon)[1]*d_lon
+            lon0 = math.modf(lon/d_lon)[1]*d_lon
         else:
-            lon0 = modf(lon/d_lon)[1]*d_lon - d_lon
+            lon0 = math.modf(lon/d_lon)[1]*d_lon - d_lon
         if lat >=0:
-            lat0 = modf(lat/d_lat)[1]*d_lat
+            lat0 = math.modf(lat/d_lat)[1]*d_lat
         else:
-            lat0 = modf(lat/d_lat)[1]*d_lat - d_lat
+            lat0 = math.modf(lat/d_lat)[1]*d_lat - d_lat
 
         coord = [[QgsPointXY(lon0, lat0),
               QgsPointXY(lon0, lat0+d_lat),
