@@ -18,8 +18,9 @@ __copyright__ = '(C) 2025, Leandro França'
 from PyQt5.QtCore import *
 from qgis.core import *
 from numpy import sqrt, array, mean, std, pi, sin
-from lftools.geocapt.imgs import Imgs
+from lftools.geocapt.imgs import *
 from lftools.translations.translate import translate
+from lftools.geocapt.topogeo import str2HTML
 import os
 from qgis.PyQt.QtGui import QIcon
 
@@ -106,7 +107,7 @@ class Accuracy_3D(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.TEST,
-                self.tr('Pontos de Teste'),
+                self.tr('Test Points', 'Pontos de Teste'),
                 [QgsProcessing.TypeVectorPoint]
             )
         )
@@ -114,7 +115,7 @@ class Accuracy_3D(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.REF,
-                self.tr('Pontos de Referência'),
+                self.tr('Reference Points', 'Pontos de Referência'),
                 [QgsProcessing.TypeVectorPoint]
             )
         )
@@ -122,7 +123,7 @@ class Accuracy_3D(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterCrs(
                 self.CRS,
-                self.tr('CRS'),
+                self.tr('CRS', 'SRC'),
                 # QgsProject.instance().crs(),
                 optional = True
                 )
@@ -131,7 +132,7 @@ class Accuracy_3D(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterField(
                 self.FIELD,
-                self.tr('Campo para nome'),
+                self.tr('Name Field', 'Campo para nome'),
                 parentLayerParameterName=self.REF,
                 optional = True
             )
@@ -140,14 +141,14 @@ class Accuracy_3D(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSink(
                 self.OUTPUT,
-                self.tr('Discrepâncias planialtimétricas 3D')
+                self.tr('3D Planialtimetric Discrepancies', 'Discrepâncias planialtimétricas 3D')
             )
         )
         
         self.addParameter(
             QgsProcessingParameterNumber(
                 self.DECIMAL,
-                self.tr('Casas decimais'),
+                self.tr('Decimal places', 'Casas decimais'),
                 QgsProcessingParameterNumber.Type.Integer,
                 defaultValue = 3,
                 minValue = 0
@@ -156,21 +157,12 @@ class Accuracy_3D(QgsProcessingAlgorithm):
         
         self.addParameter(
             QgsProcessingParameterFileDestination(
-                'HTML',
-                'Relatório do PEC-PCD planialtimétrico 3D',
-                self.tr('arquivo HTML (*.html)')
+                self.HTML,
+                self.tr('3D Planialtimetric PEC-PCD Report', 'Relatório do PEC-PCD planialtimétrico 3D'),
+                self.tr('HTML files (*.html)')
             )
         )
-        
-    def str2HTML(self, texto):
-        if texto:
-            dicHTML = {'Á': '&Aacute;',	'á': '&aacute;',	'Â': '&Acirc;',	'â': '&acirc;',	'À': '&Agrave;',	'à': '&agrave;',	'Å': '&Aring;',	'å': '&aring;',	'Ã': '&Atilde;',	'ã': '&atilde;',	'Ä': '&Auml;',	'ä': '&auml;',	'Æ': '&AElig;',	'æ': '&aelig;',	'É': '&Eacute;',	'é': '&eacute;',	'Ê': '&Ecirc;',	'ê': '&ecirc;',	'È': '&Egrave;',	'è': '&egrave;',	'Ë': '&Euml;',	'ë': '&Euml;',	'Ð': '&ETH;',	'ð': '&eth;',	'Í': '&Iacute;',	'í': '&iacute;',	'Î': '&Icirc;',	'î': '&icirc;',	'Ì': '&Igrave;',	'ì': '&igrave;',	'Ï': '&Iuml;',	'ï': '&iuml;',	'Ó': '&Oacute;',	'ó': '&oacute;',	'Ô': '&Ocirc;',	'ô': '&ocirc;',	'Ò': '&Ograve;',	'ò': '&ograve;',	'Ø': '&Oslash;',	'ø': '&oslash;',	'Ù': '&Ugrave;',	'ù': '&ugrave;',	'Ü': '&Uuml;',	'ü': '&uuml;',	'Ç': '&Ccedil;',	'ç': '&ccedil;',	'Ñ': '&Ntilde;',	'ñ': '&ntilde;',	'Ý': '&Yacute;',	'ý': '&yacute;',	'"': '&quot;', '”': '&quot;',	'<': '&lt;',	'>': '&gt;',	'®': '&reg;',	'©': '&copy;',	'\'': '&apos;', 'ª': '&ordf;', 'º': '&ordm', '°':'&deg;'}
-            for item in dicHTML:
-                if item in texto:
-                    texto = texto.replace(item, dicHTML[item])
-            return texto
-        else:
-            return ''
+
 
     def processAlgorithm(self, parameters, context, feedback):
         
@@ -440,7 +432,7 @@ class Accuracy_3D(QgsProcessingAlgorithm):
         DISCREP_Y = array(DISCREP_Y)
         DISCREP_Z = array(DISCREP_Z)
         
-        
+  
         # Gerar relatorio
         feedback.pushInfo('Gerando relatório do PEC-PCD...')
         arq = open(html_output, 'w')
@@ -448,53 +440,62 @@ class Accuracy_3D(QgsProcessingAlgorithm):
 <html>
 <head>
   <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
-  <title>ACUR&Aacute;CIA POSICIONAL PLANIM&Eacute;TRICA</title>
+  <title>''' + str2HTML(self.tr('PLANIALTIMETRIC POSITIONAL ACCURACY', 'ACURÁCIA POSICIONAL PLANIALTIMÉTRICA')) + '''</title>
+  <link rel = "icon" href = "https://github.com/LEOXINGU/lftools/blob/main/images/lftools.png?raw=true" type = "image/x-icon">
   <meta name="qrichtext" content="1">
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 </head>
 <body style="background-color: rgb(229, 233, 166);">
-<div style="text-align: center;"><span style="font-weight: bold; text-decoration: underline;">RELAT&Oacute;RIO DE ACUR&Aacute;CIA POSICIONAL PLANIALTIM&Eacute;TRICA (3D)</span><br>
+<div style="text-align: center;"><span style="font-weight: bold;"><br>
+    <img height="80" src="data:image/'''+ 'png;base64,' + lftools_logo + '''">
+</div>
+<div style="text-align: center;"><span style="font-weight: bold; text-decoration: underline;">''' + str2HTML(self.tr('PLANIALTIMETRIC POSITIONAL ACCURACY REPORT (3D)', 'RELATÓRIO DE ACURÁCIA POSICIONAL PLANIALTIMÉTRICA (3D)')) + '''</span><br>
 </div>
 <br>
-<span style="font-weight: bold;"><br>
-DADOS AVALIADOS</span><br>
-&nbsp;&nbsp;&nbsp; a. Vetores de discrep&acirc;ncias:[layer_name]<br>
-&nbsp;&nbsp;&nbsp; b. Total de pares de pontos hom&oacute;logos: [layer_count]<br>
+<span style="font-weight: bold;"><br>''' + str2HTML(self.tr('EVALUATED DATA', 'DADOS AVALIADOS')) + '''</span><br>
+&nbsp;&nbsp;&nbsp; a. ''' + str2HTML(self.tr('Discrepancy Vectors', 'Vetores de discrepâncias')) + ''':[layer_name]<br>
+&nbsp;&nbsp;&nbsp; b. ''' + str2HTML(self.tr('Total Number of Homologous Point Pairs', 'Total de pares de pontos homólogos')) + ''': [layer_count]<br>
 <span style="font-weight: bold;"><br>
 </span>
-<p class="MsoNormal"><b>ACUR&Aacute;CIA POSICIONAL PLANIM&Eacute;TRICA (XY)</b><o:p></o:p></p>
-&nbsp;&nbsp;&nbsp; <span style="font-weight: bold;">1. Discrep&acirc;ncias em X:</span><br>
-&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; a. m&eacute;dia das discrep&acirc;ncias (tend&ecirc;ncia): [discrepX_mean] m<br>
-&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; b. desvio-padr&atilde;o (precis&atilde;o):&nbsp;[discrepX_std] m<br>
-&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; c. discrep&acirc;ncia m&aacute;xima:&nbsp;[discrepX_max] m<br>
-&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; d. discrep&acirc;ncia m&iacute;nima:&nbsp;[discrepX_min] m<br>
+<p class="MsoNormal"><b>''' + str2HTML(self.tr('PLANIMETRIC POSITIONAL ACCURACY', 'ACURÁCIA POSICIONAL PLANIMÉTRICA')) + ''' (XY)</b><o:p></o:p></p>
+&nbsp;&nbsp;&nbsp; <span style="font-weight: bold;">
+1. ''' + str2HTML(self.tr('X Discrepancies', 'Discrepâncias em X')) + ''':</span><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; a. ''' + str2HTML(self.tr('average (tendency)', 'média (tendência)')) + ''': [discrepX_mean] m<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; b. ''' + str2HTML(self.tr('standard deviation (precision)', 'desvio-padrão (precisão)')) + ''':&nbsp;[discrepX_std] m<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; c. ''' + str2HTML(self.tr('maximum', 'máxima')) + ''':&nbsp;[discrepX_max] m<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; d. ''' + str2HTML(self.tr('minimum', 'mínima')) + ''':&nbsp;[discrepX_min] m<br>
 &nbsp;<span style="font-weight: bold;">&nbsp;&nbsp;
-2. Discrep&acirc;ncias em Y:</span><br>
-&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; a. m&eacute;dia das discrep&acirc;ncias (tend&ecirc;ncia):&nbsp;[discrepY_mean] m<br>
-&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; b. desvio-padr&atilde;o (precis&atilde;o):&nbsp;[discrepY_std] m<br>
-&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; c. discrep&acirc;ncia m&aacute;xima:&nbsp;[discrepY_max] m<br>
-&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; d. discrep&acirc;ncia m&iacute;nima:&nbsp;[discrepY_min] m<br>
-&nbsp;&nbsp;&nbsp; <span style="font-weight: bold;">3. REMQ: [RMSE_XY] m</span><br>
-&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; a. discrep&acirc;ncia m&aacute;xima (XY):&nbsp;[discrepXY_max] m<br>
-&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; b. discrep&acirc;ncia m&iacute;nima(XY):&nbsp;[discrepXY_min] m<br>
-&nbsp;&nbsp;&nbsp; <span style="font-weight: bold;">4. Padr&atilde;o de Exatid&atilde;o Cartogr&aacute;fica (</span><span  style="font-weight: bold;">PEC-PCD)<br>
+2. ''' + str2HTML(self.tr('Y Discrepancies', 'Discrepâncias em Y')) + ''':</span><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; a. ''' + str2HTML(self.tr('average (tendency)', 'média (tendência)')) + ''': [discrepY_mean] m<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; b. ''' + str2HTML(self.tr('standard deviation (precision)', 'desvio-padrão (precisão)')) + ''':&nbsp;[discrepY_std] m<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; c. ''' + str2HTML(self.tr('maximum', 'máxima')) + ''':&nbsp;[discrepY_max] m<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; d. ''' + str2HTML(self.tr('minimum', 'mínima')) + ''':&nbsp;[discrepY_min] m<br>
+&nbsp;&nbsp;&nbsp; <span style="font-weight: bold;">
+3. ''' + str2HTML(self.tr('RMSE', 'REMQ')) + ''': [RMSE_XY] m</span><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; a. ''' + str2HTML(self.tr('maximum discrepancy', 'discrepância máxima')) + ''' (XY):&nbsp;[discrepXY_max] m<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; b. ''' + str2HTML(self.tr('minimum discrepancy', 'discrepância mínima')) + ''' (XY):&nbsp;[discrepXY_min] m<br>
+&nbsp;&nbsp;&nbsp; <span style="font-weight: bold;">
+4. ''' + str2HTML(self.tr('Cartographic Accuracy Standard', 'Padrão de Exatidão Cartográfica')) + ''' (</span><span  style="font-weight: bold;">PEC-PCD)<br>
 </span>&nbsp;&nbsp;&nbsp; <br> [PEC_YX]<br>
 <br>
 <hr><br>
-<p class="MsoNormal"><b>ACUR&Aacute;CIA POSICIONAL ALTIM&Eacute;TRICA (Z)</b><o:p></o:p></p>
-&nbsp;&nbsp;&nbsp; <span style="font-weight: bold;">1. Discrep&acirc;ncias em Z:</span><br>
-&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; a. m&eacute;dia das discrep&acirc;ncias (tend&ecirc;ncia):&nbsp;[discrepZ_mean] m<br>
-&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; b. desvio-padr&atilde;o (precis&atilde;o):&nbsp;[discrepZ_std] m<br>
-&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; c. discrep&acirc;ncia m&aacute;xima:&nbsp;[discrepZ_max] m<br>
-&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; d. discrep&acirc;ncia m&iacute;nima:&nbsp;[discrepZ_min] m<br>
-&nbsp;<span style="font-weight: bold;"></span>&nbsp;&nbsp;&nbsp; <span style="font-weight: bold;">2. REMQ:&nbsp;</span><span  style="font-weight: bold;">[RMSE_Z]</span><span  style="font-weight: bold;"> m</span><br>
+<p class="MsoNormal"><b>''' + str2HTML(self.tr('VERTICAL POSITIONAL ACCURACY', 'ACURÁCIA POSICIONAL ALTIMÉTRICA')) + ''' (Z)</b><o:p></o:p></p>
+&nbsp;&nbsp;&nbsp; <span style="font-weight: bold;">
+1. ''' + str2HTML(self.tr('Z Discrepancies', 'Discrepâncias em Z')) + ''':</span><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; a. ''' + str2HTML(self.tr('average (tendency)', 'média (tendência)')) + ''': [discrepZ_mean] m<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; b. ''' + str2HTML(self.tr('standard deviation (precision)', 'desvio-padrão (precisão)')) + ''':&nbsp;[discrepZ_std] m<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; c. ''' + str2HTML(self.tr('maximum', 'máxima')) + ''':&nbsp;[discrepZ_max] m<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; d. ''' + str2HTML(self.tr('minimum', 'mínima')) + ''':&nbsp;[discrepZ_min] m<br>
+&nbsp;<span style="font-weight: bold;"></span>&nbsp;&nbsp;&nbsp; <span style="font-weight: bold;">
+2. ''' + str2HTML(self.tr('RMSE', 'REMQ')) + ''':&nbsp;</span><span  style="font-weight: bold;">[RMSE_Z]</span><span  style="font-weight: bold;"> m</span><br>
 &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;<br>
-&nbsp;&nbsp;&nbsp; <span style="font-weight: bold;">3. Padr&atilde;o de Exatid&atilde;o Cartogr&aacute;fica (</span><span  style="font-weight: bold;">PEC-PCD)<br>
+&nbsp;&nbsp;&nbsp; <span style="font-weight: bold;">
+3. ''' + str2HTML(self.tr('Cartographic Accuracy Standard', 'Padrão de Exatidão Cartográfica')) + ''' (</span><span  style="font-weight: bold;">PEC-PCD)<br>
 </span><br>
 [PEC_Z]<br>
 <br>
-<hr>Leandro Fran&ccedil;a 2025<br>
-<address><font size="+l">Eng. Cart&oacute;grafo<br>
+<hr>''' + str2HTML(self.tr('Leandro Franca', 'Leandro França')) + ''' 2025<br>
+<address><font size="+l">''' + str2HTML(self.tr('Cartographic Engineer', 'Eng. Cartógrafo')) + '''<br>
 email: contato@geoone.com.br<br>
 </font>
 </address>
@@ -523,7 +524,7 @@ email: contato@geoone.com.br<br>
     </table>'''
             return tabela
         
-        valores = {'[layer_name]': self.str2HTML(teste.sourceName() + ' | ' + ref.sourceName()),
+        valores = {'[layer_name]': str2HTML(teste.sourceName() + ' - ' + ref.sourceName()),
                    '[layer_count]': str(teste.featureCount()),
                    '[discrepX_mean]': format_num.format(float(DISCREP_X.mean())),
                    '[discrepX_std]': format_num.format(DISCREP_X.std()),
