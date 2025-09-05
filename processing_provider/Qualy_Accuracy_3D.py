@@ -36,9 +36,6 @@ class Accuracy_3D(QgsProcessingAlgorithm):
     CRS = 'CRS'
     FIELD = 'FIELD'
 
-    def tr(self, string):
-        return QCoreApplication.translate('Processing', string)
-
     def createInstance(self):
         return Accuracy_3D()
 
@@ -89,7 +86,7 @@ class Accuracy_3D(QgsProcessingAlgorithm):
     1. O primeiro vértice corresponde ao ponto de teste.
     2. O segundo vértice corresponde ao ponto de checagem.'''
     
-    figure = 'images/tutorial/raster_rgb.jpg'
+    figure = 'images/tutorial/qualy_3d.jpg'
 
     def shortHelpString(self):
         social_BW = Imgs().social_BW
@@ -120,6 +117,15 @@ class Accuracy_3D(QgsProcessingAlgorithm):
                 [QgsProcessing.TypeVectorPoint]
             )
         )
+
+        self.addParameter(
+            QgsProcessingParameterField(
+                self.FIELD,
+                self.tr('Name Field', 'Campo para nome'),
+                parentLayerParameterName=self.REF,
+                optional = True
+            )
+        )
         
         self.addParameter(
             QgsProcessingParameterCrs(
@@ -129,15 +135,6 @@ class Accuracy_3D(QgsProcessingAlgorithm):
                 optional = True
                 )
             )
-            
-        self.addParameter(
-            QgsProcessingParameterField(
-                self.FIELD,
-                self.tr('Name Field', 'Campo para nome'),
-                parentLayerParameterName=self.REF,
-                optional = True
-            )
-        )
 
         self.addParameter(
             QgsProcessingParameterNumber(
@@ -159,7 +156,7 @@ class Accuracy_3D(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFileDestination(
                 self.HTML,
-                self.tr('3D Planialtimetric PEC-PCD Report', 'Relatório do PEC-PCD planialtimétrico 3D'),
+                self.tr('3D Planialtimetric Accuracy Report', 'Relatório do PEC-PCD planialtimétrico 3D'),
                 self.tr('HTML files (*.html)')
             )
         )
@@ -249,7 +246,7 @@ class Accuracy_3D(QgsProcessingAlgorithm):
         
         
         # SRC definido deve ser projetado
-        msg = self.tr(self.tr('Define a projected CRS for the calculations!', 'Defina um SRC projetado para os cálculos!'))
+        msg = self.tr('Define a projected CRS for the calculations!', 'Defina um SRC projetado para os cálculos!')
         coordTransf = False
         if out_CRS.isValid():
             if out_CRS.isGeographic():
@@ -425,8 +422,9 @@ class Accuracy_3D(QgsProcessingAlgorithm):
         
   
         # Gerar relatorio
-        feedback.pushInfo(self.tr('Generating PEC-PCD report...', 'Gerando relatório do PEC-PCD...'))
+        feedback.pushInfo(self.tr('Generating accuracy report...', 'Gerando relatório do PEC-PCD...'))
         arq = open(html_output, 'w')
+        
         texto = '''<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
@@ -444,8 +442,9 @@ class Accuracy_3D(QgsProcessingAlgorithm):
 </div>
 <br>
 <span style="font-weight: bold;"><br>''' + str2HTML(self.tr('EVALUATED DATA', 'DADOS AVALIADOS')) + '''</span><br>
-&nbsp;&nbsp;&nbsp; a. ''' + str2HTML(self.tr('Discrepancy Vectors', 'Vetores de discrepâncias')) + ''':[layer_name]<br>
-&nbsp;&nbsp;&nbsp; b. ''' + str2HTML(self.tr('Total Number of Homologous Point Pairs', 'Total de pares de pontos homólogos')) + ''': [layer_count]<br>
+&nbsp;&nbsp;&nbsp; a. ''' + str2HTML(self.tr('Test Points', 'Pontos de Teste')) + ''': [test_points]<br>
+&nbsp;&nbsp;&nbsp; b. ''' + str2HTML(self.tr('Reference Points', 'Pontos de Referência')) + ''': [ref_points]<br>
+&nbsp;&nbsp;&nbsp; c. ''' + str2HTML(self.tr('Total Number of Homologous Point Pairs', 'Total de pares de pontos homólogos')) + ''': [layer_count]<br>
 <span style="font-weight: bold;"><br>
 </span>
 <p class="MsoNormal"><b>''' + str2HTML(self.tr('PLANIMETRIC POSITIONAL ACCURACY', 'ACURÁCIA POSICIONAL PLANIMÉTRICA')) + ''' (XY)</b><o:p></o:p></p>
@@ -515,7 +514,8 @@ email: contato@geoone.com.br<br>
     </table>'''
             return tabela
         
-        valores = {'[layer_name]': str2HTML(teste.sourceName() + ' - ' + ref.sourceName()),
+        valores = {'[test_points]': str2HTML(teste.sourceName()),
+                   '[ref_points]': str2HTML(ref.sourceName()),
                    '[layer_count]': str(teste.featureCount()),
                    '[discrepX_mean]': format_num.format(float(DISCREP_X.mean())),
                    '[discrepX_std]': format_num.format(DISCREP_X.std()),
@@ -546,7 +546,6 @@ email: contato@geoone.com.br<br>
         
         for valor in valores:
             texto = texto.replace(valor, valores[valor])
-                   
 
         arq.write(texto)
         arq.close()
