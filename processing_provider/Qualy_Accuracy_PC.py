@@ -19,8 +19,10 @@ from PyQt5.QtCore import *
 from qgis.core import *
 from numpy import sqrt, array, mean, std, pi, sin
 import numpy as np
-from lftools.geocapt.imgs import Imgs
+from lftools.geocapt.imgs import *
 from lftools.translations.translate import translate
+from lftools.geocapt.topogeo import str2HTML
+from lftools.geocapt.cartography import PEC
 import os
 from qgis.PyQt.QtGui import QIcon
 
@@ -31,11 +33,10 @@ class Accuracy_PC(QgsProcessingAlgorithm):
     FIELD = 'FIELD'
     CLOUD = 'CLOUD'
     DISTFILTER = 'DISTFILTER'
+    CRS = 'CRS'
+    DECIMAL = 'DECIMAL'
     OUTPUT = 'OUTPUT'
     HTML = 'HTML'
-
-    def tr(self, string):
-        return QCoreApplication.translate('Processing', string)
 
     def createInstance(self):
         return Accuracy_PC()
@@ -52,19 +53,67 @@ class Accuracy_PC(QgsProcessingAlgorithm):
     def groupId(self):
         return 'quality'
 
-    def shortHelpString(self):
-        return self.tr('''Esta ferramenta pode ser utilizada para a avaliação da acurácia posicional altimétrica de Nuvem de Pontos.
-Obtem-se como saída:
-1 - Cálculo das discrepâncias em Z para o ponto da nuvem mais próximo do ponto de checagem.
-2 - Relatório do Padrão de Exatidão Cartográfica com resultado da REMQ e classificação do PEC-PCD.
+    LOC = QgsApplication.locale()[:2]
 
-Autor: Leandro França - Eng. Cartógrafo''')
+    def tr(self, *string):
+        return translate(string, self.LOC)
+
+    def tags(self):
+        return 'GeoOne,PEC,qualidade,padrão,rmse,remq,exactness,point cloud,PC,nuvem de pontos,precision,precisão,tendência,tendency,correctness,accuracy,acurácia,discrepância,discrepancy,vector,deltas,3d,vertical,altimétrico,altimetric,cqdg,asprs'.split(',')
+
+    def icon(self):
+        return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/quality.png'))
+
+    txt_en = '''This tool can be used to evaluate the <b>altimetric (Z) positional accuracy</b> of point clouds.
+
+<b>Outputs</b>
+1. <b>Discrepancy calculations</b> in Z for the point in the cloud closest to the reference point.
+2. <b>Accuracy report</b>: Cartographic Accuracy Standard report containing RMSE results and classification according to the PEC-PCD.
+
+<b>Input Requirements:</b>
+ - Point cloud in <b>.txt</b> format
+ - Point layer with an altitude (Z) field'''
+    
+    txt_pt = '''Esta ferramenta pode ser utilizada para avaliar a acurácia posicional altimétrica (Z) de nuvem de pontos.
+
+<b>Saídas:</b>
+1. Cálculo das discrepâncias em Z para o ponto da nuvem mais próximo do ponto de referência.
+2. Relatório do Padrão de Exatidão Cartográfica com resultado da REMQ e classificação do PEC-PCD.
+
+<b>Requisitos de Entrada:</b>
+- Nuvem de pontos no formato .txt
+- Camada de pontos com campo de altitude (Z)'''
+    
+    figure = 'images/tutorial/qualy_pc.jpg'
+
+    def shortHelpString(self):
+        social_BW = Imgs().social_BW
+        footer = '''<div align="center">
+                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), self.figure) +'''">
+                      </div>
+                      <div align="right">
+                      <p align="right">
+                      <b>'''+self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
+                      </p>'''+ social_BW + '''</div>
+                    </div>'''
+        return self.tr(self.txt_en, self.txt_pt) + footer
+    
 
     def initAlgorithm(self, config=None):
+
+        self.addParameter(
+            QgsProcessingParameterFile(
+                self.CLOUD,
+                self.tr('Point Cloud', 'Nuvem de pontos') + ' .TXT',
+                behavior = QgsProcessingParameterFile.File,
+                fileFilter = 'Texto (*.txt)'
+            )
+        )
+
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.CHECKPOINTS,
-                self.tr('Pontos de checagem'),
+                self.tr('Reference points', 'Pontos de referência'),
                 [QgsProcessing.TypeVectorPoint]
             )
         )
@@ -72,56 +121,56 @@ Autor: Leandro França - Eng. Cartógrafo''')
         self.addParameter(
             QgsProcessingParameterField(
                 self.FIELD,
-                self.tr('Altitude de referência'),
+                self.tr('Reference altitude', 'Altitude de referência'),
                 parentLayerParameterName=self.CHECKPOINTS,
                 type=QgsProcessingParameterField.Numeric
             )
         )
         
         self.addParameter(
-            QgsProcessingParameterFile(
-                self.CLOUD,
-                self.tr('Nuvem de pontos como arquivo .txt'),
-                behavior = QgsProcessingParameterFile.File,
-                fileFilter = 'Texto (*.txt)'
-            )
-        )
-        
-        self.addParameter(
             QgsProcessingParameterNumber(
                 self.DISTFILTER,
-                self.tr('Filtrar pontos mais próximos (metros)'),
+                self.tr('Distance to filter nearest points (m)', 'Distância para filtrar pontos mais próximos (m)'),
                 QgsProcessingParameterNumber.Type.Double,
                 defaultValue = 1.2,
                 minValue = 0
                 )
             )
-                
+        
+        self.addParameter(
+            QgsProcessingParameterCrs(
+                self.CRS,
+                self.tr('CRS', 'SRC'),
+                # QgsProject.instance().crs(),
+                optional = True
+                )
+            )
+
+        self.addParameter(
+            QgsProcessingParameterNumber(
+                self.DECIMAL,
+                self.tr('Decimal places', 'Casas decimais'),
+                QgsProcessingParameterNumber.Type.Integer,
+                defaultValue = 3,
+                minValue = 0
+                )
+            )
         
         self.addParameter(
             QgsProcessingParameterFeatureSink(
                 self.OUTPUT,
-                self.tr('Discrepâncias da Nuvem de Pontos')
+                self.tr('Point Cloud Discrepancies', 'Discrepâncias da Nuvem de Pontos')
             )
         )
-        
+
         self.addParameter(
             QgsProcessingParameterFileDestination(
-                'HTML',
-                'Relatório do PEC-PCD da nuvem de pontos',
-                self.tr('arquivo HTML (*.html)')
+                self.HTML,
+                self.tr('Accuracy Report of the Point Cloud', 'Relatório de Acurácia da nuvem de pontos'),
+                self.tr('HTML files (*.html)')
             )
         )
-        
-    def str2HTML(self, texto):
-        if texto:
-            dicHTML = {'Á': '&Aacute;',	'á': '&aacute;',	'Â': '&Acirc;',	'â': '&acirc;',	'À': '&Agrave;',	'à': '&agrave;',	'Å': '&Aring;',	'å': '&aring;',	'Ã': '&Atilde;',	'ã': '&atilde;',	'Ä': '&Auml;',	'ä': '&auml;',	'Æ': '&AElig;',	'æ': '&aelig;',	'É': '&Eacute;',	'é': '&eacute;',	'Ê': '&Ecirc;',	'ê': '&ecirc;',	'È': '&Egrave;',	'è': '&egrave;',	'Ë': '&Euml;',	'ë': '&Euml;',	'Ð': '&ETH;',	'ð': '&eth;',	'Í': '&Iacute;',	'í': '&iacute;',	'Î': '&Icirc;',	'î': '&icirc;',	'Ì': '&Igrave;',	'ì': '&igrave;',	'Ï': '&Iuml;',	'ï': '&iuml;',	'Ó': '&Oacute;',	'ó': '&oacute;',	'Ô': '&Ocirc;',	'ô': '&ocirc;',	'Ò': '&Ograve;',	'ò': '&ograve;',	'Ø': '&Oslash;',	'ø': '&oslash;',	'Ù': '&Ugrave;',	'ù': '&ugrave;',	'Ü': '&Uuml;',	'ü': '&uuml;',	'Ç': '&Ccedil;',	'ç': '&ccedil;',	'Ñ': '&Ntilde;',	'ñ': '&ntilde;',	'Ý': '&Yacute;',	'ý': '&yacute;',	'"': '&quot;', '”': '&quot;',	'<': '&lt;',	'>': '&gt;',	'®': '&reg;',	'©': '&copy;',	'\'': '&apos;', 'ª': '&ordf;', 'º': '&ordm', '°':'&deg;'}
-            for item in dicHTML:
-                if item in texto:
-                    texto = texto.replace(item, dicHTML[item])
-            return texto
-        else:
-            return ''
+
 
     def processAlgorithm(self, parameters, context, feedback):
         
@@ -159,6 +208,20 @@ Autor: Leandro França - Eng. Cartógrafo''')
         if distProx is None or distProx<=0:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.DISTFILTER))
         
+        decimal = self.parameterAsInt(
+            parameters,
+            self.DECIMAL,
+            context
+        )
+        
+        out_CRS = self.parameterAsCrs(
+            parameters,
+            self.CRS,
+            context
+        )
+        
+        format_num = '{:,.Xf}'.replace('X', str(decimal))
+        
         Fields = source.fields()
         
         itens  = {
@@ -168,17 +231,7 @@ Autor: Leandro França - Eng. Cartógrafo''')
                      }
         for item in itens:
             Fields.append(QgsField(item, itens[item]))
-            
-        (sink, dest_id) = self.parameterAsSink(
-            parameters,
-            self.OUTPUT,
-            context,
-            Fields,
-            source.wkbType(),
-            source.sourceCrs()
-        )
-        if sink is None:
-            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT))
+
         
         html_output = self.parameterAsFileOutput(
             parameters, 
@@ -186,24 +239,47 @@ Autor: Leandro França - Eng. Cartógrafo''')
             context
         )
 
-        
-        PEC = { '0.5k': {'planim': {'A': {'EM': 0.14, 'EP': 0.085},'B': {'EM': 0.25, 'EP': 0.15},'C': {'EM': 0.4, 'EP': 0.25},'D': {'EM': 0.5, 'EP': 0.3}}, 'altim': {'A': {'EM': 0.135, 'EP': 0.085},'B': {'EM': 0.25, 'EP': 0.165},'C': {'EM': 0.3, 'EP': 0.2},'D': {'EM': 0.375, 'EP': 0.25}}},
-        '1k': {'planim': {'A': {'EM': 0.28, 'EP': 0.17},'B': {'EM': 0.5, 'EP': 0.3},'C': {'EM': 0.8, 'EP': 0.5},'D': {'EM': 1, 'EP': 0.6}}, 'altim': {'A': {'EM': 0.27, 'EP': 0.17},'B': {'EM': 0.5, 'EP': 0.33},'C': {'EM': 0.6, 'EP': 0.4},'D': {'EM': 0.75, 'EP': 0.5}}},
-        '2k': {'planim': {'A': {'EM': 0.56, 'EP': 0.34},'B': {'EM': 1, 'EP': 0.6},'C': {'EM': 1.6, 'EP': 1},'D': {'EM': 2, 'EP': 1.2}}, 'altim': {'A': {'EM': 0.27, 'EP': 0.17},'B': {'EM': 0.5, 'EP': 0.33},'C': {'EM': 0.6, 'EP': 0.4},'D': {'EM': 0.75, 'EP': 0.5}}},
-        '5k': {'planim': {'A': {'EM': 1.4, 'EP': 0.85},'B': {'EM': 2.5, 'EP': 1.5},'C': {'EM': 4, 'EP': 2.5},'D': {'EM': 5, 'EP': 3}}, 'altim': {'A': {'EM': 0.54, 'EP': 0.34},'B': {'EM': 1, 'EP': 0.67},'C': {'EM': 1.2, 'EP': 0.8},'D': {'EM': 1.5, 'EP': 1}}},
-        '10k': {'planim': {'A': {'EM': 2.8, 'EP': 1.7},'B': {'EM': 5, 'EP': 3},'C': {'EM': 8, 'EP': 5},'D': {'EM': 10, 'EP': 6}}, 'altim': {'A': {'EM': 1.35, 'EP': 0.84},'B': {'EM': 2.5, 'EP': 1.67},'C': {'EM': 3, 'EP': 2},'D': {'EM': 3.75, 'EP': 2.5}}},
-        '25k': {'planim': {'A': {'EM': 7, 'EP': 4.25},'B': {'EM': 12.5, 'EP': 7.5},'C': {'EM': 20, 'EP': 12.5},'D': {'EM': 25, 'EP': 15}}, 'altim': {'A': {'EM': 2.7, 'EP': 1.67},'B': {'EM': 5, 'EP': 3.33},'C': {'EM': 6, 'EP': 4},'D': {'EM': 7.5, 'EP': 5}}},
-        '50k': {'planim': {'A': {'EM': 14, 'EP': 8.5},'B': {'EM': 25, 'EP': 15},'C': {'EM': 40, 'EP': 25},'D': {'EM': 50, 'EP': 30}}, 'altim': {'A': {'EM': 5.5, 'EP': 3.33},'B': {'EM': 10, 'EP': 6.67},'C': {'EM': 12, 'EP': 8},'D': {'EM': 15, 'EP': 10}}},
-        '100k': {'planim': {'A': {'EM': 28, 'EP': 17},'B': {'EM': 50, 'EP': 30},'C': {'EM': 80, 'EP': 50},'D': {'EM': 100, 'EP': 60}}, 'altim': {'A': {'EM': 13.7, 'EP': 8.33},'B': {'EM': 25, 'EP': 16.67},'C': {'EM': 30, 'EP': 20},'D': {'EM': 37.5, 'EP': 25}}},
-        '250k': {'planim': {'A': {'EM': 70, 'EP': 42.5},'B': {'EM': 125, 'EP': 75},'C': {'EM': 200, 'EP': 125},'D': {'EM': 250, 'EP': 150}}, 'altim': {'A': {'EM': 27, 'EP': 16.67},'B': {'EM': 50, 'EP': 33.33},'C': {'EM': 60, 'EP': 40},'D': {'EM': 75, 'EP': 50}}}}
-        
+
+        # VALIDAÇÕES
+        num_teste = source.featureCount()
+        if num_teste < 4:
+            raise QgsProcessingException(self.tr('Insufficient number of features for quality evaluation!', 'Número de feições insuficiente para avaliação de qualidade!'))
+          
+        # SRC definido deve ser projetado
+        msg = self.tr('Define a projected CRS for the calculations!', 'Defina um SRC projetado para os cálculos!')
+        coordTransf = False
+        crs = source.sourceCrs()
+        if out_CRS.isValid():
+            if out_CRS.isGeographic():
+                raise QgsProcessingException(msg)
+            else:
+                # Transformação de coordenadas
+                coordinateTransf = QgsCoordinateTransform(crs, out_CRS, QgsProject.instance())
+                coordTransf = True
+                SRC = out_CRS
+        elif crs.isGeographic():
+            raise QgsProcessingException(msg)
+        else:
+            SRC = crs
+
+        (sink, dest_id) = self.parameterAsSink(
+            parameters,
+            self.OUTPUT,
+            context,
+            Fields,
+            source.wkbType(),
+            SRC
+        )
+        if sink is None:
+            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT))
+
         dicionario = {'0.5k': '1:500', '1k': '1:1.000', '2k': '1:2.000', '5k': '1:5.000', '10k': '1:10.000', '25k': '1:25.000', '50k': '1:50.000', '100k': '1:100.000', '250k': '1:250.000'}
         
         valores = ['A', 'B', 'C', 'D']
         
         Escalas = [ esc for esc in dicionario]
         
-        # função cálculo das distãncias
+        # função cálculo das distâncias
         def QuadDist3D (pnt1, pnt2):
             return (pnt1.x() - pnt2.x())**2 + (pnt1.y() - pnt2.y())**2 + (pnt1.z() - pnt2.z())**2
         
@@ -211,14 +287,17 @@ Autor: Leandro França - Eng. Cartógrafo''')
         # Número de pontos
         with open(caminho) as myfile:
             total_pnts = sum(1 for line in myfile)
-        feedback.pushInfo('Número total de pontos: {}'.format('{:,.0f}'.format(total_pnts).replace('.','x').replace(',','.').replace('x',',')))
+        feedback.pushInfo(self.tr('Total number of points: ', 'Número total de pontos: ') + '{}'.format(total_pnts))
     
         
         # Filtrando os pontos mais próximos
-        feedback.pushInfo('Filtrando os pontos mais próximos...')
+        feedback.pushInfo(self.tr('Filtering nearest points...', 'Filtrando os pontos mais próximos...'))
         pontos_ref = []
         for feat in source.getFeatures():
-            pnt = feat.geometry().asPoint()
+            geom = feat.geometry()
+            if coordTransf and crs != SRC:
+                geom.transform(coordinateTransf)
+            pnt = geom.asPoint()
             x_ref, y_ref = pnt.x(), pnt.y()
             pontos_ref += [[x_ref, y_ref]]
         
@@ -242,11 +321,14 @@ Autor: Leandro França - Eng. Cartógrafo''')
             feedback.setProgress(int(cont * total))
         
         # Cálculo das discrepâncias
-        feedback.pushInfo('Cálculo das discrepâncias...')
+        feedback.pushInfo(self.tr('Altimetric calculation...', 'Cálculo das discrepâncias altimétricas...'))
         DISCREP = []
         total = 100.0 / source.featureCount() if source.featureCount() else 0
         for w, feat in enumerate(source.getFeatures()):
-            pnt = feat.geometry().asPoint()
+            geom = feat.geometry()
+            if coordTransf and crs != SRC:
+                geom.transform(coordinateTransf)
+            pnt = geom.asPoint()
             z_ref = float(feat[columnIndex])
             att = feat.attributes()
             nearestPoint = (0,0,0)
@@ -272,8 +354,8 @@ Autor: Leandro França - Eng. Cartógrafo''')
             feedback.setProgress(int((w+1) * total))
             
         
-        # Gerar relatorio do metodo
-        feedback.pushInfo('Gerando relatório do PEC-PCD...')
+        # Gerar relatorio
+        feedback.pushInfo(self.tr('Generating accuracy report...', 'Gerando relatório do PEC-PCD...'))
         DISCREP = array(DISCREP)
         RMSE = sqrt((DISCREP*DISCREP).sum()/len(DISCREP))
         RESULTADOS = {}
@@ -294,71 +376,94 @@ Autor: Leandro França - Eng. Cartógrafo''')
         
         # Criacao do arquivo html com os resultados
         arq = open(html_output, 'w')
+
         texto = '''<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
-  <meta content="text/html; charset=ISO-8859-1"
- http-equiv="content-type">
-  <title>ACUR&Aacute;CIA POSICIONAL ALTIM&Eacute;TRICA</title>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>''' + str2HTML(self.tr('POINT CLOUD POSITIONAL ACCURACY', 'ACURÁCIA POSICIONAL DE NUVEM DE PONTOS')) + '''</title>
+  <link rel = "icon" href = "https://github.com/LEOXINGU/lftools/blob/main/images/lftools.png?raw=true" type = "image/x-icon">
   <meta name="qrichtext" content="1">
-  <meta http-equiv="Content-Type"
- content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 </head>
 <body style="background-color: rgb(229, 233, 166);">
-<div style="text-align: center;"><span
- style="font-weight: bold; text-decoration: underline;">RELAT&Oacute;RIO DE ACUR&Aacute;CIA POSICIONAL ALTIM&Eacute;TRICA</span><br>
+<div style="text-align: center;"><span style="font-weight: bold;"><br>
+    <img height="80" src="data:image/'''+ 'png;base64,' + lftools_logo + '''">
+</div>
+<div style="text-align: center;"><span style="font-weight: bold; text-decoration: underline;">''' + str2HTML(self.tr('POINT CLOUD POSITIONAL ACCURACY', 'ACURÁCIA POSICIONAL DE NUVEM DE PONTOS')) + '''</span><br>
 </div>
 <br>
-<span style="font-weight: bold;">1. Dados de entrada </span><br>
-&nbsp;&nbsp;&nbsp; a. Pontos de Checagem: {}<br>
-&nbsp;&nbsp;&nbsp; b. Nuvem de pontos: {}<br>
-&nbsp;&nbsp;&nbsp; c. total de pontos de checagem: {}<br>
+<span style="font-weight: bold;"><br>''' + str2HTML(self.tr('EVALUATED DATA', 'DADOS AVALIADOS')) + '''</span><br>
+&nbsp;&nbsp;&nbsp; a. ''' + str2HTML(self.tr('Point Cloud', 'Nuvem de pontos')) + ''': [cloud]<br>
+&nbsp;&nbsp;&nbsp; b. ''' + str2HTML(self.tr('Reference Points', 'Pontos de referência')) + ''': [layer_name]<br>
+&nbsp;&nbsp;&nbsp; c. ''' + str2HTML(self.tr('Total Number of Homologous Point Pairs', 'Total de pares de pontos homólogos')) + ''': [layer_count]<br>
+<span style="font-weight: bold;"><br>
+</span>
 <br>
-<span style="font-weight: bold;">2. Relat&oacute;rio</span><br>
-&nbsp;&nbsp;&nbsp; a. Discrep&acirc;ncias em Z:<br>
-&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; a.1. 
-m&eacute;dia das discrep&acirc;ncias (tend&ecirc;ncia): {:.3f} m<br>
-&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; a.2. 
-desvio-padr&atilde;o (precis&atilde;o):&nbsp;{:.3f} m<br>
-&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; a.3. 
-discrep&acirc;ncia m&aacute;xima:&nbsp;{:.3f} m<br>
-&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; a.4. 
-discrep&acirc;ncia m&iacute;nima:&nbsp;{:.3f} m<br>
-&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; a.5. 
-REMQ: {:.3f} m<br>
+<p class="MsoNormal"><b>''' + str2HTML(self.tr('VERTICAL POSITIONAL ACCURACY', 'ACURÁCIA POSICIONAL ALTIMÉTRICA')) + ''' (Z)</b><o:p></o:p></p>
+&nbsp;&nbsp;&nbsp; <span style="font-weight: bold;">
+1. ''' + str2HTML(self.tr('Z Discrepancies', 'Discrepâncias em Z')) + ''':</span><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; a. ''' + str2HTML(self.tr('average (tendency)', 'média (tendência)')) + ''': [discrepZ_mean] m<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; b. ''' + str2HTML(self.tr('standard deviation (precision)', 'desvio-padrão (precisão)')) + ''':&nbsp;[discrepZ_std] m<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; c. ''' + str2HTML(self.tr('maximum', 'máxima')) + ''':&nbsp;[discrepZ_max] m<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; d. ''' + str2HTML(self.tr('minimum', 'mínima')) + ''':&nbsp;[discrepZ_min] m<br>
+&nbsp;<span style="font-weight: bold;"></span>&nbsp;&nbsp;&nbsp; <span style="font-weight: bold;">
+2. ''' + str2HTML(self.tr('RMSE', 'REMQ')) + ''':&nbsp;</span><span  style="font-weight: bold;">[RMSE_Z]</span><span  style="font-weight: bold;"> m</span><br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp; <span style="font-weight: bold;">
+3. ''' + str2HTML(self.tr('Cartographic Accuracy Standard', 'Padrão de Exatidão Cartográfica')) + ''' (</span><span  style="font-weight: bold;">PEC-PCD)<br>
+</span><br>
+[PEC_Z]<br>
 <br>
-<span style="font-weight: bold;">3. Padr&atilde;o de Exatid&atilde;o Cartogr&aacute;fica (</span><span style="font-weight: bold;">PEC-PCD)<br>
-<br>
-</span>'''.format(self.str2HTML(source.sourceName()), str(os.path.basename(caminho)), source.featureCount(), float(DISCREP.mean()), float(DISCREP.std()), float(DISCREP.max()), float(DISCREP.min()), float(RMSE))
-        
-        texto += '''<table style="margin: 0px;" border="1" cellpadding="2"
- cellspacing="0">
-  <tbody>
-    <tr>'''
-        for escala in Escalas:
-            texto += '    <td style="text-align: center; font-weight: bold;">{}</td>'.format(dicionario[escala])
-        
-        texto +='''
-        </tr>
-        <tr>'''
-        for escala in Escalas:
-            texto += '    <td style="text-align: center;">{}</td>'.format(RESULTADOS[escala])
-        
-        texto +='''
-    </tr>
-  </tbody>
-</table>
-<br>
-<hr>
-<address><font size="+l">Leandro Fran&ccedil;a
-2023<br>
-Eng. Cart&oacute;grafo<br>
+<hr>''' + str2HTML(self.tr('Leandro Franca', 'Leandro França')) + ''' 2025<br>
+<address><font size="+l">''' + str2HTML(self.tr('Cartographic Engineer', 'Eng. Cartógrafo')) + '''<br>
 email: contato@geoone.com.br<br>
 </font>
 </address>
 </body>
 </html>
-    '''
+
+        '''
+        
+        def TabelaPEC(RESULTADOS):
+            tabela = '''<table style="margin: 0px;" border="1" cellpadding="4"
+     cellspacing="0">
+      <tbody>
+        <tr>'''
+            for escala in Escalas:
+                tabela += '    <td style="text-align: center; font-weight: bold;">{}</td>'.format(dicionario[escala])
+            
+            tabela +='''
+            </tr>
+            <tr>'''
+            for escala in Escalas:
+                tabela += '    <td style="text-align: center;">{}</td>'.format(RESULTADOS[escala])
+            
+            tabela +='''
+        </tr>
+      </tbody>
+    </table>'''
+            return tabela
+        
+        valores = {'[layer_name]': str2HTML(source.sourceName()),
+                   '[cloud]': str2HTML(os.path.basename(caminho)),
+                   '[layer_count]': str(source.featureCount()),
+                   
+                   '[discrepZ_mean]': format_num.format(DISCREP.mean()),
+                   '[discrepZ_std]': format_num.format(DISCREP.std()),
+                   '[discrepZ_max]': format_num.format(DISCREP.max()),
+                   '[discrepZ_min]': format_num.format(DISCREP.min()),
+                                      
+                   '[RMSE_Z]': format_num.format(RMSE),
+                   '[discrepZ_max]': format_num.format(DISCREP.max()),
+                   '[discrepZ_min]': format_num.format(DISCREP.min()),
+                   
+                   '[PEC_Z]': TabelaPEC(RESULTADOS),
+                   }
+        
+        for valor in valores:
+            texto = texto.replace(valor, valores[valor])
+
         arq.write(texto)
         arq.close()
         
