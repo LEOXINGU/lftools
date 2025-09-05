@@ -21,6 +21,7 @@ from numpy import sqrt, array, mean, std, pi, sin
 from lftools.geocapt.imgs import *
 from lftools.translations.translate import translate
 from lftools.geocapt.topogeo import str2HTML
+from lftools.geocapt.cartography import PEC
 import os
 from qgis.PyQt.QtGui import QIcon
 
@@ -59,7 +60,7 @@ class Accuracy_3D(QgsProcessingAlgorithm):
         return translate(string, self.LOC)
 
     def tags(self):
-        return 'GeoOne,raster,rgb,composite,composition,bands,color'.split(',')
+        return 'GeoOne,PEC,qualidade,padrão,rmse,remq,exactness,precision,precisão,tendência,tendency,correctness,accuracy,acurácia,discrepância,discrepancy,vector,deltas,3d,planialtimetrico,cqdg,asprs'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/quality.png'))
@@ -137,14 +138,7 @@ class Accuracy_3D(QgsProcessingAlgorithm):
                 optional = True
             )
         )
-        
-        self.addParameter(
-            QgsProcessingParameterFeatureSink(
-                self.OUTPUT,
-                self.tr('3D Planialtimetric Discrepancies', 'Discrepâncias planialtimétricas 3D')
-            )
-        )
-        
+
         self.addParameter(
             QgsProcessingParameterNumber(
                 self.DECIMAL,
@@ -154,6 +148,13 @@ class Accuracy_3D(QgsProcessingAlgorithm):
                 minValue = 0
                 )
             )
+        
+        self.addParameter(
+            QgsProcessingParameterFeatureSink(
+                self.OUTPUT,
+                self.tr('3D Planialtimetric Discrepancies', 'Discrepâncias planialtimétricas 3D')
+            )
+        )
         
         self.addParameter(
             QgsProcessingParameterFileDestination(
@@ -225,16 +226,6 @@ class Accuracy_3D(QgsProcessingAlgorithm):
             context
         )
         
-        PEC = { '0.5k': {'planim': {'A': {'EM': 0.14, 'EP': 0.085},'B': {'EM': 0.25, 'EP': 0.15},'C': {'EM': 0.4, 'EP': 0.25},'D': {'EM': 0.5, 'EP': 0.3}}, 'altim': {'A': {'EM': 0.135, 'EP': 0.085},'B': {'EM': 0.25, 'EP': 0.165},'C': {'EM': 0.3, 'EP': 0.2},'D': {'EM': 0.375, 'EP': 0.25}}},
-        '1k': {'planim': {'A': {'EM': 0.28, 'EP': 0.17},'B': {'EM': 0.5, 'EP': 0.3},'C': {'EM': 0.8, 'EP': 0.5},'D': {'EM': 1, 'EP': 0.6}}, 'altim': {'A': {'EM': 0.27, 'EP': 0.17},'B': {'EM': 0.5, 'EP': 0.33},'C': {'EM': 0.6, 'EP': 0.4},'D': {'EM': 0.75, 'EP': 0.5}}},
-        '2k': {'planim': {'A': {'EM': 0.56, 'EP': 0.34},'B': {'EM': 1, 'EP': 0.6},'C': {'EM': 1.6, 'EP': 1},'D': {'EM': 2, 'EP': 1.2}}, 'altim': {'A': {'EM': 0.27, 'EP': 0.17},'B': {'EM': 0.5, 'EP': 0.33},'C': {'EM': 0.6, 'EP': 0.4},'D': {'EM': 0.75, 'EP': 0.5}}},
-        '5k': {'planim': {'A': {'EM': 1.4, 'EP': 0.85},'B': {'EM': 2.5, 'EP': 1.5},'C': {'EM': 4, 'EP': 2.5},'D': {'EM': 5, 'EP': 3}}, 'altim': {'A': {'EM': 0.54, 'EP': 0.34},'B': {'EM': 1, 'EP': 0.67},'C': {'EM': 1.2, 'EP': 0.8},'D': {'EM': 1.5, 'EP': 1}}},
-        '10k': {'planim': {'A': {'EM': 2.8, 'EP': 1.7},'B': {'EM': 5, 'EP': 3},'C': {'EM': 8, 'EP': 5},'D': {'EM': 10, 'EP': 6}}, 'altim': {'A': {'EM': 1.35, 'EP': 0.84},'B': {'EM': 2.5, 'EP': 1.67},'C': {'EM': 3, 'EP': 2},'D': {'EM': 3.75, 'EP': 2.5}}},
-        '25k': {'planim': {'A': {'EM': 7, 'EP': 4.25},'B': {'EM': 12.5, 'EP': 7.5},'C': {'EM': 20, 'EP': 12.5},'D': {'EM': 25, 'EP': 15}}, 'altim': {'A': {'EM': 2.7, 'EP': 1.67},'B': {'EM': 5, 'EP': 3.33},'C': {'EM': 6, 'EP': 4},'D': {'EM': 7.5, 'EP': 5}}},
-        '50k': {'planim': {'A': {'EM': 14, 'EP': 8.5},'B': {'EM': 25, 'EP': 15},'C': {'EM': 40, 'EP': 25},'D': {'EM': 50, 'EP': 30}}, 'altim': {'A': {'EM': 5.5, 'EP': 3.33},'B': {'EM': 10, 'EP': 6.67},'C': {'EM': 12, 'EP': 8},'D': {'EM': 15, 'EP': 10}}},
-        '100k': {'planim': {'A': {'EM': 28, 'EP': 17},'B': {'EM': 50, 'EP': 30},'C': {'EM': 80, 'EP': 50},'D': {'EM': 100, 'EP': 60}}, 'altim': {'A': {'EM': 13.7, 'EP': 8.33},'B': {'EM': 25, 'EP': 16.67},'C': {'EM': 30, 'EP': 20},'D': {'EM': 37.5, 'EP': 25}}},
-        '250k': {'planim': {'A': {'EM': 70, 'EP': 42.5},'B': {'EM': 125, 'EP': 75},'C': {'EM': 200, 'EP': 125},'D': {'EM': 250, 'EP': 150}}, 'altim': {'A': {'EM': 27, 'EP': 16.67},'B': {'EM': 50, 'EP': 33.33},'C': {'EM': 60, 'EP': 40},'D': {'EM': 75, 'EP': 50}}}}
-        
         dicionario = {'0.5k': '1:500', '1k': '1:1.000', '2k': '1:2.000', '5k': '1:5.000', '10k': '1:10.000', '25k': '1:25.000', '50k': '1:50.000', '100k': '1:100.000', '250k': '1:250.000'}
         
         valores = ['A', 'B', 'C', 'D']
@@ -246,19 +237,19 @@ class Accuracy_3D(QgsProcessingAlgorithm):
         num_ref = ref.featureCount()
         # Validação do número mínimo de feições em cada camada de entrada
         if num_teste < 3 or num_teste < 3:
-            raise QgsProcessingException(self.tr('Número de feições insuficiente para avaliação de qualidade!'))
+            raise QgsProcessingException(self.tr('Insufficient number of features for quality evaluation!', 'Número de feições insuficiente para avaliação de qualidade!'))
         
         # O número de feições deve ser extamente o mesmo nas duas camadas
         if num_ref != num_teste:
-            raise QgsProcessingException(self.tr('O número de feições deve ser igual nas duas camadas!'))
+            raise QgsProcessingException(self.tr('The number of features must be the same in both layers!', 'O número de feições deve ser igual nas duas camadas!'))
             
         # As camadas de teste e de referência devem ser distintas
         if teste.sourceName() == ref.sourceName():
-            raise QgsProcessingException(self.tr('As camadas de teste e de referência devem ser distintas!'))
+            raise QgsProcessingException(self.tr('The test and reference layers must be distinct!','As camadas de teste e de referência devem ser distintas!'))
         
         
         # SRC definido deve ser projetado
-        msg = self.tr('Defina um SRC projetado para os cálculos!')
+        msg = self.tr(self.tr('Define a projected CRS for the calculations!', 'Defina um SRC projetado para os cálculos!'))
         coordTransf = False
         if out_CRS.isValid():
             if out_CRS.isGeographic():
@@ -381,7 +372,7 @@ class Accuracy_3D(QgsProcessingAlgorithm):
         
         
         # Cálculo planimétrico
-        feedback.pushInfo('Cálculo planimétrico...')
+        feedback.pushInfo(self.tr('Planimetric calculation...', 'Cálculo planimétrico...'))
         
         DISCREP_XY = array(DISCREP_XY)
         RMSE_XY = sqrt((DISCREP_XY*DISCREP_XY).sum()/len(DISCREP_XY))
@@ -407,7 +398,7 @@ class Accuracy_3D(QgsProcessingAlgorithm):
         
         
         # Cálculo altimétrico
-        feedback.pushInfo('Cálculo altimétrico...')
+        feedback.pushInfo(self.tr('Altimetric calculation...', 'Cálculo altimétrico...'))
         
         DISCREP_Z = array(DISCREP_Z)
         RMSE_Z = sqrt((DISCREP_Z*DISCREP_Z).sum()/len(DISCREP_Z))
@@ -434,7 +425,7 @@ class Accuracy_3D(QgsProcessingAlgorithm):
         
   
         # Gerar relatorio
-        feedback.pushInfo('Gerando relatório do PEC-PCD...')
+        feedback.pushInfo(self.tr('Generating PEC-PCD report...', 'Gerando relatório do PEC-PCD...'))
         arq = open(html_output, 'w')
         texto = '''<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
@@ -560,7 +551,7 @@ email: contato@geoone.com.br<br>
         arq.write(texto)
         arq.close()
         
-        feedback.pushInfo(self.tr('Operação finalizada com sucesso!'))
-        feedback.pushInfo('Leandro França - Eng Cart')
+        feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
+        feedback.pushInfo(self.tr('Leandro Franca - Cartographic Engineer', 'Leandro França - Eng Cart'))
         return {self.OUTPUT: dest_id,
                 self.HTML: html_output}
