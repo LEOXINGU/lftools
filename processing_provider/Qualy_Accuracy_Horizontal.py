@@ -18,8 +18,10 @@ __copyright__ = '(C) 2021, Leandro França'
 from PyQt5.QtCore import *
 from qgis.core import *
 from numpy import sqrt, array, mean, std, pi, sin
-from lftools.geocapt.imgs import Imgs
+from lftools.geocapt.imgs import *
 from lftools.translations.translate import translate
+from lftools.geocapt.topogeo import str2HTML
+from lftools.geocapt.cartography import PEC
 import os
 from qgis.PyQt.QtGui import QIcon
 
@@ -29,6 +31,10 @@ class Accuracy_Horizontal(QgsProcessingAlgorithm):
     INPUT = 'INPUT'
     OUTPUT = 'OUTPUT'
     HTML = 'HTML'
+    DECIMAL = 'DECIMAL'
+    HTML = 'HTML'
+    CRS = 'CRS'
+    FIELD = 'FIELD'
 
     def tr(self, string):
         return QCoreApplication.translate('Processing', string)
@@ -47,49 +53,95 @@ class Accuracy_Horizontal(QgsProcessingAlgorithm):
 
     def groupId(self):
         return 'quality'
+    
+    LOC = QgsApplication.locale()[:2]
+
+    def tr(self, *string):
+        return translate(string, self.LOC)
+
+    def tags(self):
+        return 'GeoOne,PEC,qualidade,padrão,rmse,remq,exactness,precision,precisão,tendência,tendency,correctness,accuracy,acurácia,discrepância,discrepancy,vector,deltas,3d,planimetrico,cqdg,asprs'.split(',')
+
+    def icon(self):
+        return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/quality.png'))
+       
+    txt_en = '''This tool can be used to evaluate the <b>planimetric (2D) positional accuracy</b> of digital cartographic products.
+
+<b>Outputs</b>
+1. <b>Discrepancy calculations</b>: differences in X and Y coordinates, including the planimetric (XY) resultants.
+2. <b>Accuracy report</b>: Cartographic Accuracy Standard report containing RMSE values and classification according to the <b>Planimetric PEC-PCD</b>.
+
+<b>Input Requirements</b>
+- The input layer must consist of lines with two vertices.
+- The vertices must correspond to homologous points, such that the <b>first vertex</b> corresponds to the test point and the <b>second vertex</b> corresponds to the check point.'''
+    
+    txt_pt = '''Esta ferramenta pode ser utilizada para avaliar a acurácia posicional planimétrica (2D) de produtos cartográficos digitais.
+
+<b>Saídas</b>
+1. <b>Cálculo das discrepâncias</b>: diferenças nas coordenadas X e Y, incluindo as resultantes planimétrica (XY).
+2. <b>Relatório de acurácia</b>: relatório do Padrão de Exatidão Cartográfica contendo valores de REMQ e classificação conforme o PEC-PCD Planimétrico.
+
+<b>Requisitos de Entrada</b>
+- A camada de entrada deve consistir em linhas com dois vértices.
+- Os vértices devem corresponder aos pontos homólogos, de tal forma que o primeiro vértice corresponde ao ponto de teste e o segundo vértice corresponde ao ponto de checagem.'''
+    
+    figure = 'images/tutorial/raster_rgb.jpg'
 
     def shortHelpString(self):
-        return self.tr('''Esta ferramenta pode ser utilizada para a avaliação da acurácia posicional planimétrica de produtos cartográficos digitais.
-Obtem-se como saída:
-1 - Cálculo das discrepâncias em X e Y, bem como a resultande planimétrica XY.
-2 - Relatório do Padrão de Exatidão Cartográfica com resultado da REMQ e classificação do PEC-PCD.
-
-Obs: As feições de entrada devem ser linhas de exatamente dois vértices. O primeiro vértice corresponde ao ponto teste e o segundo ao ponto de checagem.
-Autor: Leandro França - Eng. Cartógrafo''')
+        social_BW = Imgs().social_BW
+        footer = '''<div align="center">
+                      <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), self.figure) +'''">
+                      </div>
+                      <div align="right">
+                      <p align="right">
+                      <b>'''+self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
+                      </p>'''+ social_BW + '''</div>
+                    </div>'''
+        return self.tr(self.txt_en, self.txt_pt) + footer
+    
 
     def initAlgorithm(self, config=None):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT,
-                self.tr('Linhas de vetores'),
+                self.tr('Vector lines', 'Linhas de vetores'),
                 [QgsProcessing.TypeVectorLine]
             )
         )
+
+        self.addParameter(
+            QgsProcessingParameterCrs(
+                self.CRS,
+                self.tr('CRS', 'SRC'),
+                # QgsProject.instance().crs(),
+                optional = True
+                )
+            )
+
+        self.addParameter(
+            QgsProcessingParameterNumber(
+                self.DECIMAL,
+                self.tr('Decimal places', 'Casas decimais'),
+                QgsProcessingParameterNumber.Type.Integer,
+                defaultValue = 3,
+                minValue = 0
+                )
+            )
         
         self.addParameter(
             QgsProcessingParameterFeatureSink(
                 self.OUTPUT,
-                self.tr('Discrepâncias planimétricas')
+                self.tr('2D Planimetric Discrepancies', 'Discrepâncias planimétricas 2D')
             )
         )
         
         self.addParameter(
             QgsProcessingParameterFileDestination(
                 'HTML',
-                'Relatório do PEC-PCD planimétrico',
-                self.tr('arquivo HTML (*.html)')
+                self.tr('2D Planimetric PEC-PCD Report', 'Relatório do PEC-PCD planimétrico 2D'),
+                self.tr('HTML files (*.html)')
             )
         )
-        
-    def str2HTML(self, texto):
-        if texto:
-            dicHTML = {'Á': '&Aacute;',	'á': '&aacute;',	'Â': '&Acirc;',	'â': '&acirc;',	'À': '&Agrave;',	'à': '&agrave;',	'Å': '&Aring;',	'å': '&aring;',	'Ã': '&Atilde;',	'ã': '&atilde;',	'Ä': '&Auml;',	'ä': '&auml;',	'Æ': '&AElig;',	'æ': '&aelig;',	'É': '&Eacute;',	'é': '&eacute;',	'Ê': '&Ecirc;',	'ê': '&ecirc;',	'È': '&Egrave;',	'è': '&egrave;',	'Ë': '&Euml;',	'ë': '&Euml;',	'Ð': '&ETH;',	'ð': '&eth;',	'Í': '&Iacute;',	'í': '&iacute;',	'Î': '&Icirc;',	'î': '&icirc;',	'Ì': '&Igrave;',	'ì': '&igrave;',	'Ï': '&Iuml;',	'ï': '&iuml;',	'Ó': '&Oacute;',	'ó': '&oacute;',	'Ô': '&Ocirc;',	'ô': '&ocirc;',	'Ò': '&Ograve;',	'ò': '&ograve;',	'Ø': '&Oslash;',	'ø': '&oslash;',	'Ù': '&Ugrave;',	'ù': '&ugrave;',	'Ü': '&Uuml;',	'ü': '&uuml;',	'Ç': '&Ccedil;',	'ç': '&ccedil;',	'Ñ': '&Ntilde;',	'ñ': '&ntilde;',	'Ý': '&Yacute;',	'ý': '&yacute;',	'"': '&quot;', '”': '&quot;',	'<': '&lt;',	'>': '&gt;',	'®': '&reg;',	'©': '&copy;',	'\'': '&apos;', 'ª': '&ordf;', 'º': '&ordm', '°':'&deg;'}
-            for item in dicHTML:
-                if item in texto:
-                    texto = texto.replace(item, dicHTML[item])
-            return texto
-        else:
-            return ''
 
     def processAlgorithm(self, parameters, context, feedback):
         
@@ -102,8 +154,22 @@ Autor: Leandro França - Eng. Cartógrafo''')
         if source is None:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.INPUT))
         
-        Fields = source.fields()
         
+        decimal = self.parameterAsInt(
+            parameters,
+            self.DECIMAL,
+            context
+        )
+        
+        out_CRS = self.parameterAsCrs(
+            parameters,
+            self.CRS,
+            context
+        )
+        
+        format_num = '{:,.Xf}'.replace('X', str(decimal))
+
+        Fields = source.fields()
         itens  = {
                      'discrep_x' : QVariant.Double,
                      'discrep_y' : QVariant.Double,
@@ -128,23 +194,15 @@ Autor: Leandro França - Eng. Cartógrafo''')
             self.HTML, 
             context
         )
-
-        
-        PEC = { '0.5k': {'planim': {'A': {'EM': 0.14, 'EP': 0.085},'B': {'EM': 0.25, 'EP': 0.15},'C': {'EM': 0.4, 'EP': 0.25},'D': {'EM': 0.5, 'EP': 0.3}}, 'altim': {'A': {'EM': 0.135, 'EP': 0.085},'B': {'EM': 0.25, 'EP': 0.165},'C': {'EM': 0.3, 'EP': 0.2},'D': {'EM': 0.375, 'EP': 0.25}}},
-        '1k': {'planim': {'A': {'EM': 0.28, 'EP': 0.17},'B': {'EM': 0.5, 'EP': 0.3},'C': {'EM': 0.8, 'EP': 0.5},'D': {'EM': 1, 'EP': 0.6}}, 'altim': {'A': {'EM': 0.27, 'EP': 0.17},'B': {'EM': 0.5, 'EP': 0.33},'C': {'EM': 0.6, 'EP': 0.4},'D': {'EM': 0.75, 'EP': 0.5}}},
-        '2k': {'planim': {'A': {'EM': 0.56, 'EP': 0.34},'B': {'EM': 1, 'EP': 0.6},'C': {'EM': 1.6, 'EP': 1},'D': {'EM': 2, 'EP': 1.2}}, 'altim': {'A': {'EM': 0.27, 'EP': 0.17},'B': {'EM': 0.5, 'EP': 0.33},'C': {'EM': 0.6, 'EP': 0.4},'D': {'EM': 0.75, 'EP': 0.5}}},
-        '5k': {'planim': {'A': {'EM': 1.4, 'EP': 0.85},'B': {'EM': 2.5, 'EP': 1.5},'C': {'EM': 4, 'EP': 2.5},'D': {'EM': 5, 'EP': 3}}, 'altim': {'A': {'EM': 0.54, 'EP': 0.34},'B': {'EM': 1, 'EP': 0.67},'C': {'EM': 1.2, 'EP': 0.8},'D': {'EM': 1.5, 'EP': 1}}},
-        '10k': {'planim': {'A': {'EM': 2.8, 'EP': 1.7},'B': {'EM': 5, 'EP': 3},'C': {'EM': 8, 'EP': 5},'D': {'EM': 10, 'EP': 6}}, 'altim': {'A': {'EM': 1.35, 'EP': 0.84},'B': {'EM': 2.5, 'EP': 1.67},'C': {'EM': 3, 'EP': 2},'D': {'EM': 3.75, 'EP': 2.5}}},
-        '25k': {'planim': {'A': {'EM': 7, 'EP': 4.25},'B': {'EM': 12.5, 'EP': 7.5},'C': {'EM': 20, 'EP': 12.5},'D': {'EM': 25, 'EP': 15}}, 'altim': {'A': {'EM': 2.7, 'EP': 1.67},'B': {'EM': 5, 'EP': 3.33},'C': {'EM': 6, 'EP': 4},'D': {'EM': 7.5, 'EP': 5}}},
-        '50k': {'planim': {'A': {'EM': 14, 'EP': 8.5},'B': {'EM': 25, 'EP': 15},'C': {'EM': 40, 'EP': 25},'D': {'EM': 50, 'EP': 30}}, 'altim': {'A': {'EM': 5.5, 'EP': 3.33},'B': {'EM': 10, 'EP': 6.67},'C': {'EM': 12, 'EP': 8},'D': {'EM': 15, 'EP': 10}}},
-        '100k': {'planim': {'A': {'EM': 28, 'EP': 17},'B': {'EM': 50, 'EP': 30},'C': {'EM': 80, 'EP': 50},'D': {'EM': 100, 'EP': 60}}, 'altim': {'A': {'EM': 13.7, 'EP': 8.33},'B': {'EM': 25, 'EP': 16.67},'C': {'EM': 30, 'EP': 20},'D': {'EM': 37.5, 'EP': 25}}},
-        '250k': {'planim': {'A': {'EM': 70, 'EP': 42.5},'B': {'EM': 125, 'EP': 75},'C': {'EM': 200, 'EP': 125},'D': {'EM': 250, 'EP': 150}}, 'altim': {'A': {'EM': 27, 'EP': 16.67},'B': {'EM': 50, 'EP': 33.33},'C': {'EM': 60, 'EP': 40},'D': {'EM': 75, 'EP': 50}}}}
         
         dicionario = {'0.5k': '1:500', '1k': '1:1.000', '2k': '1:2.000', '5k': '1:5.000', '10k': '1:10.000', '25k': '1:25.000', '50k': '1:50.000', '100k': '1:100.000', '250k': '1:250.000'}
         
         valores = ['A', 'B', 'C', 'D']
         
         Escalas = [ esc for esc in dicionario]
+
+        # VALIDAÇÕES
+        
         
         # Cálculo das discrepâncias
         DISCREP = []
@@ -275,7 +333,7 @@ email: contato@geoone.com.br<br>
         arq.write(texto)
         arq.close()
         
-        feedback.pushInfo(self.tr('Operação finalizada com sucesso!'))
-        feedback.pushInfo('Leandro França - Eng Cart')
+        feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
+        feedback.pushInfo(self.tr('Leandro Franca - Cartographic Engineer', 'Leandro França - Eng Cart'))
         return {self.OUTPUT: dest_id,
                 self.HTML: html_output}
