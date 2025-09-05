@@ -127,6 +127,9 @@ from .processing_provider.Relief_SetZfromDEM import SetZfromDEM
 from .processing_provider.Easy_SelectByKeyAtt import SelectByKeyAtt
 from .processing_provider.Drone_exportToCloudCompare import ExportToCloudCompare
 from .processing_provider.Qualy_Accuracy_3D import Accuracy_3D
+from .processing_provider.Qualy_Accuracy_Horizontal import Accuracy_Horizontal
+from .processing_provider.Qualy_Accuracy_PC import Accuracy_PC
+from .processing_provider.Qualy_Accuracy_Vertical import Accuracy_Vertical
 
 
 
@@ -240,6 +243,9 @@ class LFToolsProvider(QgsProcessingProvider):
         self.addAlgorithm(SelectByKeyAtt())
         self.addAlgorithm(ExportToCloudCompare())
         self.addAlgorithm(Accuracy_3D())
+        self.addAlgorithm(Accuracy_Horizontal())
+        self.addAlgorithm(Accuracy_PC())
+        self.addAlgorithm(Accuracy_Vertical())
 
 
     def id(self):
