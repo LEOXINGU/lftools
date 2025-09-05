@@ -401,7 +401,7 @@ email: contato@geoone.com.br<br>
         arq.write(texto)
         arq.close()
         
-        feedback.pushInfo(self.tr('Operação finalizada com sucesso!'))
-        feedback.pushInfo('Leandro França - Eng Cart')
+        feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
+        feedback.pushInfo(self.tr('Leandro Franca - Cartographic Engineer', 'Leandro França - Eng Cart'))
         return {self.OUTPUT: dest_id,
                 self.HTML: html_output}
