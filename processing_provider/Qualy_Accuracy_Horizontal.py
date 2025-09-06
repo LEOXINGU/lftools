@@ -70,7 +70,7 @@ class Accuracy_Horizontal(QgsProcessingAlgorithm):
 
 <b>Input Requirements</b>
 - The input layer must consist of lines with two vertices.
-- The vertices must correspond to homologous points, such that the <b>first vertex</b> corresponds to the test point and the <b>second vertex</b> corresponds to the check point.'''
+- The vertices must correspond to homologous points, such that the <b>first vertex</b> corresponds to the test point and the <b>second vertex</b> corresponds to the reference point.'''
     
     txt_pt = '''Esta ferramenta pode ser utilizada para avaliar a acurácia posicional planimétrica (2D) de produtos cartográficos digitais.
 
@@ -80,7 +80,7 @@ class Accuracy_Horizontal(QgsProcessingAlgorithm):
 
 <b>Requisitos de Entrada</b>
 - A camada de entrada deve consistir em linhas com dois vértices.
-- Os vértices devem corresponder aos pontos homólogos, de tal forma que o primeiro vértice corresponde ao ponto de teste e o segundo vértice corresponde ao ponto de checagem.'''
+- Os vértices devem corresponder aos pontos homólogos, de tal forma que o primeiro vértice corresponde ao ponto de teste e o segundo vértice corresponde ao ponto de referência.'''
     
     figure = 'images/tutorial/qualy_horizontal.jpg'
 
