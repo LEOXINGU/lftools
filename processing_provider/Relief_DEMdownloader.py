@@ -48,14 +48,14 @@ class DEMdownloader(QgsProcessingAlgorithm):
         return 'relief'
 
     def tags(self):
-        return 'GeoOne,dem,dsm,dtm,mde,mdt,baixar,download,mds,terreno,relevo,elevation,height,elevação'.split(',')
+        return 'GeoOne,dem,dsm,dtm,mde,mdt,baixar,srtm,fabdem,anadem,copernicus,opentopography,topography,topografia,open,download,mds,terreno,relevo,elevation,height,elevação'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/contours.png'))
 
     txt_en = '''A tool that streamlines the download of Digital Elevation Models (DEMs), allowing the user to define the area of interest directly in QGIS. It supports access to FABDEM and other modern DEMs, automatically generating the exact clipped extent for immediate use in your projects.'''
     txt_pt = '''Ferramenta que simplifica o download de Modelos Digitais de Elevação (MDE), permitindo ao usuário definir a área de interesse diretamente no QGIS. Suporta o acesso ao FABDEM e a outros MDEs modernos, gerando automaticamente o recorte exato da extensão selecionada para uso imediato em seus projetos.'''
-    figure = 'images/tutorial/relief_defineZ.jpg'
+    figure = 'images/tutorial/relief_download.jpg'
 
     def shortHelpString(self):
         social_BW = Imgs().social_BW
