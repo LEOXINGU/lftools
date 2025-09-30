@@ -130,7 +130,7 @@ from .processing_provider.Qualy_Accuracy_3D import Accuracy_3D
 from .processing_provider.Qualy_Accuracy_Horizontal import Accuracy_Horizontal
 from .processing_provider.Qualy_Accuracy_PC import Accuracy_PC
 from .processing_provider.Qualy_Accuracy_Vertical import Accuracy_Vertical
-
+from .processing_provider.Relief_DEMdownloader import DEMdownloader
 
 
 class LFToolsProvider(QgsProcessingProvider):
@@ -246,7 +246,8 @@ class LFToolsProvider(QgsProcessingProvider):
         self.addAlgorithm(Accuracy_Horizontal())
         self.addAlgorithm(Accuracy_PC())
         self.addAlgorithm(Accuracy_Vertical())
-
+        self.addAlgorithm(DEMdownloader())
+    
 
     def id(self):
         return 'lftools'
