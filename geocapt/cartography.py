@@ -17,7 +17,7 @@ __copyright__ = '(C) 2021, Leandro França'
 from numpy import sign, array
 from numpy.linalg import norm
 import numpy as np
-import math
+import math, re
 import random
 import colorsys
 from lftools.geocapt.topogeo import azimute, geod2geoc, geoc2enu
@@ -851,6 +851,59 @@ def SymbolSimplePoint(layer, cor=QColor(255, 0, 0), tamanho=3.0, tipo='circle',
     symbol.setOpacity(opacidade)
     return QgsSingleSymbolRenderer(symbol)
 
+
+def gerar_tiles(lat_min, lat_max, lon_min, lon_max):
+            """
+            Retorna a lista de nomes de tiles (1°x1°)
+            que intersectam a extensão definida.
+            """
+            tiles = []
+            # Garante ordem
+            if lat_min > lat_max:
+                lat_min, lat_max = lat_max, lat_min
+            if lon_min > lon_max:
+                lon_min, lon_max = lon_max, lon_min
+            # Itera sobre intervalos inteiros
+            for lat in range(math.floor(lat_min), math.ceil(lat_max)):
+                for lon in range(math.floor(lon_min), math.ceil(lon_max)):
+                    # Latitude
+                    if lat >= 0:
+                        lat_tag = f"N{lat:02d}"
+                    else:
+                        lat_tag = f"S{abs(lat):02d}"
+                    # Longitude
+                    if lon >= 0:
+                        lon_tag = f"E{lon:03d}"
+                    else:
+                        lon_tag = f"W{abs(lon):03d}"
+                    tiles.append(lat_tag + lon_tag)
+            return tiles
+
+
+def folder_10x10_for_tile(tile: str):
+    """
+    Recebe um tile no formato 'NddEddd' / 'SddWddd' (ex.: 'S30E137', 'N79W106')
+    e retorna o nome da pasta 10x10 correspondente, ex.:
+      'S30E130-S20E140'
+      'N70W110-N80W100'
+    """
+    m = re.fullmatch(r'([NS])(\d{2})([EW])(\d{3})', tile)
+    if not m:
+        raise ValueError(f"Tile inválido: {tile}")
+    s_lat, d_lat, s_lon, d_lon = m.groups()
+    lat = int(d_lat) * (1 if s_lat == 'N' else -1)
+    lon = int(d_lon) * (1 if s_lon == 'E' else -1)
+    # limites 10x10 (canto sudoeste e nordeste)
+    lat_lo = math.floor(lat / 10.0) * 10
+    lon_lo = math.floor(lon / 10.0) * 10
+    lat_hi = lat_lo + 10
+    lon_hi = lon_lo + 10
+    def tag_lat(v):
+        return ('N' if v >= 0 else 'S') + f"{abs(int(v)):02d}"
+    def tag_lon(v):
+        return ('E' if v >= 0 else 'W') + f"{abs(int(v)):03d}"
+    folder = f"{tag_lat(lat_lo)}{tag_lon(lon_lo)}-{tag_lat(lat_hi)}{tag_lon(lon_hi)}"
+    return folder
 
 
 def map_sistem(lon, lat, ScaleD=1e6):
