@@ -1340,5 +1340,6 @@ Nota: Introduzca el nombre del campo de clave externa si no es el mismo que el n
 'DEM Discrepancies' : {'es': 'Discrepancias del DEM'},
 'Accuracy Report of the DEM' : {'es': 'Informe de precisión del DEM'},
 'DEM POSITIONAL ACCURACY' : {'es': 'PRECISA POSICIONAL DEL DEM'},
-
+'A tool that streamlines the download of Digital Elevation Models (DEMs), allowing the user to define the area of interest directly in QGIS. It supports access to FABDEM and other modern DEMs, automatically generating the exact clipped extent for immediate use in your projects.': {'es': 'Herramienta que simplifica la descarga de Modelos Digitales de Elevación (MDE), permitiendo al usuario definir el área de interés directamente en QGIS. Admite el acceso a FABDEM y a otros MDEs modernos, generando automáticamente el recorte exacto de la extensión seleccionada para su uso inmediato en los proyectos.'},
+'DEM Downloader': {'es': 'Descargador de MDE'},
  }
