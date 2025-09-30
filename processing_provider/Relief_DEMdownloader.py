@@ -63,6 +63,7 @@ class DEMdownloader(QgsProcessingAlgorithm):
                       <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), self.figure) +'''">
                       </div>
                       <div align="right">
+                      <small>Credits: FABDEM dataset developed by Daniel R. Hawker, Athanasios K. Karymbalis, et al. (University of Bristol).</small>
                       <p align="right">
                       <b>'''+self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
                       </p>'''+ social_BW + '''</div>
