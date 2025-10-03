@@ -80,7 +80,7 @@ class SplitRaster(QgsProcessingAlgorithm):
         return 'raster'
 
     def tags(self):
-        return 'GeoOne,splitting,dividir,separar,quebrar,break'.split(',')
+        return 'GeoOne,splitting,dividir,separar,quebrar,break,retalhar,slices'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/raster.png'))
