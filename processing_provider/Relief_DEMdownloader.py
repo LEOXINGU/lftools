@@ -75,7 +75,8 @@ class DEMdownloader(QgsProcessingAlgorithm):
     OUTPUT = 'OUTPUT'
     OPEN = 'OPEN'
 
-    dataset = ['FABDEM']
+    dataset = ['FABDEM - Global - 1 arc sec',
+               'GMTED2010 - Global - 30 arc sec']
 
     def initAlgorithm(self, config=None):
 
@@ -141,15 +142,15 @@ class DEMdownloader(QgsProcessingAlgorithm):
             lon_min, lat_min = x_min, y_min
             lon_max, lat_max = x_max, y_max
         
-        dataset = self.parameterAsEnum(
+        mde = self.parameterAsEnum(
             parameters,
             self.DATASET,
             context
         )
 
-        self.datasetName = self.dataset[dataset]
-        Tiles = ['FABDEM_tiles']
-        dataset = eval(Tiles[dataset])
+        self.datasetName = self.dataset[mde]
+        Tiles = ['FABDEM_tiles', 'GMTED_tiles']
+        dataset = eval(Tiles[mde])
         
         Output = self.parameterAsFileOutput(
             parameters,
@@ -164,28 +165,40 @@ class DEMdownloader(QgsProcessingAlgorithm):
         )
 
         # Listar datasets a partir da extensão
-        tiles = gerar_tiles(lat_min, lat_max, lon_min, lon_max)
+        if mde == 0: # FABDEM
+            tiles = gerar_tiles(lat_min, lat_max, lon_min, lon_max)
+        elif mde == 1: # GMTED2010
+            tiles = gerar_tiles(lat_min, lat_max, lon_min, lon_max, lat0=-56.0, lon0=-180.0, step_lat=20.0, step_lon=30.0)
+        
+        if len(tiles)>4:
+            raise QgsProcessingException(self.tr("Define a smaller extent on the map!", "Defina uma extensão menor no mapa!"))
+        
         out_folder = os.path.dirname(Output)
         # Verificar se cada tile tem correspondente no tipo de dataset 
         rasters = []
-        for tile in tiles:
+        for k, tile in enumerate(tiles):
             if tile in dataset:
-                pasta = folder_10x10_for_tile(tile) + '_FABDEM_V1-2'
-                tile_name = f"{tile}_FABDEM_V1-2.tif"
-                url = f"https://huggingface.co/datasets/links-ads/fabdem-v12/resolve/main/tiles/{pasta}/{tile_name}?download=true"
-                
+                if mde == 0: # FABDEM
+                    pasta = folder_10x10_for_tile(tile) + '_FABDEM_V1-2'
+                    tile_name = f"{tile}_FABDEM_V1-2.tif"
+                    url = f"https://huggingface.co/datasets/links-ads/fabdem-v12/resolve/main/tiles/{pasta}/{tile_name}?download=true"
+                elif mde == 1: # GMTED2010
+                    tile_name = f"{tile}_GMTED2010_be30.tif"
+                    url = f"https://zenodo.org/records/17261001/files/{tile_name}?download=1" 
                 try:
                     out_path = os.path.join(out_folder, tile_name)
-                    feedback.pushInfo(self.tr("Downloading file", "Baixando arquivo") + f" {tile_name} ...")
+                    feedback.pushInfo(f"[{k+1}/{len(tiles)}] " + self.tr("Downloading file", "Baixando arquivo") + f" {tile_name} ...")
                     urllib.request.urlretrieve(url, out_path)
                     rasters += [out_path]
                 except:
-                    feedback.reportError(self.tr("Problem in downloading" , "Problema ao baixar") + f" {tile_name}!")    
+                    feedback.reportError(f"[{k+1}/{len(tiles)}] " + self.tr("Problem downloading" , "Problema ao baixar") + f" {tile_name}!")
+            else:
+                feedback.reportError(f"[{k+1}/{len(tiles)}] " + f" {tile_name}!")
             if feedback.isCanceled():
                 break
-        # Mesclar arquivos temporários baixados (gera VRT se >1)
+        # Mesclar arquivos temporários baixados (gera VRT se > 1)
         if not rasters:
-            raise QgsProcessingException(self.tr("No rasters were downloaded!", "Nenhum raster foi baixado!"))
+            raise QgsProcessingException(self.tr("No raster was downloaded!", "Nenhum raster foi baixado!"))
 
         if len(rasters) == 1:
             mosaic_src = rasters[0]
