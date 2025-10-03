@@ -852,32 +852,56 @@ def SymbolSimplePoint(layer, cor=QColor(255, 0, 0), tamanho=3.0, tipo='circle',
     return QgsSingleSymbolRenderer(symbol)
 
 
-def gerar_tiles(lat_min, lat_max, lon_min, lon_max):
-            """
-            Retorna a lista de nomes de tiles (1°x1°)
-            que intersectam a extensão definida.
-            """
-            tiles = []
-            # Garante ordem
-            if lat_min > lat_max:
-                lat_min, lat_max = lat_max, lat_min
-            if lon_min > lon_max:
-                lon_min, lon_max = lon_max, lon_min
-            # Itera sobre intervalos inteiros
-            for lat in range(math.floor(lat_min), math.ceil(lat_max)):
-                for lon in range(math.floor(lon_min), math.ceil(lon_max)):
-                    # Latitude
-                    if lat >= 0:
-                        lat_tag = f"N{lat:02d}"
-                    else:
-                        lat_tag = f"S{abs(lat):02d}"
-                    # Longitude
-                    if lon >= 0:
-                        lon_tag = f"E{lon:03d}"
-                    else:
-                        lon_tag = f"W{abs(lon):03d}"
-                    tiles.append(lat_tag + lon_tag)
-            return tiles
+
+
+def tag_lat(v):
+    # 0 -> N00 (convenção comum nesses datasets)
+    return ('N' if v >= 0 else 'S') + f"{abs(int(v)):02d}"
+
+def tag_lon(v):
+    # 0 -> E000 (convenção)
+    return ('E' if v >= 0 else 'W') + f"{abs(int(v)):03d}"
+
+
+def gerar_tiles(lat_min, lat_max, lon_min, lon_max,
+                lat0=-90.0, lon0=-180.0,
+                step_lat=1.0, step_lon=1.0):
+    """
+    Lista nomes de tiles (canto sudoeste) que INTERCEPTAM a extensão fornecida,
+    para uma grade de origem (lat0, lon0) e passos (step_lat, step_lon).
+
+    - lat0, lon0: origem da grade (canto sudoeste do tile de índice 0,0)
+    - step_lat, step_lon: tamanho dos tiles em graus (positivos)
+    - lat/lon_min/max: extensão-alvo em graus (qualquer CRS geográfico)
+    """
+    if step_lat <= 0 or step_lon <= 0:
+        raise ValueError("Os passos step_lat e step_lon devem ser positivos.")
+
+    # Garante ordem
+    if lat_min > lat_max:
+        lat_min, lat_max = lat_max, lat_min
+    if lon_min > lon_max:
+        lon_min, lon_max = lon_max, lon_min
+
+    # Pequena folga para evitar problemas de ponto flutuante nas bordas
+    eps = 1e-12
+
+    # Índices dos tiles que INTERCEPTAM a bbox:
+    # - o menor índice é o piso relativo ao limite mínimo
+    # - o maior índice é o último cujo SW ainda é < limite máximo
+    i_min = math.floor((lat_min - lat0) / step_lat - eps)
+    i_max = math.ceil ((lat_max - lat0) / step_lat + eps) - 1
+    j_min = math.floor((lon_min - lon0) / step_lon - eps)
+    j_max = math.ceil ((lon_max - lon0) / step_lon + eps) - 1
+
+    tiles = []
+    for i in range(i_min, i_max + 1):
+        lat_sw = lat0 + i * step_lat
+        for j in range(j_min, j_max + 1):
+            lon_sw = lon0 + j * step_lon
+            tiles.append(tag_lat(lat_sw) + tag_lon(lon_sw))
+    return tiles
+
 
 
 def folder_10x10_for_tile(tile: str):
@@ -898,10 +922,6 @@ def folder_10x10_for_tile(tile: str):
     lon_lo = math.floor(lon / 10.0) * 10
     lat_hi = lat_lo + 10
     lon_hi = lon_lo + 10
-    def tag_lat(v):
-        return ('N' if v >= 0 else 'S') + f"{abs(int(v)):02d}"
-    def tag_lon(v):
-        return ('E' if v >= 0 else 'W') + f"{abs(int(v)):03d}"
     folder = f"{tag_lat(lat_lo)}{tag_lon(lon_lo)}-{tag_lat(lat_hi)}{tag_lon(lon_hi)}"
     return folder
 
