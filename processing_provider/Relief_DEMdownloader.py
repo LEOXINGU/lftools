@@ -63,7 +63,10 @@ class DEMdownloader(QgsProcessingAlgorithm):
                       <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), self.figure) +'''">
                       </div>
                       <div align="right">
-                      <small>Credits: FABDEM dataset developed by Daniel R. Hawker, Athanasios K. Karymbalis, et al. (University of Bristol).</small>
+                      <small>Credits:</small>
+                      <small>FABDEM - global 30 m bare-earth DEM derived from Copernicus GLO-30 developed by Hawker et al., 2022. University of Bristol.</small>
+                      <small>ANADEM - digital terrain model for South America developed by Laipelt, L. et al., 2024. ANA/UFRGS. 2024.</small>
+                      <small>GMTED2010 - Global Multi-resolution Terrain Elevation Data 2010. USGS / NGA.</small>
                       <p align="right">
                       <b>'''+self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
                       </p>'''+ social_BW + '''</div>
@@ -184,7 +187,9 @@ class DEMdownloader(QgsProcessingAlgorithm):
                     url = f"https://huggingface.co/datasets/links-ads/fabdem-v12/resolve/main/tiles/{pasta}/{tile_name}?download=true"
                 elif mde == 1: # GMTED2010
                     tile_name = f"{tile}_GMTED2010_be30.tif"
-                    url = f"https://zenodo.org/records/17261001/files/{tile_name}?download=1" 
+                    # url = f"https://zenodo.org/records/17261001/files/{tile_name}?download=1" 
+                    url = f"https://huggingface.co/datasets/GeoOne/GMTED2010/resolve/main/{tile_name}?download=1" 
+                    
                 try:
                     out_path = os.path.join(out_folder, tile_name)
                     feedback.pushInfo(f"[{k+1}/{len(tiles)}] " + self.tr("Downloading file", "Baixando arquivo") + f" {tile_name} ...")
