@@ -79,6 +79,7 @@ class DEMdownloader(QgsProcessingAlgorithm):
     OPEN = 'OPEN'
 
     dataset = ['FABDEM - Global - 1 arc sec',
+               'ANADEM - South America - 1 arc sec',
                'GMTED2010 - Global - 30 arc sec']
 
     def initAlgorithm(self, config=None):
@@ -152,7 +153,7 @@ class DEMdownloader(QgsProcessingAlgorithm):
         )
 
         self.datasetName = self.dataset[mde]
-        Tiles = ['FABDEM_tiles', 'GMTED_tiles']
+        Tiles = ['FABDEM_tiles', 'ANADEM_tiles', 'GMTED_tiles']
         dataset = eval(Tiles[mde])
         
         Output = self.parameterAsFileOutput(
@@ -170,10 +171,12 @@ class DEMdownloader(QgsProcessingAlgorithm):
         # Listar datasets a partir da extensão
         if mde == 0: # FABDEM
             tiles = gerar_tiles(lat_min, lat_max, lon_min, lon_max)
-        elif mde == 1: # GMTED2010
+        elif  mde == 1: # ANADEM
+            tiles = gerar_tiles(lat_min, lat_max, lon_min, lon_max)
+        elif mde == 2: # GMTED2010
             tiles = gerar_tiles(lat_min, lat_max, lon_min, lon_max, lat0=-56.0, lon0=-180.0, step_lat=20.0, step_lon=30.0)
         
-        if len(tiles)>4:
+        if len(tiles) > 4:
             raise QgsProcessingException(self.tr("Define a smaller extent on the map!", "Defina uma extensão menor no mapa!"))
         
         out_folder = os.path.dirname(Output)
@@ -185,11 +188,15 @@ class DEMdownloader(QgsProcessingAlgorithm):
                     pasta = folder_10x10_for_tile(tile) + '_FABDEM_V1-2'
                     tile_name = f"{tile}_FABDEM_V1-2.tif"
                     url = f"https://huggingface.co/datasets/links-ads/fabdem-v12/resolve/main/tiles/{pasta}/{tile_name}?download=true"
-                elif mde == 1: # GMTED2010
+                if mde == 1: # FABDEM
+                    pasta = folder_10x10_for_tile(tile) + '_ANADEM_V1'
+                    tile_name = f"{tile}_ANADEM_V1.tif"
+                    url = f"https://huggingface.co/datasets/GeoOne/anadem-v1/resolve/main/tiles/{pasta}/{tile_name}?download=true"
+                elif mde == 2: # GMTED2010
                     tile_name = f"{tile}_GMTED2010_be30.tif"
                     # url = f"https://zenodo.org/records/17261001/files/{tile_name}?download=1" 
                     url = f"https://huggingface.co/datasets/GeoOne/GMTED2010/resolve/main/{tile_name}?download=1" 
-                    
+
                 try:
                     out_path = os.path.join(out_folder, tile_name)
                     feedback.pushInfo(f"[{k+1}/{len(tiles)}] " + self.tr("Downloading file", "Baixando arquivo") + f" {tile_name} ...")
@@ -198,7 +205,7 @@ class DEMdownloader(QgsProcessingAlgorithm):
                 except:
                     feedback.reportError(f"[{k+1}/{len(tiles)}] " + self.tr("Problem downloading" , "Problema ao baixar") + f" {tile_name}!")
             else:
-                feedback.reportError(f"[{k+1}/{len(tiles)}] " + f" {tile_name}!")
+                feedback.reportError(f"[{k+1}/{len(tiles)}] " + f"{tile_name} is not in the dataset!")
             if feedback.isCanceled():
                 break
         # Mesclar arquivos temporários baixados (gera VRT se > 1)
