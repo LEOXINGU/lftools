@@ -39,7 +39,7 @@ import shutil
 from lftools.geocapt.imgs import Imgs
 from lftools.geocapt.topogeo import azimute as CalAZ
 from lftools.translations.translate import translate
-import os
+import os, re
 from math import pi
 from qgis.PyQt.QtGui import QIcon
 from PIL import Image, TiffTags, ExifTags
@@ -96,6 +96,7 @@ class ImportPhotos(QgsProcessingAlgorithm):
     OUTPUT = 'OUTPUT'
     SUBFOLDER = 'SUBFOLDER'
     AZIMUTH = 'AZIMUTH'
+    YPR = 'YPR'
 
     def initAlgorithm(self, config=None):
 
@@ -120,6 +121,14 @@ class ImportPhotos(QgsProcessingAlgorithm):
             QgsProcessingParameterBoolean(
                 self.AZIMUTH,
                 self.tr('Estimate azimuth', 'Estimar azimute'),
+                defaultValue = False
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterBoolean(
+                self.YPR,
+                self.tr('Yaw, pitch, roll'),
                 defaultValue = False
             )
         )
@@ -166,6 +175,12 @@ class ImportPhotos(QgsProcessingAlgorithm):
         if CalcAz:
             Atributos = []
 
+        YPR = self.parameterAsBool(
+            parameters,
+            self.YPR,
+            context
+        )
+
         fotos_nao_geo = self.parameterAsFile(
             parameters,
             self.NONGEO,
@@ -177,11 +192,11 @@ class ImportPhotos(QgsProcessingAlgorithm):
         if subpasta:
             for root, dirs, files in os.walk(pasta, topdown=True):
                 for name in files:
-                    if (name).lower().endswith(('.jpg', '.jpeg', '.tif', '.tiff')):
+                    if (name).lower().endswith(('.jpg', '.jpeg', '.tif', '.tiff', '.dng')):
                         lista += [os.path.join(root, name)]
         else:
             for item in os.listdir(pasta):
-                if (item).lower().endswith(('.jpg', '.jpeg', '.tif', '.tiff')):
+                if (item).lower().endswith(('.jpg', '.jpeg', '.tif', '.tiff', '.dng')):
                     lista += [os.path.join(pasta, item)]
 
         tam = len(lista)
@@ -242,6 +257,10 @@ class ImportPhotos(QgsProcessingAlgorithm):
             segundo = int(data_hora[5])
             data_hora = unicode(datetime.datetime(ano, mes, dia, hora, minuto, segundo))
             return data_hora
+        
+        # Mensagem de erro
+        def erro_msg(arquivo):
+            return self.tr('The file "{}" has no geotag!'.format(arquivo), 'A imagem "{}" não possui geotag!'.format(arquivo)) 
 
         # Criando Output
         crs = QgsCoordinateReferenceSystem('EPSG:4326')
@@ -255,6 +274,13 @@ class ImportPhotos(QgsProcessingAlgorithm):
         fields.append(QgsField(self.tr('path','caminho'), QVariant.String))
         fields.append(QgsField(self.tr('make','fabricante'), QVariant.String))
         fields.append(QgsField(self.tr('model','modelo'), QVariant.String))
+        if YPR:
+            fields.append(QgsField(self.tr('FlightYaw'), QVariant.Double))
+            fields.append(QgsField(self.tr('FlightPitch'), QVariant.Double))
+            fields.append(QgsField(self.tr('FlightRoll'), QVariant.Double))
+            fields.append(QgsField(self.tr('GimbalYaw'), QVariant.Double))
+            fields.append(QgsField(self.tr('GimbalPitch'), QVariant.Double))
+            fields.append(QgsField(self.tr('GimbalRoll'), QVariant.Double))
 
         (sink, dest_id) = self.parameterAsSink(
             parameters,
@@ -268,9 +294,12 @@ class ImportPhotos(QgsProcessingAlgorithm):
             raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT))
 
         Percent = 100.0/tam if tam!=0 else 0
+
         for index, filepath in enumerate(lista):
+            
             if (filepath).lower().endswith(('.jpg', '.jpeg')):
                 caminho, arquivo = os.path.split(filepath)
+                
                 try:
                     img = Image.open(os.path.join(caminho,arquivo))
                     if img._getexif():
@@ -315,21 +344,30 @@ class ImportPhotos(QgsProcessingAlgorithm):
                     modelo = ''
 
                 if lon != 0:
+                    if YPR:
+                        FlightYaw, FlightPitch, FlightRoll, GimbalYaw, GimbalPitch, GimbalRoll = self.extract_dji_orientation(filepath)
                     if not CalcAz:
                         feature = QgsFeature(fields)
                         feature.setGeometry(QgsGeometry(QgsPoint(lon, lat, altitude if altitude != None else 0)))
-                        feature.setAttributes([arquivo, lon, lat, altitude, Az, date_time, os.path.join(caminho, arquivo), fabricante, modelo])
+                        att = [arquivo, lon, lat, altitude, Az, date_time, filepath, fabricante, modelo]
+                        if YPR:
+                            att += [FlightYaw, FlightPitch, FlightRoll, GimbalYaw, GimbalPitch, GimbalRoll]
+                        feature.setAttributes(att)
                         sink.addFeature(feature, QgsFeatureSink.FastInsert)
                     else:
-                        Atributos += [[arquivo, lon, lat, altitude, Az, date_time, os.path.join(caminho, arquivo), fabricante, modelo]]
+                        if YPR:
+                            Atributos += [[arquivo, lon, lat, altitude, Az, date_time, filepath, fabricante, modelo, FlightYaw, FlightPitch, FlightRoll, GimbalYaw, GimbalPitch, GimbalRoll]]
+                        else:
+                            Atributos += [[arquivo, lon, lat, altitude, Az, date_time, filepath, fabricante, modelo]]
                 else:
-                    feedback.pushInfo(self.tr('The file "{}" has no geotag!'.format(arquivo), 'A imagem "{}" não possui geotag!'.format(arquivo)))
+                    feedback.reportError(erro_msg(arquivo))
                     if copy_ngeo:
                         shutil.copy2(os.path.join(pasta, arquivo), os.path.join(fotos_nao_geo, arquivo))
 
-            elif (filepath).lower().endswith(('.tif', '.tiff')):
+            elif (filepath).lower().endswith(('.tif', '.tiff', '.dng')):
                 caminho, arquivo = os.path.split(filepath)
                 img = Image.open(os.path.join(caminho,arquivo))
+
                 try:
                     meta_dict = {TAGS[key] : img.tag[key] for key in img.tag_v2}
                 except:
@@ -342,13 +380,14 @@ class ImportPhotos(QgsProcessingAlgorithm):
                 gps_offset = img.tag_v2.get(0x8825)
                 tags = {}
                 if gps_offset:
-                	ifh = b"II\x2A\x00\x08\x00\x00\x00" if img.tag_v2._endian == "<" else "MM\x00\x2A\x00\x00\x00\x08"
-                	info = ImageFileDirectory_v2(ifh)
-                	img.fp.seek(gps_offset)
-                	info.load(img.fp)
-                	gps_keys = ['GPSVersionID','GPSLatitudeRef','GPSLatitude','GPSLongitudeRef','GPSLongitude','GPSAltitudeRef','GPSAltitude','GPSTimeStamp','GPSSatellites','GPSStatus','GPSMeasureMode','GPSDOP','GPSSpeedRef','GPSSpeed','GPSTrackRef','GPSTrack','GPSImgDirectionRef','GPSImgDirection','GPSMapDatum','GPSDestLatitudeRef','GPSDestLatitude','GPSDestLongitudeRef','GPSDestLongitude','GPSDestBearingRef','GPSDestBearing','GPSDestDistanceRef','GPSDestDistance','GPSProcessingMethod','GPSAreaInformation','GPSDateStamp','GPSDifferential']
-                	for k, v in info.items():
-                		tags[gps_keys[k]] = str(v)
+                    ifh = b"II\x2A\x00\x08\x00\x00\x00" if img.tag_v2._endian == "<" else "MM\x00\x2A\x00\x00\x00\x08"
+                    info = ImageFileDirectory_v2(ifh)
+                    img.fp.seek(gps_offset)
+                    info.load(img.fp)
+                    gps_keys = ['GPSVersionID','GPSLatitudeRef','GPSLatitude','GPSLongitudeRef','GPSLongitude','GPSAltitudeRef','GPSAltitude','GPSTimeStamp','GPSSatellites','GPSStatus','GPSMeasureMode','GPSDOP','GPSSpeedRef','GPSSpeed','GPSTrackRef','GPSTrack','GPSImgDirectionRef','GPSImgDirection','GPSMapDatum','GPSDestLatitudeRef','GPSDestLatitude','GPSDestLongitudeRef','GPSDestLongitude','GPSDestBearingRef','GPSDestBearing','GPSDestDistanceRef','GPSDestDistance','GPSProcessingMethod','GPSAreaInformation','GPSDateStamp','GPSDifferential']
+                    for k, v in info.items():
+                        tags[gps_keys[k]] = str(v)
+                
 
                 lon, lat = 0, 0
                 Az = None
@@ -369,31 +408,48 @@ class ImportPhotos(QgsProcessingAlgorithm):
                     except:
                         date_time = data_hora(meta_dict['DateTime'])
                     if 'Make' in meta_dict:
-                        fabricante = str(meta_dict['Make'][0])
+                        if isinstance(meta_dict['Make'], tuple):
+                            fabricante = str(meta_dict['Make'][0])
+                        else:
+                            fabricante = str(meta_dict['Make'])
                     else:
                         fabricante = ''
 
                     if 'Model' in meta_dict:
-                        modelo = str(meta_dict['Model'][0])
+                        if isinstance(meta_dict['Model'], tuple):
+                            modelo = str(meta_dict['Model'][0])
+                        else:
+                            modelo = str(meta_dict['Model'])
                     else:
                         modelo = ''
 
                     if lon != 0:
+                        if YPR: 
+                            FlightYaw, FlightPitch, FlightRoll, GimbalYaw, GimbalPitch, GimbalRoll = self.extract_dji_orientation(filepath)
                         if not CalcAz:
                             feature = QgsFeature(fields)
                             feature.setGeometry(QgsGeometry(QgsPoint(lon, lat, altitude if altitude != None else 0)))
-                            feature.setAttributes([arquivo, lon, lat, altitude, Az, date_time, os.path.join(caminho, arquivo), fabricante, modelo])
+                            att = [arquivo, lon, lat, altitude, Az, date_time, filepath, fabricante, modelo]
+                            if YPR:
+                                att += [FlightYaw, FlightPitch, FlightRoll, GimbalYaw, GimbalPitch, GimbalRoll]
+                            feature.setAttributes(att)
                             sink.addFeature(feature, QgsFeatureSink.FastInsert)
                         else:
-                            Atributos += [[arquivo, lon, lat, altitude, Az, date_time, os.path.join(caminho, arquivo), fabricante, modelo]]
+                            if YPR:
+                                Atributos += [[arquivo, lon, lat, altitude, Az, date_time, filepath, fabricante, modelo, FlightYaw, FlightPitch, FlightRoll, GimbalYaw, GimbalPitch, GimbalRoll]]
+                            else:
+                                Atributos += [[arquivo, lon, lat, altitude, Az, date_time, filepath, fabricante, modelo]]
+                    else:
+                        feedback.reportError(erro_msg(arquivo))
                 else:
-                    feedback.pushInfo(self.tr('The file "{}" has no geotag!'.format(arquivo), 'A imagem "{}" não possui geotag!'.format(arquivo)))
+                    feedback.reportError(erro_msg(arquivo))
                     if copy_ngeo:
                         shutil.copy2(os.path.join(pasta, arquivo), os.path.join(fotos_nao_geo, arquivo))
                 img.close()
             if feedback.isCanceled():
                 break
             feedback.setProgress(int((index+1) * Percent))
+
 
         if CalcAz and len(Atributos) > 0:
             # Calcular azimutes
@@ -418,6 +474,54 @@ class ImportPhotos(QgsProcessingAlgorithm):
         self.SAIDA = dest_id
         self.pasta = pasta
         return {self.OUTPUT: dest_id}
+    
+    
+    def extract_dji_orientation(self, image_path):
+        """
+        Extrai yaw, pitch e roll de imagens DJI (JPEG, DNG, etc.) analisando o bloco XMP embutido.
+        """
+        try:
+            # Lê o conteúdo binário e tenta localizar o bloco XMP
+            with open(image_path, "rb") as fb:
+                data = fb.read()
+            m = re.search(br"<x:xmpmeta[\s\S]*?</x:xmpmeta>", data, re.IGNORECASE)
+            if not m:
+                m = re.search(br"<xmpmeta[\s\S]*?</xmpmeta>", data, re.IGNORECASE)
+            if not m:
+                return None, None, None, None, None, None
+            xmp = m.group(0).decode("utf-8", errors="ignore")
+            # print(xmp)
+            def find_attr_or_elem(names):
+                """Busca valor numérico para qualquer nome de tag (atributo ou elemento)."""
+                for name in names:
+                    # Tenta achar como atributo
+                    rx_attr = re.compile(rf'{re.escape(name)}\s*=\s*"([\-+]?\d+(?:\.\d+)?)"', re.IGNORECASE)
+                    m = rx_attr.search(xmp)
+                    if m:
+                        return float(m.group(1))
+                    # Tenta achar como elemento
+                    rx_elem = re.compile(
+                        rf'<[^:>]*:{re.escape(name)}\s*>([\-+]?\d+(?:\.\d+)?)\s*</[^:>]*:{re.escape(name)}\s*>',
+                        re.IGNORECASE
+                    )
+                    m = rx_elem.search(xmp)
+                    if m:
+                        return float(m.group(1))
+                return None
+
+            FlightYawDegree = find_attr_or_elem(["FlightYawDegree"])
+            FlightPitchDegree = find_attr_or_elem(["FlightPitchDegree"])
+            FlightRollDegree = find_attr_or_elem(["FlightRollDegree"])
+            
+            GimbalYawDegree = find_attr_or_elem(["GimbalYawDegree"]) # "PoseYawDegrees"
+            GimbalPitchDegree = find_attr_or_elem(["GimbalPitchDegree"]) # "PosePitchDegrees", 
+            GimbalRollDegree = find_attr_or_elem(["GimbalRollDegree"]) # "PoseRollDegrees"
+
+            return FlightYawDegree, FlightPitchDegree, FlightRollDegree, GimbalYawDegree, GimbalPitchDegree, GimbalRollDegree
+
+        except Exception as e:
+            return None, None, None, None, None, None
+        
 
     def postProcessAlgorithm(self, context, feedback):
         layer = QgsProcessingUtils.mapLayerFromString(self.SAIDA, context)
