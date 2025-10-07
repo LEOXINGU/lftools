@@ -128,6 +128,13 @@ class LFToolsPlugin(object):
         self.ColarEstilo_Action.triggered.connect(self.runColarEstilo)
         self.toolbar.addAction(self.ColarEstilo_Action)
 
+        # DEM Downloader
+        icon = QIcon(self.plugin_dir + '/images/tools/DEM_DOWNLOADER.svg')
+        self.DEM_Downloader_Action = QAction(icon, self.tr('DEM Downloader', 'Baixar MDE'), self.iface.mainWindow())
+        self.DEM_Downloader_Action.setObjectName('DEMDownloader')
+        self.DEM_Downloader_Action.triggered.connect(self.DEM_Downloader)
+        self.toolbar.addAction(self.DEM_Downloader_Action)
+
         # Principais ferramentas LFTools (Mão na roda)
         menu = QMenu()
         menu.setObjectName('MainLFTools')
@@ -175,6 +182,7 @@ class LFToolsPlugin(object):
         self.iface.removeToolBarIcon(self.Dimensioning_Action)
         self.iface.removeToolBarIcon(self.CopiarEstilo_Action)
         self.iface.removeToolBarIcon(self.ColarEstilo_Action)
+        self.iface.removeToolBarIcon(self.DEM_Downloader_Action)
         self.iface.removeToolBarIcon(self.Coord2Layer_Action)
         self.iface.removeToolBarIcon(self.GetAttribute_Action)
         self.iface.removeToolBarIcon(self.MeasureLayer_Action)
@@ -203,6 +211,9 @@ class LFToolsPlugin(object):
 
     def SelectByKeyAtt(self):
         processing.execAlgorithmDialog('lftools:selectbykeyatt', {})
+
+    def DEM_Downloader(self):
+        processing.execAlgorithmDialog('lftools:demdownloader', {})
 
 
     def runUTM(self):
