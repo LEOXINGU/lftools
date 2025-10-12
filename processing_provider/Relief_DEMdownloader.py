@@ -205,7 +205,7 @@ class DEMdownloader(QgsProcessingAlgorithm):
                 except:
                     feedback.reportError(f"[{k+1}/{len(tiles)}] " + self.tr("Problem downloading" , "Problema ao baixar") + f" {tile_name}!")
             else:
-                feedback.reportError(f"[{k+1}/{len(tiles)}] " + f"{tile_name} is not in the dataset!")
+                feedback.reportError(f"[{k+1}/{len(tiles)}] " + f"{tile} is not in the dataset!")
             if feedback.isCanceled():
                 break
         # Mesclar arquivos temporários baixados (gera VRT se > 1)
