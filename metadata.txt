@@ -2,7 +2,7 @@
 name=LF Tools
 qgisMinimumVersion=3.10
 description=Tools for cartographic production, surveying, database management, digital image processing and spatial analysis.
-version=2.5.0
+version=2.5.1
 author=Leandro França
 email=suporte@geoone.com.br
 
@@ -14,6 +14,7 @@ repository=https://github.com/LEOXINGU/lftools
 hasProcessingProvider=yes
 # Uncomment the following line and add your changelog:
 # changelog=
+  2.5.1 - bug fix to report that tile is not in DEM dataset and new function for calculating 3D areas
   2.5.0 - new tool for dem download, improvement in import geotagged photos
   2.4.0 - new tools for positional accuracy assessment
   2.3.0 - new button for Dimensioning layer
