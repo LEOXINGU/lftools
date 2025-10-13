@@ -36,6 +36,7 @@ from lftools.geocapt.cartography import (map_sistem,
                                          geom2PointList,
                                          Mesclar_Multilinhas,
                                          areaGauss,
+                                         area_triangulo_3d,
                                          classificar,
                                          FusoHemisf,
                                          main_azimuth,
@@ -851,6 +852,87 @@ def lengthLTP3 (feature, parent, context):
         return comprimentoSGL(geomGeo, crsGeo, dimension)
     except:
         return tr('Check the geometry type', 'Verifique o tipo de geometria')
+
+
+
+@qgsfunction(args='auto', group='LF Tools')
+def triangle_area_3d (geometry, layer_crs, feature, parent, context):
+    """
+    Calculates the <b>true (inclined) area</b> of 3D triangles from vertex coordinates.
+Unlike the area projected onto the horizontal plane, this tool considers the <b>surface inclination in 3D space</b>, returning the actual area of the triangular face.
+It can be applied to <b>3D geometries</b> derived from <b>triangles in polygon layers with tridimensional vertices</b>, such as those obtained from <b>TIN meshes</b>.
+    <p><b>Note 1:</b> Define the <b>CRS</b> to be used for the calculations.
+If a geographic CRS is selected, the original coordinates will be <b>converted to three-dimensional geocentric coordinates</b> for the area computation, which may provide higher accuracy.</p>
+    <p><b>Note 2:</b> If the polygon <b>does not contain Z coordinates</b> or <b>is not an exact triangle</b>, the function will return a <b>NULL value</b>.</p>
+    <h2>Example:</h2>
+    <ul>
+      <li> triangle_area_3d(geometry, layer_crs) -> LTP area </li>
+      <li> triangle_area_3d($geometry, @layer_crs) -> 407.42 </li>
+      <li> triangle_area_3d($geometry, 'EPSG:4674') -> 1193.42 </li>
+    </ul>
+    <div>
+    <p><b>About geocentric coordinates:</b></p>
+    <p>
+    <b><a href="https://geoone.com.br/sistema-geodesico-local/" target="_blank">França, L. Local Geodetic Coordinate System. GeoOne. 2022.</a></b>
+    </p>
+  </div>
+    """
+    layer_crs = QgsCoordinateReferenceSystem(layer_crs)
+    geom = geometry
+    if geom.isMultipart():
+        coord = geom2PointList(geom)[0][0]
+    else:
+        coord = geom2PointList(geom)[0]
+    
+    try: 
+        # Se o SRC do cálculo for geográfico, obter coordenadas geocêntricas.
+        if layer_crs.isGeographic():
+            
+            # Verifica se está dentro dos limites geográficos válidos
+            bbox = geom.boundingBox()
+            y_min = bbox.yMinimum()
+            y_max = bbox.yMaximum()
+            x_min = bbox.xMinimum()
+            x_max = bbox.xMaximum()
+            
+            if not (-90 <= y_min <= 90 and -90 <= y_max <= 90):
+                raise ValueError("Invalid Latitude!")
+
+            if not (-180 <= x_min <= 180 and -180 <= x_max <= 180):
+                raise ValueError("Invalid Longitude!")
+            
+            # Dados para transformar as coordenadas geodésicas em geocêntricas
+            ellipsoid_id = layer_crs.ellipsoidAcronym()
+            ellipsoid = QgsEllipsoidUtils.ellipsoidParameters(ellipsoid_id)
+            a = ellipsoid.semiMajor
+            f_inv = ellipsoid.inverseFlattening
+            f = 1/f_inv
+            
+            if len(coord) == 4:
+                if str(coord[0].z()) == 'nan' or str(coord[1].z()) == 'nan' or str(coord[2].z()) == 'nan':
+                    return None
+                else:
+                    P1 = geod2geoc(coord[0].x(), coord[0].y(), coord[0].z(), a, f)
+                    P2 = geod2geoc(coord[1].x(), coord[1].y(), coord[1].z(), a, f)
+                    P3 = geod2geoc(coord[2].x(), coord[2].y(), coord[2].z(), a, f)
+            else:
+                return None
+        # Caso contrário usar coordenadas projetadas.
+        else:
+            if len(coord) == 4:
+                P1 = (coord[0].x(), coord[0].y(), coord[0].z())
+                P2 = (coord[1].x(), coord[1].y(), coord[1].z())
+                P3 = (coord[2].x(), coord[2].y(), coord[2].z())
+            else:
+                return None
+        area3D = area_triangulo_3d(P1, P2, P3)
+        if str(area3D) == 'nan':
+            return None
+        else:
+            return float(area_triangulo_3d(P1, P2, P3))
+    except:
+        return tr('Check the geometry type!', 'Verifique o tipo de geometria!')
+
 
 
 @qgsfunction(args='auto', group='LF Tools')
