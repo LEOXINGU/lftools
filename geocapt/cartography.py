@@ -102,6 +102,40 @@ def areaGauss(coords):
     return soma/2
 
 
+def area_triangulo_3d(p1, p2, p3):
+    """
+    Calcula a área (real/inclinada) de um triângulo no espaço 3D.
+    
+    Parâmetros:
+        p1, p2, p3: tuplas (X, Y, Z)
+            Coordenadas dos vértices do triângulo.
+            
+    Retorna:
+        float: área do triângulo em unidades quadradas.
+        
+    Fórmula:
+        A = 0.5 * || (p2 - p1) x (p3 - p1) ||
+    """
+    # Vetores AB e AC
+    ab = (p2[0] - p1[0], p2[1] - p1[1], p2[2] - p1[2])
+    ac = (p3[0] - p1[0], p3[1] - p1[1], p3[2] - p1[2])
+
+    # Produto vetorial AB x AC
+    cross_prod = (
+        ab[1]*ac[2] - ab[2]*ac[1],
+        ab[2]*ac[0] - ab[0]*ac[2],
+        ab[0]*ac[1] - ab[1]*ac[0]
+    )
+
+    # Norma (módulo) do vetor resultante
+    norm = math.sqrt(cross_prod[0]**2 + cross_prod[1]**2 + cross_prod[2]**2)
+
+    # Área = metade do módulo do produto vetorial
+    area = 0.5 * norm
+    return area
+
+
+
 def distEuclidiana2D(p1, p2):
     return float(np.sqrt((p1.x() - p2.x())**2 + (p1.y() - p2.y())**2))
 
