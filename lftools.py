@@ -36,8 +36,11 @@ from qgis.core import (QgsProject,
                        QgsApplication,
                        QgsExpression)
 from qgis.PyQt.QtCore import QVariant
-from PyQt5.QtCore import QCoreApplication
-from PyQt5.QtWidgets import QMessageBox
+try:
+    from PyQt6.QtWidgets import QMessageBox
+except:
+    from PyQt5.QtWidgets import QMessageBox
+    
 from .lftools_provider import LFToolsProvider
 from .translations.translate import translate
 from .geocapt.topogeo import dms2dd as DMS2DD
