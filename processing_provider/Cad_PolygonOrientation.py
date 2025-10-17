@@ -15,7 +15,6 @@ __author__ = 'Leandro França'
 __date__ = '2022-01-05'
 __copyright__ = '(C) 2021, Leandro França'
 
-from PyQt5.QtCore import *
 from qgis.core import *
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
