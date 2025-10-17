@@ -15,7 +15,6 @@ __author__ = 'Leandro França'
 __date__ = '2019-11-02'
 __copyright__ = '(C) 2019, Leandro França'
 
-from PyQt5.QtCore import QCoreApplication, QVariant
 from qgis.core import *
 import processing
 from lftools.geocapt.imgs import Imgs
