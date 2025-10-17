@@ -15,7 +15,7 @@ __author__ = 'Leandro França'
 __date__ = '2025-05-03'
 __copyright__ = '(C) 2025, Leandro França'
 
-from qgis.PyQt.QtCore import QCoreApplication, QVariant
+from qgis.PyQt.QtCore import QVariant
 from qgis.core import (QgsApplication,
                        QgsProcessingParameterVectorLayer,
                        QgsProcessing,
