@@ -15,7 +15,6 @@ __author__ = 'Leandro França'
 __date__ = '2019-11-08'
 __copyright__ = '(C) 2019, Leandro França'
 
-from PyQt5.QtCore import QCoreApplication, QVariant
 from qgis.core import *
 import numpy as np
 from numpy.linalg import norm, inv, pinv, det, solve
