@@ -15,7 +15,7 @@ __author__ = 'Leandro França'
 __date__ = '2025-08-06'
 __copyright__ = '(C) 2025, Leandro França'
 
-from PyQt5.QtCore import *
+from qgis.PyQt.QtCore import QVariant
 from qgis.core import *
 from numpy import sqrt, array, mean, std, pi, sin
 from lftools.geocapt.imgs import *
