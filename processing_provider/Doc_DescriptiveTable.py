@@ -21,7 +21,6 @@ __author__ = 'Leandro França'
 __date__ = 'Jul 10'
 __copyright__ = '(C) 2020, Leandro França'
 
-from PyQt5.QtCore import QCoreApplication
 from qgis.core import (QgsProcessing,
                        QgsFeatureSink,
                        QgsProcessingException,
@@ -268,21 +267,21 @@ class DescriptiveTable(QgsProcessingAlgorithm):
 
         # Precisão da altitude
         try:
-        	prec_h = int(decimal[0]) # teste se precisão das coordenadas é número inteiro
+            prec_h = int(decimal[0]) # teste se precisão das coordenadas é número inteiro
         except:
-        	prec_h = round(10*(float(decimal[0]) - math.floor(float(decimal[0]))))
-        	decimal[0] = str(int(float(decimal[0])))
+            prec_h = round(10*(float(decimal[0]) - math.floor(float(decimal[0]))))
+            decimal[0] = str(int(float(decimal[0])))
 
         format_utm = '{:,.Xf}'.replace('X', decimal[0])
         format_h = '{:,.Xf}'.replace('X', str(prec_h))
         if len(decimal) == 1:
-        	decimal_geo = int(decimal[0]) + 2
-        	format_dist = '{:,.Xf}'.replace('X', decimal[0])
-        	decimal_azim = 1
+            decimal_geo = int(decimal[0]) + 2
+            format_dist = '{:,.Xf}'.replace('X', decimal[0])
+            decimal_azim = 1
         elif len(decimal) == 3:
-        	decimal_geo = int(decimal[0])
-        	decimal_azim = int(decimal[1])
-        	format_dist = '{:,.Xf}'.replace('X', decimal[2])
+            decimal_geo = int(decimal[0])
+            decimal_azim = int(decimal[1])
+            format_dist = '{:,.Xf}'.replace('X', decimal[2])
 
         modelo = self.parameterAsEnum(
             parameters,
