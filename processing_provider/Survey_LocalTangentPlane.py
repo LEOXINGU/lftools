@@ -15,7 +15,7 @@ __author__ = 'Leandro França'
 __date__ = '2019-10-28'
 __copyright__ = '(C) 2019, Leandro França'
 
-from PyQt5.QtCore import *
+from qgis.PyQt.QtCore import QVariant
 from qgis.core import *
 import processing
 from numpy import sin, cos, sqrt, matrix, radians, arctan, pi, floor
