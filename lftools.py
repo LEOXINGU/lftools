@@ -35,12 +35,9 @@ from qgis.core import (QgsProject,
                        QgsCoordinateTransform,
                        QgsApplication,
                        QgsExpression)
-from qgis.PyQt.QtCore import QVariant
-try:
-    from PyQt6.QtWidgets import QMessageBox
-except:
-    from PyQt5.QtWidgets import QMessageBox
-    
+from qgis.PyQt.QtCore import QVariant, QCoreApplication, QSettings, QTranslator, QUrl
+from qgis.PyQt.QtGui import QIcon
+from qgis.PyQt.QtWidgets import QAction, QMenu, QToolButton, QMessageBox    
 from .lftools_provider import LFToolsProvider
 from .translations.translate import translate
 from .geocapt.topogeo import dms2dd as DMS2DD
@@ -48,9 +45,6 @@ from .geocapt.cartography import LabelConf, SymbolSimplePoint
 from .geocapt.tools import *
 from .expressions import *
 from .LFTools_Dialog import ImportXYZ_Dialog
-from qgis.PyQt.QtCore import QUrl, QCoreApplication, QSettings, QTranslator
-from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAction, QMenu, QToolButton
 from qgis.utils import iface
 import processing
 import webbrowser
@@ -161,7 +155,15 @@ class LFToolsPlugin(object):
         self.MainLFToolsButton = QToolButton()
         self.MainLFToolsButton.setMenu(menu)
         self.MainLFToolsButton.setDefaultAction(self.Coord2Layer_Action)
-        self.MainLFToolsButton.setPopupMode(QToolButton.MenuButtonPopup)
+        
+        try:
+            # Qt6
+            popup_mode = QToolButton.ToolButtonPopupMode.MenuButtonPopup
+        except AttributeError:
+            # Qt5
+            popup_mode = QToolButton.MenuButtonPopup
+        self.MainLFToolsButton.setPopupMode(popup_mode)
+
         self.MainLFToolsButton.triggered.connect(self.toolButtonTriggered)
         self.MainLFToolsToolbar = self.toolbar.addWidget(self.MainLFToolsButton)
         self.MainLFToolsToolbar.setObjectName('MainLFToolsToolbar')
