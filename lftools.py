@@ -73,6 +73,12 @@ class LFToolsPlugin(object):
 
     def tr(self, *string):
         return translate(string, QgsApplication.locale()[:2])
+    
+    def exec_dialog(self, dlg):
+        try:
+            return dlg.exec()      # PyQt6
+        except AttributeError:
+            return dlg.exec_()     # PyQt5
 
     def initProcessing(self):
         """Init Processing provider for QGIS >= 3.8."""
@@ -155,7 +161,7 @@ class LFToolsPlugin(object):
         self.MainLFToolsButton = QToolButton()
         self.MainLFToolsButton.setMenu(menu)
         self.MainLFToolsButton.setDefaultAction(self.Coord2Layer_Action)
-        
+
         try:
             # Qt6
             popup_mode = QToolButton.ToolButtonPopupMode.MenuButtonPopup
@@ -239,7 +245,7 @@ class LFToolsPlugin(object):
         # Mostrar caixa de diálogo
         dlg.adjustSize()
         dlg.show()
-        result = dlg.exec_()
+        result = self.exec_dialog(dlg)
         projeto = QgsProject.instance()
         # Quando pressionado
         if result == 1:
