@@ -1,7 +1,7 @@
 [general]
 name=LF Tools
-qgisMinimumVersion=3.10
-description=Tools for cartographic production, surveying, database management, digital image processing and spatial analysis.
+qgisMinimumVersion=3.34
+description=Comprehensive solutions for cartographic production, surveying, drone mapping, GNSS data import, geospatial database management, digital image processing, and spatial analysis.
 version=2.5.2
 author=Leandro França
 email=suporte@geoone.com.br
@@ -84,6 +84,8 @@ category=cartography
 icon=images/lftools_logo.png
 # experimental flag
 experimental=False
+server=False
+supportsQt6=True
 
 # deprecated flag (applies to the whole plugin, not just a single version)
 deprecated=False
@@ -91,10 +93,11 @@ deprecated=False
 # Since QGIS 3.8, a comma separated list of plugins to be installed
 # (or upgraded) can be specified.
 # Check the documentation for more information.
-# plugin_dependencies=
+# plugin_dependencies=pillow
 
-Category of the plugin: Raster, Vector, Database or Web
-# category= Processing
+# Support the continued development of LFTools plugin for QGIS — every coffee helps!
+donation=https://www.paypal.com/ncp/payment/8V3C6PEAMQAYG 
 
-# If the plugin can run on QGIS Server.
-server=False
+## How to cite?
+# If you use LFTools plugin in your research or projects, please cite it as follows:
+# França, L. (YEAR). LFTools: Comprehensive solutions for cartographic production, surveying, drone mapping, GNSS data import, geospatial database management, digital image processing, and spatial analysis. (VERSION X.X.X) [QGIS plugin]. Retrieved from https://plugins.qgis.org/plugins/LFTools/
