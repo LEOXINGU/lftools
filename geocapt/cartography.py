@@ -672,26 +672,83 @@ def main_azimuth(geometry):
             return direcao
 
 
+# def Mesclar_Multilinhas(inters):
+#     if inters.type() == 1 and inters.isMultipart():
+#         partes = inters.asMultiPolyline()
+#         parte1 = QgsGeometry.fromPolylineXY(partes[0])
+#         k = 1
+#         cont = 1
+#         while len(partes) > 1:
+#             parte2 = QgsGeometry.fromPolylineXY(partes[k])
+#             if  parte1.intersects(parte2):
+#                 parte1 = parte1.combine(parte2)
+#                 del partes[k]
+#             else:
+#                 k += 1
+#             cont +=1
+#             if cont > 10:
+#                 break
+#         inters = parte1
+#         return inters
+#     else:
+#         return inters
+
+
 def Mesclar_Multilinhas(inters):
     if inters.type() == 1 and inters.isMultipart():
         partes = inters.asMultiPolyline()
+        
+        # Verificação de segurança para listas vazias
+        if not partes:
+            return inters 
+            
         parte1 = QgsGeometry.fromPolylineXY(partes[0])
         k = 1
-        cont = 1
+        cont = 1 # Contador de "passagens" pela lista
+        
+        # Limite de segurança maior para geometrias complexas
+        limite_seguranca = len(partes) * len(partes) 
+        
         while len(partes) > 1:
-            parte2 = QgsGeometry.fromPolylineXY(partes[k])
-            if  parte1.intersects(parte2):
+            
+            # 1. Se 'k' chegou ao fim da lista, reinicie a varredura
+            if k >= len(partes):
+                k = 1
+                cont += 1 # Conta como uma passagem completa
+            
+            # 2. Se passamos do limite de segurança, pare (evita loop infinito)
+            if cont > limite_seguranca:
+                # Retorna o que conseguiu mesclar + o que sobrou
+                geoms_restantes = [QgsGeometry.fromPolylineXY(p) for p in partes[1:]]
+                return QgsGeometry.collectGeometry([parte1] + geoms_restantes)
+
+            # 3. Pega a próxima parte
+            try:
+                parte2 = QgsGeometry.fromPolylineXY(partes[k])
+            except (IndexError, TypeError):
+                # Se algo der errado (ex: parte vazia), pule
+                k += 1
+                continue
+
+            # 4. Lógica de interseção
+            if parte1.intersects(parte2):
                 parte1 = parte1.combine(parte2)
                 del partes[k]
+                # NÃO incrementa 'k'. Como a lista encolheu,
+                # o próximo item (se houver) está agora no índice 'k'.
+                # Reiniciar 'k=1' também funcionaria, mas é menos eficiente.
+                k = 1 # Reiniciar é mais seguro para garantir que tudo se combine
             else:
+                # Só incrementa 'k' se NÃO houver interseção
                 k += 1
-            cont +=1
-            if cont > 10:
-                break
+                
+        # Fim do loop, 'parte1' contém a geometria mesclada
         inters = parte1
         return inters
     else:
+        # Se não for MultiPart, apenas retorna a geometria original
         return inters
+
 
 
 def LayerIs3D(camada):
