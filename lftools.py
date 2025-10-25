@@ -156,6 +156,8 @@ class LFToolsPlugin(object):
         self.ExportASCII_Action.setObjectName('ExportASCII')
         self.SelectByKeyAtt_Action = menu.addAction(icon, self.tr('Select by key attribute', 'Selecionar por atributo chave'), self.SelectByKeyAtt)
         self.SelectByKeyAtt_Action.setObjectName('SelectByKeyAtt')
+        self.MagicStyles_Action = menu.addAction(icon, self.tr('Magic Styles', 'Estilos Mágicos'), self.MagicStyles)
+        self.MagicStyles_Action.setObjectName('MagicStyles')
 
         # Adicionando conjunto de botões
         self.MainLFToolsButton = QToolButton()
@@ -199,6 +201,7 @@ class LFToolsPlugin(object):
         self.iface.removeToolBarIcon(self.MeasureLayer_Action)
         self.iface.removeToolBarIcon(self.ExportASCII_Action)
         self.iface.removeToolBarIcon(self.SelectByKeyAtt_Action)
+        self.iface.removeToolBarIcon(self.MagicStyles_Action)
         self.iface.removeToolBarIcon(self.Tutoriais_Action)
         # remove the toolbar
         del self.toolbar
@@ -225,6 +228,9 @@ class LFToolsPlugin(object):
 
     def DEM_Downloader(self):
         processing.execAlgorithmDialog('lftools:demdownloader', {})
+    
+    def MagicStyles(self):
+        processing.execAlgorithmDialog('lftools:magicstyles', {})
 
 
     def runUTM(self):
