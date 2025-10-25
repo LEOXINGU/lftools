@@ -69,7 +69,7 @@ class ImportPhotos(QgsProcessingAlgorithm):
         return 'reambulation'
 
     def tags(self):
-        return 'GeoOne,import,photo,reambulation,geotag,geophoto,reambulação,fotografia,photography'.split(',')
+        return 'GeoOne,import,photo,reambulation,geotag,geophoto,reambulação,fotografia,photography,drone,DJI'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/reamb_camera.png'))
@@ -264,13 +264,13 @@ class ImportPhotos(QgsProcessingAlgorithm):
         # Criando Output
         crs = QgsCoordinateReferenceSystem('EPSG:4326')
         fields = QgsFields()
-        fields.append(QgsField(self.tr('name','nome'), QVariant.String))
+        fields.append(QgsField(self.tr('name'), QVariant.String))
         fields.append(QgsField(self.tr('longitude'), QVariant.Double))
         fields.append(QgsField(self.tr('latitude'), QVariant.Double))
         fields.append(QgsField(self.tr('altitude'), QVariant.Double))
-        fields.append(QgsField(self.tr('azimuth','azimute'), QVariant.Int))
-        fields.append(QgsField(self.tr('date_time','data_hora'), QVariant.String))
-        fields.append(QgsField(self.tr('path','caminho'), QVariant.String))
+        fields.append(QgsField(self.tr('azimuth'), QVariant.Int))
+        fields.append(QgsField(self.tr('date_time'), QVariant.String))
+        fields.append(QgsField(self.tr('path'), QVariant.String))
         fields.append(QgsField(self.tr('make','fabricante'), QVariant.String))
         fields.append(QgsField(self.tr('model','modelo'), QVariant.String))
         if YPR:
@@ -525,15 +525,15 @@ class ImportPhotos(QgsProcessingAlgorithm):
     def postProcessAlgorithm(self, context, feedback):
         layer = QgsProcessingUtils.mapLayerFromString(self.SAIDA, context)
         if self.pasta[0:2] in (r'\\', r'//'):
-            layer.setMapTipTemplate(r'''[%''' + self.tr("name","nome") + '''%]<br><img src="file://[%''' + self.tr('path','caminho') + '''%]" width="450">''')
+            layer.setMapTipTemplate(r'''[%''' + self.tr("name") + '''%]<br><img src="file://[%''' + self.tr('path') + '''%]" width="450">''')
         else:
-            layer.setMapTipTemplate(r'''[%''' + self.tr("name","nome") + '''%]<br><img src="file:///[%''' + self.tr('path','caminho') + '''%]" width="450">''')
+            layer.setMapTipTemplate(r'''[%''' + self.tr("name") + '''%]<br><img src="file:///[%''' + self.tr('path') + '''%]" width="450">''')
 
         acManager = layer.actions()
-        acActor = QgsAction(QgsAction.ActionType.GenericPython , self.tr('Open photo', 'Abrir foto'),"""
+        acActor = QgsAction(QgsAction.ActionType.GenericPython , self.tr('Open photo'),"""
 import os
 os.popen(r'[%"{}"%]')
-""".format(self.tr("path","caminho")), False)
+""".format(self.tr("path")), False)
         acActor.setActionScopes({'Field', 'Layer', 'Canvas', 'Feature'})
         acManager.addAction(acActor)
 
