@@ -24,13 +24,14 @@ def translate(string, loc):
             return string[0]
     # Espanhol
     elif loc == 'es':
-        if string[0] in dic:
-            if loc in dic[string[0]]:
-                return dic[string[0]][loc]
-            else:
-                return string[0]
-        elif len(string) == 2:
-            return string[1]
+        if len(string) == 2:
+            if string[0] in dic:
+                if loc in dic[string[0]]:
+                    return dic[string[0]][loc]
+                else:
+                    return string[0]
+            elif len(string) == 2:
+                return string[1]
         else:
             return string[0]
     # Inglês
