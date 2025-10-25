@@ -715,7 +715,7 @@ dic = {
 'Opening minuend raster file...' : {'es': 'Abriendo archivo ráster de minuendo...'},
 'Opening subtrahend raster file...' : {'es': 'Abriendo archivo ráster de sustraendo...'},
 'Calculating the difference...' : {'es': 'Calculando la diferencia...'},
-'DEM filter' : {'es': 'filtro DEM'},
+'DEM filter' : {'es': 'Filtro DEM'},
 'Mean kernel - 3 by 3' : {'es': 'Núcleo medio - 3 por 3'},
 'Mean kernel - 5 by 5' : {'es': 'Núcleo medio - 5 por 5'},
 'Median kernel - 3 by 3' : {'es': 'Núcleo mediano - 3 por 3'},
@@ -1346,4 +1346,11 @@ Nota: Introduzca el nombre del campo de clave externa si no es el mismo que el n
 'No raster was downloaded!': {'es': '¡Ningún ráster fue descargado!'},
 'Problem downloading': {'es': 'Problema al descargar'},
 'Downloading file': {'es': 'Descargando archivo'},
+'''This tool automatically applies cartographic styles to your QGIS vector layers — as if by magic.
+It turns points, lines, and polygons into ready-to-use visual representations for professional maps, quickly and effortlessly.''': {'es': '''Esta herramienta aplica estilos cartográficos automáticos a tus capas vectoriales en QGIS, como por arte de magia.
+Transforma puntos, líneas y polígonos en representaciones visuales listas para mapas profesionales, de forma rápida y sencilla.'''},
+'- Select one style -': {'es': '- Selecciona un estilo -'},
+'Dimensioning': {'es': 'Acotación'},
+'Distance and Azimuth': {'es': 'Distancia y Azimut'},
+
  }
