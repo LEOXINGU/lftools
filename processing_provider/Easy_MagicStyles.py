@@ -62,9 +62,9 @@ class MagicStyles(QgsProcessingAlgorithm):
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/easy.png'))
 
-    txt_en = '''This tool automatically applies cartographic styles to your QGIS vector layers — as if by magic.
+    txt_en = '''This tool automatically <b>applies cartographic styles</b> to your QGIS vector layers — as if by magic.
 It turns points, lines, and polygons into ready-to-use visual representations for professional maps, quickly and effortlessly.'''
-    txt_pt = '''Esta ferramenta aplica estilos cartográficos automáticos às suas camadas vetoriais no QGIS, como um passe de mágica.
+    txt_pt = '''Esta ferramenta <b>aplica estilos</b> cartográficos automáticos às suas camadas vetoriais no QGIS, como um passe de mágica.
 Transforme pontos, linhas e polígonos em representações visuais prontas para mapas profissionais — simples, rápidas e com um toque criativo.'''
     figure = 'images/tutorial/easy_magic_styles.jpg'
 
