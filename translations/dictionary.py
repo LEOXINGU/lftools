@@ -1346,8 +1346,8 @@ Nota: Introduzca el nombre del campo de clave externa si no es el mismo que el n
 'No raster was downloaded!': {'es': '¡Ningún ráster fue descargado!'},
 'Problem downloading': {'es': 'Problema al descargar'},
 'Downloading file': {'es': 'Descargando archivo'},
-'''This tool automatically applies cartographic styles to your QGIS vector layers — as if by magic.
-It turns points, lines, and polygons into ready-to-use visual representations for professional maps, quickly and effortlessly.''': {'es': '''Esta herramienta aplica estilos cartográficos automáticos a tus capas vectoriales en QGIS, como por arte de magia.
+'''This tool automatically <b>applies cartographic styles</b> to your QGIS vector layers — as if by magic.
+It turns points, lines, and polygons into ready-to-use visual representations for professional maps, quickly and effortlessly.''': {'es': '''Esta herramienta <b>aplica estilos</b> cartográficos automáticos a tus capas vectoriales en QGIS, como por arte de magia.
 Transforma puntos, líneas y polígonos en representaciones visuales listas para mapas profesionales, de forma rápida y sencilla.'''},
 '- Select one style -': {'es': '- Selecciona un estilo -'},
 'Dimensioning': {'es': 'Acotación'},
