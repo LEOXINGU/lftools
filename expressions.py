@@ -1694,7 +1694,7 @@ def deedtable2(prefix, titulo, decimal, fontsize, tipo, azimuth_dist, feature, p
                 layer = QgsProject.instance().mapLayersByName(descricao)[0]
             campos = [field.name() for field in layer.fields()]
             # Camadas de polígono e confrontantes deve estar com o mesmo SRC
-            filter = '"{}" = {}'.format(id, feature.id())
+            filter = '"{}" = {}'.format(id, feature["fid"])
             exp = QgsExpression(filter)
             if id not in campos or nome not in campos:
                 prefixo = str(prefix)
@@ -1953,7 +1953,7 @@ def deedtable3(prefix, titulo, decimal, fontsize, tipo, azimuth_dist, feature, p
                 layer = QgsProject.instance().mapLayersByName(descricao)[0]
             campos = [field.name() for field in layer.fields()]
             # Camadas de polígono e confrontantes deve estar com o mesmo SRC
-            filter = '"{}" = {}'.format(id, feature.id())
+            filter = '"{}" = {}'.format(id, feature["fid"])
             exp = QgsExpression(filter)
             if id not in campos or nome not in campos:
                 prefixo = str(prefix)
@@ -2186,7 +2186,7 @@ def deedtext(description, estilo, prefix, decimal, calculation, fontsize, featur
                 layer = QgsProject.instance().mapLayersByName(descricao)[0]
             campos = [field.name() for field in layer.fields()]
             # Camadas de polígono e confrontantes deve estar com o mesmo SRC
-            filter = '"{}" = {}'.format(id, feature.id())
+            filter = '"{}" = {}'.format(id, feature["fid"])
             exp = QgsExpression(filter)
             if id not in campos or nome not in campos:
                 prefixo = str(prefix)
@@ -2386,7 +2386,7 @@ def deedtext(description, estilo, prefix, decimal, calculation, fontsize, featur
                 layer = QgsProject.instance().mapLayersByName(descricao)[0]
             campos = [field.name() for field in layer.fields()]
             # Camadas de polígono e confrontantes deve estar com o mesmo SRC
-            filter = '"{}" = {}'.format(id, feature.id())
+            filter = '"{}" = {}'.format(id, feature["fid"])
             exp = QgsExpression(filter)
             if id not in campos or nome not in campos:
                 descr_pnt_ini = description
@@ -2616,7 +2616,7 @@ def geoneighbors(prefix, testada, borderer_field, coord_type, precision, fontsiz
                 if geom1.intersects(geom2):
                     inters = geom1.intersection(geom2)
                     inters = Mesclar_Multilinhas(inters)
-                    confront[feat2.id()] = [cd_lote2, inters]
+                    confront[feat2["fid"]] = [cd_lote2, inters]
 
         if geom1.isMultipart():
             coords = geom1.asMultiPolygon()[0][0]
@@ -2630,7 +2630,7 @@ def geoneighbors(prefix, testada, borderer_field, coord_type, precision, fontsiz
                 layer = QgsProject.instance().mapLayersByName(descricao)[0]
             campos = [field.name() for field in layer.fields()]
             # Camadas de polígono e confrontantes deve estar com o mesmo SRC
-            filter = '"{}" = {}'.format(id, feature.id())
+            filter = '"{}" = {}'.format(id, feature["fid"])
             exp = QgsExpression(filter)
             if id not in campos or nome not in campos:
                 frontLot = str(testada)
@@ -2679,7 +2679,7 @@ def geoneighbors(prefix, testada, borderer_field, coord_type, precision, fontsiz
                 layer = QgsProject.instance().mapLayersByName(descricao)[0]
             campos = [field.name() for field in layer.fields()]
             # Camadas de polígono e confrontantes deve estar com o mesmo SRC
-            filter = '"{}" = {}'.format(id, feature.id())
+            filter = '"{}" = {}'.format(id, feature["fid"])
             exp = QgsExpression(filter)
             if id not in campos or nome not in campos:
                 prefixo = str(prefix)
