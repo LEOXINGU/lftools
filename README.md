@@ -125,6 +125,9 @@ pip install Pillow
         <li><a href="#get-attribute-by-location">Get attribute by location</a></li>
       </ul>
       <ul>
+        <li><a href="#magic-styles">Magic Styles</a></li>
+      </ul>
+      <ul>
         <li><a href="#measure-layers">Measure layers</a></li>
       </ul>
       <ul>
@@ -253,6 +256,9 @@ pip install Pillow
       </ul>
       </li><li>
       <a href="#relief">Relief</a>
+      <ul>
+        <li><a href="#dem-downloader">DEM Downloader</a></li>
+      </ul>
       <ul>
         <li><a href="#dem-difference">DEM difference</a></li>
       </ul>
@@ -494,6 +500,9 @@ pip install Pillow
       </li><li>
       <a href="#mão-na-roda">Mão na Roda</a>
       <ul>
+        <li><a href="#estilos-mágicos">Estilos Mágicos</a></li>
+      </ul>
+      <ul>
         <li><a href="#medir-camadas">Medir camadas</a></li>
       </ul>
       <ul>
@@ -616,6 +625,9 @@ pip install Pillow
       </ul>
       </li><li>
       <a href="#relevo">Relevo</a>
+      <ul>
+        <li><a href="#baixar-mde">Baixar MDE</a></li>
+      </ul>
       <ul>
         <li><a href="#definir-coordenada-z-pelo-mde">Definir coordenada Z pelo MDE</a></li>
       </ul>
@@ -1047,6 +1059,18 @@ This algorithm fills in the attributes of a specific field from another layer, i
 </table>
 </div>
 
+### Magic Styles
+This tool automatically <b>applies cartographic styles</b> to your QGIS vector layers — as if by magic.</br>It turns points, lines, and polygons into ready-to-use visual representations for professional maps, quickly and effortlessly.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/easy_magic_styles.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
 ### Measure layers
 This tool calculates the line feature's lengths and polygon feature's perimeter and area in virtual fields for all vector layers.
 <div align="center">
@@ -1243,7 +1267,7 @@ This tool can be used to evaluate the <b>planialtimetric (3D) positional accurac
 </div>
 
 ### Horizontal positional accuracy
-This tool can be used to evaluate the <b>planimetric (2D) positional accuracy</b> of digital cartographic products.</br></br><b>Outputs</b></br>1. <b>Discrepancy calculations</b>: differences in X and Y coordinates, including the planimetric (XY) resultants.</br>2. <b>Accuracy report</b>: Cartographic Accuracy Standard report containing RMSE values and classification according to the <b>Planimetric PEC-PCD</b>.</br></br><b>Input Requirements</b></br>- The input layer must consist of lines with two vertices.</br>- The vertices must correspond to homologous points, such that the <b>first vertex</b> corresponds to the test point and the <b>second vertex</b> corresponds to the check point.
+This tool can be used to evaluate the <b>planimetric (2D) positional accuracy</b> of digital cartographic products.</br></br><b>Outputs</b></br>1. <b>Discrepancy calculations</b>: differences in X and Y coordinates, including the planimetric (XY) resultants.</br>2. <b>Accuracy report</b>: Cartographic Accuracy Standard report containing RMSE values and classification according to the <b>Planimetric PEC-PCD</b>.</br></br><b>Input Requirements</b></br>- The input layer must consist of lines with two vertices.</br>- The vertices must correspond to homologous points, such that the <b>first vertex</b> corresponds to the test point and the <b>second vertex</b> corresponds to the reference point.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
@@ -1544,6 +1568,18 @@ The largest width or height value of the original image is resized to the user-d
 
 ## Relief
 
+
+### DEM Downloader
+A tool that streamlines the download of Digital Elevation Models (DEMs), allowing the user to define the area of interest directly in QGIS. It supports access to FABDEM and other modern DEMs, automatically generating the exact clipped extent for immediate use in your projects.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/relief_download.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 ### DEM difference
 This tool performs the difference between two Digital Elevation Models (DEM).</br>Minuend is the raster to be subtracted.</br>Subtrahend is the rastar that is subtracting.
@@ -2443,6 +2479,18 @@ Encontra os pontos centrais (vértices) das concentrações de pontos levantados
 ## Mão na Roda
 
 
+### Estilos Mágicos
+Esta ferramenta <b>aplica estilos</b> cartográficos automáticos às suas camadas vetoriais no QGIS, como um passe de mágica.</br>Transforme pontos, linhas e polígonos em representações visuais prontas para mapas profissionais — simples, rápidas e com um toque criativo.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/easy_magic_styles.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
 ### Medir camadas
 Esta ferramenta calcula em campos virtuais os comprimentos de feições do tipo linha e o perímetro e área de feições do tipo polígono para todas as camadas.
 <div align="center">
@@ -2639,7 +2687,7 @@ Esta ferramenta pode ser utilizada para avaliar a acurácia posicional altimétr
 </div>
 
 ### Acurácia posicional planimétrica
-Esta ferramenta pode ser utilizada para avaliar a acurácia posicional planimétrica (2D) de produtos cartográficos digitais.</br></br><b>Saídas</b></br>1. <b>Cálculo das discrepâncias</b>: diferenças nas coordenadas X e Y, incluindo as resultantes planimétrica (XY).</br>2. <b>Relatório de acurácia</b>: relatório do Padrão de Exatidão Cartográfica contendo valores de REMQ e classificação conforme o PEC-PCD Planimétrico.</br></br><b>Requisitos de Entrada</b></br>- A camada de entrada deve consistir em linhas com dois vértices.</br>- Os vértices devem corresponder aos pontos homólogos, de tal forma que o primeiro vértice corresponde ao ponto de teste e o segundo vértice corresponde ao ponto de checagem.
+Esta ferramenta pode ser utilizada para avaliar a acurácia posicional planimétrica (2D) de produtos cartográficos digitais.</br></br><b>Saídas</b></br>1. <b>Cálculo das discrepâncias</b>: diferenças nas coordenadas X e Y, incluindo as resultantes planimétrica (XY).</br>2. <b>Relatório de acurácia</b>: relatório do Padrão de Exatidão Cartográfica contendo valores de REMQ e classificação conforme o PEC-PCD Planimétrico.</br></br><b>Requisitos de Entrada</b></br>- A camada de entrada deve consistir em linhas com dois vértices.</br>- Os vértices devem corresponder aos pontos homólogos, de tal forma que o primeiro vértice corresponde ao ponto de teste e o segundo vértice corresponde ao ponto de referência.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
@@ -2916,6 +2964,18 @@ O maior valor de largura ou altura da imagem original é redimensionado para o v
 
 ## Relevo
 
+
+### Baixar MDE
+Ferramenta que simplifica o download de Modelos Digitais de Elevação (MDE), permitindo ao usuário definir a área de interesse diretamente no QGIS. Suporta o acesso ao FABDEM e a outros MDEs modernos, gerando automaticamente o recorte exato da extensão selecionada para uso imediato em seus projetos.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/relief_download.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 ### Definir coordenada Z pelo MDE
 Esta ferramenta substitui as coordenadas Z de uma camada existente pelo valor da célula mais próxima de um Modelo Digital de Elevação (MDE).
