@@ -219,9 +219,10 @@ class ConfidenceEllipse(QgsProcessingAlgorithm):
         if sink is None:
             raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT))
 
+        total = 100.0 / layer.featureCount() if layer.featureCount() else 0
         if Campo_Agrupar:
             dic = {}
-            for feat in layer.getFeatures():
+            for current, feat in enumerate(layer.getFeatures()):
                 geom = feat.geometry()
                 if geom.isMultipart():
                     pnt = geom.asMultiPoint()[0]
@@ -238,9 +239,12 @@ class ConfidenceEllipse(QgsProcessingAlgorithm):
                         dic[grupo] = {'x':[pnt.x()], 'y':[pnt.y()], 'w':[int(feat[Campo_Peso])]}
                     else:
                         dic[grupo] = {'x':[pnt.x()], 'y':[pnt.y()]}
+                if feedback.isCanceled():
+                    break
+                feedback.setProgress(int(current * total))
         else:
             dic = {}
-            for feat in layer.getFeatures():
+            for current, feat in enumerate(layer.getFeatures()):
                 geom = feat.geometry()
                 if geom.isMultipart():
                     pnt = geom.asMultiPoint()[0]
@@ -257,9 +261,11 @@ class ConfidenceEllipse(QgsProcessingAlgorithm):
                         dic[grupo] = {'x':[pnt.x()], 'y':[pnt.y()], 'w':[int(feat[Campo_Peso])]}
                     else:
                         dic[grupo] = {'x':[pnt.x()], 'y':[pnt.y()]}
+                if feedback.isCanceled():
+                    break
+                feedback.setProgress(int(current * total))
 
         feature = QgsFeature()
-        total = 100.0 / len(dic) if len(dic) else 0
         for current, grupo in enumerate(dic):
             x = np.array(dic[grupo]['x'])
             y = np.array(dic[grupo]['y'])
@@ -340,7 +346,6 @@ class ConfidenceEllipse(QgsProcessingAlgorithm):
             sink.addFeature(feat, QgsFeatureSink.FastInsert)
             if feedback.isCanceled():
                 break
-            feedback.setProgress(int(current * total))
 
         feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
         feedback.pushInfo(self.tr('Leandro Franca - Cartographic Engineer', 'Leandro França - Eng Cart'))
