@@ -97,11 +97,13 @@ Transforme pontos, linhas e polígonos em representações visuais prontas para 
         STYLES = {
         QgsWkbTypes.PointGeometry: [self.tr('- Select one style -', '- Selecione um estilo -'),
                                     'Drone',
-                                    self.tr('VR 360°', 'RV 360°')],
+                                    self.tr('VR Photo 360°', 'RV Foto 360°'),
+                                    self.tr('VR Video 360°', 'RV Vídeo 360°')],
 
         QgsWkbTypes.LineGeometry: [self.tr('- Select one style -', '- Selecione um estilo -'),
                                    self.tr('Dimensioning', 'Cotagem'),
-                                   self.tr('Distance and Azimuth', 'Distância e Azimute')],
+                                   self.tr('Distance and Azimuth', 'Distância e Azimute'),
+                                   self.tr('VR Video 360°', 'RV Video 360°')],
 
         QgsWkbTypes.PolygonGeometry: [self.tr('- Select one style -', '- Selecione um estilo -'),
                                       self.tr('Cadastre', 'Cadastro')]
@@ -169,11 +171,13 @@ Transforme pontos, linhas e polígonos em representações visuais prontas para 
         QML = {
         QgsWkbTypes.PointGeometry: {
                                     1: 'drone_prof_leandro',
-                                    2: 'vr360_prof_leandro',
+                                    2: 'vr_photo_360_prof_leandro',
+                                    3: 'vr_video_point_360_prof_leandro',
                                     },
         QgsWkbTypes.LineGeometry: {
                                     1: 'cotagem_GEO_prof_leandro' if CRS.isGeographic() else 'cotagem_UTM_prof_leandro',
                                     2: 'dist_azim_linha_GEO_prof_leandro' if CRS.isGeographic() else 'dist_azim_linha_UTM_prof_leandro',
+                                    3: 'vr_video_line_360_prof_leandro',
                                     },
 
         QgsWkbTypes.PolygonGeometry: {
@@ -193,14 +197,20 @@ Transforme pontos, linhas e polígonos em representações visuais prontas para 
                     estilo_selec = self.prepare_temp_qml(estilo_selec, ['[CAMINHO1]', '[CAMINHO2]'], 
                                                                        [ os.path.join( caminho_estilos , 'SVG/drone_azimuth.svg'),
                                                                          os.path.join( caminho_estilos , 'SVG/drone.svg')] )
-                elif estilo_ponto == 2: # 360
+                elif estilo_ponto == 2: # foto 360
                     estilo_selec = self.prepare_temp_qml(estilo_selec, ['[CAMINHO]'], 
                                                                        [ os.path.join( caminho_estilos , 'SVG/multidirectional 360.svg') ] )
+                elif estilo_ponto == 3: # video 360
+                    estilo_selec = self.prepare_temp_qml(estilo_selec, ['[CAMINHO]'], 
+                                                                       [ os.path.join( caminho_estilos , 'SVG/video360.svg') ] )
         if tipo_geom == QgsWkbTypes.LineGeometry:
             if estilo_linha == 0:
                 raise QgsProcessingException('Select a Line Layer Style!')
             else:
                 estilo_selec = os.path.join(caminho_estilos, QML[tipo_geom][estilo_linha] + '.qml')
+                if estilo_linha == 3: # video 360
+                    estilo_selec = self.prepare_temp_qml(estilo_selec, ['[CAMINHO]'], 
+                                                                       [ os.path.join( caminho_estilos , 'SVG/video360.svg') ] )
             
         if tipo_geom == QgsWkbTypes.PolygonGeometry:
             if estilo_poligono == 0:
