@@ -14,6 +14,7 @@ repository=https://github.com/LEOXINGU/lftools
 hasProcessingProvider=yes
 # Uncomment the following line and add your changelog:
 # changelog=
+  2.6.1 - new magic style added for 360° videos
   2.6.0 - new tool that applies vector layer styles as if by magic
   2.5.2 - compatibility with Qt5 and Qt6
   2.5.1 - bug fix to report that tile is not in DEM dataset and new function for calculating 3D areas
