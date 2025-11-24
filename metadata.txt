@@ -2,11 +2,11 @@
 name=LF Tools
 qgisMinimumVersion=3.34
 description=Comprehensive solutions for cartographic production, surveying, drone mapping, GNSS data import, geospatial database management, digital image processing, and spatial analysis.
-version=2.6.0
+version=2.6.1
 author=Leandro França
 email=suporte@geoone.com.br
 
-about=The LFTools plugin is a true "Swiss Army knife" developed for QGIS, bringing together more than 133 scripts, expression functions, and toolbar tools. It caters to a wide range of needs, including cartographic production, surveying, drone operations, GNSS, image processing, database management, and spatial analysis. Since its launch in March 2021, it has become the most downloaded Brazilian-developed plugin on the platform, widely adopted by surveyors, cartographers, geographers, and other professionals working with geotechnologies. LFTools stands out for offering practical and automated solutions for creating topographic plans, descriptive reports, and other technical documents, combining automation efficiency with QGIS Atlas features and Python expressions.
+about=The LFTools plugin is a true "Swiss Army knife" developed for QGIS, bringing together more than 135 scripts, expression functions, and toolbar tools. It caters to a wide range of needs, including cartographic production, surveying, drone operations, GNSS, image processing, database management, and spatial analysis. Since its launch in March 2021, it has become the most downloaded Brazilian-developed plugin on the platform, widely adopted by surveyors, cartographers, geographers, and other professionals working with geotechnologies. LFTools stands out for offering practical and automated solutions for creating topographic plans, descriptive reports, and other technical documents, combining automation efficiency with QGIS Atlas features and Python expressions.
 
 tracker=https://github.com/LEOXINGU/lftools/issues
 repository=https://github.com/LEOXINGU/lftools
