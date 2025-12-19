@@ -17,6 +17,7 @@ __copyright__ = '(C) 2021, Leandro França'
 from numpy import radians, arctan, pi, sin, cos, sqrt, degrees, array, diag, ones, zeros, floor
 from numpy.linalg import norm, pinv, inv
 from qgis.core import QgsEllipsoidUtils
+from datetime import datetime, timedelta
 import datetime as dt
 import numpy as np
 
@@ -291,6 +292,40 @@ def degrees2meters(theta, lat, SRC):
     dist = theta*R
     return dist
 
+
+def datetime_decimal_str(ano, mes, dia, hora, minuto, segundo):
+    s = float(segundo)
+    sec = int(s)
+    frac = s - sec
+    frac_str = f"{round(frac*10**1):01d}" # casas decimais = 1
+    return f"{int(ano):04d}-{int(mes):02d}-{int(dia):02d} {int(hora):02d}:{int(minuto):02d}:{sec:02d}.{frac_str}"
+
+
+
+def str_decimal_to_datetime(dt_str):
+    """
+    Converte 'YYYY-MM-DD HH:MM:SS.sss' para datetime,
+    tratando corretamente overflow de micros, segundos,
+    minutos, horas e dias.
+    """
+    date_part, time_part = dt_str.strip().split(' ')
+    year, month, day = map(int, date_part.split('-'))
+
+    hh, mm, ss = time_part.split(':')
+    hh = int(hh)
+    mm = int(mm)
+
+    s = float(ss)
+    sec = int(s)
+    micro = int(round((s - sec) * 1e6))
+
+    # datetime base SEM segundos
+    base = datetime(year, month, day, hh, mm, 0)
+
+    # soma tudo via timedelta
+    return base + timedelta(seconds=sec, microseconds=micro)
+
+
 # Hora GPS
 def gpsdate(Y, M, DoM, Hr, Mn, Sc):
     '''
@@ -319,7 +354,7 @@ def gpsdate(Y, M, DoM, Hr, Mn, Sc):
     # calculation of day of the GPS Week
     DoGPSW = round(((JD - 2444244.5)/7 - GPSW)*7)
     # calculation of second of the GPS Week
-    SoGPSW = round((((JD - 2444244.5)/7 - GPSW)*7)*(24*60*60))
+    SoGPSW = (((JD - 2444244.5)/7 - GPSW)*7)*(24*60*60)
     return [Y,M,DoM,DoY,GPSW,DoGPSW,SoGPSW,JD,DecY]
 
 
