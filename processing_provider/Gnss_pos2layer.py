@@ -47,9 +47,9 @@ from qgis.core import (QgsProcessing,
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
 from lftools.geocapt.vemos import vemos
-from lftools.geocapt.topogeo import meters2degrees
+from lftools.geocapt.topogeo import meters2degrees, datetime_decimal_str, str_decimal_to_datetime
 import numpy as np
-from datetime import datetime
+from datetime import datetime, timedelta
 import codecs
 import os
 from qgis.PyQt.QtGui import QIcon
@@ -277,7 +277,7 @@ Tipos:
                 h = float(pnt[4])
                 ano, mes, dia = pnt[0].split('/')
                 hora, minuto, segundo = pnt[1].split(':')
-                datahora = unicode(datetime(int(ano), int(mes), int(dia), int(hora), int(minuto), int(float(segundo))))
+                datahora = datetime_decimal_str(int(ano), int(mes), int(dia), int(hora), int(minuto), float(segundo))
                 quality = quality_dic[int(pnt[5])]
                 nsat = int(pnt[6])
                 slat = float(pnt[7])
@@ -299,12 +299,12 @@ Tipos:
                 ano, mes, dia = pnt[4].split('-')
                 hora, minuto, segundo = pnt[5].split(':')
                 if int(float(segundo)) != 60:
-                    datahora = unicode(datetime(int(ano), int(mes), int(dia), int(hora), int(minuto), int(float(segundo))))
+                    datahora = datetime_decimal_str(int(ano), int(mes), int(dia), int(hora), int(minuto), float(segundo))
                 else:
                     if int(minuto) < 59:
-                        datahora = unicode(datetime(int(ano), int(mes), int(dia), int(hora), int(minuto) + 1, 0))
+                        datahora = datetime_decimal_str(int(ano), int(mes), int(dia), int(hora), int(minuto) + 1, 0)
                     else:
-                        datahora = unicode(datetime(int(ano), int(mes), int(dia), int(hora) + 1, 0, 0))
+                        datahora = datetime_decimal_str(int(ano), int(mes), int(dia), int(hora) + 1, 0, 0)
                 quality = 'ppp-ibge'
                 nsat = int(pnt[6])
                 slat = float(pnt[15])
@@ -340,7 +340,7 @@ Tipos:
 
             if model_vel > 0 and saida == 0:
                 vlat, vlon = vemos(lat, lon, ['vemos2009','vemos2017','vemos2022'][model_vel-1])
-                delta_tempo = datetime.strptime(datahora, "%Y-%m-%d %H:%M:%S") - datetime.strptime('2000-04-24 12:00:00', "%Y-%m-%d %H:%M:%S")
+                delta_tempo = str_decimal_to_datetime(datahora) - str_decimal_to_datetime('2000-04-24 12:00:00')
                 anos = delta_tempo.days/365.25
                 dLat = meters2degrees(vlat*anos, lat, QgsCoordinateReferenceSystem('EPSG:4674'))
                 dLon = meters2degrees(vlon*anos, lat, QgsCoordinateReferenceSystem('EPSG:4674'))
@@ -387,3 +387,5 @@ class Renamer (QgsProcessingLayerPostProcessorInterface):
 
     def postProcessLayer(self, layer, context, feedback):
         layer.setName(self.name)
+
+
