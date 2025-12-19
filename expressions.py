@@ -57,6 +57,7 @@ import numpy as np
 from pyproj.crs import CRS
 import unicodedata
 from datetime import datetime, date
+import datetime as dt
 import re, os
 # https://qgis.org/pyqgis/3.2/core/Expression/QgsExpression.html
 
@@ -413,10 +414,20 @@ def gpsdate (datahora, tempo, feature, parent):
     """
 
     if isinstance(datahora, str):
-        dt_hr = datetime.strptime(datahora, '%Y-%m-%d %H:%M:%S')
+        date_part, time_part = datahora.strip().split(' ')
+        year, month, day = map(int, date_part.split('-'))
+        hh, mm, ss = time_part.split(':')
+        hh = int(hh)
+        mm = int(mm)
+        Sc = float(ss)
+        sec = int(Sc)
+        micro = int(round((Sc - sec) * 1e6))
+        base = datetime(year, month, day, hh, mm, 0)
+        dt_hr = base + dt.timedelta(seconds=sec, microseconds=micro)
     else:
         dt_hr = datahora.toPyDateTime()
-    Y, M, DoM, Hr, Mn, Sc = dt_hr.year, dt_hr.month, dt_hr.day, dt_hr.hour, dt_hr.minute, dt_hr.second
+        Sc = dt_hr.second
+    Y, M, DoM, Hr, Mn  = dt_hr.year, dt_hr.month, dt_hr.day, dt_hr.hour, dt_hr.minute
     [Y,M,DoM,DoY,GPSW,DoGPSW,SoGPSW,JD,DecY] = GPSDATE(Y, M, DoM, Hr, Mn, Sc)
     if tempo.lower() == 'y':
         return Y
