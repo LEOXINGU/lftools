@@ -120,14 +120,14 @@ class LFToolsPlugin(object):
         # Copiar estilo da camada ativa
         icon = QIcon(self.plugin_dir + '/images/tools/COPY_STYLE.svg')
         self.CopiarEstilo_Action = QAction(icon, self.tr('Copy layer style', 'Copiar estilo da camada'), self.iface.mainWindow())
-        self.CopiarEstilo_Action.setObjectName('ImportXYZ')
+        self.CopiarEstilo_Action.setObjectName('CopyStyle')
         self.CopiarEstilo_Action.triggered.connect(self.runCopiarEstilo)
         self.toolbar.addAction(self.CopiarEstilo_Action)
 
         # Colar estilo
         icon = QIcon(self.plugin_dir + '/images/tools/PASTE_STYLE.svg')
         self.ColarEstilo_Action = QAction(icon, self.tr('Paste style to the layer', 'Colar estilo na camada'), self.iface.mainWindow())
-        self.ColarEstilo_Action.setObjectName('ImportXYZ')
+        self.ColarEstilo_Action.setObjectName('PasteStyle')
         self.ColarEstilo_Action.triggered.connect(self.runColarEstilo)
         self.toolbar.addAction(self.ColarEstilo_Action)
 
@@ -227,7 +227,7 @@ class LFToolsPlugin(object):
         processing.execAlgorithmDialog('lftools:demdownloader', {})
     
     def MagicStyles(self):
-        processing.execAlgorithmDialog('lftools:magicstyles', {})
+        processing.execAlgorithmDialog('lftools:magicstyles', {}) 
 
 
     def runUTM(self):
