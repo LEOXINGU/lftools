@@ -27,7 +27,6 @@ from qgis.core import (QgsApplication,
                        QgsProcessingParameterFeatureSource,
                        QgsProcessingParameterFeatureSink)
 
-import shutil
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
 import os
