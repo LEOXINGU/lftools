@@ -1352,5 +1352,29 @@ Transforma puntos, líneas y polígonos en representaciones visuales listas para
 '- Select one style -': {'es': '- Selecciona un estilo -'},
 'Dimensioning': {'es': 'Acotación'},
 'Distance and Azimuth': {'es': 'Distancia y Azimut'},
+'Equirectangular to Cubemap': {'es': 'Equirectangular a Cubemap'},
+'''Converts a 360° image in equirectangular format into six images corresponding to the faces of a cube (cubemap).
+The tool automatically creates a folder next to the original file and saves the faces using the original filename plus the face suffix (+X, −X, +Y, −Y, +Z, −Z).
+These images can be opened in external editors for tasks such as anonymization, blurring, fixing artifacts near the poles, or inserting additional information.
+
+The face resolution can be defined by the user, allowing a balance between performance and visual quality.''': {'es': '''Convierte una imagen 360° en formato equirectangular en seis imágenes que corresponden a las caras de un cubo (cubemap).
+La herramienta crea automáticamente una carpeta junto al archivo original y guarda las caras usando el nombre del archivo seguido del sufijo de la cara (+X, −X, +Y, −Y, +Z, −Z).
+Estas imágenes pueden abrirse en editores externos para tareas como anonimización, desenfoque, correcciones en los polos o inserción de información adicional.
+La resolución de las caras puede ser definida por el usuario, permitiendo elegir entre rendimiento y calidad visual.'''},
+'Equirectangular image (360°)': {'es': 'Archivo de entrada en formato equirectangular'},
+'Face resolution (N × N)': {'es': 'Tamaño de cada imagen generada del cubo'},
+'Cubemap to Equirectangular': {'es': 'Cubemap a Equirectangular'},
+'''Rebuilds a 360° equirectangular image from the six faces of a cubemap.
+The tool reads the face images (+X, −X, +Y, −Y, +Z, −Z), recomposes the panorama, and produces a new image in standard equirectangular format.
+Useful for returning to 360° format after editing, anonymization, or adding information directly on the cube faces.
+When available, EXIF metadata from the original image can be reapplied to preserve GPS data and compatibility with 360° viewers.''': {'es': '''Reconstruye una imagen 360° en formato equirectangular a partir de las seis caras de un cubemap.
+La herramienta lee las caras (+X, −X, +Y, −Y, +Z, −Z), recompone el panorama y genera una nueva imagen en formato equirectangular estándar.
+Útil para volver al formato 360° después de procesos de edición, anonimización o inserción de información en las caras del cubo.
+Cuando sea posible, los metadatos EXIF de la imagen original pueden aplicarse nuevamente para mantener los datos de GPS y la compatibilidad con visualizadores 360°.'''},
+'Cubemap faces folder': {'es': 'Carpeta con las caras del cubemap'},
+'Image Height (H)': {'es': 'Altura de la imagen (H)'},
+'Original equirectangular image': {'es': 'Imagen equirectangular original'},
+'Rebuilt 360° Image': {'es': 'Imagen 360° reconstruida'},
+
 
  }
