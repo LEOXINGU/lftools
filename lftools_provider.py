@@ -132,6 +132,8 @@ from .processing_provider.Qualy_Accuracy_PC import Accuracy_PC
 from .processing_provider.Qualy_Accuracy_Vertical import Accuracy_Vertical
 from .processing_provider.Relief_DEMdownloader import DEMdownloader
 from .processing_provider.Easy_MagicStyles import MagicStyles
+from .processing_provider.RV360_Equiretangular2Cubemap import Equiretangular2Cubemap
+from .processing_provider.RV360_Cubemap2Equiretangular import Cubemap2Equiretangular
 
 
 class LFToolsProvider(QgsProcessingProvider):
@@ -248,7 +250,9 @@ class LFToolsProvider(QgsProcessingProvider):
         self.addAlgorithm(Accuracy_PC())
         self.addAlgorithm(Accuracy_Vertical())
         self.addAlgorithm(DEMdownloader())
-        self.addAlgorithm(MagicStyles())        
+        self.addAlgorithm(MagicStyles())
+        self.addAlgorithm(Equiretangular2Cubemap())
+        self.addAlgorithm(Cubemap2Equiretangular())
     
 
     def id(self):
