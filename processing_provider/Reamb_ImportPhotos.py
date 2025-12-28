@@ -27,6 +27,7 @@ from qgis.core import (QgsApplication,
                        QgsCoordinateReferenceSystem,
                        QgsProcessingParameterFile,
                        QgsProcessingParameterBoolean,
+                       QgsProcessingParameterEnum,
                        QgsFeatureSink,
                        QgsProcessingUtils,
                        QgsProcessingException,
@@ -39,6 +40,7 @@ from lftools.geocapt.imgs import Imgs
 from lftools.geocapt.topogeo import azimute as CalAZ
 from lftools.translations.translate import translate
 import os, re
+import processing
 from math import pi
 from qgis.PyQt.QtGui import QIcon
 from PIL import Image, TiffTags, ExifTags
@@ -96,6 +98,7 @@ class ImportPhotos(QgsProcessingAlgorithm):
     SUBFOLDER = 'SUBFOLDER'
     AZIMUTH = 'AZIMUTH'
     YPR = 'YPR'
+    STYLE = 'STYLE'
 
     def initAlgorithm(self, config=None):
 
@@ -139,6 +142,19 @@ class ImportPhotos(QgsProcessingAlgorithm):
                 behavior=QgsProcessingParameterFile.Folder,
                 defaultValue=None,
                 optional = True
+            )
+        )
+
+        STYLES = [self.tr('Simple Camera', 'Camera simples'),
+                  self.tr('Drone'),
+                  self.tr('VR Photo 360°', 'RV Foto 360°') ]
+
+        self.addParameter(
+            QgsProcessingParameterEnum(
+                self.STYLE,
+                self.tr('Layer Style', 'Estilo da camada'),
+				options = STYLES,
+                defaultValue= 0
             )
         )
 
@@ -470,6 +486,13 @@ class ImportPhotos(QgsProcessingAlgorithm):
 
         feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
         feedback.pushInfo(self.tr('Leandro Franca - Cartographic Engineer', 'Leandro França - Eng Cart'))
+
+        estilo = self.parameterAsEnum(
+            parameters,
+            self.STYLE,
+            context
+        )
+        self.ESTILO = [4,1,2][estilo]  # 0:camera simples (4), 1:drone (1), 2:camera 360 (2)
         self.SAIDA = dest_id
         self.pasta = pasta
         return {self.OUTPUT: dest_id}
@@ -524,17 +547,21 @@ class ImportPhotos(QgsProcessingAlgorithm):
 
     def postProcessAlgorithm(self, context, feedback):
         layer = QgsProcessingUtils.mapLayerFromString(self.SAIDA, context)
+        
+        params = { 'LAYER' : layer, 'STYLE_POINT' : self.ESTILO, 'STYLE_LINE' : 0, 'STYLE_POLYGON' : 0 }
+        processing.run("lftools:magicstyles", params)
+
         if self.pasta[0:2] in (r'\\', r'//'):
             layer.setMapTipTemplate(r'''[%''' + self.tr("name") + '''%]<br><img src="file://[%''' + self.tr('path') + '''%]" width="450">''')
         else:
             layer.setMapTipTemplate(r'''[%''' + self.tr("name") + '''%]<br><img src="file:///[%''' + self.tr('path') + '''%]" width="450">''')
 
-        acManager = layer.actions()
-        acActor = QgsAction(QgsAction.ActionType.GenericPython , self.tr('Open photo'),"""
-import os
-os.popen(r'[%"{}"%]')
-""".format(self.tr("path")), False)
-        acActor.setActionScopes({'Field', 'Layer', 'Canvas', 'Feature'})
-        acManager.addAction(acActor)
+#         acManager = layer.actions()
+#         acActor = QgsAction(QgsAction.ActionType.GenericPython , self.tr('Open photo'),"""
+# import os
+# os.popen(r'[%"{}"%]')
+# """.format(self.tr("path")), False)
+#         acActor.setActionScopes({'Field', 'Layer', 'Canvas', 'Feature'})
+#         acManager.addAction(acActor)
 
         return {self.OUTPUT: self.SAIDA}
