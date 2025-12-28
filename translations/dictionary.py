@@ -1377,5 +1377,7 @@ Cuando sea posible, los metadatos EXIF de la imagen original pueden aplicarse nu
 'Rebuilt 360° Image': {'es': 'Imagen 360° reconstruida'},
 'Enroll in the 360° VR course in QGIS': {'es': 'Inscríbete en el curso de RV 360° en QGIS'},
 'Click here to watch a full class on this tool': {'es': 'Haz clic aquí para ver una clase completa sobre esta herramienta'},
+'Simple Camera': {'es': 'Cámara simple'},
+'Layer Style': {'es': 'Estilo de capa'},
 
  }
