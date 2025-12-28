@@ -30,6 +30,7 @@ from qgis.core import (QgsApplication,
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
 from lftools.geocapt.cartography import OrientarPoligono
+from collections import Counter
 import os
 import tempfile
 from qgis.PyQt.QtGui import QIcon
@@ -103,6 +104,7 @@ Transforme pontos, linhas e polígonos em representações visuais prontas para 
 
         QgsWkbTypes.LineGeometry: [self.tr('- Select one style -', '- Selecione um estilo -'),
                                    self.tr('Dimensioning', 'Cotagem'),
+                                   self.tr('Contour Lines', 'Curvas de nível'),
                                    self.tr('Distance and Azimuth', 'Distância e Azimute'),
                                    self.tr('VR Video 360°', 'RV Video 360°')],
 
@@ -178,8 +180,9 @@ Transforme pontos, linhas e polígonos em representações visuais prontas para 
                                     },
         QgsWkbTypes.LineGeometry: {
                                     1: 'cotagem_GEO_prof_leandro' if CRS.isGeographic() else 'cotagem_UTM_prof_leandro',
-                                    2: 'dist_azim_linha_GEO_prof_leandro' if CRS.isGeographic() else 'dist_azim_linha_UTM_prof_leandro',
-                                    3: 'vr_video_line_360_prof_leandro',
+                                    2: 'contours_prof_leandro',
+                                    3: 'dist_azim_linha_GEO_prof_leandro' if CRS.isGeographic() else 'dist_azim_linha_UTM_prof_leandro',
+                                    4: 'vr_video_line_360_prof_leandro',
                                     },
 
         QgsWkbTypes.PolygonGeometry: {
@@ -214,9 +217,13 @@ Transforme pontos, linhas e polígonos em representações visuais prontas para 
                 raise QgsProcessingException('Select a Line Layer Style!')
             else:
                 estilo_selec = os.path.join(caminho_estilos, QML[tipo_geom][estilo_linha] + '.qml')
-                if estilo_linha == 3: # video 360
+                if estilo_linha == 4: # video 360
                     estilo_selec = self.prepare_temp_qml(estilo_selec, ['[CAMINHO]'], 
                                                                        [ os.path.join( caminho_estilos , 'SVG/video360.svg') ] )
+                elif estilo_linha == 2: # curvas de nivel
+                    ATT, EQUIDIST = self.detectar_campo_cota_e_equidistancia(camada, feedback = feedback)
+                    estilo_selec = self.prepare_temp_qml(estilo_selec, ['[ATT]', '[EQUIDIST]'], 
+                                                                       [ str(ATT), str(EQUIDIST) ])
             
         if tipo_geom == QgsWkbTypes.PolygonGeometry:
             if estilo_poligono == 0:
@@ -295,3 +302,95 @@ Transforme pontos, linhas e polígonos em representações visuais prontas para 
             raise RuntimeError(f"Erro ao salvar QML temporário: {e}")
 
         return temp_qml_path
+    
+    from collections import Counter
+
+    def detectar_campo_cota_e_equidistancia(self, layer, candidate_names=None, casas_decimais=6, feedback=None):
+        """
+        Detecta automaticamente o campo de cota e a equidistância entre curvas de nível.
+
+        Parâmetros
+        ----------
+        layer : QgsVectorLayer
+            Camada vetorial de curvas de nível.
+        candidate_names : list[str], opcional
+            Lista de nomes possíveis para o campo de cota.
+            Padrão: ["ELEV", "cota", "elevation", "Z"] (case-insensitive).
+        casas_decimais : int, opcional
+            Número de casas decimais para arredondar as diferenças entre cotas,
+            a fim de reduzir ruído de ponto flutuante. Padrão: 6.
+
+        Retorno
+        -------
+        (field_name, equidistancia) : (str, float)
+            field_name  -> nome do campo de cota encontrado.
+            equidistancia -> equidistância estimada entre curvas de nível.
+
+        Verificações
+        --------
+            Se não encontrar campo de cota, se não houver valores suficientes
+            ou não for possível calcular equidistância.
+        """
+
+        if candidate_names is None:
+            candidate_names = ["ELEV", "cota", "elevation", "altitude", "elevação", "Z"]
+
+        equidistancia_padrao = 10
+
+        # 1. Procurar o campo de cota (case-insensitive)
+        field_name = None
+        candidate_lower = [c.lower() for c in candidate_names]
+
+        for f in layer.fields():
+            if f.name().lower() in candidate_lower:
+                field_name = f.name()
+                break
+
+        if field_name is None:
+            feedback.reportError(self.tr('Field name for contours layer was not found!'))
+            field_name = "ELEV"
+
+        # 2. Ler valores de cota
+        values = []
+        for feat in layer.getFeatures():
+            val = feat[field_name]
+            if val is not None:
+                try:
+                    values.append(float(val))
+                except Exception:
+                    # Ignora valores não numéricos
+                    pass
+        
+        # 3. Valores únicos ordenados
+        unique_vals = sorted(set(values))
+
+        if len(values) < 2:
+            feedback.reportError(self.tr("Insufficient values ​​to calculate equidistance (less than 2 elevations)!"))
+            return field_name, equidistancia_padrao
+        
+        elif len(unique_vals) < 2:
+            feedback.reportError(self.tr("Apparently all the curves have the same elevation. There is no way to calculate the equidistance!"))
+            return field_name, equidistancia_padrao
+        
+        else:
+            # 4. Diferenças entre cotas consecutivas
+            diffs = []
+            for i in range(1, len(unique_vals)):
+                d = unique_vals[i] - unique_vals[i - 1]
+                if d > 0:
+                    diffs.append(d)
+
+            if not diffs:
+                feedback.reportError(self.tr("It was not possible to obtain positive differences between quotas!"))
+                return field_name, equidistancia_padrao
+            
+            else:
+                # 5. Arredonda difs para evitar ruído de ponto flutuante
+                rounded_diffs = [round(d, casas_decimais) for d in diffs]
+
+                # 6. Conta qual diferença aparece mais (modo)
+                counter = Counter(rounded_diffs)
+                equidistancia, freq = counter.most_common(1)[0]
+
+                return field_name, equidistancia
+
