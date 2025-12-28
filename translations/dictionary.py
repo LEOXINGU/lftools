@@ -1379,5 +1379,6 @@ Cuando sea posible, los metadatos EXIF de la imagen original pueden aplicarse nu
 'Click here to watch a full class on this tool': {'es': 'Haz clic aquí para ver una clase completa sobre esta herramienta'},
 'Simple Camera': {'es': 'Cámara simple'},
 'Layer Style': {'es': 'Estilo de capa'},
-
+'intermediate contours': {'es': 'curvas de nivel intermedias'},
+'index contours': {'es': 'curvas de nivel maestras'},
  }
