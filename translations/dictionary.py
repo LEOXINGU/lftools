@@ -730,7 +730,7 @@ dic = {
 'Raster filtering...' : {'es': 'Filtrado de trama...'},
 'Filtered raster' : {'es': 'Ráster filtrado'},
 'Generate Spot Elevations' : {'es': 'Generar elevaciones puntuales'},
-'Contour Lines' : {'es': 'Lineas de contorno'},
+'Contour Lines' : {'es': 'Curvas de nivel'},
 'Elevation field' : {'es': 'campo de elevación'},
 'Spot Elevations' : {'es': 'Elevaciones puntuales'},
 'elevation' : {'es': 'elevación'},
