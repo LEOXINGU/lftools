@@ -2,8 +2,8 @@
 <qgis version="3.40.12-Bratislava" labelsEnabled="1" styleCategories="Symbology|Labeling|MapTips">
   <renderer-v2 enableorderby="0" type="RuleRenderer" referencescale="-1" forceraster="0" symbollevels="0">
     <rules key="{3a0a462d-deca-4d47-8cb1-0af7ba6e8c5f}">
-      <rule key="{8e85f613-4fa1-405c-b22c-403f252f2cd6}" filter="ELSE" symbol="0" label="intermediate"/>
-      <rule key="{7090d471-ceda-4b3e-8a75-0802a5504db4}" filter="(&quot;[ATT]&quot; / [EQUIDIST]) % 5 = 0" symbol="1" label="main"/>
+      <rule key="{8e85f613-4fa1-405c-b22c-403f252f2cd6}" filter="ELSE" symbol="0" label="[INTERMEDIATE]"/>
+      <rule key="{7090d471-ceda-4b3e-8a75-0802a5504db4}" filter="(&quot;[ATT]&quot; / [EQUIDIST]) % 5 = 0" symbol="1" label="[INDEX]"/>
     </rules>
     <symbols>
       <symbol name="0" frame_rate="10" force_rhr="0" type="line" alpha="1" is_animated="0" clip_to_extent="1">
