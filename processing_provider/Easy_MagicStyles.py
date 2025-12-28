@@ -31,7 +31,7 @@ from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
 from lftools.geocapt.cartography import OrientarPoligono
 from collections import Counter
-import os
+import os, shutil
 import tempfile
 from qgis.PyQt.QtGui import QIcon
 
@@ -199,17 +199,17 @@ Transforme pontos, linhas e polígonos em representações visuais prontas para 
             else:
                 estilo_selec = os.path.join(caminho_estilos, QML[tipo_geom][estilo_ponto] + '.qml')
                 if estilo_ponto == 1: # drone
-                    estilo_selec = self.prepare_temp_qml(estilo_selec, ['[CAMINHO1]', '[CAMINHO2]'], 
+                    estilo_selec = self.prepare_temp_qml_with_svg(estilo_selec, ['[CAMINHO1]', '[CAMINHO2]'], 
                                                                        [ os.path.join( caminho_estilos , 'SVG/drone_azimuth.svg'),
                                                                          os.path.join( caminho_estilos , 'SVG/drone.svg')] )
                 elif estilo_ponto == 2: # foto 360
-                    estilo_selec = self.prepare_temp_qml(estilo_selec, ['[CAMINHO]'], 
+                    estilo_selec = self.prepare_temp_qml_with_svg(estilo_selec, ['[CAMINHO]'], 
                                                                        [ os.path.join( caminho_estilos , 'SVG/multidirectional 360.svg') ] )
                 elif estilo_ponto == 3: # video 360
-                    estilo_selec = self.prepare_temp_qml(estilo_selec, ['[CAMINHO]'], 
+                    estilo_selec = self.prepare_temp_qml_with_svg(estilo_selec, ['[CAMINHO]'], 
                                                                        [ os.path.join( caminho_estilos , 'SVG/video360.svg') ] )
                 elif estilo_ponto == 4: # camera simples
-                    estilo_selec = self.prepare_temp_qml(estilo_selec, ['[CAMINHO]'], 
+                    estilo_selec = self.prepare_temp_qml_with_svg(estilo_selec, ['[CAMINHO]'], 
                                                                        [ os.path.join( caminho_estilos , 'SVG/camera.svg') ] )
 
         if tipo_geom == QgsWkbTypes.LineGeometry:
@@ -218,12 +218,12 @@ Transforme pontos, linhas e polígonos em representações visuais prontas para 
             else:
                 estilo_selec = os.path.join(caminho_estilos, QML[tipo_geom][estilo_linha] + '.qml')
                 if estilo_linha == 4: # video 360
-                    estilo_selec = self.prepare_temp_qml(estilo_selec, ['[CAMINHO]'], 
+                    estilo_selec = self.prepare_temp_qml_with_svg(estilo_selec, ['[CAMINHO]'], 
                                                                        [ os.path.join( caminho_estilos , 'SVG/video360.svg') ] )
                 elif estilo_linha == 2: # curvas de nivel
                     ATT, EQUIDIST = self.detectar_campo_cota_e_equidistancia(camada, feedback = feedback)
-                    estilo_selec = self.prepare_temp_qml(estilo_selec, ['[ATT]', '[EQUIDIST]'], 
-                                                                       [ str(ATT), str(EQUIDIST) ])
+                    estilo_selec = self.prepare_temp_qml(estilo_selec, ['[ATT]', '[EQUIDIST]', '[INTERMEDIATE]', '[INDEX]'], 
+                                                                       [ str(ATT), str(EQUIDIST), self.tr('intermediate contours', 'curvas normais'), self.tr('index contours', 'curvas mestras') ])
             
         if tipo_geom == QgsWkbTypes.PolygonGeometry:
             if estilo_poligono == 0:
@@ -239,7 +239,7 @@ Transforme pontos, linhas e polígonos em representações visuais prontas para 
 
         return {}
     
-    def prepare_temp_qml(self, qml_path, tokens_to_replace, svg_paths):
+    def prepare_temp_qml_with_svg(self, qml_path, tokens_to_replace, svg_paths):
         """
         Cria um QML temporário substituindo múltiplos placeholders por caminhos de SVG.
 
@@ -265,19 +265,19 @@ Transforme pontos, linhas e polígonos em representações visuais prontas para 
         """
         # Validações básicas
         if not os.path.isfile(qml_path):
-            raise FileNotFoundError(f"QML não encontrado: {qml_path}")
+            raise FileNotFoundError(f"QML not found: {qml_path}!")
 
         if not isinstance(tokens_to_replace, (list, tuple)) or not isinstance(svg_paths, (list, tuple)):
-            raise TypeError("tokens_to_replace e svg_paths devem ser listas/tuplas.")
+            raise TypeError("tokens_to_replace and svg_paths must bem list or tuple!")
 
         if len(tokens_to_replace) != len(svg_paths):
-            raise ValueError("tokens_to_replace e svg_paths devem ter o MESMO comprimento.")
+            raise ValueError("tokens_to_replace and svg_paths must have the SAME length!")
 
         # Normaliza caminhos de SVG (QGIS lida bem com '/')
         norm_svg_paths = []
         for p in svg_paths:
             if not os.path.isfile(p):
-                raise FileNotFoundError(f"SVG não encontrado: {p}")
+                raise FileNotFoundError(f"SVG not found: {p}!")
             norm = os.path.normpath(p).replace('\\', '/')
             norm_svg_paths.append(norm)
 
@@ -299,11 +299,66 @@ Transforme pontos, linhas e polígonos em representações visuais prontas para 
         except Exception as e:
             # limpa se falhar ao gravar
             shutil.rmtree(temp_dir, ignore_errors=True)
-            raise RuntimeError(f"Erro ao salvar QML temporário: {e}")
+            raise RuntimeError(f"Error saving temporary QML: {e}")
 
         return temp_qml_path
     
-    from collections import Counter
+
+    def prepare_temp_qml(self, qml_path, tokens_to_replace, text_to_replace):
+        """
+        Cria um QML temporário substituindo múltiplos placeholders por textos
+
+        Parâmetros
+        ----------
+        qml_path : str
+            Caminho para o arquivo QML original (texto).
+        tokens_to_replace : list[str]
+            Lista de strings a serem substituídas (placeholders) no QML. Ex.: ['[CAMINHO1]', '[CAMINHO2]'].
+        text_to_replace : list[str]
+            Lista de strings que substituirão os tokens, na mesma ordem.
+
+        Retorna
+        -------
+        str
+            Caminho do arquivo QML temporário (mesmo nome do QML original, salvo em pasta tmp).
+
+        Regras
+        ------
+        - O número de tokens deve ser igual ao número de textos.
+        - Em caso de erro, a pasta temporária criada é removida.
+        """
+        # Validações básicas
+        if not os.path.isfile(qml_path):
+            raise FileNotFoundError(f"QML not found: {qml_path}!")
+
+        if not isinstance(tokens_to_replace, (list, tuple)) or not isinstance(text_to_replace, (list, tuple)):
+            raise TypeError("tokens_to_replace and text_to_replace must bem list or tuple!")
+
+        if len(tokens_to_replace) != len(text_to_replace):
+            raise ValueError("tokens_to_replace and text_to_replace must have the SAME length!")
+
+        # Lê o QML original
+        with open(qml_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+
+        # Substituições (uma a uma, na ordem)
+        for token, txt in zip(tokens_to_replace, text_to_replace):
+            content = content.replace(token, txt)
+
+        # Cria pasta temporária e salva o QML com o MESMO nome do original
+        temp_dir = tempfile.mkdtemp(prefix='lftools_qml_')
+        temp_qml_path = os.path.join(temp_dir, os.path.basename(qml_path))
+
+        try:
+            with open(temp_qml_path, 'w', encoding='utf-8') as f:
+                f.write(content)
+        except Exception as e:
+            # limpa se falhar ao gravar
+            shutil.rmtree(temp_dir, ignore_errors=True)
+            raise RuntimeError(f"Error saving temporary QML: {e}")
+
+        return temp_qml_path
+    
 
     def detectar_campo_cota_e_equidistancia(self, layer, candidate_names=None, casas_decimais=6, feedback=None):
         """
@@ -333,7 +388,8 @@ Transforme pontos, linhas e polígonos em representações visuais prontas para 
         """
 
         if candidate_names is None:
-            candidate_names = ["ELEV", "cota", "elevation", "altitude", "elevação", "Z"]
+            candidate_names = ["cota", "cotas", "nivel", "nível", "nivels", "nivels", "altura", "altitude", "altimetria", "elev", "elevation", "elevation_m", "elev_m", "height", "height_m", "elevação", "elevacao",
+                               "z", "zvalue", "z_value", "contour", "contour_elev", "niveles", "altitud", "cote", "côte", "hauteur", "quota", "quote", "altitudine", "hoehe", "höhe", "gelaendehoehe", "gelaende_hoehe"]
 
         equidistancia_padrao = 10
 
