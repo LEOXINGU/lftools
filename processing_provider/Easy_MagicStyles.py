@@ -96,9 +96,10 @@ Transforme pontos, linhas e polígonos em representações visuais prontas para 
 
         STYLES = {
         QgsWkbTypes.PointGeometry: [self.tr('- Select one style -', '- Selecione um estilo -'),
-                                    'Drone',
+                                    self.tr('Drone'),
                                     self.tr('VR Photo 360°', 'RV Foto 360°'),
-                                    self.tr('VR Video 360°', 'RV Vídeo 360°')],
+                                    self.tr('VR Video 360°', 'RV Vídeo 360°'),
+                                    self.tr('Simple Camera', 'Camera simples')],
 
         QgsWkbTypes.LineGeometry: [self.tr('- Select one style -', '- Selecione um estilo -'),
                                    self.tr('Dimensioning', 'Cotagem'),
@@ -173,6 +174,7 @@ Transforme pontos, linhas e polígonos em representações visuais prontas para 
                                     1: 'drone_prof_leandro',
                                     2: 'vr_photo_360_prof_leandro',
                                     3: 'vr_video_point_360_prof_leandro',
+                                    4: 'camera_prof_leandro',
                                     },
         QgsWkbTypes.LineGeometry: {
                                     1: 'cotagem_GEO_prof_leandro' if CRS.isGeographic() else 'cotagem_UTM_prof_leandro',
@@ -203,6 +205,10 @@ Transforme pontos, linhas e polígonos em representações visuais prontas para 
                 elif estilo_ponto == 3: # video 360
                     estilo_selec = self.prepare_temp_qml(estilo_selec, ['[CAMINHO]'], 
                                                                        [ os.path.join( caminho_estilos , 'SVG/video360.svg') ] )
+                elif estilo_ponto == 4: # camera simples
+                    estilo_selec = self.prepare_temp_qml(estilo_selec, ['[CAMINHO]'], 
+                                                                       [ os.path.join( caminho_estilos , 'SVG/camera.svg') ] )
+
         if tipo_geom == QgsWkbTypes.LineGeometry:
             if estilo_linha == 0:
                 raise QgsProcessingException('Select a Line Layer Style!')
