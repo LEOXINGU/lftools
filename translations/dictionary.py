@@ -1004,7 +1004,6 @@ dic = {
 'Elaboration of Deed Description based on vector layers that define a property survey.' : {'es': 'Elaboración de Descripción de Escritura en base a capas vectoriales que definen un levantamiento de propiedad.'},
 'This tool generates report(s) with the informations about a geodetic landmarks automatically from the "reference_point_p" layer.' : {'es': 'Esta herramienta genera informes con la información sobre puntos de referencia geodésicos automáticamente desde la capa "reference_point_p".'},
 "This tool generates the Vertices and Sides Descriptive Table, also known as Synthetic Deed Description, based on the attributes, sequence and code, in the point layer's attribute table." : {'es': 'Esta herramienta genera la Tabla Descriptiva de Vértices y Lados, también conocida como Descripción de Escritura Sintética, basada en los atributos, secuencia y código, en la tabla de atributos de la capa de puntos.'},
-'Calculation of points or line from a set of azimuths and distances.' : {'es': 'Cálculo de puntos o rectas a partir de un conjunto de acimutes y distancias.'},
 'This tool allows you to restore a database content by importing all the backup information in a ".sql" file into a PostgreSQL server.' : {'es': 'Esta herramienta le permite restaurar el contenido de una base de datos importando toda la información de la copia de seguridad en un archivo ".sql" a un servidor PostgreSQL.'},
 'This tool creates a <b>backup</b> file in the "<b>.sql</b>" format for a PostgreSQL server database.' : {'es': 'Esta herramienta crea un archivo <b>copia de seguridad</b> en el formato "<b>.sql</b>" para una base de datos del servidor PostgreSQL.'},
 'This tool allows the user to clone any PostgreSQL database. From a model database, another database that has exactly the same (schema and instances) is generated with a new name defined by the operator.' : {'es': 'Esta herramienta permite al usuario clonar cualquier base de datos PostgreSQL. A partir de una base de datos modelo se genera otra base de datos que tiene exactamente lo mismo (esquema e instancias) con un nuevo nombre definido por el operador.'},
@@ -1381,4 +1380,37 @@ Cuando sea posible, los metadatos EXIF de la imagen original pueden aplicarse nu
 'Layer Style': {'es': 'Estilo de capa'},
 'intermediate contours': {'es': 'curvas de nivel intermedias'},
 'index contours': {'es': 'curvas de nivel maestras'},
+'List of Directions (Azimuths or Bearings)': {'es': 'Lista de Direcciones (Azimutes o Rumbos)'},
+'''Calculation of points or a line from a set of horizontal <b>distances</b> and <b>directions.</b>
+    <p>
+      Directions can be entered as:
+    </p>
+    <ul>
+      <li><b>Azimuths</b> (0–360°, in decimal or DMS format), e.g.:<br>
+          <code>34°12'43.2"</code>, <code>165.25</code>
+      </li>
+      <li><b>Quadrant bearings</b> (rumo + quadrant/direction), e.g.:<br>
+          <code>34°12'43.2" NE</code>, <code>N 34°12'43.2" E</code>, <code>47°33'15.3" SE</code>
+      </li>
+    </ul>
+    <p>
+      Both formats can be mixed in the same list of directions. Bearings are automatically converted to azimuths for the traverse computation.
+    </p>
+    ''': {'es': '''Cálculo de puntos o de una línea a partir de un conjunto de <b>distancias</b> y <b>direcciones</b> horizontales.
+<p>
+  Las direcciones se pueden introducir como:
+</p>
+<ul>
+  <li><b>Azimuts</b> (0–360°, en formato decimal o DMS), por ejemplo:<br>
+      <code>34°12'43.2"</code>, <code>165.25</code>
+  </li>
+  <li><b>Rumbos en cuadrantes</b> (rumbo + cuadrante/dirección), por ejemplo:<br>
+      <code>34°12'43.2" NE</code>, <code>N 34°12'43.2" E</code>, <code>47°33'15.3" SE</code>
+  </li>
+</ul>
+<p>
+  Ambos formatos pueden mezclarse en la misma lista de direcciones. Los rumbos se convierten automáticamente en azimuts para el cálculo de la poligonal.
+</p>
+'''},
+
  }
