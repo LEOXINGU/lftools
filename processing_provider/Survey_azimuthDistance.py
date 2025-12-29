@@ -22,7 +22,7 @@ from numpy import sin, cos, modf, radians, sqrt, floor
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
 from lftools.geocapt.topogeo import *
-import os
+import os, re
 from qgis.PyQt.QtGui import QIcon
 
 
@@ -54,8 +54,38 @@ class AzimuthDistance(QgsProcessingAlgorithm):
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/total_station.png'))
 
-    txt_en = 'Calculation of points or line from a set of azimuths and distances.'
-    txt_pt = 'Cálculo de pontos ou linha a partir de um conjunto de azimutes e distâncias.'
+    txt_en = '''Calculation of points or a line from a set of horizontal <b>distances</b> and <b>directions.</b>
+    <p>
+      Directions can be entered as:
+    </p>
+    <ul>
+      <li><b>Azimuths</b> (0–360°, in decimal or DMS format), e.g.:<br>
+          <code>34°12'43.2"</code>, <code>165.25</code>
+      </li>
+      <li><b>Quadrant bearings</b> (rumo + quadrant/direction), e.g.:<br>
+          <code>34°12'43.2" NE</code>, <code>N 34°12'43.2" E</code>, <code>47°33'15.3" SE</code>
+      </li>
+    </ul>
+    <p>
+      Both formats can be mixed in the same list of directions. Bearings are automatically converted to azimuths for the traverse computation.
+    </p>
+    '''
+    txt_pt = '''Cálculo de pontos ou de uma linha a partir de um conjunto de <b>distâncias horizontais</b> e <b>direções.</b>
+    <p>
+      As direções podem ser informadas como:
+    </p>
+    <ul>
+      <li><b>Azimutes</b> (0–360°, em formato decimal ou DMS), por exemplo:<br>
+          <code>34°12'43.2"</code>, <code>165.25</code>
+      </li>
+      <li><b>Rumos em quadrantes</b> (rumo + quadrante/direção), por exemplo:<br>
+          <code>34°12'43.2" NE</code>, <code>N 34°12'43.2" E</code>, <code>47°33'15.3" SE</code>
+      </li>
+    </ul>
+    <p>
+      Ambos os formatos podem ser misturados na mesma lista de direções. Os rumos são convertidos automaticamente em azimutes para o cálculo da poligonal.
+    </p>
+    '''
     figure = 'images/tutorial/survey_azimuth_distance.jpg'
 
     def shortHelpString(self):
@@ -100,7 +130,7 @@ class AzimuthDistance(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterString(
                 self.AZIMUTHS,
-                self.tr('List of Azimuths','Lista de Azimutes'),
+                self.tr('List of Directions (Azimuths or Bearings)','Lista de Direções (Azimutes ou Rumos)'),
                 defaultValue = '''34°12'43.2", 82°51'08.9", 132°26'44.7", 35°08'47.1" ''',
                 multiLine = True
             )
@@ -176,9 +206,16 @@ class AzimuthDistance(QgsProcessingAlgorithm):
 
         pnts = [ponto]
 
+        # Convert each string in Azims to azimuth (degrees),
+        # automatically handling pure azimuths OR bearings+quadrant.
+        azimuths_deg = []
+        for txt_az in Azims:
+            azimuths_deg.append(self.string_to_azimuth_deg(txt_az))
+
         for k in range(tam):
-            dx = distances[k]*cos(radians(90 - dms2dd(Azims[k])))
-            dy = distances[k]*sin(radians(90 - dms2dd(Azims[k])))
+            az = azimuths_deg[k]
+            dx = distances[k] * cos(radians(90 - az))
+            dy = distances[k] * sin(radians(90 - az))
             x = pnts[-1].x() + dx
             y = pnts[-1].y() + dy
             pnts += [QgsPointXY(x, y)]
@@ -268,3 +305,74 @@ class AzimuthDistance(QgsProcessingAlgorithm):
         feedback.pushInfo(self.tr('Leandro Franca - Cartographic Engineer', 'Leandro França - Eng Cart'))
 
         return {self.OUTPUT: dest_id}
+
+    def string_to_azimuth_deg(self, txt: str) -> float:
+        """
+        Parse a string that may represent either:
+        - a pure azimuth (0–360°), or
+        - a bearing (rumo) + quadrant/direction,
+        and return the corresponding azimuth in degrees.
+
+        Examples (treated as AZIMUTH):
+            "34°12'43.2\""
+            "165.25"
+            "132 26 44.7"
+
+        Examples (treated as BEARING + QUADRANT):
+            "14.75 SE"
+            "SE 14.75"
+            "N 14°30' E"
+            "S14°30'W"
+            "25°30' NO"   (NO -> NW, SO -> SW)
+        """
+        if txt is None:
+            raise QgsProcessingException("Empty azimuth/bearing string.")
+
+        s = txt.strip()
+        if not s:
+            raise QgsProcessingException("Empty azimuth/bearing string.")
+
+        # Extract letters that may represent directions
+        letters = ''.join(ch for ch in s.upper() if ch in 'NSEWO')
+
+        # If no cardinal letters, treat as pure azimuth
+        if not letters:
+            return dms2dd(s)
+
+        # There ARE direction letters -> treat as BEARING + QUADRANT
+        # Normalize 'O' (Oeste) to 'W'
+        letters = letters.replace('O', 'W')
+
+        # Quadrant can be N, S, E, W or NE, SE, SW, NW
+        if len(letters) == 1:
+            quadrant = letters  # 'N', 'S', 'E', 'W'
+        elif len(letters) == 2:
+            quadrant = letters  # 'NE', 'SE', 'SW', 'NW'
+        else:
+            raise QgsProcessingException(
+                f"Invalid bearing/quadrant in '{txt}'. "
+                "Use N, S, E, W, O or NE, SE, SW, NW / NO, SO."
+            )
+
+        # Extract numeric part (angle) from the string
+        numeric_part = ''.join(
+            ch for ch in s
+            if (ch.isdigit() or ch in ".,°'\" +-")
+        ).strip()
+
+        if not numeric_part:
+            raise QgsProcessingException(
+                f"Could not extract angle from bearing '{txt}'."
+            )
+
+        # Convert numeric part (in DMS or decimal) to degrees
+        rumo_deg = dms2dd(numeric_part)
+
+        # Convert bearing + quadrant -> azimuth
+        try:
+            az = rumo_para_azimute(rumo_deg, quadrant)
+        except ValueError as e:
+            # Propaga como erro do algoritmo QGIS
+            raise QgsProcessingException(str(e))
+
+        return float(az)
