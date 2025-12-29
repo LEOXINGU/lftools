@@ -48,6 +48,8 @@ from lftools.geocapt.topogeo import (dd2dms as DD2DMS,
                                      azimute, str2HTML,
                                      geod2geoc, geoc2enu,
                                      meters2degrees,
+                                     azimute_para_rumo,
+                                     rumo_para_azimute,
                                      gpsdate as GPSDATE)
 from lftools import geomag
 from lftools.geocapt.imgs import img2html_resized, geom_icons
@@ -176,6 +178,105 @@ def scalefactor(lon, lat, feature, parent):
     </ul>
     """
     return ScaleFactor(lon, lat)
+
+
+@qgsfunction(args='auto', group='LF Tools')
+def azimuth2bearing(azimute, feature, parent):
+    """
+      Converts an azimuth (0–360°) into a bearing and its corresponding quadrant/direction.
+
+    <h3><b>Parameters</b></h3>
+    <ul>
+      <li>
+        <b>azimuth</b> : float<br>
+        Azimuth in degrees, within the interval [0°, 360°).
+      </li>
+    </ul>
+
+    <h3><b>Returns</b></h3>
+    <ul>
+      <li>
+        <b>bearing</b> : float<br>
+        Bearing in degrees, usually between 0° and 90°.
+      </li>
+      <li>
+        <b>quadrant</b> : str<br>
+        Quadrant/direction string, for example:
+        <code>'NE'</code>, <code>'SE'</code>, <code>'SW'</code>, <code>'NW'</code>,
+        or (for axis-aligned directions) <code>'N'</code>, <code>'S'</code>, <code>'E'</code>, <code>'W'</code>.
+      </li>
+    </ul>
+
+    <h3><b>Example usage</b></h3>
+    <ul>
+      <li><code>azimuth2bearing("azimuth")</code> → <code>[bearing, quadrant]</code></li>
+      <li><code>azimuth2bearing(165.25)</code> → <code>[14.75, 'SE']</code></li>
+    </ul>
+
+    <div>
+      <p><b>Further reading</b></p>
+      <p>
+        <b>
+          <a href="https://geoone.com.br/medicoes-angulares-topografia/" target="_blank">
+            França, L. Angular Measurements for Surveying — GeoOne (2024)
+          </a>
+        </b>
+      </p>
+    </div>
+    """
+    rumo, quadrante = azimute_para_rumo(azimute)
+    print(rumo, quadrante)
+    return [rumo, quadrante]
+
+@qgsfunction(args='auto', group='LF Tools')
+def bearing2azimuth(rumo, quadrante, feature, parent):
+    """
+      Converts a bearing and quadrant/direction into an azimuth (0–360°).
+
+    <h3><b>Parameters</b></h3>
+    <ul>
+      <li>
+        <b>bearing</b> : float<br>
+        Bearing in degrees, usually between 0° and 90°.
+      </li>
+
+      <li>
+        <b>quadrant</b> : str<br>
+        Quadrant/direction string, for example:
+        <ul>
+          <li><code>'NE'</code>, <code>'SE'</code>, <code>'SW'</code>, <code>'NW'</code></li>
+          <li><code>'NO'</code>, <code>'SO'</code> (Portuguese) are interpreted as <code>'NW'</code>, <code>'SW'</code></li>
+          <li><code>'N'</code>, <code>'S'</code>, <code>'E'</code>, <code>'W'</code>, <code>'O'</code></li>
+        </ul>
+      </li>
+    </ul>
+
+    <h3><b>Returns</b></h3>
+    <ul>
+      <li>
+        <b>azimuth</b> : float<br>
+        Azimuth in degrees, within the interval [0°, 360°).
+      </li>
+    </ul>
+
+    <h3><b>Example usage</b></h3>
+    <ul>
+      <li><code>bearing2azimuth("bearing", "quadrant")</code> → <code>azimuth</code></li>
+      <li><code>bearing2azimuth(25.71, 'SW')</code> → <code>205.71</code></li>
+    </ul>
+
+    <div>
+      <p><b>Further reading</b></p>
+      <p>
+        <b>
+          <a href="https://geoone.com.br/medicoes-angulares-topografia/" target="_blank">
+            França, L. Angular Measurements for Surveying — GeoOne (2024)
+          </a>
+        </b>
+      </p>
+    </div>
+    """
+    return rumo_para_azimute(rumo, quadrante)
 
 
 @qgsfunction(args='auto', group='LF Tools')
