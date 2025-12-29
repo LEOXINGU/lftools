@@ -20,6 +20,10 @@ from qgis.core import QgsEllipsoidUtils
 from datetime import datetime, timedelta
 import datetime as dt
 import numpy as np
+import math
+
+EPS = 1e-10  # Tolerance for floating point comparisons
+
 
 def azimute(A,B):
     # Cálculo dos Azimutes entre dois pontos (Vetor AB origem A extremidade B)
@@ -376,3 +380,162 @@ def validar_precisoes(lista, val = [1,5]):
         if k!=1 and numero < 0: # apenas a precisão do azimute pode ser negativa
             return False
     return True
+
+
+
+def azimute_para_rumo(azimute: float):
+    """
+    Convert azimuth (degrees, 0–360) to bearing (rumo) + quadrant/direction.
+
+    Returns
+    -------
+    (bearing_deg, quadrant_str)
+
+    Conventions:
+    - Bearing is always between 0° and 90°.
+    - Direction can be one of: N, S, E, W, NE, SE, SW, NW.
+    - Axis directions are mapped as:
+        0°   -> 0°,  N
+        90°  -> 90°, E
+        180° -> 0°,  S
+        270° -> 90°, W
+    """
+    az = float(azimute) % 360.0
+
+    # Cardinal axes treated explicitly
+    if math.isclose(az, 0.0, abs_tol=EPS) or math.isclose(az, 360.0, abs_tol=EPS):
+        return 0.0, "N"
+    if math.isclose(az, 90.0, abs_tol=EPS):
+        return 90.0, "E"
+    if math.isclose(az, 180.0, abs_tol=EPS):
+        return 0.0, "S"
+    if math.isclose(az, 270.0, abs_tol=EPS):
+        return 90.0, "W"
+
+    # Quadrants
+    if 0.0 < az < 90.0:
+        # From North towards East
+        bearing = az
+        quad = "NE"
+    elif 90.0 < az < 180.0:
+        # From South towards East
+        bearing = 180.0 - az
+        quad = "SE"
+    elif 180.0 < az < 270.0:
+        # From South towards West
+        bearing = az - 180.0
+        quad = "SW"
+    else:  # 270.0 < az < 360.0
+        # From North towards West
+        bearing = 360.0 - az
+        quad = "NW"
+
+    return bearing, quad
+
+
+def rumo_para_azimute(rumo: float, quadrante: str) -> float:
+    """
+    Convert bearing (rumo) + quadrant/direction to azimuth (0–360°).
+
+    Parameters
+    ----------
+    rumo : float
+        Bearing in degrees. Usually between 0° and 90°.
+    quadrante : str
+        Quadrant/direction string, e.g.:
+        - 'NE', 'SE', 'SW', 'NW'
+        - 'NO', 'SO' (Portuguese) will be treated as 'NW', 'SW'
+        - 'N', 'S', 'E', 'W', 'O'
+
+    Returns
+    -------
+    azimuth_deg : float
+        Azimuth in degrees, in [0, 360).
+
+    Notes
+    -----
+    Handles correctly special cases such as:
+        90°E, 90°NE, 90°SE,
+        90°W, 90°NW, 90°SW,
+        0°N, 0°NE, 0°NW,
+        0°S, 0°SE, 0°SW.
+    """
+    r = float(rumo)
+
+    if quadrante is None:
+        raise ValueError("Direction/quadrant cannot be None.")
+
+    # Normalize quadrant string
+    q = quadrante.upper().replace(" ", "")
+    q = q.replace("O", "W")  # 'Oeste' (Portuguese) -> 'W'
+
+    # ---------------- Quadrants NE, SE, SW, NW ----------------
+    if q in {"NE", "SE", "SW", "NW"}:
+        if not (0.0 <= r <= 90.0):
+            raise ValueError(
+                "Bearing must be between 0° and 90° for quadrant bearings (NE, SE, SW, NW)."
+            )
+
+        if q == "NE":
+            az = r
+        elif q == "SE":
+            az = 180.0 - r
+        elif q == "SW":
+            az = 180.0 + r
+        else:  # "NW"
+            az = 360.0 - r
+
+        return az % 360.0
+
+    # ---------------- Cardinal directions N, S ----------------
+    if q == "N":
+        if math.isclose(r, 0.0, abs_tol=EPS):
+            # 0°N
+            return 0.0
+        elif math.isclose(r, 90.0, abs_tol=EPS):
+            # N 90° E or N 90° W is ambiguous without E/W
+            raise ValueError(
+                "Bearing 'N 90°' is ambiguous. Use 'NE' or 'NW' as the quadrant."
+            )
+        else:
+            raise ValueError(
+                "For direction 'N', bearing must be 0° or 90°. "
+                "Use 'NE' or 'NW' for general quadrant bearings."
+            )
+
+    if q == "S":
+        if math.isclose(r, 0.0, abs_tol=EPS):
+            # 0°S
+            return 180.0
+        elif math.isclose(r, 90.0, abs_tol=EPS):
+            raise ValueError(
+                "Bearing 'S 90°' is ambiguous. Use 'SE' or 'SW' as the quadrant."
+            )
+        else:
+            raise ValueError(
+                "For direction 'S', bearing must be 0° or 90°. "
+                "Use 'SE' or 'SW' for general quadrant bearings."
+            )
+
+    # ---------------- Cardinal directions E, W ----------------
+    if q in {"E", "W"}:
+        if math.isclose(r, 90.0, abs_tol=EPS):
+            # 90°E or 90°W -> axis East or West
+            return 90.0 if q == "E" else 270.0
+        elif math.isclose(r, 0.0, abs_tol=EPS):
+            raise ValueError(
+                "Bearing '0° E/W' is usually written as 'N 0° E/W' or 'S 0° E/W'. "
+                "Use a quadrant form (NE, SE, SW, NW)."
+            )
+        else:
+            raise ValueError(
+                "For pure 'E' or 'W', bearing must be 90°. "
+                "Use 'NE'/'SE' or 'NW'/'SW' for general quadrant bearings."
+            )
+
+    # ---------------- Invalid direction ----------------
+    raise ValueError(
+        f"Invalid direction/quadrant '{quadrante}'. "
+        "Use N, S, E, W/O, NE, SE, SW, or NW."
+    )
+
