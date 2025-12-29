@@ -225,7 +225,6 @@ def azimuth2bearing(azimute, feature, parent):
     </div>
     """
     rumo, quadrante = azimute_para_rumo(azimute)
-    print(rumo, quadrante)
     return [rumo, quadrante]
 
 @qgsfunction(args='auto', group='LF Tools')
