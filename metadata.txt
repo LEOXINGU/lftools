@@ -2,7 +2,7 @@
 name=LF Tools
 qgisMinimumVersion=3.34
 description=Comprehensive solutions for cartographic production, surveying, drone mapping, GNSS data import, geospatial database management, digital image processing, and spatial analysis.
-version=2.6.1
+version=2.7.0
 author=Leandro França
 email=suporte@geoone.com.br
 
@@ -14,6 +14,7 @@ repository=https://github.com/LEOXINGU/lftools
 hasProcessingProvider=yes
 # Uncomment the following line and add your changelog:
 # changelog=
+  2.7.0 - new tools for RV 360° photos and new functions for azimuth to bearing conversion
   2.6.1 - new magic style added for 360° videos
   2.6.0 - new tool that applies vector layer styles as if by magic
   2.5.2 - compatibility with Qt5 and Qt6
