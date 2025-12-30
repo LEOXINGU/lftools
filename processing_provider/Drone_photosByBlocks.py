@@ -71,10 +71,15 @@ class PhotosByBlocks(QgsProcessingAlgorithm):
         footer = '''<div align="center">
                       <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), self.figure) +'''">
                       </div>
-                      <div align="right">
-                      <p align="right">
-                      <b>'''+self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
-                      </p>'''+ social_BW + '''</div>
+                      <div align="left">
+                      <p>
+                      <b><a href="'''+ self.tr('https://portal.geoone.com.br/m/lessons/drone-webodm?classId=3402') + '''" target="_blank">'''+ self.tr('Click here to watch a full class on this tool',
+                                    'Clique aqui para assistir uma aula completa sobre esta ferramenta') +'''</a></b>
+                      </p>
+                      <p>
+                      <b><a href="'''+ self.tr('https://geoone.com.br/pvdrone/') + '''" target="_blank">'''+ self.tr('Sign up for the WebODM and QGIS course',
+                                    'Inscreva-se no curso de WebODM e QGIS') +'</a><br><br>'+ self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
+                      </p>'''+ social_BW + '''
                     </div>'''
         return self.tr(self.txt_en, self.txt_pt) + footer
 
