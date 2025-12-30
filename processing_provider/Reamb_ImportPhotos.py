@@ -38,6 +38,7 @@ import datetime
 import shutil
 from lftools.geocapt.imgs import Imgs
 from lftools.geocapt.topogeo import azimute as CalAZ
+from lftools.geocapt.cartography import simbologiaPontos3D
 from lftools.translations.translate import translate
 import os, re
 import processing
@@ -556,12 +557,9 @@ class ImportPhotos(QgsProcessingAlgorithm):
         else:
             layer.setMapTipTemplate(r'''[%''' + self.tr("name") + '''%]<br><img src="file:///[%''' + self.tr('path') + '''%]" width="450">''')
 
-#         acManager = layer.actions()
-#         acActor = QgsAction(QgsAction.ActionType.GenericPython , self.tr('Open photo'),"""
-# import os
-# os.popen(r'[%"{}"%]')
-# """.format(self.tr("path")), False)
-#         acActor.setActionScopes({'Field', 'Layer', 'Canvas', 'Feature'})
-#         acManager.addAction(acActor)
+        renderer3d = simbologiaPontos3D()
+        layer.setRenderer3D(renderer3d)
+        layer.trigger3DUpdate()
+        layer.triggerRepaint() 
 
         return {self.OUTPUT: self.SAIDA}

@@ -1195,9 +1195,7 @@ Los valores de las celdas ráster donde el centro del píxel está exactamente d
 A class matches the values within the range of thresholds, where the value 1 (true) is returned. The other class corresponds to values outside the range, returning the value 0 (false).''': {'es': '''Crea un ráster binario, dividiendo el ráster de entrada en dos clases distintas a partir de datos estadísticos (umbral inferior y superior) de muestras de área o puntos. Opcionalmente, también se pueden establecer valores de umbral mínimo y máximo.
 Una clase coincide con los valores dentro del rango de umbrales, donde se devuelve el valor 1 (verdadero). La otra clase corresponde a valores fuera del rango, devolviendo el valor 0 (falso).'''},
 
-'''Note: Binary thresholding is one of the easiest and fastest ways to classify an image from an index such as NDVI. This algorithm can be used to identify areas with vegetation cover using an index such as the NDVI (França et al., 2017).
-Reference:''': {'es': '''Nota: El umbral binario es una de las formas más fáciles y rápidas de clasificar una imagen a partir de un índice como NDVI. Este algoritmo se puede utilizar para identificar áreas con cobertura vegetal utilizando un índice como el NDVI (França et al., 2017).
-Referencia:'''},
+'Note: Binary thresholding is one of the easiest and fastest ways to classify an image from an index such as NDVI. This algorithm can be used to identify areas with vegetation cover using an index such as the NDVI (França et al., 2017).': {'es': 'Nota: El umbral binario es una de las formas más fáciles y rápidas de clasificar una imagen a partir de un índice como NDVI. Este algoritmo se puede utilizar para identificar áreas con cobertura vegetal utilizando un índice como el NDVI (França et al., 2017).'},
 
 '''The largest width or height value of the original image is resized to the user-defined value. The short side is scaled proportionately.
 Note: The metadata is preserved.''': {'es': '''El valor de ancho o alto más grande de la imagen original cambia de tamaño al valor definido por el usuario. El lado corto tiene una escala proporcional.
@@ -1412,5 +1410,8 @@ Cuando sea posible, los metadatos EXIF de la imagen original pueden aplicarse nu
   Ambos formatos pueden mezclarse en la misma lista de direcciones. Los rumbos se convierten automáticamente en azimuts para el cálculo de la poligonal.
 </p>
 '''},
-
+'Sign up for the WebODM and QGIS course': {'es': 'Inscríbete en el curso de WebODM y QGIS.'},
+'Sign up for the GNSS with RTKLib and QGIS course': {'es': 'Inscríbete en el curso GNSS con RTKLib y QGIS'},
+"Sign up for GeoOne's PostGIS course": {'es': 'Inscríbete en el curso PostGIS de GeoOne'},
+'Sign up for the Remote Sensing in QGIS course': {'es': 'Inscríbete en el curso de Teledetección en QGIS'}
  }
