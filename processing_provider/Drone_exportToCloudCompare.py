@@ -64,7 +64,7 @@ class ExportToCloudCompare(QgsProcessingAlgorithm):
         return 'drones'
 
     def tags(self):
-        return 'GeoOne,drones,cc,fotografia,photography,gcp,copy,points,control,ground,quality,homologous,controle,terreno'.split(',')
+        return 'GeoOne,drones,cc,cloud,compare,nuvem,fotografia,photography,gcp,copy,points,control,ground,quality,homologous,controle,terreno'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/drone.png'))
@@ -78,10 +78,15 @@ class ExportToCloudCompare(QgsProcessingAlgorithm):
         footer = '''<div align="center">
                       <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), self.figure) +'''">
                       </div>
-                      <div align="right">
-                      <p align="right">
-                      <b>'''+self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
-                      </p>'''+ social_BW + '''</div>
+                      <div align="left">
+                      <p>
+                      <b><a href="'''+ self.tr('https://portal.geoone.com.br/m/lessons/pvcloudcompare?classId=5787') + '''" target="_blank">'''+ self.tr('Click here to watch a full class on this tool',
+                                    'Clique aqui para assistir uma aula completa sobre esta ferramenta') +'''</a></b>
+                      </p>
+                      <p>
+                      <b><a href="'''+ self.tr('https://geoone.com.br/pvcloudcompare/') + '''" target="_blank">'''+ self.tr('Sign up for the CloudCompare course',
+                                    'Inscreva-se no curso de CloudCompare') +'</a><br><br>'+ self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
+                      </p>'''+ social_BW + '''
                     </div>'''
         return self.tr(self.txt_en, self.txt_pt) + footer
 
