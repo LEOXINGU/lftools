@@ -23,6 +23,13 @@ import colorsys
 from lftools.geocapt.topogeo import azimute, geod2geoc, geoc2enu
 from qgis.core import *
 from qgis.PyQt.QtGui import QFont, QColor
+from qgis._3d import (
+    QgsVectorLayer3DRenderer,
+    QgsLine3DSymbol,
+    QgsPoint3DSymbol,
+    QgsPhongMaterialSettings,
+    Qgs3DTypes
+)
 
 
 def FusoHemisf(pnt):
@@ -942,6 +949,45 @@ def SymbolSimplePoint(layer, cor=QColor(255, 0, 0), tamanho=3.0, tipo='circle',
     symbol.setOpacity(opacidade)
     return QgsSingleSymbolRenderer(symbol)
 
+
+def simbologiaPontos3D(forma = QgsPoint3DSymbol.Cube, 
+                       props = {"size": 1.2 }, 
+                       altitude=Qgs3DTypes.AltClampAbsolute, # altitude: Qgs3DTypes.AltClampRelative, Qgs3DTypes.AltClampTerrain
+                       cor_difusa=QColor(122, 122, 122), 
+                       cor_ambiente = QColor(5, 30, 5)):
+   # Cylinder {"radius": 1.2 , "length": 2}
+   # Sphere {"radius": 0.9}
+   # Cone {"length": 1 "topRadius": 2 "bottomRadius": 0}
+   # Outros: https://qgis.org/pyqgis/3.40/_3d/QgsPoint3DSymbol.html
+   symbol3d = QgsPoint3DSymbol()
+   symbol3d.setShape(forma)
+   symbol3d.setShapeProperties(props)
+   symbol3d.setAltitudeClamping(altitude)
+   material = QgsPhongMaterialSettings()
+   material.setDiffuse(cor_difusa)
+   material.setAmbient(cor_ambiente)
+   symbol3d.setMaterialSettings(material)
+   renderer3d = QgsVectorLayer3DRenderer(symbol3d)
+   return renderer3d
+
+
+def simbologiaLinha3D(largura=0.6, altitude=Qgs3DTypes.AltClampAbsolute, 
+                                    cor_difusa=QColor(255, 0, 0), 
+                                    cor_ambiente = QColor(120, 0, 0), 
+                                    cor_especular = QColor(255, 255, 255) ):
+    # altitude: Qgs3DTypes.AltClampRelative, Qgs3DTypes.AltClampTerrain
+    renderer3d = QgsVectorLayer3DRenderer()
+    symbol3d = QgsLine3DSymbol()
+    symbol3d.setWidth(largura)
+    symbol3d.setAltitudeClamping(altitude)
+    material = QgsPhongMaterialSettings()
+    material.setDiffuse(cor_difusa)
+    material.setAmbient(cor_ambiente)
+    material.setSpecular(cor_especular)
+    material.setShininess(20)
+    symbol3d.setMaterialSettings(material)
+    renderer3d.setSymbol(symbol3d)
+    return renderer3d
 
 
 
