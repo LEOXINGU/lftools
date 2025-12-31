@@ -75,7 +75,7 @@ Quando disponível, os metadados EXIF da imagem original podem ser reaplicados n
                       </div>
                       <div align="left">
                       <p>
-                      <b><a href="'''+ self.tr('https://portal.geoone.com.br/m/lessons/mapeamento360?classId=5975') + '''" target="_blank">'''+ self.tr('Click here to watch a full class on this tool',
+                      <b><a href="'''+ self.tr('https://portal.geoone.com.br/m/lessons/mapeamento360?classId=5995') + '''" target="_blank">'''+ self.tr('Click here to watch a full class on this tool',
                                     'Clique aqui para assistir uma aula completa sobre esta ferramenta') +'''</a></b>
                       </p>
                       <p>
