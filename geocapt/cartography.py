@@ -23,6 +23,7 @@ import colorsys
 from lftools.geocapt.topogeo import azimute, geod2geoc, geoc2enu
 from qgis.core import *
 from qgis.PyQt.QtGui import QFont, QColor
+
 from qgis._3d import (
     QgsVectorLayer3DRenderer,
     QgsLine3DSymbol,
@@ -949,10 +950,20 @@ def SymbolSimplePoint(layer, cor=QColor(255, 0, 0), tamanho=3.0, tipo='circle',
     symbol.setOpacity(opacidade)
     return QgsSingleSymbolRenderer(symbol)
 
+# Compatibilidade QGIS 3.x
+try:
+    ALT_CLAMP_ABSOLUTE = Qgs3DTypes.AltClampAbsolute
+    ALT_CLAMP_RELATIVE = Qgs3DTypes.AltClampRelative
+    ALT_CLAMP_TERRAIN  = Qgs3DTypes.AltClampTerrain
+except AttributeError:
+    # Usar diretamente o enum novo
+    ALT_CLAMP_ABSOLUTE = Qgis.AltitudeClamping.Absolute
+    ALT_CLAMP_RELATIVE = Qgis.AltitudeClamping.Relative
+    ALT_CLAMP_TERRAIN  = Qgis.AltitudeClamping.Terrain
 
 def simbologiaPontos3D(forma = QgsPoint3DSymbol.Cube, 
                        props = {"size": 1.2 }, 
-                       altitude=Qgs3DTypes.AltClampAbsolute, # altitude: Qgs3DTypes.AltClampRelative, Qgs3DTypes.AltClampTerrain
+                       altitude = ALT_CLAMP_ABSOLUTE,
                        cor_difusa=QColor(122, 122, 122), 
                        cor_ambiente = QColor(5, 30, 5)):
    # Cylinder {"radius": 1.2 , "length": 2}
@@ -971,7 +982,7 @@ def simbologiaPontos3D(forma = QgsPoint3DSymbol.Cube,
    return renderer3d
 
 
-def simbologiaLinha3D(largura=0.6, altitude=Qgs3DTypes.AltClampAbsolute, 
+def simbologiaLinha3D(largura=0.6, altitude = ALT_CLAMP_ABSOLUTE, 
                                     cor_difusa=QColor(255, 0, 0), 
                                     cor_ambiente = QColor(120, 0, 0), 
                                     cor_especular = QColor(255, 255, 255) ):
