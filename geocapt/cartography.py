@@ -950,16 +950,15 @@ def SymbolSimplePoint(layer, cor=QColor(255, 0, 0), tamanho=3.0, tipo='circle',
     symbol.setOpacity(opacidade)
     return QgsSingleSymbolRenderer(symbol)
 
-# Compatibilidade QGIS 3.x
+# Altitude do 3D
 try:
-    ALT_CLAMP_ABSOLUTE = Qgs3DTypes.AltClampAbsolute
-    ALT_CLAMP_RELATIVE = Qgs3DTypes.AltClampRelative
-    ALT_CLAMP_TERRAIN  = Qgs3DTypes.AltClampTerrain
-except AttributeError:
-    # Usar diretamente o enum novo
     ALT_CLAMP_ABSOLUTE = Qgis.AltitudeClamping.Absolute
     ALT_CLAMP_RELATIVE = Qgis.AltitudeClamping.Relative
     ALT_CLAMP_TERRAIN  = Qgis.AltitudeClamping.Terrain
+except:
+    ALT_CLAMP_ABSOLUTE = Qgs3DTypes.AltClampAbsolute
+    ALT_CLAMP_RELATIVE = Qgs3DTypes.AltClampRelative
+    ALT_CLAMP_TERRAIN  = Qgs3DTypes.AltClampTerrain
 
 def simbologiaPontos3D(forma = QgsPoint3DSymbol.Cube, 
                        props = {"size": 1.2 }, 
