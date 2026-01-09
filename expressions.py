@@ -8,7 +8,7 @@
                               -------------------
         begin                : 2021-03-19
         copyright            : (C) 2021 by Leandro Franca
-        email                : geoleandro.franca@gmail.com
+        email                : suporte@geoone.com.br
  ***************************************************************************/
 
 /***************************************************************************
@@ -61,7 +61,6 @@ import unicodedata
 from datetime import datetime, date
 import datetime as dt
 import re, os
-# https://qgis.org/pyqgis/3.2/core/Expression/QgsExpression.html
 
 LOC = QgsApplication.locale()[:2]
 def tr(*string):
@@ -491,7 +490,7 @@ def removespetialchar (text, feature, parent):
 
 
 @qgsfunction(args='auto', group='LF Tools')
-def gpsdate (datahora, tempo, feature, parent):
+def gpsdate(datahora, tempo, feature, parent):
     """
     Inputs:
       datetime or unicode datetime string.
@@ -586,7 +585,7 @@ def img2html(filepath, size, feature, parent):
 
 
 @qgsfunction(args='auto', group='LF Tools')
-def cusum (layer_name, sequence_field, value_field, group_field, feature, parent):
+def cusum(layer_name, sequence_field, value_field, group_field, feature, parent):
     """
     Calculates the cumulative sum of attributes considering the sequence and value fields. The group field also can be used, otherwise set as ''.
     <h2>Examples:</h2>
@@ -644,7 +643,7 @@ def cusum (layer_name, sequence_field, value_field, group_field, feature, parent
 
 
 @qgsfunction(args='auto', group='LF Tools')
-def azimuth_by_sequence (sequence_field, group_field, feature, parent, context):
+def azimuth_by_sequence(sequence_field, group_field, feature, parent, context):
     """
     Calculates the azimuth between sequential points in a point layer based on an ordering field.
     Optionally, azimuths can be calculated within separate groups defined by a grouping field
