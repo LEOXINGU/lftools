@@ -15,14 +15,11 @@ __date__ = '2021-03-01'
 __copyright__ = '(C) 2021, Leandro França'
 
 from numpy import radians, arctan, pi, sin, cos, sqrt, degrees, array, diag, ones, zeros, floor
-from numpy.linalg import norm, pinv, inv
 from qgis.core import QgsEllipsoidUtils
 from datetime import datetime, timedelta
 import datetime as dt
 import numpy as np
 import math
-
-EPS = 1e-10  # Tolerance for floating point comparisons
 
 
 def azimute(A,B):
@@ -382,6 +379,7 @@ def validar_precisoes(lista, val = [1,5]):
     return True
 
 
+EPS = 1e-10  # Tolerance for floating point comparisons
 
 def azimute_para_rumo(azimute: float):
     """
