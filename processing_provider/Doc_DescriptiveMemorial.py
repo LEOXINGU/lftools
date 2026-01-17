@@ -537,7 +537,7 @@ class DescriptiveMemorial(QgisAlgorithm):
                 validar = True
         if not validar:
             raise QgsProcessingException(self.tr("The first point of the limit_point_p layer must coincide with the first vertex of a line of the boundary_element_l layer!",
-            'O primeiro vértice da camada ponto limite deve coincidir com o primeiro vértice de uma linha da camada elemento confrontante!'))
+            'O primeiro vértice da camada ponto limite deve coincidir com o primeiro vértice de uma linha da camada elemento confrontante! ASSISTA COMO RESOLVER: www.youtube.com/watch?v=KGt91jf5LHU'))
         # idenficando primeiro confrontante
         lista_ordem = []
         last_coord = []
