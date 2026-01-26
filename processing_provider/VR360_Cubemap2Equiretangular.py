@@ -23,7 +23,7 @@ from qgis.core import (QgsApplication,
                        QgsProcessingAlgorithm)
 
 from lftools.geocapt.imgs import Imgs
-from lftools.geocapt.rv360 import cube_faces_to_equirect
+from lftools.geocapt.vr360 import cube_faces_to_equirect
 from lftools.translations.translate import translate
 from qgis.PyQt.QtGui import QIcon
 import os
