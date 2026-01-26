@@ -22,7 +22,7 @@ from qgis.core import (QgsApplication,
                        QgsProcessingAlgorithm)
 
 from lftools.geocapt.imgs import Imgs
-from lftools.geocapt.rv360 import generate_cube_face_from_image
+from lftools.geocapt.vr360 import generate_cube_face_from_image
 from lftools.translations.translate import translate
 from qgis.PyQt.QtGui import QIcon
 import numpy as np
