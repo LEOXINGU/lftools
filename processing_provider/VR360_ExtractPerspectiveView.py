@@ -51,7 +51,7 @@ class ExtractPerspectiveView(QgsProcessingAlgorithm):
         return self.tr('VR 360°', 'RV 360°')
 
     def groupId(self):
-        return 'rv360'
+        return 'vr360'
 
     def tags(self):
         return 'GeoOne,virtual,reality,realidade,esphere,esférica,360°,graus,photography,photos,fotos,fotografia,gopro,insta360,VR,RV,perspective,perspectiva,crop,recorte,FOV'.split(',')
