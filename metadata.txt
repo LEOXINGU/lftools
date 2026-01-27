@@ -2,7 +2,7 @@
 name=LF Tools
 qgisMinimumVersion=3.40
 description=Comprehensive solutions for cartographic production, surveying, drone mapping, GNSS data import, geospatial database management, digital image processing, and spatial analysis.
-version=2.7.1
+version=2.8.0
 author=Leandro França
 email=suporte@geoone.com.br
 
@@ -14,6 +14,7 @@ repository=https://github.com/LEOXINGU/lftools
 hasProcessingProvider=yes
 # Uncomment the following line and add your changelog:
 # changelog=
+  2.8.0 - added a new tool to extract perspective (pinhole) views from 360° equirectangular images.
   2.7.1 - bug fix - resolved crash caused by missing Qgs3DTypes.AltClampAbsolute in recent QGIS versions
   2.7.0 - new tools for RV 360° photos and new functions for azimuth to bearing conversion
   2.6.1 - new magic style added for 360° videos
