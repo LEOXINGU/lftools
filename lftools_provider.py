@@ -134,6 +134,8 @@ from .processing_provider.Relief_DEMdownloader import DEMdownloader
 from .processing_provider.Easy_MagicStyles import MagicStyles
 from .processing_provider.VR360_Equiretangular2Cubemap import Equiretangular2Cubemap
 from .processing_provider.VR360_Cubemap2Equiretangular import Cubemap2Equiretangular
+from .processing_provider.VR360_ExtractPerspectiveView import ExtractPerspectiveView
+
 
 
 class LFToolsProvider(QgsProcessingProvider):
@@ -253,6 +255,7 @@ class LFToolsProvider(QgsProcessingProvider):
         self.addAlgorithm(MagicStyles())
         self.addAlgorithm(Equiretangular2Cubemap())
         self.addAlgorithm(Cubemap2Equiretangular())
+        self.addAlgorithm(ExtractPerspectiveView())      
     
 
     def id(self):
