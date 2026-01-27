@@ -81,99 +81,99 @@ class ExtractPerspectiveView(QgsProcessingAlgorithm):
         return self.tr(self.txt_en, self.txt_pt) + footer
 
     INPUT = 'INPUT'
-LAT = 'LAT'
-LON = 'LON'
-FOV = 'FOV'
-W = 'W'
-H = 'H'
-ROLL = 'ROLL'
-OUTPUT = 'OUTPUT'
+    LAT = 'LAT'
+    LON = 'LON'
+    FOV = 'FOV'
+    W = 'W'
+    H = 'H'
+    ROLL = 'ROLL'
+    OUTPUT = 'OUTPUT'
 
-def initAlgorithm(self, config=None):
+    def initAlgorithm(self, config=None):
 
-    self.addParameter(
-        QgsProcessingParameterFile(
-            self.INPUT,
-            self.tr('Equirectangular image (360°)', 'Imagem equiretangular (360°)'),
-            behavior=QgsProcessingParameterFile.File,
-            fileFilter='Image (*.jpeg *.jpg *.JPG)'
+        self.addParameter(
+            QgsProcessingParameterFile(
+                self.INPUT,
+                self.tr('Equirectangular image (360°)', 'Imagem equiretangular (360°)'),
+                behavior=QgsProcessingParameterFile.File,
+                fileFilter='Image (*.jpeg *.jpg *.JPG)'
+            )
         )
-    )
 
-    self.addParameter(
-        QgsProcessingParameterNumber(
-            self.LAT,
-            self.tr('Perspective center – latitude', 'Centro da perspectiva - latitude'),
-            type=QgsProcessingParameterNumber.Type.Double,
-            minValue=-90.0,
-            maxValue=90.0,
-            defaultValue=0.0
+        self.addParameter(
+            QgsProcessingParameterNumber(
+                self.LAT,
+                self.tr('Perspective center – latitude', 'Centro da perspectiva - latitude'),
+                type=QgsProcessingParameterNumber.Type.Double,
+                minValue=-90.0,
+                maxValue=90.0,
+                defaultValue=0.0
+            )
         )
-    )
 
-    self.addParameter(
-        QgsProcessingParameterNumber(
-            self.LON,
-            self.tr('Perspective center – longitude', 'Centro da perspectiva - longitude'),
-            type=QgsProcessingParameterNumber.Type.Double,
-            minValue=-180.0,
-            maxValue=180.0,
-            defaultValue=0.0
+        self.addParameter(
+            QgsProcessingParameterNumber(
+                self.LON,
+                self.tr('Perspective center – longitude', 'Centro da perspectiva - longitude'),
+                type=QgsProcessingParameterNumber.Type.Double,
+                minValue=-180.0,
+                maxValue=180.0,
+                defaultValue=0.0
+            )
         )
-    )
 
-    self.addParameter(
-        QgsProcessingParameterNumber(
-            self.FOV,
-            self.tr('Horizontal field of view (°)', 'Campo de visão horizontal (°)'),
-            type=QgsProcessingParameterNumber.Type.Double,
-            minValue=30.0,
-            maxValue=110.0,
-            defaultValue=90.0
+        self.addParameter(
+            QgsProcessingParameterNumber(
+                self.FOV,
+                self.tr('Horizontal field of view (°)', 'Campo de visão horizontal (°)'),
+                type=QgsProcessingParameterNumber.Type.Double,
+                minValue=30.0,
+                maxValue=110.0,
+                defaultValue=90.0
+            )
         )
-    )
 
-    self.addParameter(
-        QgsProcessingParameterNumber(
-            self.W,
-            self.tr('Output image width (pixels)', 'Largura da imagem de saída (pixels)'),
-            type=QgsProcessingParameterNumber.Type.Integer,
-            minValue=256,
-            maxValue=8192,
-            defaultValue=1920
+        self.addParameter(
+            QgsProcessingParameterNumber(
+                self.W,
+                self.tr('Output image width (pixels)', 'Largura da imagem de saída (pixels)'),
+                type=QgsProcessingParameterNumber.Type.Integer,
+                minValue=256,
+                maxValue=8192,
+                defaultValue=1920
+            )
         )
-    )
 
-    self.addParameter(
-        QgsProcessingParameterNumber(
-            self.H,
-            self.tr('Output image height (pixels)', 'Altura da imagem de saída (pixels)'),
-            type=QgsProcessingParameterNumber.Type.Integer,
-            minValue=256,
-            maxValue=8192,
-            defaultValue=1080
+        self.addParameter(
+            QgsProcessingParameterNumber(
+                self.H,
+                self.tr('Output image height (pixels)', 'Altura da imagem de saída (pixels)'),
+                type=QgsProcessingParameterNumber.Type.Integer,
+                minValue=256,
+                maxValue=8192,
+                defaultValue=1080
+            )
         )
-    )
 
-    self.addParameter(
-        QgsProcessingParameterNumber(
-            self.ROLL,
-            self.tr('Camera roll (°)', 'Rotação da câmera (roll) (°)'),
-            type=QgsProcessingParameterNumber.Type.Double,
-            minValue=-180.0,
-            maxValue=180.0,
-            defaultValue=0.0
+        self.addParameter(
+            QgsProcessingParameterNumber(
+                self.ROLL,
+                self.tr('Camera roll (°)', 'Rotação da câmera (roll) (°)'),
+                type=QgsProcessingParameterNumber.Type.Double,
+                minValue=-180.0,
+                maxValue=180.0,
+                defaultValue=0.0
+            )
         )
-    )
 
-    # OUTPUT
-    self.addParameter(
-        QgsProcessingParameterFileDestination(
-            self.OUTPUT,
-            self.tr('Perspective view image', 'Imagem de vista perspectiva'),
-            fileFilter='Image (*.jpg)'
+        # OUTPUT
+        self.addParameter(
+            QgsProcessingParameterFileDestination(
+                self.OUTPUT,
+                self.tr('Perspective view image', 'Imagem de vista perspectiva'),
+                fileFilter='Image (*.jpg)'
+            )
         )
-    )
 
 
     def processAlgorithm(self, parameters, context, feedback):        
