@@ -198,6 +198,7 @@ class ExtractPerspectiveView(QgsProcessingAlgorithm):
 
         # Checagem rápida equiretangular ~2:1
         img_pil = Image.open(entrada)
+        exif_bytes = img_pil.info.get("exif", None)
         W_eq, H_eq = img_pil.size
         ratio = W_eq / H_eq
         if not (1.94 <= ratio <= 2.06):
@@ -231,7 +232,11 @@ class ExtractPerspectiveView(QgsProcessingAlgorithm):
         feedback.setProgress(90)
         feedback.pushInfo(self.tr('Saving output image...', 'Salvando imagem de saída...'))
 
-        Image.fromarray(view).save(saida)
+        out = Image.fromarray(view)
+        if exif_bytes:
+            out.save(saida, exif=exif_bytes)
+        else:
+            out.save(saida)
 
         feedback.setProgress(100)
         feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
