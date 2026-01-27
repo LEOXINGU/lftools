@@ -186,4 +186,4 @@ Quando disponível, os metadados EXIF da imagem original podem ser reaplicados n
         feedback.pushInfo(self.tr('Leandro Franca - Cartographic Engineer', 'Leandro França - Eng Cart'))
 
         # Abrir arquivo
-        return {}
+        return {self.OUTPUT: img_final}
