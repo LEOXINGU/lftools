@@ -255,7 +255,7 @@ class LFToolsProvider(QgsProcessingProvider):
         self.addAlgorithm(MagicStyles())
         self.addAlgorithm(Equiretangular2Cubemap())
         self.addAlgorithm(Cubemap2Equiretangular())
-        self.addAlgorithm(ExtractPerspectiveView())      
+        self.addAlgorithm(ExtractPerspectiveView())
     
 
     def id(self):
