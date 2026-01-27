@@ -1358,7 +1358,7 @@ The face resolution can be defined by the user, allowing a balance between perfo
 La herramienta crea automáticamente una carpeta junto al archivo original y guarda las caras usando el nombre del archivo seguido del sufijo de la cara (+X, −X, +Y, −Y, +Z, −Z).
 Estas imágenes pueden abrirse en editores externos para tareas como anonimización, desenfoque, correcciones en los polos o inserción de información adicional.
 La resolución de las caras puede ser definida por el usuario, permitiendo elegir entre rendimiento y calidad visual.'''},
-'Equirectangular image (360°)': {'es': 'Archivo de entrada en formato equirectangular'},
+'Equirectangular image (360°)': {'es': 'Imagen equirectangular (360°)'},
 'Face resolution (N × N)': {'es': 'Tamaño de cada imagen generada del cubo'},
 'Cubemap to Equirectangular': {'es': 'Cubemap a Equirectangular'},
 '''Rebuilds a 360° equirectangular image from the six faces of a cubemap.
@@ -1413,5 +1413,15 @@ Cuando sea posible, los metadatos EXIF de la imagen original pueden aplicarse nu
 'Sign up for the WebODM and QGIS course': {'es': 'Inscríbete en el curso de WebODM y QGIS.'},
 'Sign up for the GNSS with RTKLib and QGIS course': {'es': 'Inscríbete en el curso GNSS con RTKLib y QGIS'},
 "Sign up for GeoOne's PostGIS course": {'es': 'Inscríbete en el curso PostGIS de GeoOne'},
-'Sign up for the Remote Sensing in QGIS course': {'es': 'Inscríbete en el curso de Teledetección en QGIS'}
+'Sign up for the Remote Sensing in QGIS course': {'es': 'Inscríbete en el curso de Teledetección en QGIS'},
+'Extract Perspective View': {'es': 'Extraer Vista en Perspectiva'},
+'Extracts a perspective (pinhole) image from a 360° equirectangular image, simulating the framing of a conventional camera oriented toward a specified viewing direction.': {'es': 'Extrae una imagen en proyección perspectiva (pinhole) a partir de una imagen 360° en formato equirectangular, simulando el encuadre de una cámara convencional orientada hacia una dirección específica del espacio.'},
+'Perspective center – latitude': {'es': 'Centro de la perspectiva – latitud'},
+'Perspective center – longitude': {'es': 'Centro de la perspectiva – longitud'},
+'Horizontal field of view (°)': {'es': 'ampo de visión horizontal (°)'},
+'Output image width (pixels)': {'es': 'Ancho de la imagen de salida (píxeles)'},
+'Output image height (pixels)': {'es': 'Altura de la imagen de salida (píxeles)'},
+'Camera roll (°)': {'es': 'Rotación de la cámara (roll) (°)'},
+'Perspective view image': {'es': 'Imagen de vista perspectiva'},
+
  }
