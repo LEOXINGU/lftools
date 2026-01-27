@@ -322,7 +322,7 @@ class LFToolsPlugin(object):
                 self.layer.startEditing()
                 self.layer.addFeatures([ feat ])
                 self.layer.commitChanges()
-                self.canvas.setCenter(QgsPointXY(X, Y))
+                # self.canvas.setCenter(QgsPointXY(X, Y))
 
             except Exception as e:
                 QMessageBox.information(self.iface.mainWindow(), QCoreApplication.translate('LFTools', "LFTools plugin error"), QCoreApplication.translate('LFTools', "There was an error with the input parameter:<br><strong>{}</strong>".format(e)))
