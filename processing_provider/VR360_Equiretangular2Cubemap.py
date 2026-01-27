@@ -168,4 +168,4 @@ A resolução das faces pode ser definida pelo usuário, permitindo escolher ent
 
         # Abrir pasta
 
-        return {}
+        return {'FOLDER': folder}
