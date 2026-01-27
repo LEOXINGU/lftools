@@ -312,6 +312,17 @@ pip install Pillow
         <li><a href="#traverse-adjustment">Traverse adjustment</a></li>
       </ul>
       </li><li>
+      <a href="#vr-360°">VR 360°</a>
+      <ul>
+        <li><a href="#cubemap-to-equirectangular">Cubemap to Equirectangular</a></li>
+      </ul>
+      <ul>
+        <li><a href="#equirectangular-to-cubemap">Equirectangular to Cubemap</a></li>
+      </ul>
+      <ul>
+        <li><a href="#extract-perspective-view">Extract Perspective View</a></li>
+      </ul>
+      </li><li>
       <a href="#vector">Vector</a>
       <ul>
         <li><a href="#calculate-polygon-angles">Calculate polygon angles</a></li>
@@ -555,6 +566,17 @@ pip install Pillow
       </ul>
       <ul>
         <li><a href="#acurácia-posicional-planimétrica">Acurácia posicional planimétrica</a></li>
+      </ul>
+      </li><li>
+      <a href="#rv-360°">RV 360°</a>
+      <ul>
+        <li><a href="#cubemap-para-equiretangular">Cubemap para Equiretangular</a></li>
+      </ul>
+      <ul>
+        <li><a href="#equiretangular-para-cubemap-(gerar-faces)">Equiretangular para Cubemap (Gerar Faces)</a></li>
+      </ul>
+      <ul>
+        <li><a href="#extrair-vista-perspectiva">Extrair vista perspectiva</a></li>
       </ul>
       </li><li>
       <a href="#raster">Raster</a>
@@ -1712,7 +1734,7 @@ Measures the degree to which features are concentrated or dispersed around the g
 
 
 ### Azimuth and distance
-Calculation of points or line from a set of azimuths and distances.
+Calculation of points or a line from a set of horizontal <b>distances</b> and <b>directions.</b></br>    <p></br>      Directions can be entered as:</br>    </p></br>    <ul></br>      <li><b>Azimuths</b> (0–360°, in decimal or DMS format), e.g.:<br></br>          <code>34°12'43.2"</code>, <code>165.25</code></br>      </li></br>      <li><b>Quadrant bearings</b> (rumo + quadrant/direction), e.g.:<br></br>          <code>34°12'43.2" NE</code>, <code>N 34°12'43.2" E</code>, <code>47°33'15.3" SE</code></br>      </li></br>    </ul></br>    <p></br>      Both formats can be mixed in the same list of directions. Bearings are automatically converted to azimuths for the traverse computation.</br>    </p></br>    
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
@@ -1778,6 +1800,47 @@ This algorithm performs the traverse adjustments of a framed polygonal by least 
   <tbody>
     <tr>
       <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/survey_traverse.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+## VR 360°
+
+
+### Cubemap to Equirectangular
+Rebuilds a 360° equirectangular image from the six faces of a cubemap.</br>The tool reads the face images (+X, −X, +Y, −Y, +Z, −Z), recomposes the panorama, and produces a new image in standard equirectangular format.</br>Useful for returning to 360° format after editing, anonymization, or adding information directly on the cube faces.</br>When available, EXIF metadata from the original image can be reapplied to preserve GPS data and compatibility with 360° viewers.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/vr360_cube_eq.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Equirectangular to Cubemap
+Converts a 360° image in equirectangular format into six images corresponding to the faces of a cube (cubemap).</br>The tool automatically creates a folder next to the original file and saves the faces using the original filename plus the face suffix (+X, −X, +Y, −Y, +Z, −Z).</br>These images can be opened in external editors for tasks such as anonymization, blurring, fixing artifacts near the poles, or inserting additional information.</br>The face resolution can be defined by the user, allowing a balance between performance and visual quality.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/vr360_eq_cube.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Extract Perspective View
+Extracts a perspective (pinhole) image from a 360° equirectangular image, simulating the framing of a conventional camera oriented toward a specified viewing direction.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/vr360_extract_perspective.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -1941,7 +2004,7 @@ This script fills a certain attribute of the features of a layer of points accor
 
 
 ### Azimute e distância
-Cálculo de pontos ou linha a partir de um conjunto de azimutes e distâncias.
+Cálculo de pontos ou de uma linha a partir de um conjunto de <b>distâncias horizontais</b> e <b>direções.</b></br>    <p></br>      As direções podem ser informadas como:</br>    </p></br>    <ul></br>      <li><b>Azimutes</b> (0–360°, em formato decimal ou DMS), por exemplo:<br></br>          <code>34°12'43.2"</code>, <code>165.25</code></br>      </li></br>      <li><b>Rumos em quadrantes</b> (rumo + quadrante/direção), por exemplo:<br></br>          <code>34°12'43.2" NE</code>, <code>N 34°12'43.2" E</code>, <code>47°33'15.3" SE</code></br>      </li></br>    </ul></br>    <p></br>      Ambos os formatos podem ser misturados na mesma lista de direções. Os rumos são convertidos automaticamente em azimutes para o cálculo da poligonal.</br>    </p></br>    
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
@@ -2693,6 +2756,47 @@ Esta ferramenta pode ser utilizada para avaliar a acurácia posicional planimét
   <tbody>
     <tr>
       <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/qualy_horizontal.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+## RV 360°
+
+
+### Cubemap para Equiretangular
+Reconstrói uma imagem 360° no formato equiretangular a partir das seis faces de um cubemap.</br>A ferramenta lê os arquivos correspondentes às faces (+X, −X, +Y, −Y, +Z, −Z), recompõe o panorama e gera uma nova imagem no mesmo padrão da original.</br>Ideal para retornar ao formato 360° após processos de edição, anonimização ou inserção de informações nas faces do cubo.</br>Quando disponível, os metadados EXIF da imagem original podem ser reaplicados na imagem final para manter informações de GPS e compatibilidade com visualizadores 360°.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/vr360_cube_eq.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Equiretangular para Cubemap (Gerar Faces)
+Converte uma imagem 360° no formato equiretangular em seis imagens correspondentes às faces de um cubo (cubemap).</br>A ferramenta cria automaticamente uma pasta ao lado do arquivo original e salva as faces com o nome do arquivo seguido do sufixo da face (+X, −X, +Y, −Y, +Z, −Z).</br>Essas imagens podem ser abertas em editores externos para tarefas como anonimização, borramento, correções nos polos ou inserção de informações.</br>A resolução das faces pode ser definida pelo usuário, permitindo escolher entre desempenho e qualidade visual.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/vr360_eq_cube.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Extrair vista perspectiva
+Extrai uma imagem em projeção perspectiva (pinhole) a partir de uma imagem 360° no formato equiretangular, simulando o enquadramento de uma câmera convencional orientada para uma direção específica no espaço.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/vr360_extract_perspective.jpg"></td>
     </tr>
   </tbody>
 </table>
