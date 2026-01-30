@@ -100,7 +100,8 @@ Transforme pontos, linhas e polígonos em representações visuais prontas para 
                                     self.tr('Drone'),
                                     self.tr('VR Photo 360°', 'RV Foto 360°'),
                                     self.tr('VR Video 360°', 'RV Vídeo 360°'),
-                                    self.tr('Simple Camera', 'Camera simples')],
+                                    self.tr('Simple Camera', 'Camera simples'),
+                                    self.tr('Spot elevation', 'Ponto cotado')],
 
         QgsWkbTypes.LineGeometry: [self.tr('- Select one style -', '- Selecione um estilo -'),
                                    self.tr('Dimensioning', 'Cotagem'),
@@ -177,6 +178,7 @@ Transforme pontos, linhas e polígonos em representações visuais prontas para 
                                     2: 'vr_photo_360_prof_leandro',
                                     3: 'vr_video_point_360_prof_leandro',
                                     4: 'camera_prof_leandro',
+                                    5: 'spot_elevation_prof_leandro'
                                     },
         QgsWkbTypes.LineGeometry: {
                                     1: 'cotagem_GEO_prof_leandro' if CRS.isGeographic() else 'cotagem_UTM_prof_leandro',
@@ -211,6 +213,9 @@ Transforme pontos, linhas e polígonos em representações visuais prontas para 
                 elif estilo_ponto == 4: # camera simples
                     estilo_selec = self.prepare_temp_qml_with_svg(estilo_selec, ['[CAMINHO]'], 
                                                                        [ os.path.join( caminho_estilos , 'SVG/camera.svg') ] )
+                elif estilo_ponto == 5: # ponto cotado
+                    ATT = self.detectar_campo(camada, feedback = feedback)
+                    estilo_selec = self.prepare_temp_qml(estilo_selec, ['[COTA]'], [ ATT ] )
 
         if tipo_geom == QgsWkbTypes.LineGeometry:
             if estilo_linha == 0:
@@ -450,3 +455,27 @@ Transforme pontos, linhas e polígonos em representações visuais prontas para 
 
                 return field_name, equidistancia
 
+    def detectar_campo(self, layer, candidate_names=None, standard_name=None, feedback=None):
+        """Detecta automaticamente o possível nome do campo de uma camada."""
+
+        if candidate_names is None:
+            candidate_names = ["cota", "cotas", "nivel", "nível", "nivels", "nivels", "altura", "altitude", "altimetria", "elev", "elevation", "elevation_m", "elev_m", "height", "height_m", "elevação", "elevacao",
+                               "z", "zvalue", "z_value", "contour", "niveles", "altitud", "cote", "côte", "hauteur", "quota", "quote", "altitudine", "hoehe", "höhe", "gelaendehoehe", "gelaende_hoehe"]
+
+        if standard_name is None:
+            standard_name = self.tr('elevation','cota')
+
+        # 1. Procurar o campo de cota (case-insensitive)
+        field_name = None
+        candidate_lower = [c.lower() for c in candidate_names]
+
+        for f in layer.fields():
+            if f.name().lower() in candidate_lower:
+                field_name = f.name()
+                break
+        
+        if field_name is None:
+            feedback.reportError(self.tr('Field name for contours layer was not found!'))
+            field_name = standard_name
+
+        return field_name
