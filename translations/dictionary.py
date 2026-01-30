@@ -1423,5 +1423,6 @@ Cuando sea posible, los metadatos EXIF de la imagen original pueden aplicarse nu
 'Output image height (pixels)': {'es': 'Altura de la imagen de salida (píxeles)'},
 'Camera roll (°)': {'es': 'Rotación de la cámara (roll) (°)'},
 'Perspective view image': {'es': 'Imagen de vista perspectiva'},
+'Spot elevation': {'es': 'Cota puntual'},
 
  }
