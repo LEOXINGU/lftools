@@ -47,7 +47,8 @@ from qgis.core import (QgsProcessing,
 
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
-from lftools.geocapt.topogeo import meters2degrees
+from lftools.geocapt.topogeo import meters2degrees, str_decimal_to_datetime
+
 import numpy as np
 from pyproj.crs import CRS
 from datetime import datetime
@@ -70,7 +71,7 @@ class StopAndGo(QgsProcessingAlgorithm):
         return 'stopandgo'
 
     def displayName(self):
-        return self.tr('Stop and Go', 'Semicinemático')
+        return self.tr('Stop and Go', 'Semicinemático (Stop and Go)')
 
     def group(self):
         return self.tr('GNSS')
@@ -146,7 +147,7 @@ Dados de entrada:
                 self.DIST,
                 self.tr('Maximum distance to be static (cm)', 'Distância máxima para ser estático (cm)'),
                 type = QgsProcessingParameterNumber.Type.Double,
-                defaultValue = 2.0,
+                defaultValue = 5.0,
                 minValue = 0.5
                 )
             )
@@ -257,8 +258,8 @@ Dados de entrada:
                 x += [x1]
                 y += [y1]
             else:
-                intervalo = datetime.strptime(t, "%Y-%m-%d %H:%M:%S") - datetime.strptime(t_ini, "%Y-%m-%d %H:%M:%S")
-                intervalo = intervalo.total_seconds() # intervalo em segundos
+                intervalo = str_decimal_to_datetime(t) - str_decimal_to_datetime(t_ini)
+                intervalo = intervalo.total_seconds()
                 if  intervalo > tempo_min: # se ficou parado pelo tempo mínimo
                     grupos[cont] = {'x': x, 'y': y, 't_ini': t_ini, 't_fim': t}
                     cont += 1
@@ -266,7 +267,7 @@ Dados de entrada:
                 x, y = [],[]
 
         # Última leva
-        intervalo = datetime.strptime(t, "%Y-%m-%d %H:%M:%S") - datetime.strptime(t_ini, "%Y-%m-%d %H:%M:%S")
+        intervalo = str_decimal_to_datetime(t) - str_decimal_to_datetime(t_ini)
         intervalo = intervalo.total_seconds()
         if  intervalo > tempo_min:
             grupos[cont] = {'x': x, 'y': y, 't_ini': t_ini, 't_fim': t}
