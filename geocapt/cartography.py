@@ -17,7 +17,8 @@ __copyright__ = '(C) 2021, Leandro França'
 from numpy import sign, array
 from numpy.linalg import norm
 import numpy as np
-import math, re
+import math, re, os, shutil
+import tempfile
 import random
 import colorsys
 from lftools.geocapt.topogeo import azimute, geod2geoc, geoc2enu
@@ -1000,7 +1001,6 @@ def simbologiaLinha3D(largura=0.6, altitude = ALT_CLAMP_ABSOLUTE,
     return renderer3d
 
 
-
 def tag_lat(v):
     # 0 -> N00 (convenção comum nesses datasets)
     return ('N' if v >= 0 else 'S') + f"{abs(int(v)):02d}"
@@ -1048,6 +1048,62 @@ def gerar_tiles(lat_min, lat_max, lon_min, lon_max,
             lon_sw = lon0 + j * step_lon
             tiles.append(tag_lat(lat_sw) + tag_lon(lon_sw))
     return tiles
+
+
+def prepare_temp_qml(qml_path, tokens_to_replace, text_to_replace):
+    """
+    Cria um QML temporário substituindo múltiplos placeholders por textos
+
+    Parâmetros
+    ----------
+    qml_path : str
+        Caminho para o arquivo QML original (texto).
+    tokens_to_replace : list[str]
+        Lista de strings a serem substituídas (placeholders) no QML. Ex.: ['[CAMINHO1]', '[CAMINHO2]'].
+    text_to_replace : list[str]
+        Lista de strings que substituirão os tokens, na mesma ordem.
+
+    Retorna
+    -------
+    str
+        Caminho do arquivo QML temporário (mesmo nome do QML original, salvo em pasta tmp).
+
+    Regras
+    ------
+    - O número de tokens deve ser igual ao número de textos.
+    - Em caso de erro, a pasta temporária criada é removida.
+    """
+    # Validações básicas
+    if not os.path.isfile(qml_path):
+        raise FileNotFoundError(f"QML not found: {qml_path}!")
+
+    if not isinstance(tokens_to_replace, (list, tuple)) or not isinstance(text_to_replace, (list, tuple)):
+        raise TypeError("tokens_to_replace and text_to_replace must bem list or tuple!")
+
+    if len(tokens_to_replace) != len(text_to_replace):
+        raise ValueError("tokens_to_replace and text_to_replace must have the SAME length!")
+
+    # Lê o QML original
+    with open(qml_path, 'r', encoding='utf-8') as f:
+        content = f.read()
+
+    # Substituições (uma a uma, na ordem)
+    for token, txt in zip(tokens_to_replace, text_to_replace):
+        content = content.replace(token, txt)
+
+    # Cria pasta temporária e salva o QML com o MESMO nome do original
+    temp_dir = tempfile.mkdtemp(prefix='lftools_qml_')
+    temp_qml_path = os.path.join(temp_dir, os.path.basename(qml_path))
+
+    try:
+        with open(temp_qml_path, 'w', encoding='utf-8') as f:
+            f.write(content)
+    except Exception as e:
+        # limpa se falhar ao gravar
+        shutil.rmtree(temp_dir, ignore_errors=True)
+        raise RuntimeError(f"Error saving temporary QML: {e}")
+
+    return temp_qml_path
 
 
 
