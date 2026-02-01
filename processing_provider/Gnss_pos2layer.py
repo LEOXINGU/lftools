@@ -16,43 +16,14 @@ __date__ = '2022-06-13'
 __copyright__ = '(C) 2022, Leandro França'
 
 from qgis.PyQt.QtCore import QVariant
-from qgis.core import (QgsProcessing,
-                       QgsFeatureSink,
-                       QgsWkbTypes,
-                       QgsFields,
-                       QgsField,
-                       QgsPoint,
-                       QgsFeature,
-                       QgsGeometry,
-                       QgsProcessingException,
-                       QgsProcessingAlgorithm,
-                       QgsProcessingParameterFile,
-                       QgsProcessingParameterEnum,
-                       QgsProcessingParameterNumber,
-                       QgsFeatureRequest,
-                       QgsProcessingUtils,
-                       QgsProcessingParameterFeatureSource,
-                       QgsProcessingParameterFeatureSink,
-                       QgsProcessingParameterFileDestination,
-                       QgsProcessingParameterRasterLayer,
-                       QgsProcessingParameterRasterDestination,
-                       QgsApplication,
-                       QgsProcessingParameterCrs,
-                       QgsProject,
-                       QgsRasterLayer,
-                       QgsCoordinateTransform,
-                       QgsProcessingLayerPostProcessorInterface,
-                       QgsCoordinateReferenceSystem)
-
+from qgis.core import *
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
 from lftools.geocapt.vemos import vemos
 from lftools.geocapt.topogeo import meters2degrees, datetime_decimal_str, str_decimal_to_datetime
-import numpy as np
-from datetime import datetime, timedelta
 import codecs
 import os
-from qgis.PyQt.QtGui import QIcon
+from qgis.PyQt.QtGui import QIcon, QColor
 
 
 class Pos2layer(QgsProcessingAlgorithm):
@@ -378,7 +349,48 @@ Tipos:
         renamer = Renamer(nome)
         context.layerToLoadOnCompletionDetails(dest_id).setPostProcessor(renamer)
 
+        self.SAIDA = dest_id
+
         return {self.OUTPUT: dest_id}
+    
+
+    def postProcessAlgorithm(self, context, feedback):
+        layer = QgsProcessingUtils.mapLayerFromString(self.SAIDA, context)
+        if layer is not None:
+
+           # Criar a simbologia baseada em regras
+            root_rule = QgsRuleBasedRenderer.Rule(None)
+
+            # Helper: cria regra com filtro, label e cor
+            def add_rule(filter_expr, label, color_hex, size=2.1):
+                rule = QgsRuleBasedRenderer.Rule(QgsSymbol.defaultSymbol(layer.geometryType()))
+                rule.setFilterExpression(filter_expr)
+                rule.setLabel(label)
+                rule.symbol().setColor(QColor(color_hex))
+                rule.symbol().setSize(size)
+                root_rule.appendChild(rule)
+
+            # FIX (verde)
+            add_rule('"quality" = \'1: fix\'',   "1: fix",    "#33a02c")  # verde
+
+            # FLOAT (laranja)
+            add_rule('"quality" = \'2: float\'', "2: float",  "#FF8C00")  # laranja
+
+            # SINGLE (vermelho)
+            add_rule('"quality" = \'5: single\'',"5: single", "#FF0000")  # vermelho
+
+            # PPP (roxo)
+            add_rule('"quality" in (\'6: ppp\', \'ppp-ibge\')',   "6: ppp",    "#c45ec4")  # roxo
+
+            # OUTROS (cinza) - pega tudo que não caiu nas regras acima
+            add_rule('ELSE', self.tr('others', 'outras'), "#b0b0b0")      # cinza
+
+            # Aplicar a simbologia baseada em regras na camada
+            renderer = QgsRuleBasedRenderer(root_rule)
+            layer.setRenderer(renderer)
+            layer.triggerRepaint()
+
+        return {}
 
 class Renamer (QgsProcessingLayerPostProcessorInterface):
     def __init__(self, layer_name):
@@ -389,3 +401,4 @@ class Renamer (QgsProcessingLayerPostProcessorInterface):
         layer.setName(self.name)
 
 
+  
