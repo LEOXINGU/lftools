@@ -41,7 +41,7 @@ from qgis.PyQt.QtWidgets import QAction, QMenu, QToolButton, QMessageBox
 from .lftools_provider import LFToolsProvider
 from .translations.translate import translate
 from .geocapt.topogeo import dms2dd as DMS2DD
-from .geocapt.cartography import LabelConf, SymbolSimplePoint
+from .geocapt.cartography import LabelConf, SymbolSimplePoint, prepare_temp_qml
 from .geocapt.tools import *
 from .expressions import *
 from .LFTools_Dialog import ImportXYZ_Dialog
@@ -322,7 +322,17 @@ class LFToolsPlugin(object):
                 self.layer.startEditing()
                 self.layer.addFeatures([ feat ])
                 self.layer.commitChanges()
-                # self.canvas.setCenter(QgsPointXY(X, Y))
+                self.layer.triggerRepaint()
+                
+                project_crs = QgsProject.instance().crs()
+                pt = QgsPointXY(X, Y)  # no CRS de entrada (crs)
+
+                if crs != project_crs:
+                    ct = QgsCoordinateTransform(crs, project_crs, QgsProject.instance())
+                    pt = ct.transform(pt)
+
+                self.canvas.setCenter(pt)
+                self.canvas.refresh()
 
             except Exception as e:
                 QMessageBox.information(self.iface.mainWindow(), QCoreApplication.translate('LFTools', "LFTools plugin error"), QCoreApplication.translate('LFTools', "There was an error with the input parameter:<br><strong>{}</strong>".format(e)))
@@ -339,10 +349,9 @@ class LFToolsPlugin(object):
             self.layerid2 = layer.id()
 
             # Adicionar estilos
-            if crs.isGeographic():
-                estilo = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'lftools/styles/cotagem_GEO_prof_leandro.qml' )
-            else:
-                estilo = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'lftools/styles/cotagem_UTM_prof_leandro.qml' )
+            estilo = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'lftools/styles/cotagem_prof_leandro.qml' )
+            expr = '$length' if crs.isGeographic() else 'length($geometry)'
+            estilo = prepare_temp_qml(estilo, ['[EXPRESSION]'], [ expr ] )
             layer.loadNamedStyle(estilo)
 
             # Adicionar camada
