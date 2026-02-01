@@ -181,14 +181,14 @@ Transforme pontos, linhas e polígonos em representações visuais prontas para 
                                     5: 'spot_elevation_prof_leandro'
                                     },
         QgsWkbTypes.LineGeometry: {
-                                    1: 'cotagem_GEO_prof_leandro' if CRS.isGeographic() else 'cotagem_UTM_prof_leandro',
+                                    1: 'cotagem_prof_leandro',
                                     2: 'contours_prof_leandro',
-                                    3: 'dist_azim_linha_GEO_prof_leandro' if CRS.isGeographic() else 'dist_azim_linha_UTM_prof_leandro',
+                                    3: 'dist_azim_linha_prof_leandro',
                                     4: 'vr_video_line_360_prof_leandro',
                                     },
 
         QgsWkbTypes.PolygonGeometry: {
-                                    1: 'cadastro_GEO_prof_leandro' if CRS.isGeographic() else 'cadastro_UTM_prof_leandro',
+                                    1: 'cadastro_prof_leandro'
                                     }
         }
 
@@ -222,7 +222,10 @@ Transforme pontos, linhas e polígonos em representações visuais prontas para 
                 raise QgsProcessingException('Select a Line Layer Style!')
             else:
                 estilo_selec = os.path.join(caminho_estilos, QML[tipo_geom][estilo_linha] + '.qml')
-                if estilo_linha == 4: # video 360
+                if estilo_linha in (1, 3): # cotagem
+                    expr = '$length' if CRS.isGeographic() else 'length($geometry)'
+                    estilo_selec = self.prepare_temp_qml(estilo_selec, ['[EXPRESSION]'], [ expr ] )
+                elif estilo_linha == 4: # video 360
                     estilo_selec = self.prepare_temp_qml_with_svg(estilo_selec, ['[CAMINHO]'], 
                                                                        [ os.path.join( caminho_estilos , 'SVG/video360.svg') ] )
                 elif estilo_linha == 2: # curvas de nivel
@@ -235,6 +238,19 @@ Transforme pontos, linhas e polígonos em representações visuais prontas para 
                 raise QgsProcessingException('Select a Polygon Layer Style!')
             else:
                 estilo_selec = os.path.join(caminho_estilos, QML[tipo_geom][estilo_poligono] + '.qml')
+                if estilo_poligono == 1: # cadastre
+                    if CRS.isGeographic():
+                        expr1 = "format_number( distance( start_point(geometry_n(   transform($geometry, @layer_crs,  @project_crs ),  @geometry_part_num )), end_point(geometry_n(   transform($geometry, @layer_crs,  @project_crs ),  @geometry_part_num )) ) ,2)  ||  ' m'"
+                        expr2 = "format_number(area(transform($geometry, @layer_crs, @project_crs)),2) ||  ' m²'"
+                        expr3 = "'Az '  || dd2dms(degrees(  azimuth( start_point(geometry_n(   transform($geometry, @layer_crs,  @project_crs ),  @geometry_part_num )), end_point(geometry_n(   transform($geometry, 'EPSG:4674',  @project_crs ),  @geometry_part_num )))),0)"
+                        # SGL
+                        # expr1 = "format_number(lengthLTP( make_line( start_point(geometry_n( transform($geometry, @layer_crs,  @project_crs ),  @geometry_part_num )), end_point(geometry_n(   transform($geometry, @layer_crs,  @project_crs ),  @geometry_part_num )) ), @layer_crs, '2d'), 2)  ||  ' m'"
+                        # expr2 = "format_number($areaLTP,2)  ||  ' m²'"
+                    else:
+                        expr1 = "format_number( distance( start_point(geometry_n(  $geometry,  @geometry_part_num )), end_point(geometry_n(  $geometry,  @geometry_part_num )) ) ,2)  ||  ' m'"
+                        expr2 = "format_number(area($geometry), 2)  ||  ' m²'"
+                        expr3 = "'Az '  || dd2dms( degrees(  azimuth( start_point(geometry_n(  $geometry,  @geometry_part_num )), end_point(geometry_n(  $geometry,  @geometry_part_num )))),0)"
+                    estilo_selec = self.prepare_temp_qml(estilo_selec, ['[EXPRESSION_DISTANCE]', '[EXPRESSION_AREA]', '[EXPRESSION_AZIMUTH]'], [ expr1, expr2, expr3 ])
 
         camada.loadNamedStyle(estilo_selec)
         camada.triggerRepaint()
