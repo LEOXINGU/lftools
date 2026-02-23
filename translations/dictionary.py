@@ -666,7 +666,7 @@ dic = {
 'The raster layer must have more than 1 band!' : {'es': '¡La capa ráster debe tener más de 1 banda!'},
 'Covariance matrix is singular. Choose another method!' : {'es': 'La matriz de covarianza es singular. ¡Elija otro método!'},
 'Zonal Statistics' : {'es': 'Estadísticas Zonales'},
-'Band' : {'es': 'banda'},
+'Band' : {'es': 'Banda'},
 'Statistics' : {'es': 'Estadísticas'},
 'Zonal statistics' : {'es': 'Estadísticas zonales'},
 'Calculating zonal statistics...' : {'es': 'Calculando estadísticas zonales...'},
