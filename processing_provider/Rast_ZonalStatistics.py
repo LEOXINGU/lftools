@@ -150,7 +150,7 @@ Os valores das células do raster onde o centro do pixel se encontra exatamente 
                 self.tr('Statistics', 'Estatísticas'),
 				options = self.STATS,
                 allowMultiple = True,
-                defaultValue = [2,4]
+                defaultValue = [0,2,4]
             )
         )
 
