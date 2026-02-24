@@ -243,56 +243,103 @@ Os valores das células do raster onde o centro do pixel se encontra exatamente 
                 geom = feat.geometry()
                 if transf_SRC:
                     geom.transform(coordTransf)
+                
                 if geom.isMultipart():
-                    poly = geom.asMultiPolygon()[0][0]
+                    polygons = geom.asMultiPolygon()   # -> [ [ring0, ring1, ...], [ring0, ...], ... ]
                 else:
-                    poly = geom.asPolygon()[0]
-                caminho = []
-                lin_min = 1e8
-                col_min = 1e8
-                lin_max = -1e8
-                col_max = -1e8
-                for ponto in poly:
-                    linha = (origem[1]-ponto.y())/resol_Y
-                    if linha > lin_max:
-                        lin_max = linha
-                    if linha < lin_min:
-                        lin_min = linha
-                    coluna = (ponto.x() - origem[0])/resol_X
-                    if coluna > col_max:
-                        col_max = coluna
-                    if coluna < col_min:
-                        col_min = coluna
-                    caminho += [(linha, coluna)]
-                p = path.Path(caminho)
-                lin_min = int(np.floor(lin_min))
-                lin_max = int(np.floor(lin_max))
-                col_min = int(np.floor(col_min))
-                col_max = int(np.floor(col_max))
-                nx, ny = (lin_max-lin_min+1, col_max-col_min+1)
-                lin = np.linspace(lin_min, lin_max, nx)
-                col = np.linspace(col_min, col_max, ny)
-                COL, LIN = np.meshgrid(col, lin)
-                recorte = np.zeros((int(nx), int(ny)), dtype=bool)
-                for x in range(int(nx)):
-                    for y in range(int(ny)):
-                        pixel = (LIN[x][y]+0.5, COL[x][y]+0.5) # 0.5 eh o centro do pixel
-                        contem = p.contains_points([pixel])
-                        recorte[x][y] = contem[0]
+                    polygons = [geom.asPolygon()]      # -> [ [ring0, ring1, ...] ]
 
-                # Recorte de banda
-                recorte_img = banda[lin_min:lin_max+1, col_min:col_max+1]
-                if np.shape(recorte)!=np.shape(recorte_img):
-                    # chegou no fim do recorte
-                    recorte = recorte[0:np.shape(recorte_img)[0], 0:np.shape(recorte_img)[1]]
-                tam = np.shape(recorte_img)
                 valores = []
-                for x in range(tam[0]):
-                    for y in range(tam[1]):
-                        if recorte[x][y]:
-                            valor = recorte_img[x][y]
-                            if valor != Pixel_Nulo:
-                                valores += [float(valor)]
+
+                for poly_rings in polygons:
+                    if not poly_rings:
+                        continue
+
+                    outer_ring = poly_rings[0]
+                    inner_rings = poly_rings[1:]  # buracos
+
+                    # --- bbox baseado no anel externo ---
+                    lin_min = 1e18
+                    col_min = 1e18
+                    lin_max = -1e18
+                    col_max = -1e18
+                    caminho_outer = []
+
+                    for ponto in outer_ring:
+                        linha = (origem[1] - ponto.y()) / resol_Y
+                        coluna = (ponto.x() - origem[0]) / resol_X
+
+                        lin_min = min(lin_min, linha)
+                        lin_max = max(lin_max, linha)
+                        col_min = min(col_min, coluna)
+                        col_max = max(col_max, coluna)
+
+                        caminho_outer.append((linha, coluna))
+
+                    # Converter bbox para índices inteiros e CLAMP no raster
+                    lin_min = int(np.floor(lin_min))
+                    lin_max = int(np.floor(lin_max))
+                    col_min = int(np.floor(col_min))
+                    col_max = int(np.floor(col_max))
+
+                    # clamp
+                    lin_min = max(0, lin_min)
+                    col_min = max(0, col_min)
+                    lin_max = min(rows - 1, lin_max)
+                    col_max = min(cols - 1, col_max)
+
+                    # se bbox ficou inválido, pula
+                    if lin_max < lin_min or col_max < col_min:
+                        continue
+
+                    nx = lin_max - lin_min + 1
+                    ny = col_max - col_min + 1
+
+                    lin = np.arange(lin_min, lin_max + 1)
+                    col = np.arange(col_min, col_max + 1)
+                    COL, LIN = np.meshgrid(col, lin)  # LIN/COL com shape (nx, ny)
+
+                    # Máscara do anel externo
+                    p_outer = path.Path(caminho_outer)
+                    pts = np.column_stack(((LIN + 0.5).ravel(), (COL + 0.5).ravel()))
+                    mask_outer = p_outer.contains_points(pts).reshape((nx, ny))
+
+                    # Subtrair buracos
+                    if inner_rings:
+                        mask_holes = np.zeros((nx, ny), dtype=bool)
+                        for hole_ring in inner_rings:
+                            if not hole_ring:
+                                continue
+                            caminho_hole = []
+                            for ponto in hole_ring:
+                                linha = (origem[1] - ponto.y()) / resol_Y
+                                coluna = (ponto.x() - origem[0]) / resol_X
+                                caminho_hole.append((linha, coluna))
+                            p_hole = path.Path(caminho_hole)
+                            mask_holes |= p_hole.contains_points(pts).reshape((nx, ny))
+
+                        mask = mask_outer & (~mask_holes)
+                    else:
+                        mask = mask_outer
+
+                    # Recorte de banda
+                    recorte_img = banda[lin_min:lin_max+1, col_min:col_max+1]
+
+                    # Coletar valores (vetorizado)
+                    vals = recorte_img[mask]
+
+                    # tratar nodata (se nodata for NaN)
+                    if Pixel_Nulo is not None and isinstance(Pixel_Nulo, float) and np.isnan(Pixel_Nulo):
+                        vals = vals[~np.isnan(vals)]
+                    else:
+                        vals = vals[vals != Pixel_Nulo]
+
+                    # acumular
+                    if vals.size:
+                        valores.extend(vals.astype(float).tolist())
+
+                    print(feat['name'], len(valores))
+                
                 # Calcular estatísticas da lista de valores
                 valores = np.array(valores)
                 lista_stats = []
