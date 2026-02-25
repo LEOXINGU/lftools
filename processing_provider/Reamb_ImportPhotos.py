@@ -367,6 +367,7 @@ class ImportPhotos(QgsProcessingAlgorithm):
                         feature.setGeometry(QgsGeometry(QgsPoint(lon, lat, altitude if altitude != None else 0)))
                         att = [arquivo, lon, lat, altitude, Az, date_time, filepath, fabricante, modelo]
                         if YPR:
+                            att[4] = FlightYaw
                             att += [FlightYaw, FlightPitch, FlightRoll, GimbalYaw, GimbalPitch, GimbalRoll]
                         feature.setAttributes(att)
                         sink.addFeature(feature, QgsFeatureSink.FastInsert)
@@ -440,7 +441,7 @@ class ImportPhotos(QgsProcessingAlgorithm):
                         modelo = ''
 
                     if lon != 0:
-                        if YPR: 
+                        if YPR:
                             FlightYaw, FlightPitch, FlightRoll, GimbalYaw, GimbalPitch, GimbalRoll = self.extract_dji_orientation(filepath)
                         if not CalcAz:
                             feature = QgsFeature(fields)
