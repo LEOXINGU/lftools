@@ -26,24 +26,13 @@ from qgis.core import (QgsProcessing,
                        QgsGeometry,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
-                       QgsProcessingParameterString,
-                       QgsProcessingParameterNumber,
                        QgsProcessingParameterField,
-                       QgsProcessingParameterBoolean,
-                       QgsProcessingParameterCrs,
-                       QgsProcessingParameterEnum,
-                       QgsFeatureRequest,
-                       QgsExpression,
                        QgsProcessingParameterFeatureSource,
                        QgsProcessingParameterFeatureSink,
-                       QgsProcessingParameterFileDestination,
-                       QgsProcessingParameterMultipleLayers,
-                       QgsProcessingParameterVectorLayer,
                        QgsProcessingParameterRasterLayer,
-                       QgsProcessingParameterRasterDestination,
                        QgsApplication,
                        QgsProject,
-                       QgsRasterLayer,
+                       QgsProcessingUtils,
                        QgsCoordinateTransform,
                        QgsCoordinateReferenceSystem)
 
@@ -53,7 +42,7 @@ from pyproj.crs import CRS
 from math import floor, ceil
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
-import os
+import os, processing
 from qgis.PyQt.QtGui import QIcon
 from matplotlib import path
 
@@ -333,8 +322,16 @@ class SpotElevation(QgsProcessingAlgorithm):
                 break
             feedback.setProgress(int((index+1) * Percent))
 
+        self.SAIDA = dest_id
 
         feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
         feedback.pushInfo(self.tr('Leandro Franca - Cartographic Engineer', 'Leandro França - Eng Cart'))
 
         return {self.SPOTS: dest_id}
+    
+    def postProcessAlgorithm(self, context, feedback):
+        layer = QgsProcessingUtils.mapLayerFromString(self.SAIDA, context)
+        params = { 'LAYER' : layer, 'STYLE_POINT' : 5, 'STYLE_LINE' : 0, 'STYLE_POLYGON' : 0 } # Spot elevation
+        processing.run("lftools:magicstyles", params)
+        layer.triggerRepaint()
+        return {}
