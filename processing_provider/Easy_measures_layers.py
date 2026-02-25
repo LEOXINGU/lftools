@@ -121,7 +121,8 @@ class MeasureLayers(QgsProcessingAlgorithm):
 
         tipo = [self.tr('Ellipsoid', 'Elipsoidal'),
                  self.tr('Cartesian / Projected', 'Cartesiano / Projetado'),
-                 self.tr('Local Tangent Plane - LTP', 'Sistema Geodésico Local - SGL')]
+                 self.tr('Local Tangent Plane - LFTools', 'SGL - LFTools'),
+                 self.tr('Local Tangent Plane - INCRA', 'SGL - INCRA')]
 
         self.addParameter(
             QgsProcessingParameterEnum(
@@ -158,6 +159,13 @@ class MeasureLayers(QgsProcessingAlgorithm):
             context
         )
 
+        if formula == 3: # SGL - INCRA
+            if not QgsApplication.processingRegistry().algorithmById(":addFeat"):
+                raise QgsProcessingException(
+                    "O plugin GeoINCRA não foi encontrado ou não está ativado!\n"
+                    "Instale/ative o GeoINCRA antes de executar esta ferramenta."
+                )
+
         # Transformação de unidades
         unid_transf_dist = [1, 0.3048, 0.9144, 1000, 621.4]
         unid_abb_dist = ['m', 'ft', 'yd', 'Km', 'mi']
@@ -166,7 +174,7 @@ class MeasureLayers(QgsProcessingAlgorithm):
         unidade_dist = unid_transf_dist[units_dist]
         unidade_area = unid_transf_area[units_area]
 
-        formula_tipo = [self.tr('ellip', 'elip'), self.tr('cart'), self.tr('LTP', 'SGL')][formula]
+        formula_tipo = [self.tr('ellip', 'elip'), self.tr('cart'), self.tr('LTP_LFTools', 'SGL_LFTools'), self.tr('LTP_INCRA', 'SGL_INCRA')][formula]
 
         field_length = QgsField( self.tr('length', 'comprimento')+ '_' + formula_tipo + '_' + unid_abb_dist[units_dist], QVariant.Double, "numeric", 14, precisao)
         field_perimeter = QgsField( self.tr('perimeter', 'perímetro') + '_'  + formula_tipo + '_' + unid_abb_dist[units_dist], QVariant.Double, "numeric", 14, precisao)
@@ -186,9 +194,18 @@ class MeasureLayers(QgsProcessingAlgorithm):
         for current, layer in enumerate(layers):
 
             if layer.type() == 0: # VectorLayer
-                formula_length = ['$length', 'length($geometry)', "lengthLTP( $geometry,  @layer_crs , '2d')"][formula]
-                formula_perimeter = ['$perimeter', 'perimeter($geometry)', 'perimeterLTP( $geometry, @layer_crs)'][formula]
-                formula_area = ['$area', 'area($geometry)', 'areaLTP( $geometry, @layer_crs)'][formula]
+                formula_length = ['$length', 
+                                  'length($geometry)', 
+                                  "lengthLTP( $geometry,  @layer_crs , '2d')",
+                                  "lengthLTP( $geometry,  @layer_crs , '2d')"][formula]
+                formula_perimeter = ['$perimeter', 
+                                     'perimeter($geometry)', 
+                                     'perimeterLTP( $geometry, @layer_crs)',
+                                     'perimetroINCRA( $geometry, @layer_crs)'][formula]
+                formula_area = ['$area', 
+                                'area($geometry)', 
+                                'areaLTP( $geometry, @layer_crs)',
+                                'areaINCRA( $geometry, @layer_crs)'][formula]
 
                 if layer.geometryType() == QgsWkbTypes.LineGeometry:
                     layer.addExpressionField(formula_length + '/' + str(unidade_dist), field_length)
