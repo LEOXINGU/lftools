@@ -1424,5 +1424,11 @@ Cuando sea posible, los metadatos EXIF de la imagen original pueden aplicarse nu
 'Camera roll (°)': {'es': 'Rotación de la cámara (roll) (°)'},
 'Perspective view image': {'es': 'Imagen de vista perspectiva'},
 'Spot elevation': {'es': 'Cota puntual'},
+'Export Flight Area to DJI KML': {'es': 'Exportar área de vuelo a KML de DJI'},
+'''Exports polygon features to a simplified KML compatible with DJI flight controllers.
+            Multipart geometries are reduced to the first polygon part, interior rings are removed, and the output is automatically transformed to WGS84 (EPSG:4326).''': {'es': '''Exporta entidades poligonales a un KML simplificado compatible con los controles de vuelo de DJI. 
+                                                                                                                                                                           Las geometrías multiparte se reducen a la primera parte del polígono, los anillos interiores se eliminan y la salida se transforma automáticamente a WGS84 (EPSG:4326).'''},
+'Polygon Layer':{'es': 'Capa de polígonos'},
+'DJI-Compatible KML': {'es':'KML compatible con DJI'},
 
  }
