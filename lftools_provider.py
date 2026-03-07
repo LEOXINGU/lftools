@@ -135,6 +135,7 @@ from .processing_provider.Easy_MagicStyles import MagicStyles
 from .processing_provider.VR360_Equiretangular2Cubemap import Equiretangular2Cubemap
 from .processing_provider.VR360_Cubemap2Equiretangular import Cubemap2Equiretangular
 from .processing_provider.VR360_ExtractPerspectiveView import ExtractPerspectiveView
+from .processing_provider.Drone_exportToDJI_KML import ExportToDJI_KML
 
 
 
@@ -256,6 +257,7 @@ class LFToolsProvider(QgsProcessingProvider):
         self.addAlgorithm(Equiretangular2Cubemap())
         self.addAlgorithm(Cubemap2Equiretangular())
         self.addAlgorithm(ExtractPerspectiveView())
+        self.addAlgorithm(ExportToDJI_KML())
     
 
     def id(self):
