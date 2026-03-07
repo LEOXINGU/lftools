@@ -75,7 +75,7 @@ class CentralTendency(QgsProcessingAlgorithm):
         return 'spatialstatistics'
 
     def tags(self):
-        return 'GeoOne,deviational,standard,tendency,dispertion,directional,trend,confidence,covariance,mean,average,median,center,distances,centroid'.split(',')
+        return 'GeoOne,deviational,standard,tendency,dispertion,directional,trend,confidence,covariance,mean,average,median,center,distances,centroid,média'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/statistics.png'))
