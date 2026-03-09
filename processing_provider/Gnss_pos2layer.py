@@ -22,6 +22,7 @@ from lftools.translations.translate import translate
 from lftools.geocapt.vemos import vemos
 from lftools.geocapt.topogeo import meters2degrees, datetime_decimal_str, str_decimal_to_datetime
 import codecs
+import math
 import os
 from qgis.PyQt.QtGui import QIcon, QColor
 
@@ -54,16 +55,20 @@ class Pos2layer(QgsProcessingAlgorithm):
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/satellite.png'))
 
-    txt_en = '''Loads a POS file (.pos) from GNSS processing as a point layer.
-Compatibility: RTKLIB, IBGE-PPP.
+    txt_en = '''Loads a GNSS POS file (.pos) as a point layer.
+Compatibility: RTKLIB and IBGE-PPP.
 Types:
 ◼️ All processed points
-◼️ Last point'''
-    txt_pt = '''Carrega um arquivo POS resultante do processamento de dados GNSS como uma camada do tipo ponto.
-Compatibilidade: RTKLIB, IBGE-PPP
+◼️ Last point
+For relative positioning (RTK/PPK), base station standard deviations may be used to propagate rover coordinate precisions.'''
+
+    txt_pt = '''Carrega um arquivo POS (.pos) de processamento GNSS como camada de pontos.
+Compatibilidade: RTKLIB e IBGE-PPP.
 Tipos:
 ◼️ Todos os pontos processados
-◼️ Último ponto'''
+◼️ Último ponto
+
+Para posicionamento relativo (RTK/PPK), os desvios-padrão da estação base podem ser usados para propagar as precisões das coordenadas do rover.'''
 
     figure = 'images/tutorial/gnss_pos2layer.jpg'
 
@@ -91,6 +96,9 @@ Tipos:
     OUTPUT = 'OUTPUT'
     CRS = 'CRS'
     VEMOS = 'VEMOS'
+    SIGMA_X_BASE = 'SIGMA_X_BASE'
+    SIGMA_Y_BASE = 'SIGMA_Y_BASE'
+    SIGMA_Z_BASE = 'SIGMA_Z_BASE'
 
     def initAlgorithm(self, config=None):
 
@@ -149,6 +157,41 @@ Tipos:
             )
         )
 
+        # Parametros para sigma da base
+        self.addParameter(
+            QgsProcessingParameterNumber(
+                self.SIGMA_X_BASE,
+                self.tr('Base Sigma X (m) - East', 'Sigma Base X (m) - Este'),
+                type = QgsProcessingParameterNumber.Type.Double,
+                defaultValue = 0,
+                minValue = 0.0,
+                optional = True
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterNumber(
+                self.SIGMA_Y_BASE,
+                self.tr('Base Sigma Y (m) - North', 'Sigma Base Y (m) - Norte'),
+                type = QgsProcessingParameterNumber.Type.Double,
+                defaultValue = 0,
+                minValue = 0.0,
+                optional = True
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterNumber(
+                self.SIGMA_Z_BASE,
+                self.tr('Base Sigma Z (m) - Up', 'Sigma Base Z (m) - Altura'),
+                type = QgsProcessingParameterNumber.Type.Double,
+                defaultValue = 0,
+                minValue = 0.0,
+                optional = True
+            )
+        )
+
+
         self.addParameter(
             QgsProcessingParameterFeatureSink(
                 self.OUTPUT,
@@ -189,6 +232,14 @@ Tipos:
             self.VEMOS,
             context
         )
+
+        sigma_x_base = self.parameterAsDouble(parameters, self.SIGMA_X_BASE, context)
+        sigma_y_base = self.parameterAsDouble(parameters, self.SIGMA_Y_BASE, context)
+        sigma_z_base = self.parameterAsDouble(parameters, self.SIGMA_Z_BASE, context)
+
+        sigma_x_base = 0.0 if sigma_x_base is None else sigma_x_base
+        sigma_y_base = 0.0 if sigma_y_base is None else sigma_y_base
+        sigma_z_base = 0.0 if sigma_z_base is None else sigma_z_base
 
         itens  = {"ord": QVariant.Int,
                   "lat": QVariant.Double,
@@ -254,8 +305,14 @@ Tipos:
                 slat = float(pnt[7])
                 slon = float(pnt[8])
                 sh = float(pnt[9])
+
+                # Calcula sigmas propagados
+                sigma_x_prop = math.sqrt(slon**2 + sigma_x_base**2)
+                sigma_y_prop = math.sqrt(slat**2 + sigma_y_base**2)
+                sigma_z_prop = math.sqrt(sh**2 + sigma_z_base**2)
+
                 dic[k+1] = {'lat': lat, 'lon':lon, 'h': h, 'datahora': datahora, 'quality': quality, 'nsat': nsat,
-                          'slat': slat, 'slon': slon, 'sh':sh   }
+                          'slat': sigma_y_prop, 'slon': sigma_x_prop, 'sh':sigma_z_prop   }
         elif tipo == 'ibge':
             for linha in arq.readlines():
                 if linha[0:3] == 'FWD':
