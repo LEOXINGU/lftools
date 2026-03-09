@@ -1034,7 +1034,6 @@ dic = {
 'This tool returns the central tendency point(s) for clustering points of entry points.' : {'es': 'Esta herramienta devuelve los puntos de tendencia central para los puntos de agrupación de puntos de entrada.'},
 'Performs the reconstitution of a Deed Description using Regular Expressions (RegEx).' : {'es': 'Realiza la reconstitución de una Descripción de Escritura utilizando Expresiones Regulares (RegEx).'},
 'Creates new vertices between adjacent polygons to ensure perfect connectivity (topology) between them.' : {'es': 'Crea nuevos vértices entre polígonos adyacentes para asegurar una perfecta conectividad (topología) entre ellos.'},
-'Loads a POS file (.pos) from GNSS processing as a point layer.' : {'es': 'Carga un archivo POS (.pos) desde el procesamiento GNSS como una capa de puntos.'},
 'This tool assigns a sequential value to connected line features based on their topological order. It is ideal for mapping drainage networks, road segments, pipelines, irrigation systems, or any linear vector structure where directional order matters. Users can define the sequence direction (forward, reverse, or both), group by an attribute field, and set a spatial tolerance for node connection. The result is written directly to the layer in custom fields.' : {'es': 'Esta herramienta permite asignar un valor secuencial a entidades lineales conectadas, según su orden topológico. Es ideal para aplicaciones en redes de drenaje, sistemas de riego, carreteras, tuberías u otras estructuras lineales donde la secuencia tenga importancia. El usuario puede definir la dirección de la numeración (hacia adelante, hacia atrás o ambas), agrupar por un campo de atributo y ajustar la tolerancia espacial para la conexión entre vértices. El resultado se guarda directamente en la capa, en campos personalizados.'},
 'This tool generates a polygon layer from a point layer and its filled order (sequence) attributes.' : {'es': 'Esta herramienta genera una capa de polígono a partir de una capa de puntos y sus atributos de orden (secuencia) rellenos.'},
 'This tool generates a polygon layer from a connected line layer.' : {'es': 'Esta herramienta genera una capa de polígono a partir de una capa de líneas conectadas.'},
@@ -1113,15 +1112,18 @@ Las siguientes estadísticas se pueden obtener agrupando:
 ◼️ <b>Entidad central</b>: identificación de la entidad central (distancia euclidiana más pequeña)
 Nota: La capa en un SRC proyectado obtiene resultados más precisos.'''},
 
-'''Loads a POS file (.pos) from GNSS processing as a point layer.
-Compatibility: RTKLIB, IBGE-PPP.
+'''Loads a GNSS processing POS file (.pos) as a point layer.
+Compatibility: RTKLIB and IBGE-PPP.
 Types:
 ◼️ All processed points
-◼️ Last point''': {'es': '''Carga un archivo POS (.pos) desde el procesamiento GNSS como una capa de puntos.
-Compatibilidad: RTKLIB, IBGE-PPP.
+◼️ Last point
+For relative solutions (RTK/PPK), base station standard deviations can be informed to propagate the rover coordinate precisions. Use this option when the base coordinates are not error-free.'''
+: {'es': '''Carga un archivo POS (.pos) de procesamiento GNSS como una capa de puntos.
+Compatibilidad: RTKLIB e IBGE-PPP.
 Tipos:
 ◼️ Todos los puntos procesados
-◼️ Último punto'''},
+◼️ Último punto
+Para posicionamiento relativo (RTK/PPK), las desviaciones estándar de la estación base pueden utilizarse para propagar las precisiones de las coordenadas del rover.'''},
 
 '''It finds the central points (vertices) of the concentrations of points surveyed by the Kinematic method (stop and go) from the processing of GNSS data.
 Input data:
