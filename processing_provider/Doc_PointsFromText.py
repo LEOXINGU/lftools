@@ -22,8 +22,7 @@ __date__ = 'Jun 12'
 __copyright__ = '(C) 2022, Leandro França'
 
 from qgis.PyQt.QtCore import QVariant
-from qgis.core import (QgsProcessing,
-                       QgsApplication,
+from qgis.core import (QgsApplication,
                        QgsProcessingParameterString,
                        QgsProcessingParameterCrs,
                        QgsProcessingParameterBoolean,
@@ -36,14 +35,15 @@ from qgis.core import (QgsProcessing,
                        QgsFeatureSink,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
-                       QgsProcessingParameterFeatureSource,
+                       QgsProcessingUtils,
                        QgsProcessingParameterFeatureSink)
 
 import re, os
 from lftools.geocapt.imgs import *
+from lftools.geocapt.cartography import LabelConf, SymbolSimplePoint
 from lftools.translations.translate import translate
 from lftools.geocapt.topogeo import dms2dd
-from qgis.PyQt.QtGui import QIcon
+from qgis.PyQt.QtGui import QIcon, QColor
 
 class PointsFromText(QgsProcessingAlgorithm):
 
@@ -352,4 +352,20 @@ class PointsFromText(QgsProcessingAlgorithm):
         feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
         feedback.pushInfo('Leandro França - Eng Cart')
 
+        self.SAIDA = dest_id
         return {self.OUTPUT: dest_id}
+    
+    def postProcessAlgorithm(self, context, feedback):
+        layer = QgsProcessingUtils.mapLayerFromString(self.SAIDA, context)
+        # Rotulação
+        labeling = LabelConf(self.tr('code'))
+        layer.setLabeling(labeling)
+        layer.setLabelsEnabled(True)
+        layer.triggerRepaint()
+        # Simbologia
+        renderer = SymbolSimplePoint(layer, cor=QColor(30, 60, 255), tamanho=2.0)
+        layer.setRenderer(renderer)
+        layer.triggerRepaint()
+
+        return {}
+
