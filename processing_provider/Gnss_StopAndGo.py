@@ -19,31 +19,16 @@ from qgis.PyQt.QtCore import QVariant
 from qgis.core import (QgsProcessing,
                        QgsFeatureSink,
                        QgsWkbTypes,
-                       QgsFields,
                        QgsField,
                        QgsPoint,
-                       QgsFeature,
                        QgsGeometry,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
-                       QgsProcessingParameterFile,
-                       QgsProcessingParameterEnum,
                        QgsProcessingParameterNumber,
-                       QgsFeatureRequest,
-                       QgsProcessingUtils,
                        QgsProcessingParameterFeatureSource,
                        QgsProcessingParameterFeatureSink,
-                       QgsProcessingParameterFileDestination,
-                       QgsProcessingParameterRasterLayer,
-                       QgsProcessingParameterRasterDestination,
-                       QgsApplication,
-                       QgsProcessingParameterCrs,
-                       QgsPointXY,
-                       QgsProject,
-                       QgsRasterLayer,
-                       QgsCoordinateTransform,
-                       QgsProcessingLayerPostProcessorInterface,
-                       QgsCoordinateReferenceSystem)
+                       QgsApplication
+                       )
 
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
@@ -289,7 +274,7 @@ Dados de entrada:
                     if pnt.x() == central_X and pnt.y() == central_Y:
                         att = feat.attributes()
                         break
-                pnt = QgsGeometry.fromPointXY(QgsPointXY(float(central_X), float(central_Y)))
+                pnt = QgsGeometry(QgsPoint(float(central_X), float(central_Y), float(feat['h'])))
                 att += [grupos[grupo]['t_ini'], grupos[grupo]['t_fim'], len(x), str(grupo)]
                 feat.setGeometry(pnt)
                 feat.setAttributes(att)
