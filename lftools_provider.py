@@ -136,6 +136,7 @@ from .processing_provider.VR360_Equiretangular2Cubemap import Equiretangular2Cub
 from .processing_provider.VR360_Cubemap2Equiretangular import Cubemap2Equiretangular
 from .processing_provider.VR360_ExtractPerspectiveView import ExtractPerspectiveView
 from .processing_provider.Drone_exportToDJI_KML import ExportToDJI_KML
+from .processing_provider.Drone_CreateGCPfile_Agisoft import CreateGCPfileAgisoft
 
 
 
@@ -258,6 +259,7 @@ class LFToolsProvider(QgsProcessingProvider):
         self.addAlgorithm(Cubemap2Equiretangular())
         self.addAlgorithm(ExtractPerspectiveView())
         self.addAlgorithm(ExportToDJI_KML())
+        self.addAlgorithm(CreateGCPfileAgisoft())
     
 
     def id(self):
