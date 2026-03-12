@@ -83,6 +83,7 @@ class CreateGCPfile(QgsProcessingAlgorithm):
 
     POINTS = 'POINTS'
     NAME = 'NAME'
+    Z_FIELD = 'Z_FIELD'
     FILE = 'FILE'
     DECIMAL = 'DECIMAL'
     CRS = 'CRS'
@@ -102,7 +103,17 @@ class CreateGCPfile(QgsProcessingAlgorithm):
                 self.NAME,
                 self.tr('GCP name', 'Nome do ponto de controle'),
                 parentLayerParameterName=self.POINTS,
-                type=QgsProcessingParameterField.String
+                type=QgsProcessingParameterField.Any
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterField(
+                self.Z_FIELD,
+                self.tr('Z Coordinate', 'Coordenada Z'),
+                parentLayerParameterName=self.POINTS,
+                type=QgsProcessingParameterField.Any,
+                optional=True
             )
         )
 
@@ -149,6 +160,9 @@ class CreateGCPfile(QgsProcessingAlgorithm):
         )
         if pontos is None:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.POINTS))
+        if pontos.featureCount() == 0:
+            raise QgsProcessingException(self.tr('The input layer has no features!',
+                                                'A camada de entrada não possui feições!'))
 
         campo = self.parameterAsFields(
             parameters,
@@ -159,6 +173,8 @@ class CreateGCPfile(QgsProcessingAlgorithm):
             raise QgsProcessingException(self.invalidSourceError(parameters, self.NAME))
 
         columnIndex = pontos.fields().indexFromName(campo[0])
+
+        z_field = self.parameterAsString(parameters, self.Z_FIELD, context)
 
         out_CRS = self.parameterAsCrs(
             parameters,
@@ -189,21 +205,22 @@ class CreateGCPfile(QgsProcessingAlgorithm):
             raise QgsProcessingException(self.invalidSourceError(parameters, self.FILE))
 
         # Verificando se a camada possui coordenada Z
-        for feat in pontos.getFeatures():
-                geom = feat.geometry()
-                break
-        t = str(geom.constGet().z())
-        try:
+        if not z_field:
+            for feat in pontos.getFeatures():
+                    geom = feat.geometry()
+                    break
             t = str(geom.constGet().z())
-        except:
-            t = 'nan'
-        if t == 'nan':
-            eh3d = False
-            feedback.pushInfo(self.tr('''Layer features do not have a Z coordinate.
-            The Z coordinate will be set to 0 (zero)!''', '''Feições da camada não possuem coordenada Z.
-A coordena Z será definida com 0 (zero)!'''))
-        else:
-            eh3d = True
+            try:
+                t = str(geom.constGet().z())
+            except:
+                t = 'nan'
+            if t == 'nan':
+                eh3d = False
+                feedback.reportError(self.tr('''Layer features do not have a Z coordinate.
+                The Z coordinate will be set to 0 (zero)!''', '''Feições da camada não possuem coordenada Z.
+    A coordenada Z será definida com 0 (zero)!'''))
+            else:
+                eh3d = True
 
         # Criando arquivo de pontos de controle
         arq = open(filepath, 'w')
@@ -215,15 +232,23 @@ A coordena Z será definida com 0 (zero)!'''))
             arq.write(pontos.sourceCrs().toProj4()  + '\n')
 
         for feat in pontos.getFeatures():
-            nome = feat[columnIndex].replace(' ', '_')
+            nome = str(feat[columnIndex]).strip().replace(' ', '_')
             geom = feat.geometry()
+
             if out_CRS.isValid():
                 geom.transform(coordinateTransformer)
-            if not eh3d:
-                pnt = geom.asPoint()
-                X, Y, Z = pnt.x(), pnt.y(), 0
+            
+            pnt = geom.asPoint()
+            if z_field:
+                try:
+                    X, Y, Z = pnt.x(), pnt.y(), float(str(feat[z_field]).replace(',','.'))
+                except:
+                    raise QgsProcessingException(f'Invalid Z value {str(feat[z_field])} for feature ID {feat.id()}')
             else:
-                X, Y, Z = geom.constGet().x(), geom.constGet().y(), geom.constGet().z()
+                if not eh3d:
+                    X, Y, Z = pnt.x(), pnt.y(), 0
+                else:
+                    X, Y, Z = geom.constGet().x(), geom.constGet().y(), geom.constGet().z()
             arq.write(format_num.format(X) + ' ' + format_num.format(Y) + ' ' + format_num.format(Z) + ' 0 0 ' + nome + '\n')
             if feedback.isCanceled():
                 break
