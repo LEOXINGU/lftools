@@ -1,6 +1,7 @@
 [general]
 name=LF Tools
 qgisMinimumVersion=3.40
+qgisMaximumVersion=4.99
 description=Comprehensive solutions for cartographic production, surveying, drone mapping, GNSS data import, geospatial database management, digital image processing, and spatial analysis.
 version=2.9.1
 author=Leandro França
