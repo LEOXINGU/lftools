@@ -16,34 +16,7 @@ __date__ = '2022-02-27'
 __copyright__ = '(C) 2022, Leandro França'
 
 from qgis.PyQt.QtCore import QVariant
-from qgis.core import (QgsProcessing,
-                       QgsFeatureSink,
-                       QgsWkbTypes,
-                       QgsFields,
-                       QgsField,
-                       QgsPoint,
-                       QgsFeature,
-                       QgsGeometry,
-                       QgsProcessingException,
-                       QgsProcessingAlgorithm,
-                       QgsProcessingParameterFile,
-                       QgsProcessingParameterEnum,
-                       QgsProcessingParameterNumber,
-                       QgsFeatureRequest,
-                       QgsProcessingUtils,
-                       QgsProcessingParameterFeatureSource,
-                       QgsProcessingParameterFeatureSink,
-                       QgsProcessingParameterFileDestination,
-                       QgsProcessingParameterRasterLayer,
-                       QgsProcessingParameterRasterDestination,
-                       QgsApplication,
-                       QgsProcessingParameterCrs,
-                       QgsProject,
-                       QgsRasterLayer,
-                       QgsCoordinateTransform,
-                       QgsProcessingLayerPostProcessorInterface,
-                       QgsCoordinateReferenceSystem)
-
+from qgis.core import *
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
 from lftools.geocapt.cartography import raioMedioGauss
@@ -51,7 +24,7 @@ import numpy as np
 import datetime
 import codecs
 import os
-from qgis.PyQt.QtGui import QIcon
+from qgis.PyQt.QtGui import QIcon, QColor
 
 
 class NMEA2layer(QgsProcessingAlgorithm):
@@ -228,7 +201,8 @@ Modos:
                     H = float(partes[9]) - aa
                     N = float(partes[11])
                     h = N + H
-                    lista += [[lat, lon, h, H, N, HDOP, VDOP, PDOP, hora, min, seg, quality, num_sat]]
+                    if quality != nmea_quality[0]: # Only parse if is valid
+                        lista += [[lat, lon, h, H, N, HDOP, VDOP, PDOP, hora, min, seg, quality, num_sat]]
 
                 if line[3:6] == 'ZDA': # Time & Date – UTC, Day, Month, Year and Local Time Zone
                     partes = line.split(',')
@@ -246,8 +220,10 @@ Modos:
                 pass
 
         arq.close()
-
-        valores = np.array(lista)
+        if len(lista) == 0:
+            raise QgsProcessingException(self.tr('No valid observations found!', 'Nenhuma observação válida encontrada!'))
+        else:
+            valores = np.array(lista)
         # Campos
         if tipo == 0:
             itens  = {"lat": QVariant.Double,
@@ -288,7 +264,7 @@ Modos:
             for pnt in lista:
                 feat.setGeometry(QgsPoint(pnt[1],pnt[0], pnt[2]))
                 try:
-                    data_hora = unicode(datetime.datetime(ano, mes, dia, pnt[-5], pnt[-4], int(pnt[-3])))
+                    data_hora = str(datetime.datetime(ano, mes, dia, pnt[-5], pnt[-4], int(pnt[-3])))
                 except:
                     data_hora = None
                 feat.setAttributes(pnt[0:5] + [data_hora] + pnt[5:8] + pnt[-2:]  ) # lat, lon, h, H, N, HDOP, VDOP, PDOP, hora, min, seg, quality, num_sat
@@ -308,12 +284,12 @@ Modos:
             H = valores[:,3].astype('float').mean()
             N = valores[:,4].astype('float').mean()
             try:
-                data_hora_ini = unicode(datetime.datetime(ano, mes, dia, int(valores[0, -5]), int(valores[0, -4]), int(float(valores[0, -3]))))
-                data_hora_fim = unicode(datetime.datetime(ano, mes, dia, int(valores[-1, -5]), int(valores[-1, -4]), int(float(valores[-1, -3]))))
+                data_hora_ini = str(datetime.datetime(ano, mes, dia, int(valores[0, -5]), int(valores[0, -4]), int(float(valores[0, -3]))))
+                data_hora_fim = str(datetime.datetime(ano, mes, dia, int(valores[-1, -5]), int(valores[-1, -4]), int(float(valores[-1, -3]))))
             except:
-                data_hora_ini, data_hora_fim = None
+                data_hora_ini, data_hora_fim = None, None
             # Raio Médio de Gauss
-            R = raioMedioGauss(lat, int(self.tr('EPSG:4326','EPSG:4674')))
+            R = raioMedioGauss(lat, self.tr('EPSG:4326','EPSG:4674'))
             sigma_x = (R+h)*np.radians(s_lon)
             sigma_y = (R+h)*np.radians(s_lat)
 
@@ -343,12 +319,12 @@ Modos:
             H = valores[:,3].astype('float').mean()
             N = valores[:,4].astype('float').mean()
             try:
-                data_hora_ini = unicode(datetime.datetime(ano, mes, dia, int(valores[0, -5]), int(valores[0, -4]), int(float(valores[0, -3]))))
-                data_hora_fim = unicode(datetime.datetime(ano, mes, dia, int(valores[-1, -5]), int(valores[-1, -4]), int(float(valores[-1, -3]))))
+                data_hora_ini = str(datetime.datetime(ano, mes, dia, int(valores[0, -5]), int(valores[0, -4]), int(float(valores[0, -3]))))
+                data_hora_fim = str(datetime.datetime(ano, mes, dia, int(valores[-1, -5]), int(valores[-1, -4]), int(float(valores[-1, -3]))))
             except:
                 data_hora_ini, data_hora_fim = None, None
             # Raio Médio de Gauss
-            R = raioMedioGauss(lat, int(self.tr('EPSG:4326','EPSG:4674')))
+            R = raioMedioGauss(lat, self.tr('EPSG:4326','EPSG:4674'))
             sigma_x = (R+h)*np.radians(s_lon)
             sigma_y = (R+h)*np.radians(s_lat)
 
@@ -373,8 +349,46 @@ Modos:
         global renamer
         renamer = Renamer(nome)
         context.layerToLoadOnCompletionDetails(dest_id).setPostProcessor(renamer)
+        self.SAIDA = dest_id
 
         return {self.OUTPUT: dest_id}
+    
+    
+    def postProcessAlgorithm(self, context, feedback):
+        layer = QgsProcessingUtils.mapLayerFromString(self.SAIDA, context)
+        if layer is not None:
+
+           # Criar a simbologia baseada em regras
+            root_rule = QgsRuleBasedRenderer.Rule(None)
+
+            # Helper: cria regra com filtro, label e cor
+            def add_rule(filter_expr, label, color_hex, size=2.1):
+                rule = QgsRuleBasedRenderer.Rule(QgsSymbol.defaultSymbol(layer.geometryType()))
+                rule.setFilterExpression(filter_expr)
+                rule.setLabel(label)
+                rule.symbol().setColor(QColor(color_hex))
+                rule.symbol().setSize(size)
+                root_rule.appendChild(rule)
+
+            # FIX (verde)
+            add_rule('"quality" = \'4: RTK fixed\'',   "4: RTK fixed",    "#33a02c")  # verde
+
+            # FLOAT (laranja)
+            add_rule('"quality" = \'5: RTK float\'', "5: RTK float",  "#FF8C00")  # laranja
+
+            # SINGLE (vermelho)
+            add_rule('"quality" = \'1: Standalone\'',"1: Standalone", "#FF0000")  # vermelho
+
+            # OUTROS (cinza) - pega tudo que não caiu nas regras acima
+            add_rule('ELSE', self.tr('others', 'outras'), "#b0b0b0")      # cinza
+
+            # Aplicar a simbologia baseada em regras na camada
+            renderer = QgsRuleBasedRenderer(root_rule)
+            layer.setRenderer(renderer)
+            layer.triggerRepaint()
+
+        return {}
+
 
 class Renamer (QgsProcessingLayerPostProcessorInterface):
     def __init__(self, layer_name):
