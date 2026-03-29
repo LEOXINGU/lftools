@@ -203,10 +203,12 @@ class ValidateTopology(QgsProcessingAlgorithm):
                 for pnt in linha:
                     corresp = False
                     for feat2 in vertices.getFeatures():
-                        vert = feat2.geometry().asPoint()
-                        if vert == pnt:
-                            corresp = True
-                            continue
+                        geom2 = feat2.geometry()
+                        if geom2:
+                            vert = geom2.asPoint()
+                            if vert == pnt:
+                                corresp = True
+                                continue
                     if not corresp:
                         cont += 1
                         X, Y = pnt.x(), pnt.y()
@@ -230,10 +232,12 @@ class ValidateTopology(QgsProcessingAlgorithm):
                         for pnt in anel:
                             corresp = False
                             for feat2 in vertices.getFeatures():
-                                vert = feat2.geometry().asPoint()
-                                if vert == pnt:
-                                    corresp = True
-                                    continue
+                                geom2 = feat2.geometry()
+                                if geom2:
+                                    vert = geom2.asPoint()
+                                    if vert == pnt:
+                                        corresp = True
+                                        continue
                             if not corresp:
                                 cont += 1
                                 X, Y = pnt.x(), pnt.y()
