@@ -22,42 +22,24 @@ import numpy as np
 import math
 
 
-def azimute(A,B):
-    # Cálculo dos Azimutes entre dois pontos (Vetor AB origem A extremidade B)
-    if ((B.x()-A.x())>=0 and (B.y()-A.y())>0): #1º quadrante
-        AzAB=arctan((B.x()-A.x())/(B.y()-A.y()))
-        AzBA=AzAB+pi
-    elif ((B.x()-A.x())>0 and (B.y()-A.y())<0): #2º quadrante
-        AzAB=pi+arctan((B.x()-A.x())/(B.y()-A.y()))
-        AzBA=AzAB+pi
-    elif ((B.x()-A.x())<=0 and (B.y()-A.y())<0): #3º quadrante
-        AzAB=arctan((B.x()-A.x())/(B.y()-A.y()))+pi
-        AzBA=AzAB-pi
-    elif ((B.x()-A.x())<0 and (B.y()-A.y())>0): #4º quadrante
-        AzAB=2*pi+arctan((B.x()-A.x())/(B.y()-A.y()))
-        AzBA=AzAB+pi
-    elif ((B.x()-A.x())>0 and (B.y()-A.y())==0): # no eixo positivo de x (90º)
-        AzAB=pi/2
-        AzBA=1.5*pi
-    else: # ((B.x()-A.x())<0 and(B.y()-A.y())==0) # no eixo negativo de x (270º)
-        AzAB=1.5*pi
-        AzBA=pi/2
-    # Correção dos ângulos para o intervalo de 0 a 2pi
-    if AzAB<0 or AzAB>2*pi:
-        if (AzAB<0):
-           AzAB=AzAB+2*pi
-        else:
-           AzAB=AzAB-2*pi
-    if AzBA<0 or AzBA>2*pi:
-        if (AzBA<0):
-            AzBA=AzBA+2*pi
-        else:
-            AzBA=AzBA-2*pi
-    return (AzAB, AzBA)
+# Cálculo dos azimutes entre dois pontos (vetor AB: origem A, extremidade B)
+def azimute(A, B):
+    dx = B.x() - A.x()
+    dy = B.y() - A.y()
+
+    # Pontos coincidentes
+    if dx == 0 and dy == 0:
+        return None, None
+
+    # Azimute a partir do Norte, no sentido horário
+    AzAB = np.arctan2(dx, dy) % (2 * np.pi)
+    AzBA = (AzAB + np.pi) % (2 * np.pi)
+
+    return AzAB, AzBA
 
 
+# Diferença (ângulo) entre azimutes
 def DifAz(Az_ini, Az_fim):
-    # Diferença (ângulo) entre azimutes
     dAz = Az_fim - Az_ini
     if dAz < 0:
         dAz = 2*pi + Az_fim - Az_ini
