@@ -30,7 +30,7 @@ from qgis.core import (QgsProcessing,
 from osgeo import osr, gdal_array, gdal #https://gdal.org/python/
 from math import floor, ceil
 import numpy as np
-from PIL import Image
+from lftools.dependencies import ensure_pillow
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
 import os
@@ -124,6 +124,12 @@ class SaveAsJPEG(QgsProcessingAlgorithm):
 
     def processAlgorithm(self, parameters, context, feedback):
 
+        Image = ensure_pillow(feedback)
+        if Image is None:
+            raise QgsProcessingException(
+                "The Pillow library (PIL) is required for this tool and could not be loaded automatically."
+            )
+        
         RasterIN = self.parameterAsRasterLayer(
             parameters,
             self.RasterIN,

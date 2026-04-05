@@ -15,23 +15,19 @@ __author__ = 'Leandro França'
 __date__ = '2022-03-07'
 __copyright__ = '(C) 2022, Leandro França'
 
-from qgis.PyQt.QtCore import QVariant
+
 from qgis.core import (QgsApplication,
                        QgsProcessingParameterFile,
                        QgsProcessingParameterBoolean,
-                       QgsProcessingParameterEnum,
                        QgsProcessingParameterNumber,
-                       QgsProcessingUtils,
                        QgsProcessingException,
-                       QgsProcessingAlgorithm,
-                       QgsProcessingParameterFeatureSource,
-                       QgsProcessingParameterFeatureSink)
+                       QgsProcessingAlgorithm)
 
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
 import os
 from qgis.PyQt.QtGui import QIcon
-import PIL
+from lftools.dependencies import ensure_pillow
 
 
 class ResizePhotos(QgsProcessingAlgorithm):
@@ -125,6 +121,12 @@ class ResizePhotos(QgsProcessingAlgorithm):
 
     def processAlgorithm(self, parameters, context, feedback):
 
+        Image = ensure_pillow(feedback)
+        if Image is None:
+            raise QgsProcessingException(
+                "The Pillow library (PIL) is required for this tool and could not be loaded automatically."
+            )
+
         pasta_in = self.parameterAsFile(
             parameters,
             self.INPUT_FOLDER,
@@ -174,7 +176,7 @@ class ResizePhotos(QgsProcessingAlgorithm):
         feedback.pushInfo(self.tr('Resizing the images...', 'Redimensionando as imagens...'))
         for index, caminho in enumerate(lista):
             arquivo = os.path.split(caminho)[-1]
-            img = PIL.Image.open(caminho)
+            img = Image.open(caminho)
             if 'exif' in img.info:
                 exif = img.info['exif']
             altura = img.size[1]

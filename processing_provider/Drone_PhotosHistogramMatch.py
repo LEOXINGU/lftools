@@ -48,13 +48,9 @@ from qgis.core import (QgsProcessing,
 import numpy as np
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
-from lftools.geocapt.dip import Interpolar
-from lftools.geocapt.adjust import AjustVertical, ValidacaoGCP, Ajust2D, ValidacaoVetores
-from lftools.geocapt.cartography import geom2PointList
+from lftools.dependencies import ensure_pillow
 import os
 from qgis.PyQt.QtGui import QIcon
-from PIL import Image
-import matplotlib.pyplot as plt
 
 class PhotosHistogramMatch(QgsProcessingAlgorithm):
 
@@ -132,7 +128,13 @@ class PhotosHistogramMatch(QgsProcessingAlgorithm):
         )
 
     def processAlgorithm(self, parameters, context, feedback):
-
+        
+        Image = ensure_pillow(feedback)
+        if Image is None:
+            raise QgsProcessingException(
+                "The Pillow library (PIL) is required for this tool and could not be loaded automatically."
+            )
+        
         # camada de fotos a serem ajustadas
         ajust = self.parameterAsSource(
             parameters,

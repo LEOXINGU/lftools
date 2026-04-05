@@ -44,10 +44,8 @@ import os, re
 import processing
 from math import pi
 from qgis.PyQt.QtGui import QIcon
-from PIL import Image, TiffTags, ExifTags
-from PIL.TiffImagePlugin import ImageFileDirectory_v2
-from PIL.TiffTags import TAGS
-ImageFileDirectory_v2._load_dispatch[13] = ImageFileDirectory_v2._load_dispatch[TiffTags.LONG]
+from lftools.dependencies import ensure_pillow
+
 
 class ImportPhotos(QgsProcessingAlgorithm):
 
@@ -168,6 +166,17 @@ class ImportPhotos(QgsProcessingAlgorithm):
 
 
     def processAlgorithm(self, parameters, context, feedback):
+
+        Image = ensure_pillow(feedback)
+        if Image is None:
+            raise QgsProcessingException(
+                "The Pillow library (PIL) is required for this tool and could not be loaded automatically."
+            )
+
+        from PIL import TiffTags, ExifTags
+        from PIL.TiffTags import TAGS
+        from PIL.TiffImagePlugin import ImageFileDirectory_v2
+        ImageFileDirectory_v2._load_dispatch[13] = ImageFileDirectory_v2._load_dispatch[TiffTags.LONG]
 
         pasta = self.parameterAsFile(
             parameters,

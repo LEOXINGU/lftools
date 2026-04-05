@@ -17,8 +17,14 @@ __copyright__ = '(C) 2025 Leandro França'
 import math
 import numpy as np
 import os
-from PIL import Image
 from qgis.core import QgsProcessingException
+from lftools.dependencies import ensure_pillow
+
+Image = ensure_pillow()
+if Image is None:
+    raise ImportError(
+        "Pillow (PIL) is required for VR360 functions but could not be loaded."
+    )
 
 
 # Nome das faces

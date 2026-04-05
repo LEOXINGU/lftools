@@ -27,7 +27,7 @@ from lftools.geocapt.vr360 import extract_perspective_from_equirect
 from lftools.translations.translate import translate
 from qgis.PyQt.QtGui import QIcon
 import os
-from PIL import Image
+from lftools.dependencies import ensure_pillow
 import numpy as np
 
 
@@ -176,7 +176,13 @@ class ExtractPerspectiveView(QgsProcessingAlgorithm):
         )
 
 
-    def processAlgorithm(self, parameters, context, feedback):        
+    def processAlgorithm(self, parameters, context, feedback):
+
+        Image = ensure_pillow(feedback)
+        if Image is None:
+            raise QgsProcessingException(
+                "The Pillow library (PIL) is required for this tool and could not be loaded automatically."
+            )   
         
         # INPUT (imagem equiretangular)
         entrada = self.parameterAsFile(parameters, self.INPUT, context)
