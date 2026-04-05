@@ -41,10 +41,10 @@ from qgis.core import (QgsApplication,
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
 import os
-from numpy import array, arange, sqrt, floor, ceil
+from numpy import array, arange, sqrt, floor
 from numpy.linalg import norm
 from qgis.PyQt.QtGui import QIcon
-from lftools.geocapt.cartography import geom2PointList
+from lftools.geocapt.topogeo import meters2degrees
 
 class CrossSections(QgsProcessingAlgorithm):
 
@@ -189,8 +189,11 @@ class CrossSections(QgsProcessingAlgorithm):
 
         # Se a camada de linhas for Geográfica, obter medidas em graus decimais
         if SRC.isGeographic():
-            distSec /= 111000
-            tamSec /= 111000
+            extensao = layer.sourceExtent()
+            y_max = extensao.yMaximum()
+            y_min = extensao.yMinimum()
+            distSec = meters2degrees(distSec, (y_max + y_min)/2, SRC)
+            tamSec = meters2degrees(tamSec, (y_max + y_min)/2, SRC)
 
         def distancia(P1, P2):
             return sqrt((P1.x() - P2.x())**2 + (P1.y() - P2.y())**2)
@@ -199,7 +202,10 @@ class CrossSections(QgsProcessingAlgorithm):
         for current, feat in enumerate(layer.getFeatures()):
             geom = feat.geometry()
             comprimento = geom.length()
-            coord = geom.asPolyline()
+            if geom.isMultipart():
+                coord = geom.asMultiPolyline()[0]
+            else:
+                coord = geom.asPolyline()
             LIST_COORD = []
             LIST_ATT = []
             # Criar lista de pontos e distancias
