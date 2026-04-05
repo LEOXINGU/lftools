@@ -23,11 +23,9 @@ from qgis.core import (QgsApplication,
                        QgsProcessingAlgorithm)
 
 from lftools.geocapt.imgs import Imgs
-from lftools.geocapt.vr360 import extract_perspective_from_equirect
 from lftools.translations.translate import translate
 from qgis.PyQt.QtGui import QIcon
 import os
-from lftools.dependencies import ensure_pillow
 import numpy as np
 
 
@@ -178,6 +176,8 @@ class ExtractPerspectiveView(QgsProcessingAlgorithm):
 
     def processAlgorithm(self, parameters, context, feedback):
 
+        from lftools.dependencies import ensure_pillow
+        from lftools.geocapt.vr360 import extract_perspective_from_equirect
         Image = ensure_pillow(feedback)
         if Image is None:
             raise QgsProcessingException(

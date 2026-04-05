@@ -44,7 +44,6 @@ import os, re
 import processing
 from math import pi
 from qgis.PyQt.QtGui import QIcon
-from lftools.dependencies import ensure_pillow
 
 
 class ImportPhotos(QgsProcessingAlgorithm):
@@ -167,6 +166,7 @@ class ImportPhotos(QgsProcessingAlgorithm):
 
     def processAlgorithm(self, parameters, context, feedback):
 
+        from lftools.dependencies import ensure_pillow
         Image = ensure_pillow(feedback)
         if Image is None:
             raise QgsProcessingException(

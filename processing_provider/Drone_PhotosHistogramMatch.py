@@ -48,7 +48,6 @@ from qgis.core import (QgsProcessing,
 import numpy as np
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
-from lftools.dependencies import ensure_pillow
 import os
 from qgis.PyQt.QtGui import QIcon
 
@@ -129,6 +128,7 @@ class PhotosHistogramMatch(QgsProcessingAlgorithm):
 
     def processAlgorithm(self, parameters, context, feedback):
         
+        from lftools.dependencies import ensure_pillow
         Image = ensure_pillow(feedback)
         if Image is None:
             raise QgsProcessingException(

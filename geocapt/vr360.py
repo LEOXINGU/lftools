@@ -18,8 +18,8 @@ import math
 import numpy as np
 import os
 from qgis.core import QgsProcessingException
-from lftools.dependencies import ensure_pillow
 
+from lftools.dependencies import ensure_pillow
 Image = ensure_pillow()
 if Image is None:
     raise ImportError(

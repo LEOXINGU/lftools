@@ -27,7 +27,6 @@ from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
 import os
 from qgis.PyQt.QtGui import QIcon
-from lftools.dependencies import ensure_pillow
 
 
 class ResizePhotos(QgsProcessingAlgorithm):
@@ -121,6 +120,7 @@ class ResizePhotos(QgsProcessingAlgorithm):
 
     def processAlgorithm(self, parameters, context, feedback):
 
+        from lftools.dependencies import ensure_pillow
         Image = ensure_pillow(feedback)
         if Image is None:
             raise QgsProcessingException(

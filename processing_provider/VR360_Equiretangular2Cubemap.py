@@ -22,12 +22,10 @@ from qgis.core import (QgsApplication,
                        QgsProcessingAlgorithm)
 
 from lftools.geocapt.imgs import Imgs
-from lftools.geocapt.vr360 import generate_cube_face_from_image
 from lftools.translations.translate import translate
 from qgis.PyQt.QtGui import QIcon
 import numpy as np
 import os
-from lftools.dependencies import ensure_pillow
 
 
 class Equiretangular2Cubemap(QgsProcessingAlgorithm):
@@ -112,6 +110,8 @@ A resolução das faces pode ser definida pelo usuário, permitindo escolher ent
 
     def processAlgorithm(self, parameters, context, feedback):
 
+        from lftools.dependencies import ensure_pillow
+        from lftools.geocapt.vr360 import generate_cube_face_from_image
         Image = ensure_pillow(feedback)
         if Image is None:
             raise QgsProcessingException(
