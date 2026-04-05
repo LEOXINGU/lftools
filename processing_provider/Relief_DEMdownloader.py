@@ -81,6 +81,7 @@ class DEMdownloader(QgsProcessingAlgorithm):
     DATASET = 'DATASET'
     OUTPUT = 'OUTPUT'
     OPEN = 'OPEN'
+    STYLE = 'STYLE'
 
     dataset = ['FABDEM - Global - 1 arc sec',
                'ANADEM - South America - 1 arc sec',
@@ -104,6 +105,22 @@ class DEMdownloader(QgsProcessingAlgorithm):
                 self.tr('DEM', 'MDE'),
 				options = self.dataset,
                 defaultValue= 0
+            )
+        )
+
+        estilos = [
+                self.tr('No style', 'Sem estilo'),
+                self.tr('Elevation', 'Elevação') + ' 1',
+                self.tr('Elevation', 'Elevação') + ' 2',
+                self.tr('Temperature', 'Temperatura')
+            ]
+
+        self.addParameter(
+            QgsProcessingParameterEnum(
+                self.STYLE,
+                self.tr('Symbology', 'Simbologia'),
+				options = estilos,
+                defaultValue= 1
             )
         )
 
@@ -157,6 +174,12 @@ class DEMdownloader(QgsProcessingAlgorithm):
         mde = self.parameterAsEnum(
             parameters,
             self.DATASET,
+            context
+        )
+
+        self.simbologia = self.parameterAsEnum(
+            parameters,
+            self.STYLE,
             context
         )
 
@@ -352,4 +375,9 @@ class DEMdownloader(QgsProcessingAlgorithm):
         if self.CARREGAR:
             rlayer = QgsRasterLayer(self.CAMINHO, self.datasetName)
             QgsProject.instance().addMapLayer(rlayer)
+            
+            if self.simbologia !=0:
+                params = { 'LAYER' : rlayer, 'STYLE_POINT' : 0, 'STYLE_LINE' : 0, 'STYLE_POLYGON' : 0, 'STYLE_RASTER': self.simbologia}
+                processing.run("lftools:magicstyles", params)
+
         return {}
