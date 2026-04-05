@@ -1458,4 +1458,9 @@ Cuando sea posible, los metadatos EXIF de la imagen original pueden aplicarse nu
   - Si no se proporciona un <b>campo Z</b> y la geometría no tiene <b>valor Z</b>, la <b>coordenada Z</b> se establecerá en <b>0</b>.<br>
   - Para obtener mejores resultados en <b>Agisoft Metashape</b>, utilice <b>sistemas de coordenadas proyectados</b>.'''},
 'No valid observations found!': {'es': '¡No se encontraron observaciones válidas!'},
+'Select a Raster Layer Style!': {'es': '¡Selecciona un estilo de capa ráster!'},
+'Elevation': {'es': 'Elevación'},
+'No style': {'es': 'Sin estilo'},
+'Symbology': {'es': 'Simbología'},
+
  }
