@@ -47,7 +47,6 @@ from qgis.core import (QgsProcessing,
 
 from math import floor, ceil
 from osgeo import osr, gdal_array, gdal #https://gdal.org/python/
-from matplotlib import path
 import numpy as np
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
@@ -183,6 +182,14 @@ class SupervisedClassification(QgsProcessingAlgorithm):
         )
 
     def processAlgorithm(self, parameters, context, feedback):
+
+        from lftools.dependencies import ensure_matplotlib
+        path = ensure_matplotlib(feedback)
+        if path is None:
+            raise QgsProcessingException(
+                "The 'matplotlib' library is required for this tool but could not be installed automatically. "
+                "Please install it manually using: pip install matplotlib"
+            )
 
         RasterIN = self.parameterAsRasterLayer(
             parameters,

@@ -47,7 +47,6 @@ from qgis.core import (QgsProcessing,
 
 from math import floor, ceil
 from osgeo import osr, gdal_array, gdal #https://gdal.org/python/
-from matplotlib import path
 import numpy as np
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate

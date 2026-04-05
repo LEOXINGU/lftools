@@ -48,7 +48,6 @@ from qgis.core import (QgsProcessing,
 
 from osgeo import osr, gdal_array, gdal #https://gdal.org/python/
 from itertools import combinations
-from matplotlib import path
 import numpy as np
 from pyproj.crs import CRS
 from math import floor, ceil
@@ -202,6 +201,14 @@ class MosaicRaster(QgsProcessingAlgorithm):
 
 
     def processAlgorithm(self, parameters, context, feedback):
+
+        from lftools.dependencies import ensure_matplotlib
+        path = ensure_matplotlib(feedback)
+        if path is None:
+            raise QgsProcessingException(
+                "The 'matplotlib' library is required for this tool but could not be installed automatically. "
+                "Please install it manually using: pip install matplotlib"
+            )
 
         # inputs
         rasters = self.parameterAsLayerList(

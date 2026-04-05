@@ -44,7 +44,6 @@ from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
 import os, processing
 from qgis.PyQt.QtGui import QIcon
-from matplotlib import path
 
 class SpotElevation(QgsProcessingAlgorithm):
 
@@ -131,6 +130,14 @@ class SpotElevation(QgsProcessingAlgorithm):
         )
 
     def processAlgorithm(self, parameters, context, feedback):
+
+        from lftools.dependencies import ensure_matplotlib
+        path = ensure_matplotlib(feedback)
+        if path is None:
+            raise QgsProcessingException(
+                "The 'matplotlib' library is required for this tool but could not be installed automatically. "
+                "Please install it manually using: pip install matplotlib"
+            )
 
         # inputs
         RasterIN = self.parameterAsRasterLayer(

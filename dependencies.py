@@ -1,96 +1,76 @@
-import os
 import sys
-import subprocess
 import importlib
-
-PLUGIN_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-LOCAL_PACKAGES_DIR = os.path.join(
-    PLUGIN_DIR,
-    f'python{sys.version_info.major}.{sys.version_info.minor}'
-)
+import platform
 
 
-def _add_local_packages():
-    if os.path.isdir(LOCAL_PACKAGES_DIR) and LOCAL_PACKAGES_DIR not in sys.path:
-        sys.path.insert(0, LOCAL_PACKAGES_DIR)
-
-
-def _import_pil():
-    _add_local_packages()
+def _import_module(module_name, attr=None):
     try:
-        from PIL import Image
-        return Image
+        module = importlib.import_module(module_name)
+        return getattr(module, attr) if attr else module
     except Exception:
         return None
 
 
-def _ensure_pip(feedback=None):
-    cmd = [sys.executable, "-m", "pip", "--version"]
-    result = subprocess.run(cmd, capture_output=True, text=True)
+def _install_package(package_name, feedback=None):
+    system_os = platform.system()
 
-    if result.returncode != 0:
-        if feedback is not None:
-            feedback.pushInfo("pip not found. Trying to bootstrap with ensurepip...")
-
-        cmd = [sys.executable, "-m", "ensurepip", "--upgrade"]
-        result = subprocess.run(cmd, capture_output=True, text=True)
-
-        if result.returncode != 0 and feedback is not None:
-            feedback.reportError("Failed to initialize pip.")
-            if result.stderr:
-                feedback.reportError(result.stderr.strip())
-
-
-def ensure_pillow(feedback=None):
-    image_module = _import_pil()
-    if image_module is not None:
-        return image_module
-
-    os.makedirs(LOCAL_PACKAGES_DIR, exist_ok=True)
-
-    _ensure_pip(feedback)
-
-    cmd = [
-        sys.executable,
-        "-m",
-        "pip",
-        "install",
-        "-U",
-        "--target",
-        LOCAL_PACKAGES_DIR,
-        "pillow"
-    ]
+    if feedback:
+        feedback.pushInfo(f'Package "{package_name}" not found. Trying to install...')
 
     try:
-        if feedback is not None:
-            feedback.pushInfo("Pillow library not found. Trying to install automatically...")
-            feedback.pushInfo("Executing: " + " ".join(cmd))
+        if system_os == "Linux":
+            import subprocess
 
-        result = subprocess.run(cmd, capture_output=True, text=True)
+            subprocess.check_call(
+                [sys.executable, "-m", "pip", "install", package_name],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL
+            )
+        else:
+            # macOS e Windows → funciona melhor
+            import pip
+            pip.main(["install", package_name])
 
-        if result.returncode != 0:
-            if feedback is not None:
-                feedback.reportError("Failed to install Pillow.")
-                if result.stderr:
-                    feedback.reportError(result.stderr.strip())
-            return None
+        if feedback:
+            feedback.pushInfo(f'Package "{package_name}" installed successfully.')
+
+        return True
 
     except Exception as e:
-        if feedback is not None:
-            feedback.reportError(f"Failed to install Pillow: {e}")
+        if feedback:
+            feedback.reportError(f'Failed to install "{package_name}": {e}')
+        return False
+
+
+# ==========================
+# PILLOW
+# ==========================
+
+def ensure_pillow(feedback=None):
+    Image = _import_module("PIL", "Image")
+    if Image is not None:
+        return Image
+
+    if not _install_package("Pillow", feedback):
         return None
 
     importlib.invalidate_caches()
-    image_module = _import_pil()
 
-    if image_module is not None:
-        if feedback is not None:
-            feedback.pushInfo("Pillow installed successfully.")
-        return image_module
+    return _import_module("PIL", "Image")
 
-    if feedback is not None:
-        feedback.reportError(
-            "Pillow was installed, but could not be imported. Please check the installation and try again."
-        )
 
-    return None
+# ==========================
+# MATPLOTLIB
+# ==========================
+
+def ensure_matplotlib(feedback=None):
+    path = _import_module("matplotlib", "path")
+    if path is not None:
+        return path
+
+    if not _install_package("matplotlib", feedback):
+        return None
+
+    importlib.invalidate_caches()
+
+    return _import_module("matplotlib", "path")
