@@ -50,7 +50,6 @@ from osgeo import osr, gdal_array, gdal #https://gdal.org/python/
 from itertools import combinations
 import numpy as np
 from pyproj.crs import CRS
-from math import floor, ceil
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
 from lftools.geocapt.dip import Interpolar
