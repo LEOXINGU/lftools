@@ -35,7 +35,6 @@ from lftools.translations.translate import translate
 from lftools.geocapt.topogeo import meters2degrees, str_decimal_to_datetime
 
 import numpy as np
-from pyproj.crs import CRS
 from datetime import datetime
 import codecs
 import os
