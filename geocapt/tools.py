@@ -14,7 +14,6 @@ __author__ = 'Leandro França'
 __date__ = '2024-10-07'
 __copyright__ = '(C) 2024, Leandro França'
 
-import pyproj
 from qgis.core import *
 from qgis.gui import *
 from lftools.translations.translate import translate
@@ -24,6 +23,8 @@ def tr(*string):
     return translate(string, LOC)
 
 def DefinirUTM(iface):
+    import pyproj
+    
     # Obter a extensão atual da tela do mapa
     canvas = iface.mapCanvas()
     extent = canvas.extent()
@@ -68,7 +69,7 @@ def DefinirUTM(iface):
     UTM = datum + ' / UTM zone ' + str(fuso) + hemisf
 
     # crs_info_list = pyproj.database.query_crs_info(auth_name="EPSG", pj_types="PROJECTED_CRS")
-    crs_info_list = pyproj.database.query_utm_crs_info(datum_name = datum)
+    crs_info_list = pyproj.database.query_utm_crs_info(datum_name= datum)
 
     for crs_info in crs_info_list:
         nome = crs_info.name
