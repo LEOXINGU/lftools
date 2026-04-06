@@ -3,7 +3,7 @@
   <renderer-v2 symbollevels="0" referencescale="-1" enableorderby="0" forceraster="0" type="RuleRenderer">
     <rules key="{5c6d92d9-9307-4f90-9b1a-a11e972664ca}">
       <rule symbol="0" label="Drone" filter="ELSE" key="{fecfc7e0-958b-4030-9dcc-53c64fef9584}"/>
-      <rule symbol="1" label="Drone azimuth" filter=" &quot;azimuth&quot; is not NULL" key="{ce61daff-decc-44c0-8b74-9a0da52b7d1a}"/>
+      <rule symbol="1" label="Drone azimuth" filter=" &quot;[AZIMUTE]&quot; is not NULL" key="{ce61daff-decc-44c0-8b74-9a0da52b7d1a}"/>
     </rules>
     <symbols>
       <symbol clip_to_extent="1" is_animated="0" alpha="1" force_rhr="0" name="0" frame_rate="10" type="marker">
@@ -79,7 +79,7 @@
               <Option name="properties" type="Map">
                 <Option name="angle" type="Map">
                   <Option value="true" name="active" type="bool"/>
-                  <Option value="azimuth" name="field" type="QString"/>
+                  <Option value="[AZIMUTE]" name="field" type="QString"/>
                   <Option value="2" name="type" type="int"/>
                 </Option>
               </Option>
