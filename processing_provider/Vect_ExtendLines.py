@@ -34,7 +34,6 @@ from qgis.core import (QgsApplication,
 from numpy import array
 import numpy as np
 from numpy.linalg import norm
-from pyproj.crs import CRS
 from lftools.geocapt.imgs import Imgs
 from lftools.geocapt.topogeo import meters2degrees
 from lftools.translations.translate import translate
