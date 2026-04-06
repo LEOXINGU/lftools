@@ -17,8 +17,6 @@ __copyright__ = '(C) 2019, Leandro França'
 
 from qgis.PyQt.QtCore import QVariant
 from qgis.core import *
-import processing
-from numpy import sin, cos, sqrt, matrix, radians, arctan, pi, floor
 from pyproj.crs import CRS
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
