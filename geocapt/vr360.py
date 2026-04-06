@@ -23,7 +23,7 @@ from lftools.dependencies import ensure_pillow
 Image = ensure_pillow()
 if Image is None:
     raise ImportError(
-        "Pillow (PIL) is required for VR360 functions but could not be loaded."
+        "Pillow (PIL) is required for VR360 functions but could not be loaded. Try to install it using pip: pip install Pillow"
     )
 
 
