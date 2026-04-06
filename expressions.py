@@ -56,7 +56,6 @@ from lftools.geocapt.imgs import img2html_resized, geom_icons
 from lftools.translations.translate import translate
 from numpy import array, pi, sqrt, median
 import numpy as np
-from pyproj.crs import CRS
 import unicodedata
 from datetime import datetime, date
 import datetime as dt
