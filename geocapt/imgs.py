@@ -16,13 +16,8 @@ __copyright__ = '(C) 2021, Leandro França'
 
 import os, base64
 from math import atan, pi, sqrt, floor
-
 from lftools.dependencies import ensure_pillow
-Image = ensure_pillow()
-if Image is None:
-    raise ImportError(
-        "Pillow (PIL) is required for VR360 functions but could not be loaded."
-    )
+
 
 # Imagem para HTML
 def img2html(path_file):
@@ -35,6 +30,11 @@ def img2html(path_file):
 
 # Redimensionar Imagem
 def ImgResize(path_file, lado, resized):
+    Image = ensure_pillow()
+    if Image is None:
+        raise ImportError(
+            "Pillow (PIL) is required but could not be loaded. Try to install it using pip: pip install Pillow"
+        )
     caminho, arquivo = os.path.split(path_file)
     img = Image.open(path_file)
     altura = img.size[1]
