@@ -287,6 +287,8 @@ Transforme pontos, linhas, polígonos e rasters em representações visuais pron
                             os.path.join(caminho_estilos, 'SVG/drone.svg')
                         ]
                     )
+                    ATT = self.detectar_campo(camada, ['azimuth', 'azimute', 'heading(deg)'], standard_name = 'azimuth', feedback=feedback) # para aplicar no CSV do Litchi
+                    estilo_selec = self.prepare_temp_qml(estilo_selec, ['[AZIMUTE]'], [ATT])
                 elif estilo_ponto == 2:  # foto 360
                     estilo_selec = self.prepare_temp_qml_with_svg(
                         estilo_selec,
