@@ -16,30 +16,17 @@ __date__ = '2021-01-12'
 __copyright__ = '(C) 2021, Leandro França'
 
 from qgis.core import (QgsProcessing,
-                       QgsFeatureSink,
-                       QgsWkbTypes,
-                       QgsFields,
-                       QgsField,
-                       QgsFeature,
                        QgsPointXY,
                        QgsGeometry,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
-                       QgsProcessingParameterString,
                        QgsProcessingParameterNumber,
-                       QgsProcessingParameterField,
                        QgsProcessingParameterBoolean,
-                       QgsProcessingParameterCrs,
                        QgsProcessingParameterEnum,
-                       QgsFeatureRequest,
-                       QgsExpression,
                        QgsProcessingParameterFeatureSource,
-                       QgsProcessingParameterFeatureSink,
                        QgsProcessingParameterFileDestination,
                        QgsProcessingParameterMultipleLayers,
-                       QgsProcessingParameterVectorLayer,
-                       QgsProcessingParameterRasterLayer,
-                       QgsProcessingParameterRasterDestination,
+                       QgsEllipsoidUtils,
                        QgsApplication,
                        QgsProject,
                        QgsRasterLayer,
@@ -49,7 +36,6 @@ from qgis.core import (QgsProcessing,
 from osgeo import osr, gdal_array, gdal #https://gdal.org/python/
 from itertools import combinations
 import numpy as np
-from pyproj.crs import CRS
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
 from lftools.geocapt.dip import Interpolar
@@ -350,10 +336,11 @@ class MosaicRaster(QgsProcessingAlgorithm):
         # Transformar resolucao de metros para graus, se o SRC for Geográfico
         src_qgis = QgsCoordinateReferenceSystem(prj)
         if src_qgis.isGeographic():
-            EPSG = int(src_qgis.authid().split(':')[-1])
-            proj_crs = CRS.from_epsg(EPSG)
-            a=proj_crs.ellipsoid.semi_major_metre
-            f=1/proj_crs.ellipsoid.inverse_flattening
+            ellipsoid_id = src_qgis.ellipsoidAcronym()
+            ellipsoid = QgsEllipsoidUtils.ellipsoidParameters(ellipsoid_id)
+            a = ellipsoid.semiMajor
+            f_inv = ellipsoid.inverseFlattening
+            f=1/f_inv
             e2 = f*(2-f)
             N = a/np.sqrt(1-e2*(np.sin((y_min+y_max)/2))**2) # Raio de curvatura 1º vertical
             M = a*(1-e2)/(1-e2*(np.sin((y_min+y_max)/2))**2)**(3/2.) # Raio de curvatura meridiana

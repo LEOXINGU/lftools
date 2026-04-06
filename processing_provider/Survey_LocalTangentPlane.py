@@ -17,7 +17,6 @@ __copyright__ = '(C) 2019, Leandro França'
 
 from qgis.PyQt.QtCore import QVariant
 from qgis.core import *
-from pyproj.crs import CRS
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
 from lftools.geocapt.topogeo import geod2geoc, geoc2geod, geoc2enu, enu2geoc, dd2dms, dms2dd
@@ -300,10 +299,10 @@ Saiba mais:'''
             raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT))
 
         # Parâmetros a e f do elipsoide
-        EPSG = int(GRS.authid().split(':')[-1]) # pegando o EPGS do SRC do QGIS
-        proj_crs = CRS.from_epsg(EPSG) # transformando para SRC do pyproj
-        a=proj_crs.ellipsoid.semi_major_metre
-        f_inv = proj_crs.ellipsoid.inverse_flattening
+        ellipsoid_id = GRS.ellipsoidAcronym()
+        ellipsoid = QgsEllipsoidUtils.ellipsoidParameters(ellipsoid_id)
+        a = ellipsoid.semiMajor
+        f_inv = ellipsoid.inverseFlattening
         f=1/f_inv
         feedback.pushInfo((self.tr('Semi major axis: {}', 'Semi-eixo maior: {}')).format(str(a)))
         feedback.pushInfo((self.tr('Inverse flattening: {}', 'Achatamento (inverso): {}')).format(str(f_inv)))

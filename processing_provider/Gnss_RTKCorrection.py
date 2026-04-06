@@ -19,41 +19,29 @@ from qgis.PyQt.QtCore import QVariant
 from qgis.core import (QgsProcessing,
                        QgsFeatureSink,
                        QgsWkbTypes,
-                       QgsFields,
                        QgsField,
                        QgsPoint,
                        QgsFeature,
                        QgsGeometry,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
-                       QgsProcessingParameterFile,
                        QgsProcessingParameterPoint,
                        QgsProcessingParameterNumber,
-                       QgsFeatureRequest,
-                       QgsProcessingUtils,
                        QgsProcessingParameterFeatureSource,
                        QgsProcessingParameterFeatureSink,
-                       QgsProcessingParameterFileDestination,
-                       QgsProcessingParameterRasterLayer,
-                       QgsProcessingParameterRasterDestination,
                        QgsApplication,
-                       QgsProcessingParameterCrs,
+                       QgsEllipsoidUtils,
                        QgsCoordinateReferenceSystem,
                        QgsCoordinateTransform,
                        QgsPointXY,
                        QgsProject,
-                       QgsRasterLayer,
                        QgsCoordinateTransform,
-                       QgsProcessingLayerPostProcessorInterface,
                        QgsCoordinateReferenceSystem)
 
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
 from numpy import sqrt
 from lftools.geocapt.topogeo import geod2geoc, geoc2geod
-from pyproj.crs import CRS
-from datetime import datetime
-import codecs
 import os
 from qgis.PyQt.QtGui import QIcon
 
@@ -236,11 +224,11 @@ class RTKCorrection(QgsProcessingAlgorithm):
 
 
         # Parâmetros a e f do elipsoide
-        EPSG = int(GRS.authid().split(':')[-1]) # pegando o EPGS do SRC do QGIS
-        proj_crs = CRS.from_epsg(EPSG) # transformando para SRC do pyproj
-        a = proj_crs.ellipsoid.semi_major_metre
-        f_inv = proj_crs.ellipsoid.inverse_flattening
-        f = 1/f_inv
+        ellipsoid_id = GRS.ellipsoidAcronym()
+        ellipsoid = QgsEllipsoidUtils.ellipsoidParameters(ellipsoid_id)
+        a = ellipsoid.semiMajor
+        f_inv = ellipsoid.inverseFlattening
+        f=1/f_inv
         feedback.pushInfo((self.tr('Semi major axis: {}', 'Semi-eixo maior: {}')).format(str(a)))
         feedback.pushInfo((self.tr('Inverse flattening: {}', 'Achatamento (inverso): {}')).format(str(f_inv)))
 
