@@ -68,7 +68,7 @@ def DefinirUTM(iface):
     UTM = datum + ' / UTM zone ' + str(fuso) + hemisf
 
     # crs_info_list = pyproj.database.query_crs_info(auth_name="EPSG", pj_types="PROJECTED_CRS")
-    crs_info_list = pyproj.database.query_utm_crs_info(datum_name= datum)
+    crs_info_list = pyproj.database.query_utm_crs_info(datum_name = datum)
 
     for crs_info in crs_info_list:
         nome = crs_info.name
