@@ -59,8 +59,6 @@ def MeridianConvergence(lon, lat, SRC):
     fuso = round((183+lon)/6.0)
     # Calculo do Meridiano Central
     MC = 6*fuso-183
-    # Fator de distorcao inicial
-    kappaZero = 0.9996
     # Semi-eixos
     ellipsoid_id = SRC.ellipsoidAcronym()
     ellipsoid = QgsEllipsoidUtils.ellipsoidParameters(ellipsoid_id)
