@@ -42,9 +42,20 @@ from lftools.geocapt.cartography import simbologiaPontos3D
 from lftools.translations.translate import translate
 import os, re
 import processing
+import math
+import struct
 from math import pi, atan, degrees
 from qgis.PyQt.QtGui import QIcon
+from PIL import Image, TiffTags, ExifTags
+from PIL.TiffImagePlugin import ImageFileDirectory_v2
+from PIL.TiffTags import TAGS
+ImageFileDirectory_v2._load_dispatch[13] = ImageFileDirectory_v2._load_dispatch[TiffTags.LONG]
 
+try:
+    from pillow_heif import register_heif_opener
+    register_heif_opener()
+except ImportError:
+    pass
 
 class ImportPhotos(QgsProcessingAlgorithm):
 
@@ -95,7 +106,9 @@ class ImportPhotos(QgsProcessingAlgorithm):
     OUTPUT = 'OUTPUT'
     SUBFOLDER = 'SUBFOLDER'
     AZIMUTH = 'AZIMUTH'
-    YPR = 'YPR'
+    SENSOR = 'SENSOR'
+    GEOMETRY = 'GEOMETRY'
+    PHOTOMETRY = 'PHOTOMETRY'
     STYLE = 'STYLE'
 
     def initAlgorithm(self, config=None):
@@ -127,9 +140,25 @@ class ImportPhotos(QgsProcessingAlgorithm):
 
         self.addParameter(
             QgsProcessingParameterBoolean(
-                self.YPR,
-                self.tr('Yaw, pitch, roll'),
-                defaultValue = False
+                self.SENSOR,
+                self.tr('Sensor'),
+                defaultValue = True
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterBoolean(
+                self.GEOMETRY,
+                self.tr('Geometry', 'Geometria'),
+                defaultValue = True
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterBoolean(
+                self.PHOTOMETRY,
+                self.tr('Photometry', 'Fotometria'),
+                defaultValue = True
             )
         )
 
@@ -166,18 +195,6 @@ class ImportPhotos(QgsProcessingAlgorithm):
 
     def processAlgorithm(self, parameters, context, feedback):
 
-        from lftools.dependencies import ensure_pillow
-        Image = ensure_pillow(feedback)
-        if Image is None:
-            raise QgsProcessingException(
-                "The Pillow library (PIL) is required for this tool and could not be loaded automatically."
-            )
-
-        from PIL import TiffTags, ExifTags
-        from PIL.TiffTags import TAGS
-        from PIL.TiffImagePlugin import ImageFileDirectory_v2
-        ImageFileDirectory_v2._load_dispatch[13] = ImageFileDirectory_v2._load_dispatch[TiffTags.LONG]
-
         pasta = self.parameterAsFile(
             parameters,
             self.FOLDER,
@@ -200,9 +217,21 @@ class ImportPhotos(QgsProcessingAlgorithm):
         if CalcAz:
             Atributos = []
 
-        YPR = self.parameterAsBool(
+        InSensor = self.parameterAsBool(
             parameters,
-            self.YPR,
+            self.SENSOR,
+            context
+        )
+
+        InGeometria = self.parameterAsBool(
+            parameters,
+            self.GEOMETRY,
+            context
+        )
+
+        InFotometria = self.parameterAsBool(
+            parameters,
+            self.PHOTOMETRY,
             context
         )
 
@@ -217,11 +246,11 @@ class ImportPhotos(QgsProcessingAlgorithm):
         if subpasta:
             for root, dirs, files in os.walk(pasta, topdown=True):
                 for name in files:
-                    if (name).lower().endswith(('.jpg', '.jpeg', '.tif', '.tiff', '.dng')):
+                    if (name).lower().endswith(('.jpg', '.jpeg', '.tif', '.tiff', '.dng', '.png', '.bmp', '.webp', '.cr2', '.arw', '.heic', '.heif')):
                         lista += [os.path.join(root, name)]
         else:
             for item in os.listdir(pasta):
-                if (item).lower().endswith(('.jpg', '.jpeg', '.tif', '.tiff', '.dng')):
+                if (item).lower().endswith(('.jpg', '.jpeg', '.tif', '.tiff', '.dng', '.png', '.bmp', '.webp', '.cr2', '.arw', '.heic', '.heif')):
                     lista += [os.path.join(pasta, item)]
 
         tam = len(lista)
@@ -294,20 +323,34 @@ class ImportPhotos(QgsProcessingAlgorithm):
         fields.append(QgsField(self.tr('longitude'), QVariant.Double))
         fields.append(QgsField(self.tr('latitude'), QVariant.Double))
         fields.append(QgsField(self.tr('altitude'), QVariant.Double))
-        fields.append(QgsField(self.tr('azimuth'), QVariant.Int))
+        fields.append(QgsField(self.tr('azimuth'), QVariant.Double))
         fields.append(QgsField(self.tr('date_time'), QVariant.String))
         fields.append(QgsField(self.tr('path'), QVariant.String))
-        fields.append(QgsField(self.tr('make','fabricante'), QVariant.String))
-        fields.append(QgsField(self.tr('model','modelo'), QVariant.String))
-        if YPR:
+        
+        if InSensor:
+            fields.append(QgsField(self.tr('make','fabricante'), QVariant.String))
+            fields.append(QgsField(self.tr('model','modelo'), QVariant.String))
+            fields.append(QgsField(self.tr('dimensions','dimensões'), QVariant.String))
+            fields.append(QgsField(self.tr('FOV'), QVariant.Double))
+            fields.append(QgsField(self.tr('SensorSize'), QVariant.String))
+            fields.append(QgsField('FocalLen', QVariant.Double))
+            fields.append(QgsField('SensW', QVariant.Double))
+            fields.append(QgsField('ImgW', QVariant.Int))
+            fields.append(QgsField('ImgH', QVariant.Int))
+
+        if InFotometria:
+            fields.append(QgsField(self.tr('iso'), QVariant.String))
+            fields.append(QgsField(self.tr('exposure_bias','exp_bias'), QVariant.String))
+            fields.append(QgsField(self.tr('aperture','abertura'), QVariant.String))
+            fields.append(QgsField(self.tr('shutter_speed','obturação'), QVariant.String))
+
+        if InGeometria:
             fields.append(QgsField(self.tr('FlightYaw'), QVariant.Double))
             fields.append(QgsField(self.tr('FlightPitch'), QVariant.Double))
             fields.append(QgsField(self.tr('FlightRoll'), QVariant.Double))
             fields.append(QgsField(self.tr('GimbalYaw'), QVariant.Double))
             fields.append(QgsField(self.tr('GimbalPitch'), QVariant.Double))
             fields.append(QgsField(self.tr('GimbalRoll'), QVariant.Double))
-            fields.append(QgsField(self.tr('FOV'), QVariant.Double))
-            fields.append(QgsField(self.tr('SensorSize'), QVariant.String))
 
         (sink, dest_id) = self.parameterAsSink(
             parameters,
@@ -324,19 +367,25 @@ class ImportPhotos(QgsProcessingAlgorithm):
 
         for index, filepath in enumerate(lista):
             
-            if (filepath).lower().endswith(('.jpg', '.jpeg')):
+            ext_file = (filepath).lower()
+            if ext_file.endswith(('.jpg', '.jpeg', '.png', '.bmp', '.webp', '.heic', '.heif')):
                 caminho, arquivo = os.path.split(filepath)
                 
                 try:
                     img = Image.open(os.path.join(caminho,arquivo))
-                    if img._getexif():
-                        exif = {
-                            ExifTags.TAGS[k]: v
-                            for k, v in img._getexif().items()
-                            if k in ExifTags.TAGS
-                        }
+                    raw_exif = img._getexif()
+                    if raw_exif:
+                        # Dicionário robusto com IDs e nomes
+                        exif = {}
+                        for k, v in raw_exif.items():
+                            exif[k] = v
+                            if k in ExifTags.TAGS:
+                                exif[ExifTags.TAGS[k]] = v
                     else:
                         exif = {}
+
+                    dimensions, iso_str, exp_str, fnum_str, obt_str, img_w, img_h = self.format_photo_metadata(img, exif)
+                    
                     lon, lat = 0, 0
                     Az = None
                     date_time = None
@@ -344,17 +393,59 @@ class ImportPhotos(QgsProcessingAlgorithm):
                     img.close()
                 except:
                     lon = 0
+                    img_w = img_h = 0
                     exif = {}
+
+                # 1. Metadados de Geometria e Sensor (Prioridade XMP para Drones/DNG)
+                FlightYaw = FlightPitch = FlightRoll = GimbalYaw = GimbalPitch = GimbalRoll = FOV = SensorSize = None
+                xmp_data = self.extract_image_metadata(filepath, exif)
+                
+                # Desempacotar metadados XMP
+                (FlightYaw, FlightPitch, FlightRoll, 
+                 GimbalYaw, GimbalPitch, GimbalRoll, 
+                 FOV, SensorSize, focal_len, sens_w,
+                 xmp_lat, xmp_lon, xmp_alt, xmp_alt_rel,
+                 xmp_iso, xmp_obt, xmp_fnum, xmp_exp,
+                 xmp_w, xmp_h) = xmp_data
+
+                # 2. Resolução (Correção para miniaturas de DNG)
+                if xmp_w and xmp_h:
+                    if img_w < 1000 or img_h < 1000: # Provável miniatura
+                        img_w, img_h = int(xmp_w), int(xmp_h)
+                        dimensions = f"{img_w}x{img_h}"
+
+                # 3. GPS (Fallback/Prioridade XMP se EXIF falhar)
                 if 'GPSInfo' in exif:
                     lat, lon = coordenadas(exif)
-                    if lat != 0:
-                        if 17 in exif['GPSInfo']:
-                            Az = float(azimute(exif))
-                        if 6 in exif['GPSInfo']:
-                            try:
-                                altitude = float(exif['GPSInfo'][6][0])/exif['GPSInfo'][6][1]
-                            except:
-                                altitude = float(exif['GPSInfo'][6])
+                    if 17 in exif['GPSInfo']:
+                        Az = float(azimute(exif))
+                    if 6 in exif['GPSInfo']:
+                        try:
+                            altitude = float(exif['GPSInfo'][6][0])/exif['GPSInfo'][6][1]
+                        except:
+                            altitude = float(exif['GPSInfo'][6])
+                
+                # Se EXIF falhar (como no DNG), usa XMP
+                if (lat == 0 or lon == 0) and (xmp_lat is not None and xmp_lon is not None):
+                    lat, lon = xmp_lat, xmp_lon
+                if altitude is None and xmp_alt is not None:
+                    altitude = xmp_alt
+                elif altitude is None and xmp_alt_rel is not None:
+                    altitude = xmp_alt_rel
+
+                # 4. Fotometria (Se estiver vazio e tiver no XMP)
+                if not iso_str and xmp_iso: iso_str = f"ISO{int(xmp_iso)}"
+                if not fnum_str and xmp_fnum: fnum_str = f"f/{xmp_fnum:.1f}"
+                if not exp_str and xmp_exp is not None: 
+                    exp_str = f"EXP{float(xmp_exp):.1f}".replace('EXP-0.0', 'EXP0').replace('EXP0.0', 'EXP0')
+                if not obt_str and xmp_obt:
+                    # Formatar obturação vinda do XMP (float)
+                    if xmp_obt < 1:
+                        obt_str = f"1/{int(round(1/xmp_obt))}"
+                    else:
+                        obt_str = f"{round(xmp_obt, 1)}s"
+
+                # 5. Data e Hora
                 if 'DateTimeOriginal' in exif:
                     date_time = data_hora(exif['DateTimeOriginal'])
                 elif 'DateTime' in exif:
@@ -371,28 +462,60 @@ class ImportPhotos(QgsProcessingAlgorithm):
                     modelo = ''
 
                 if lon != 0:
-                    if YPR:
-                        FlightYaw, FlightPitch, FlightRoll, GimbalYaw, GimbalPitch, GimbalRoll, FOV, SensorSize = self.extract_image_metadata(filepath, exif)
+                    # Fallback para Azimute
+                    if Az is None:
+                        if GimbalYaw is not None:
+                            Az = GimbalYaw
+                        elif FlightYaw is not None:
+                            Az = FlightYaw
+
                     if not CalcAz:
                         feature = QgsFeature(fields)
                         feature.setGeometry(QgsGeometry(QgsPoint(lon, lat, altitude if altitude != None else 0)))
-                        att = [arquivo, lon, lat, altitude, Az, date_time, filepath, fabricante, modelo]
-                        if YPR:
-                            att[4] = FlightYaw
-                            att += [FlightYaw, FlightPitch, FlightRoll, GimbalYaw, GimbalPitch, GimbalRoll, FOV, SensorSize]
+                        
+                        # Atributos Automáticos
+                        # Usar casting explícito para evitar erros de conversão no QGIS 4.0 (Qt 6)
+                        att = [arquivo, float(lon), float(lat), float(altitude) if altitude is not None else 0.0, float(Az) if Az is not None else 0.0, date_time, filepath]
+                        
+                        # Categorias
+                        if InSensor:
+                            # FOV, focal_len e sens_w devem ser float. img_w e img_h devem ser int.
+                            att += [fabricante, modelo, dimensions, 
+                                    float(FOV) if FOV is not None else None, 
+                                    SensorSize, 
+                                    float(focal_len) if focal_len is not None else None, 
+                                    float(sens_w) if sens_w is not None else None, 
+                                    int(img_w) if img_w is not None else None, 
+                                    int(img_h) if img_h is not None else None]
+                        if InFotometria:
+                            att += [iso_str, exp_str, fnum_str, obt_str]
+                        if InGeometria:
+                            # Todos os ângulos devem ser float
+                            att += [float(val) if val is not None else None for val in [FlightYaw, FlightPitch, FlightRoll, GimbalYaw, GimbalPitch, GimbalRoll]]
+                            
                         feature.setAttributes(att)
                         sink.addFeature(feature, QgsFeatureSink.FastInsert)
                     else:
-                        if YPR:
-                            Atributos += [[arquivo, lon, lat, altitude, Az, date_time, filepath, fabricante, modelo, FlightYaw, FlightPitch, FlightRoll, GimbalYaw, GimbalPitch, GimbalRoll, FOV, SensorSize]]
-                        else:
-                            Atributos += [[arquivo, lon, lat, altitude, Az, date_time, filepath, fabricante, modelo]]
+                        att = [arquivo, float(lon), float(lat), float(altitude) if altitude is not None else 0.0, float(Az) if Az is not None else 0.0, date_time, filepath]
+                        if InSensor:
+                            att += [fabricante, modelo, dimensions, 
+                                    float(FOV) if FOV is not None else None, 
+                                    SensorSize, 
+                                    float(focal_len) if focal_len is not None else None, 
+                                    float(sens_w) if sens_w is not None else None, 
+                                    int(img_w) if img_w is not None else None, 
+                                    int(img_h) if img_h is not None else None]
+                        if InFotometria:
+                            att += [iso_str, exp_str, fnum_str, obt_str]
+                        if InGeometria:
+                            att += [float(val) if val is not None else None for val in [FlightYaw, FlightPitch, FlightRoll, GimbalYaw, GimbalPitch, GimbalRoll]]
+                        Atributos += [att]
                 else:
                     feedback.reportError(erro_msg(arquivo))
                     if copy_ngeo:
                         shutil.copy2(os.path.join(pasta, arquivo), os.path.join(fotos_nao_geo, arquivo))
 
-            elif (filepath).lower().endswith(('.tif', '.tiff', '.dng')):
+            elif ext_file.endswith(('.tif', '.tiff', '.dng', '.cr2', '.arw')):
                 caminho, arquivo = os.path.split(filepath)
                 img = Image.open(os.path.join(caminho,arquivo))
 
@@ -404,6 +527,8 @@ class ImportPhotos(QgsProcessingAlgorithm):
                     for tag_id, value in exif.items():
                         tag_name = TAGS.get(tag_id)
                         meta_dict[tag_name] = value
+
+                dimensions, iso_str, exp_str, fnum_str, obt_str, img_w, img_h = self.format_photo_metadata(img, meta_dict)
 
                 gps_offset = img.tag_v2.get(0x8825)
                 tags = {}
@@ -423,51 +548,130 @@ class ImportPhotos(QgsProcessingAlgorithm):
                 altitude = None
 
                 if 'GPSLatitudeRef' in tags:
-                    lat_ref = str(tags['GPSLatitudeRef'])
-                    lat = eval(str(tags['GPSLatitude']))
-                    lat = (-1 if lat_ref.upper() == 'S' else 1)*(lat[0] + lat[1]/60 + lat[2]/3600)
-                    lon_ref = str(tags['GPSLongitudeRef'])
-                    lon = eval(str(tags['GPSLongitude']))
-                    lon = (-1 if lon_ref.upper() == 'W' else 1)*(lon[0] + lon[1]/60 + lon[2]/3600)
-                    alt_ref = str(tags['GPSAltitudeRef'])
-                    altitude = eval(str(tags['GPSAltitude']))
                     try:
-                        date_time = data_hora(meta_dict['DateTime'][0])
+                        lat_ref = str(tags['GPSLatitudeRef'])
+                        lat_val = eval(str(tags['GPSLatitude']))
+                        lat = (-1 if lat_ref.upper() == 'S' else 1)*(float(lat_val[0]) + float(lat_val[1])/60 + float(lat_val[2])/3600)
+                        
+                        lon_ref = str(tags['GPSLongitudeRef'])
+                        lon_val = eval(str(tags['GPSLongitude']))
+                        lon = (-1 if lon_ref.upper() == 'W' else 1)*(float(lon_val[0]) + float(lon_val[1])/60 + float(lon_val[2])/3060) # Wait, typing error in 3600? fixed below
+                        lon = (-1 if lon_ref.upper() == 'W' else 1)*(float(lon_val[0]) + float(lon_val[1])/60 + float(lon_val[2])/3600)
+                        
+                        alt_val = eval(str(tags['GPSAltitude']))
+                        altitude = float(alt_val[0])/alt_val[1] if alt_val[1] != 0 else float(alt_val[0])
+                        
+                        # Extração de Azimute do GPS (tag 17)
+                        if 'GPSImgDirection' in tags:
+                            az_val = eval(str(tags['GPSImgDirection']))
+                            Az = float(az_val[0])/az_val[1] if az_val[1] != 0 else float(az_val[0])
                     except:
-                        date_time = data_hora(meta_dict['DateTime'])
+                        pass
+
+                    # Data e Hora
+                    for tag_date in ['DateTimeOriginal', 'DateTime', 36867, 306]:
+                        if tag_date in meta_dict:
+                            val = meta_dict[tag_date]
+                            if isinstance(val, (tuple, list)): val = val[0]
+                            date_time = data_hora(str(val))
+                            break
+
                     if 'Make' in meta_dict:
-                        if isinstance(meta_dict['Make'], tuple):
-                            fabricante = str(meta_dict['Make'][0])
-                        else:
-                            fabricante = str(meta_dict['Make'])
+                        fabricante = str(meta_dict['Make'][0]) if isinstance(meta_dict['Make'], tuple) else str(meta_dict['Make'])
+                        fabricante = fabricante.replace('\x00', '').strip()
                     else:
                         fabricante = ''
 
                     if 'Model' in meta_dict:
-                        if isinstance(meta_dict['Model'], tuple):
-                            modelo = str(meta_dict['Model'][0])
-                        else:
-                            modelo = str(meta_dict['Model'])
+                        modelo = str(meta_dict['Model'][0]) if isinstance(meta_dict['Model'], tuple) else str(meta_dict['Model'])
+                        modelo = modelo.replace('\x00', '').strip()
                     else:
                         modelo = ''
 
                     if lon != 0:
-                        if YPR:
-                            FlightYaw, FlightPitch, FlightRoll, GimbalYaw, GimbalPitch, GimbalRoll, FOV, SensorSize = self.extract_image_metadata(filepath, meta_dict)
+                        # 1. Metadados de Geometria e Sensor (Prioridade XMP para Drones/DNG)
+                        FlightYaw = FlightPitch = FlightRoll = GimbalYaw = GimbalPitch = GimbalRoll = FOV = SensorSize = None
+                        xmp_data = self.extract_image_metadata(filepath, meta_dict)
+                        
+                        # Desempacotar metadados XMP
+                        (FlightYaw, FlightPitch, FlightRoll, 
+                         GimbalYaw, GimbalPitch, GimbalRoll, 
+                         FOV, SensorSize, focal_len, sens_w,
+                         xmp_lat, xmp_lon, xmp_alt, xmp_alt_rel,
+                         xmp_iso, xmp_obt, xmp_fnum, xmp_exp,
+                         xmp_w, xmp_h) = xmp_data
+
+                        # 2. Resolução (Correção para miniaturas de DNG)
+                        if xmp_w and xmp_h:
+                            if img_w < 1000 or img_h < 1000: # Provável miniatura
+                                img_w, img_h = int(xmp_w), int(xmp_h)
+                                dimensions = f"{img_w}x{img_h}"
+
+                        # 3. GPS (Fallback/Prioridade XMP para DNG)
+                        # Se EXIF falhar (como no DNG), usa XMP
+                        if (lat == 0 or lon == 0) and (xmp_lat is not None and xmp_lon is not None):
+                            lat, lon = xmp_lat, xmp_lon
+                        if altitude is None and xmp_alt is not None:
+                            altitude = xmp_alt
+                        elif altitude is None and xmp_alt_rel is not None:
+                            altitude = xmp_alt_rel
+
+                        # 4. Fotometria (Se estiver vazio e tiver no XMP)
+                        if not iso_str and xmp_iso: iso_str = f"ISO{int(xmp_iso)}"
+                        if not fnum_str and xmp_fnum: fnum_str = f"f/{xmp_fnum:.1f}"
+                        if not exp_str and xmp_exp is not None: 
+                            exp_str = f"EXP{float(xmp_exp):.1f}".replace('EXP-0.0', 'EXP0').replace('EXP0.0', 'EXP0')
+                        if not obt_str and xmp_obt:
+                            if xmp_obt < 1:
+                                obt_str = f"1/{int(round(1/xmp_obt))}"
+                            else:
+                                obt_str = f"{round(xmp_obt, 1)}s"
+                        
+                        # Fallback para Azimute
+                        if Az is None:
+                            if GimbalYaw is not None:
+                                Az = GimbalYaw
+                            elif FlightYaw is not None:
+                                Az = FlightYaw
+
                         if not CalcAz:
                             feature = QgsFeature(fields)
                             feature.setGeometry(QgsGeometry(QgsPoint(lon, lat, altitude if altitude != None else 0)))
-                            att = [arquivo, lon, lat, altitude, Az, date_time, filepath, fabricante, modelo]
-                            if YPR:
-                                att[4] = FlightYaw
-                                att += [FlightYaw, FlightPitch, FlightRoll, GimbalYaw, GimbalPitch, GimbalRoll, FOV, SensorSize]
+                            
+                            # Atributos Automáticos
+                            att = [arquivo, float(lon), float(lat), float(altitude) if altitude is not None else 0.0, float(Az) if Az is not None else 0.0, date_time, filepath]
+                            
+                            # Categorias
+                            if InSensor:
+                                att += [fabricante, modelo, dimensions, 
+                                        float(FOV) if FOV is not None else None, 
+                                        SensorSize, 
+                                        float(focal_len) if focal_len is not None else None, 
+                                        float(sens_w) if sens_w is not None else None, 
+                                        int(img_w) if img_w is not None else None, 
+                                        int(img_h) if img_h is not None else None]
+                            if InFotometria:
+                                att += [iso_str, exp_str, fnum_str, obt_str]
+                            if InGeometria:
+                                att += [float(val) if val is not None else None for val in [FlightYaw, FlightPitch, FlightRoll, GimbalYaw, GimbalPitch, GimbalRoll]]
+                                
                             feature.setAttributes(att)
                             sink.addFeature(feature, QgsFeatureSink.FastInsert)
                         else:
-                            if YPR:
-                                Atributos += [[arquivo, lon, lat, altitude, Az, date_time, filepath, fabricante, modelo, FlightYaw, FlightPitch, FlightRoll, GimbalYaw, GimbalPitch, GimbalRoll, FOV, SensorSize]]
-                            else:
-                                Atributos += [[arquivo, lon, lat, altitude, Az, date_time, filepath, fabricante, modelo]]
+                            att = [arquivo, float(lon), float(lat), float(altitude) if altitude is not None else 0.0, float(Az) if Az is not None else 0.0, date_time, filepath]
+                            if InSensor:
+                                att += [fabricante, modelo, dimensions, 
+                                        float(FOV) if FOV is not None else None, 
+                                        SensorSize, 
+                                        float(focal_len) if focal_len is not None else None, 
+                                        float(sens_w) if sens_w is not None else None, 
+                                        int(img_w) if img_w is not None else None, 
+                                        int(img_h) if img_h is not None else None]
+                            if InFotometria:
+                                att += [iso_str, exp_str, fnum_str, obt_str]
+                            if InGeometria:
+                                att += [float(val) if val is not None else None for val in [FlightYaw, FlightPitch, FlightRoll, GimbalYaw, GimbalPitch, GimbalRoll]]
+                            Atributos += [att]
                     else:
                         feedback.reportError(erro_msg(arquivo))
                 else:
@@ -485,9 +689,14 @@ class ImportPhotos(QgsProcessingAlgorithm):
             for k in range(len(Atributos)-1):
                 pntA = QgsPoint( float(Atributos[k][1]),  float(Atributos[k][2]))
                 pntB = QgsPoint( float(Atributos[k+1][1]),float(Atributos[k+1][2]))
-                Az = int(180*CalAZ(pntA, pntB)[0]/pi)
-                Atributos[k][4] = Az
-            Atributos[-1][4] = Az
+                res_az = CalAZ(pntA, pntB)[0]
+                if res_az is not None:
+                    # Apenas atualiza se os pontos não forem coincidentes
+                    Az = round(180*res_az/pi, 1)
+                    Atributos[k][4] = Az
+            # O último ponto mantém o azimute do penúltimo ou o seu próprio gimbal
+            if len(Atributos) > 1:
+                Atributos[-1][4] = Atributos[-2][4]
 
             # Criar feições
             for att in Atributos:
@@ -512,145 +721,296 @@ class ImportPhotos(QgsProcessingAlgorithm):
         return {self.OUTPUT: dest_id}
     
     
+    def _read_tiff_ifd(self, f, offset, endian, name="IFD", depth=0, results=None):
+        """Metodo auxiliar para ler IFDs recursivamente em arquivos TIFF/DNG"""
+        if depth > 5 or results is None: return
+        f.seek(offset)
+        count_data = f.read(2)
+        if len(count_data) < 2: return
+        num_tags = struct.unpack(endian + 'H', count_data)[0]
+        
+        # Tags de interesse: 256=W, 257=H, 34855=ISO, 33434=ExpTime, 33437=FNum, 34665=ExifIFD, 34853=GPS_IFD, 330=SubIFDs, 37386=Folen, 41989=F35, 17=GPSAz
+        tags_map = {
+            256: 'w', 257: 'h', 34855: 'iso', 33434: 'obt', 33437: 'fnum',
+            34665: 'exif_off', 34853: 'gps_off', 330: 'sub_off',
+            37386: 'flen', 41989: 'f35', 17: 'az'
+        }
+        
+        next_calls = []
+        for _ in range(num_tags):
+            tag_data = f.read(12)
+            if len(tag_data) < 12: break
+            tag_id, tag_type, count, val_offset = struct.unpack(endian + 'HHII', tag_data)
+            
+            if tag_id in tags_map:
+                key = tags_map[tag_id]
+                if tag_id in [256, 257, 34855, 41989]: # Valores diretos ou curtos (W, H, ISO, F35)
+                    if results.get(key) is None or (key in ['w', 'h'] and val_offset > results.get(key, 0)):
+                        results[key] = val_offset
+                elif tag_id in [34665, 34853]: # Offsets
+                    next_calls.append((val_offset, key))
+                elif tag_id == 330: # SubIFDs
+                    if count == 1:
+                        next_calls.append((val_offset, 'sub'))
+                    elif count > 1:
+                        curr_pos = f.tell()
+                        f.seek(val_offset)
+                        for _ in range(count):
+                            off_data = f.read(4)
+                            if len(off_data) == 4:
+                                next_calls.append((struct.unpack(endian + 'I', off_data)[0], 'sub'))
+                        f.seek(curr_pos)
+                elif tag_id in [33434, 33437, 37386, 17]: # Racionais
+                    curr_pos = f.tell()
+                    f.seek(val_offset)
+                    rat_data = f.read(8)
+                    if len(rat_data) == 8:
+                        n, d = struct.unpack(endian + 'II', rat_data)
+                        if d != 0: results[key] = n / d
+                    f.seek(curr_pos)
+        
+        for off, n in next_calls:
+            self._read_tiff_ifd(f, off, endian, n, depth + 1, results)
+
+    def format_photo_metadata(self, img, exif):
+        """
+        Baseado nos exemplos do usuário: 4000x3000, ISO100, EXP0.3, f/1.7, 1/2500
+        Retorna: dimensões, iso, compensação, abertura, obturação
+        """
+        # Função interna para extrair valor seja por nome ou ID
+        def get_val(tags_names_or_ids):
+            for t in tags_names_or_ids:
+                if t in exif: return exif[t]
+            return None
+
+        # Helper para converter racionais/objetos em frações num/den
+        def get_ratio(val):
+            if hasattr(val, 'numerator') and hasattr(val, 'denominator'):
+                return val.numerator, val.denominator
+            if isinstance(val, (tuple, list)) and len(val) == 2:
+                return val[0], val[1]
+            return None
+
+        # --- Resolucao ---
+        w = get_val(['ImageWidth', 256, 'ExifImageWidth', 40962])
+        h = get_val(['ImageLength', 257, 'ExifImageHeight', 40963])
+        
+        # Correcao para DNG/TIFF (Pillow costuma ler a miniatura IFD0)
+        ext = ""
+        if hasattr(img, 'filename'): ext = os.path.splitext(img.filename)[1].lower()
+        if ext in ['.dng', '.tif', '.tiff'] or (w and h and (int(w) < 500 or int(h) < 500)):
+            tiff_res = {'w': None, 'h': None, 'iso': None, 'obt': None, 'fnum': None}
+            try:
+                with open(img.filename, 'rb') as f:
+                    header = f.read(8)
+                    endian = '<' if header[:2] == b'II' else '>'
+                    first_ifd = struct.unpack(endian + 'I', header[4:8])[0]
+                    self._read_tiff_ifd(f, first_ifd, endian, results=tiff_res)
+                if tiff_res['w'] and tiff_res['h']:
+                    w, h = tiff_res['w'], tiff_res['h']
+            except: pass
+
+        if isinstance(w, (tuple, list)): w = w[0]
+        if isinstance(h, (tuple, list)): h = h[0]
+        if not w or not h: w, h = img.size
+        dimensions = f"{int(w)}x{int(h)}"
+
+        # --- Fotometria ---
+        iso = get_val(['ISOSpeedRatings', 34855])
+        if isinstance(iso, (tuple, list)): iso = iso[0]
+        if iso is None and ext in ['.dng', '.tif'] and 'tiff_res' in locals():
+            iso = tiff_res.get('iso')
+        iso_str = f"ISO{iso}" if iso else ""
+
+        exp = get_val(['ExposureBiasValue', 37380])
+        ratio_exp = get_ratio(exp)
+        if ratio_exp:
+            exp = ratio_exp[0]/ratio_exp[1] if ratio_exp[1] != 0 else ratio_exp[0]
+        exp_str = f"EXP{float(exp):.1f}".replace('EXP-0.0', 'EXP0').replace('EXP0.0', 'EXP0') if exp is not None else ""
+
+        fnum = get_val(['FNumber', 33437])
+        ratio_fnum = get_ratio(fnum)
+        if ratio_fnum:
+            fnum = ratio_fnum[0]/ratio_fnum[1] if ratio_fnum[1] != 0 else ratio_fnum[0]
+        if not fnum and ext in ['.dng', '.tif'] and 'tiff_res' in locals():
+            fnum = tiff_res.get('fnum')
+        fnum_str = f"f/{float(fnum):.1f}" if fnum else ""
+
+        obt = get_val(['ExposureTime', 33434, 'ShutterSpeedValue', 37377, 'ShutterSpeed'])
+        if not obt and ext in ['.dng', '.tif'] and 'tiff_res' in locals():
+            obt = tiff_res.get('obt')
+            
+        obt_str = ""
+        ratio_obt = get_ratio(obt)
+        
+        if ratio_obt:
+            num, den = ratio_obt
+            if den == 0:
+                obt_str = ""
+            else:
+                com_div = math.gcd(int(num), int(den))
+                num, den = num // com_div, den // com_div
+                
+                if num == 1:
+                    obt_str = f"1/{den}"
+                elif num >= den:
+                    obt_str = f"{round(num/den, 1)}s"
+                else:
+                    if den / num > 1.5:
+                        obt_str = f"1/{int(round(den/num))}"
+                    else:
+                        obt_str = f"{num}/{den}"
+        elif isinstance(obt, (float, int)):
+            if 0 < obt < 1:
+                obt_str = f"1/{int(round(1/obt))}"
+            elif obt >= 1:
+                obt_str = f"{round(float(obt), 1)}s"
+            else:
+                obt_str = str(obt)
+        else:
+            # Última tentativa: converter o objeto estranho para string direta
+            obt_str = str(obt) if obt is not None else ""
+        
+        return dimensions, iso_str, exp_str, fnum_str, obt_str, int(w), int(h)
+
+
     def extract_image_metadata(self, image_path, exif_data):
         """
-        Extrai yaw, pitch, roll, FOV e tamanho do sensor analisando XMP + EXIF.
-        Compatível com diversos modelos DJI (Phantom, Mavic, Enterprise, Matrice).
+        Extrai yaw, pitch, roll, FOV e Tamanho do Sensor de imagens analisando o bloco XMP e EXIF.
+        Desenvolvido para ser resiliente a diferentes versões de firmware e modelos DJI (P4P até Matrice 350).
         """
-        FlightYaw = FlightPitch = FlightRoll = None
-        GimbalYaw = GimbalPitch = GimbalRoll = None
-        FOV = SensorWidth = SensorHeight = None
+        def to_float(val):
+            if val is None: return None
+            if isinstance(val, (tuple, list)) and len(val) > 0:
+                val = val[0]
+            try: return float(val)
+            except:
+                if hasattr(val, 'numerator') and hasattr(val, 'denominator'):
+                     return float(val.numerator) / val.denominator if val.denominator != 0 else 0.0
+                return None
 
-        # Base de sensores DJI (mm)
+        FlightYaw = FlightPitch = FlightRoll = GimbalYaw = GimbalPitch = GimbalRoll = FOV = SensorWidth = SensorHeight = None
+        f_real = f_35mm = None
+        
+        # Base de dados de sensores DJI (Largura x Altura em mm)
         DJI_SENSORS = {
-            'FC6310': (13.2, 8.8),     # Phantom 4 Pro
-            'FC6310S': (13.2, 8.8),    # Phantom 4 Pro V2
-            'FC220': (13.2, 8.8),      # Mavic 2 Pro
-            'FC2204': (6.4, 4.8),      # Mavic Air 2
-            'FC3170': (13.2, 8.8),     # Air 2S
-            'FC7303': (17.3, 13.0),    # Mavic 3
-            'FC3682': (6.4, 4.8),      # M2 Enterprise Adv
-            'FC8484': (17.3, 13.0),    # Mavic 3 Enterprise
-            'FC8482': (6.4, 4.8),      # Mavic 3 Thermal
-            'M30T': (6.4, 4.8),        # Matrice 30T
-            'ZenmuseP1': (35.9, 24.0),
-            'ZenmuseH20': (6.17, 4.55),
-            'ZenmuseH20T': (6.17, 4.55),
-            'FC6510': (13.2, 8.8),
-            'FC6520': (17.3, 13.0),
-            'FC6540': (23.5, 15.7),
+            'FC6310': (13.2, 8.8), 'FC6310S': (13.2, 8.8), 'FC220': (13.2, 8.8),
+            'FC2204': (6.4, 4.8), 'FC3170': (13.2, 8.8), 'FC7303': (17.3, 13.0),
+            'FC3682': (6.4, 4.8), 'FC8484': (17.3, 13.0), 'FC8482': (6.4, 4.8),
+            'M30T': (6.4, 4.8), 'ZenmuseP1': (35.9, 24.0), 'ZenmuseH20': (6.17, 4.55),
+            'ZenmuseH20T': (6.17, 4.55), 'FC6510': (13.2, 8.8), 'FC6520': (17.3, 13.0),
+            'FC6540': (23.5, 15.7), 'FC330': (6.5, 4.88)
         }
 
         try:
-            # -------- 1. LEITURA DO XMP --------
+            # 1. Extração via XMP
             with open(image_path, "rb") as fb:
-                data = fb.read(131072)  # lê só 128KB (mais eficiente)
-
-            import re
+                data = fb.read(262144)
+            
             m = re.search(br"<x:xmpmeta[\s\S]*?</x:xmpmeta>", data, re.IGNORECASE)
-            if not m:
-                m = re.search(br"<xmpmeta[\s\S]*?</xmpmeta>", data, re.IGNORECASE)
-
+            if not m: m = re.search(br"<xmpmeta[\s\S]*?</xmpmeta>", data, re.IGNORECASE)
+            
             if m:
                 xmp = m.group(0).decode("utf-8", errors="ignore")
-
-                def find_attr_or_elem(names):
+                def find_attr_or_elem(names, as_string=False):
                     for name in names:
-                        # atributo
-                        rx_attr = re.compile(
-                            rf'(?:[\w-]+:)?{name}\s*=\s*["\']([\-+]?\d+(?:\.\d+)?)["\']',
-                            re.IGNORECASE
-                        )
+                        rx_attr = re.compile(rf'(?:[\w-]+:)?{re.escape(name)}\s*=\s*["\']([\-+]?\d+(?:\.\d+)?)["\']', re.IGNORECASE)
                         m_attr = rx_attr.search(xmp)
                         if m_attr:
-                            return float(m_attr.group(1))
-
-                        # elemento XML
-                        rx_elem = re.compile(
-                            rf'<([^:>]*:)?{name}>([\-+]?\d+(?:\.\d+)?)</([^:>]*:)?{name}>',
-                            re.IGNORECASE
-                        )
+                            val = m_attr.group(1)
+                            return val if as_string else float(val)
+                        rx_elem = re.compile(rf'<([^:>]*:)?{re.escape(name)}\s*>([\-+]?\d+(?:\.\d+)?)\s*</([^:>]*:)?{re.escape(name)}\s*>', re.IGNORECASE)
                         m_elem = rx_elem.search(xmp)
                         if m_elem:
-                            return float(m_elem.group(2))
-
+                            val = m_elem.group(2)
+                            return val if as_string else float(val)
                     return None
 
-                # Drone
-                FlightYaw = find_attr_or_elem(["FlightYawDegree", "Yaw", "DroneYawDegree"])
-                FlightPitch = find_attr_or_elem(["FlightPitchDegree", "Pitch"])
-                FlightRoll = find_attr_or_elem(["FlightRollDegree", "Roll"])
+                FlightYaw = find_attr_or_elem(["FlightYawDegree", "YawDegree", "Yaw", "FlightYaw"])
+                FlightPitch = find_attr_or_elem(["FlightPitchDegree", "PitchDegree", "Pitch", "FlightPitch"])
+                FlightRoll = find_attr_or_elem(["FlightRollDegree", "RollDegree", "Roll", "FlightRoll"])
+                GimbalYaw = find_attr_or_elem(["GimbalYawDegree", "GimbalYaw", "PoseYawDegrees", "CameraYawDegree"])
+                GimbalPitch = find_attr_or_elem(["GimbalPitchDegree", "GimbalPitch", "PosePitchDegrees", "CameraPitchDegree"])
+                GimbalRoll = find_attr_or_elem(["GimbalRollDegree", "GimbalRoll", "PoseRollDegrees", "CameraRollDegree"])
+                FOV = find_attr_or_elem(["FieldOfView", "HorizontalFOV", "HFOV"])
+                SensorWidth = find_attr_or_elem(["SensorWidth", "SensorWidthmm"])
+                SensorHeight = find_attr_or_elem(["SensorHeight", "SensorHeightmm"])
 
-                # Gimbal
-                GimbalYaw = find_attr_or_elem(["GimbalYawDegree", "CameraYaw"])
-                GimbalPitch = find_attr_or_elem(["GimbalPitchDegree", "CameraPitch"])
-                GimbalRoll = find_attr_or_elem(["GimbalRollDegree", "CameraRoll"])
+                XMPLat = find_attr_or_elem(["GPSLatitude", "Latitude"])
+                XMPLon = find_attr_or_elem(["GPSLongitude", "Longitude"])
+                XMPAlt = find_attr_or_elem(["AbsoluteAltitude", "GPSAltitude", "Altitude"])
+                XMPAltRel = find_attr_or_elem(["RelativeAltitude"])
+                XMPISO = find_attr_or_elem(["ISOSpeedRatings", "ISO", "ExposureIndex"])
+                XMPObt = find_attr_or_elem(["ExposureTime", "ShutterSpeedValue"])
+                XMPFNum = find_attr_or_elem(["FNumber", "ApertureValue"])
+                XMPExp = find_attr_or_elem(["ExposureBiasValue", "ExposureBias"])
+                XMPW = find_attr_or_elem(["FullImageWidth", "ImageWidth", "ExifImageWidth", "OriginalImageWidth"])
+                XMPH = find_attr_or_elem(["FullImageHeight", "ImageHeight", "ExifImageHeight", "OriginalImageHeight"])
 
-                # Extras
-                FOV = find_attr_or_elem(["FieldOfView", "HFOV"])
-                SensorWidth = find_attr_or_elem(["SensorWidth"])
-                SensorHeight = find_attr_or_elem(["SensorHeight"])
+            # 2. Refinamento via IFD Nativo (para DNG/TIF onde EXIF falha)
+            ext = os.path.splitext(image_path)[1].lower()
+            tiff_res = {}
+            if ext in ['.dng', '.tif', '.tiff']:
+                try:
+                    with open(image_path, 'rb') as f:
+                        header = f.read(8)
+                        endian = '<' if header[:2] == b'II' else '>'
+                        first_ifd = struct.unpack(endian + 'I', header[4:8])[0]
+                        self._read_tiff_ifd(f, first_ifd, endian, results=tiff_res)
+                except: pass
 
-            # -------- 2. REFINAMENTO EXIF --------
+            # 3. Refinamento de Metadados e Banco de Dados DJI
+            model = make = ""
             if exif_data:
                 model = str(exif_data.get('Model', '')).replace('\x00', '').strip()
                 make = str(exif_data.get('Make', '')).replace('\x00', '').strip()
+                f_real = to_float(exif_data.get('FocalLength'))
+                f_35mm = to_float(exif_data.get('FocalLengthIn35mmFilm') or exif_data.get('FocalLengthIn35mmFormat'))
 
-                f_real = exif_data.get('FocalLength')
-                if isinstance(f_real, (tuple, list)) and f_real[1] != 0:
-                    f_real = float(f_real[0]) / f_real[1]
+            # Fallbacks via Parser Binário
+            if not f_real: f_real = tiff_res.get('flen')
+            if not f_35mm: f_35mm = tiff_res.get('f35')
+            if GimbalYaw is None: GimbalYaw = tiff_res.get('az')
+            
+            # Se ainda vazio, tenta Model/Make no XMP (comum em DNGs DJI)
+            if not model and 'xmp' in locals():
+                m_mod = re.search(r'Model=["\']([^"\']+)["\']', xmp)
+                if m_mod: model = m_mod.group(1)
+                m_mak = re.search(r'Make=["\']([^"\']+)["\']', xmp)
+                if m_mak: make = m_mak.group(1)
 
-                # Se for DJI
-                if "DJI" in make.upper() or model.startswith("FC"):
+            # Lógica Elástica DJI
+            if "DJI" in make.upper() or model.startswith("FC") or "ZENMUSE" in model.upper():
+                if GimbalPitch is not None and abs(GimbalPitch) < 0.1: GimbalPitch = -90.0
+                elif GimbalPitch is None and (model in ['FC3682', 'FC8482', 'FC330']): GimbalPitch = -90.0
+                if GimbalYaw is None and FlightYaw is not None: GimbalYaw = FlightYaw
+                if model in DJI_SENSORS:
+                    sw, sh = DJI_SENSORS[model]
+                    if SensorWidth is None: SensorWidth = sw
+                    if SensorHeight is None: SensorHeight = sh
+                
+                if FOV is None:
+                    if f_35mm: FOV = round(2 * math.degrees(math.atan(36.0 / (2.0 * f_35mm))), 2)
+                    elif f_real and SensorWidth: FOV = round(2 * math.degrees(math.atan(SensorWidth / (2.0 * f_real))), 2)
+                
+                if SensorWidth is None and f_real and f_35mm:
+                    SensorWidth = round(36.0 * f_real / f_35mm, 2)
+                if SensorWidth and SensorHeight is None:
+                    ratio = 0.75 if SensorWidth < 20 else 0.66
+                    SensorHeight = round(SensorWidth * ratio, 2)
 
-                    # Pitch nadir
-                    if GimbalPitch is not None and abs(GimbalPitch) < 0.1:
-                        GimbalPitch = -90.0
+            sensor_str = f"{SensorWidth} x {SensorHeight} mm" if (SensorWidth and SensorHeight) else (f"{SensorWidth} mm" if SensorWidth else None)
+            
+            return (to_float(FlightYaw), to_float(FlightPitch), to_float(FlightRoll), 
+                    to_float(GimbalYaw), to_float(GimbalPitch), to_float(GimbalRoll), 
+                    to_float(FOV), sensor_str, to_float(f_real), to_float(SensorWidth),
+                    to_float(XMPLat), to_float(XMPLon), to_float(XMPAlt), to_float(XMPAltRel),
+                    to_float(XMPISO), to_float(XMPObt), to_float(XMPFNum), to_float(XMPExp),
+                    to_float(XMPW), to_float(XMPH))
 
-                    # Yaw fallback
-                    if GimbalYaw is None and FlightYaw is not None:
-                        GimbalYaw = FlightYaw
+        except Exception as e:
+            return None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None
 
-                    # Sensor via banco
-                    if model in DJI_SENSORS:
-                        sw, sh = DJI_SENSORS[model]
-                        if SensorWidth is None:
-                            SensorWidth = sw
-                        if SensorHeight is None:
-                            SensorHeight = sh
-
-                    # Cálculo FOV
-                    f_35mm = exif_data.get('FocalLengthIn35mmFilm')
-                    if f_real and f_35mm:
-                        from math import atan, degrees
-
-                        if FOV is None:
-                            FOV = round(2 * degrees(atan(36.0 / (2.0 * float(f_35mm)))), 2)
-
-                        if SensorWidth is None:
-                            SensorWidth = round(36.0 * f_real / float(f_35mm), 2)
-
-                    # Altura do sensor
-                    if SensorWidth and SensorHeight is None:
-                        ratio = 0.75  # padrão 4:3
-                        if SensorWidth > 20:
-                            ratio = 0.66  # sensores grandes
-                        SensorHeight = round(SensorWidth * ratio, 2)
-
-            sensor_str = (
-                f"{SensorWidth} x {SensorHeight} mm"
-                if (SensorWidth and SensorHeight)
-                else (f"{SensorWidth} mm" if SensorWidth else None)
-            )
-
-            return (
-                FlightYaw, FlightPitch, FlightRoll,
-                GimbalYaw, GimbalPitch, GimbalRoll,
-                FOV, sensor_str
-            )
-
-        except Exception:
-            return None, None, None, None, None, None, None, None
         
 
     def postProcessAlgorithm(self, context, feedback):
