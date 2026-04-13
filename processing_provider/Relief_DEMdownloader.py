@@ -83,11 +83,12 @@ class DEMdownloader(QgsProcessingAlgorithm):
     OPEN = 'OPEN'
     STYLE = 'STYLE'
 
-    dataset = ['FABDEM - Global - 1 arc sec',
+    dataset = ['SRTM - Global - 1 arc sec',
+               'Copernicus DEM GLO-30 - Global - 1 arc sec',
+               'FABDEM - Global - 1 arc sec',
                'ANADEM - South America - 1 arc sec',
-               'GMTED2010 - Global - 30 arc sec',
-               'SRTM - Global - 1 arc sec',
-               'Copernicus DEM GLO-30 - Global - 1 arc sec']
+               'GMTED2010 - Global - 30 arc sec'
+               ]
 
     def initAlgorithm(self, config=None):
 
@@ -185,7 +186,7 @@ class DEMdownloader(QgsProcessingAlgorithm):
 
         self.datasetName = self.dataset[mde]
 
-        Tiles = [FABDEM_tiles, ANADEM_tiles, GMTED_tiles, SRTM_tiles, COPDEM30_tiles]
+        Tiles = [SRTM_tiles, COPDEM30_tiles, FABDEM_tiles, ANADEM_tiles, GMTED_tiles]
         dataset = Tiles[mde]
         
         Output = self.parameterAsFileOutput(
@@ -201,7 +202,7 @@ class DEMdownloader(QgsProcessingAlgorithm):
         )
 
         # Listar datasets a partir da extensão
-        if mde in [0, 1, 3, 4]:  # FABDEM, ANADEM, SRTM, Copernicus
+        if mde in [0, 1, 3, 4]:  # SRTM, Copernicus, FABDEM, ANADEM
             tiles = gerar_tiles(lat_min, lat_max, lon_min, lon_max)
         elif mde == 2:  # GMTED2010
             tiles = gerar_tiles(lat_min, lat_max, lon_min, lon_max, lat0=-56.0, lon0=-180.0, step_lat=20.0, step_lon=30.0)
@@ -228,24 +229,24 @@ class DEMdownloader(QgsProcessingAlgorithm):
                 continue
 
             # Montar nome e URL conforme o dataset
-            if mde == 0:  # FABDEM
+            if mde == 2:  # FABDEM
                 pasta = folder_10x10_for_tile(tile) + '_FABDEM_V1-2'
                 tile_name = f"{tile}_FABDEM_V1-2.tif"
                 url = f"https://huggingface.co/datasets/links-ads/fabdem-v12/resolve/main/tiles/{pasta}/{tile_name}?download=true"
 
-            elif mde == 1:  # ANADEM
+            elif mde == 3:  # ANADEM
                 pasta = folder_10x10_for_tile(tile) + '_ANADEM_V1'
                 tile_name = f"{tile}_ANADEM_V1.tif"
                 url = f"https://huggingface.co/datasets/GeoOne/anadem-v1/resolve/main/tiles/{pasta}/{tile_name}?download=true"
 
-            elif mde == 2:  # GMTED2010
+            elif mde == 4:  # GMTED2010
                 tile_name = f"{tile}_GMTED2010_be30.tif"
                 url = f"https://huggingface.co/datasets/GeoOne/GMTED2010/resolve/main/{tile_name}?download=1"
 
-            elif mde == 3:  # SRTM
+            elif mde == 0:  # SRTM
                 tile_name, url = self.srtm_url(tile)
 
-            elif mde == 4:  # Copernicus DEM
+            elif mde == 1:  # Copernicus DEM
                 tile_name, url = self.copdem_url(tile)
 
             try:
