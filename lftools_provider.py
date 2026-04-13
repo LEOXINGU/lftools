@@ -137,6 +137,7 @@ from .processing_provider.VR360_Cubemap2Equiretangular import Cubemap2Equiretang
 from .processing_provider.VR360_ExtractPerspectiveView import ExtractPerspectiveView
 from .processing_provider.Drone_exportToDJI_KML import ExportToDJI_KML
 from .processing_provider.Drone_CreateGCPfile_Agisoft import CreateGCPfileAgisoft
+from .processing_provider.Vector_LightGeometryCleanup import LightGeometryCleanup
 
 
 
@@ -260,6 +261,7 @@ class LFToolsProvider(QgsProcessingProvider):
         self.addAlgorithm(ExtractPerspectiveView())
         self.addAlgorithm(ExportToDJI_KML())
         self.addAlgorithm(CreateGCPfileAgisoft())
+        self.addAlgorithm(LightGeometryCleanup())
     
 
     def id(self):
