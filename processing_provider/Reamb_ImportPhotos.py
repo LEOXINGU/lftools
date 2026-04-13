@@ -46,16 +46,6 @@ import math
 import struct
 from math import pi, atan, degrees
 from qgis.PyQt.QtGui import QIcon
-from PIL import Image, TiffTags, ExifTags
-from PIL.TiffImagePlugin import ImageFileDirectory_v2
-from PIL.TiffTags import TAGS
-ImageFileDirectory_v2._load_dispatch[13] = ImageFileDirectory_v2._load_dispatch[TiffTags.LONG]
-
-try:
-    from pillow_heif import register_heif_opener
-    register_heif_opener()
-except ImportError:
-    pass
 
 class ImportPhotos(QgsProcessingAlgorithm):
 
@@ -142,7 +132,7 @@ class ImportPhotos(QgsProcessingAlgorithm):
             QgsProcessingParameterBoolean(
                 self.SENSOR,
                 self.tr('Sensor'),
-                defaultValue = True
+                defaultValue = False
             )
         )
 
@@ -150,7 +140,7 @@ class ImportPhotos(QgsProcessingAlgorithm):
             QgsProcessingParameterBoolean(
                 self.GEOMETRY,
                 self.tr('Geometry', 'Geometria'),
-                defaultValue = True
+                defaultValue = False
             )
         )
 
@@ -158,7 +148,7 @@ class ImportPhotos(QgsProcessingAlgorithm):
             QgsProcessingParameterBoolean(
                 self.PHOTOMETRY,
                 self.tr('Photometry', 'Fotometria'),
-                defaultValue = True
+                defaultValue = False
             )
         )
 
@@ -194,6 +184,16 @@ class ImportPhotos(QgsProcessingAlgorithm):
 
 
     def processAlgorithm(self, parameters, context, feedback):
+
+        from PIL import Image, TiffTags, ExifTags
+        from PIL.TiffImagePlugin import ImageFileDirectory_v2
+        from PIL.TiffTags import TAGS
+        ImageFileDirectory_v2._load_dispatch[13] = ImageFileDirectory_v2._load_dispatch[TiffTags.LONG]
+        try:
+            from pillow_heif import register_heif_opener
+            register_heif_opener()
+        except ImportError:
+            pass
 
         pasta = self.parameterAsFile(
             parameters,
