@@ -297,8 +297,9 @@ class DescriptiveTable(QgsProcessingAlgorithm):
 
         # Pegando o SRC do Projeto
         SRC = QgsProject.instance().crs().description()
+
         # Verificando o SRC
-        if QgsProject.instance().crs().isGeographic():
+        if QgsProject.instance().crs().isGeographic() and (modelo in [0,1,2,3] or calculo in [0]):
             raise QgsProcessingException(self.tr('The Project CRS must be projected!', 'O SRC do Projeto deve ser Projetado!'))
         feedback.pushInfo(self.tr('Project CRS is {}.', 'SRC do Projeto é {}.').format(SRC))
 
