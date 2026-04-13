@@ -1462,5 +1462,40 @@ Cuando sea posible, los metadatos EXIF de la imagen original pueden aplicarse nu
 'Elevation': {'es': 'Elevación'},
 'No style': {'es': 'Sin estilo'},
 'Symbology': {'es': 'Simbología'},
+'Light Geometry Cleanup': {'es': 'Limpieza Geométrica Ligera'},
+'''
+This tool performs a light geometric cleanup directly on the input layer.
+
+It:
+- removes features with null or empty geometries directly from the original layer;
+- records the deleted feature IDs in the processing log;
+- exports the attributes of removed features to a no-geometry table;
+- removes duplicate vertices for line and polygon features.
+
+Note: Invalid geometries are not fixed or deleted by this tool.
+''': {'es': '''Esta herramienta realiza una limpieza geométrica ligera directamente sobre la capa de entrada.
+
+Permite:
+- eliminar de la capa original las entidades con geometrías nulas o vacías;
+- registrar en el log de procesamiento los IDs de las entidades eliminadas;
+- exportar los atributos de las entidades eliminadas a una tabla sin geometría;
+- eliminar vértices duplicados en entidades de tipo línea y polígono.
+
+Nota: Las geometrías inválidas no son corregidas ni eliminadas por esta herramienta.'''},
+'Output table of removed features': {'es': 'Tabla de salida de entidades eliminadas'},
+'Could not create output table.':{'es': 'No se pudo crear la tabla de salida.'},
+'No features to process.': {'es': 'No hay entidades para procesar.'},
+'Starting light geometry cleanup...': {'es': 'Iniciando limpieza geométrica ligera...'},
+'Checking for null or empty geometries...': {'es': 'Verificando geometrías nulas o vacías...'},
+'null geometry': {'es': 'geometría nula'},
+'empty geometry': {'es': 'geometría vacía'},
+'Deleted feature ID {} ({})': {'es': 'Entidad ID {} eliminada ({})'},
+'Could not delete null/empty geometry features.': {'es': 'No se pudieron eliminar las entidades con geometría nula/vacía.'},
+'{} feature(s) removed due to null or empty geometry.': {'es': '{} entidad(es) eliminada(s) por geometría nula o vacía.'},
+'Duplicate vertices removed from feature ID {}': {'es': 'Vértices duplicados eliminados de la entidad ID {}'},
+'{} feature(s) had duplicate vertices removed.': {'es': '{} entidad(es) tuvieron vértices duplicados eliminados.'},
+'Duplicate vertex cleanup skipped (only applies to line and polygon layers).': {'es': 'La eliminación de vértices duplicados fue omitida (solo aplica a capas de líneas y polígonos).'},
+'Could not save layer edits.': {'es': 'No se pudieron guardar las ediciones de la capa.'},
+'Edits were kept in edit mode and not committed.': {'es': 'Las ediciones se mantuvieron en modo de edición y no fueron guardadas.'},
 
  }
