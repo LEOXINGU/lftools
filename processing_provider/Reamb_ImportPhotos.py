@@ -42,7 +42,7 @@ from lftools.geocapt.cartography import simbologiaPontos3D
 from lftools.translations.translate import translate
 import os, re
 import processing
-from math import pi, atan, degrees
+from math import pi
 from qgis.PyQt.QtGui import QIcon
 
 
@@ -306,8 +306,6 @@ class ImportPhotos(QgsProcessingAlgorithm):
             fields.append(QgsField(self.tr('GimbalYaw'), QVariant.Double))
             fields.append(QgsField(self.tr('GimbalPitch'), QVariant.Double))
             fields.append(QgsField(self.tr('GimbalRoll'), QVariant.Double))
-            fields.append(QgsField(self.tr('FOV'), QVariant.Double))
-            fields.append(QgsField(self.tr('SensorSize'), QVariant.String))
 
         (sink, dest_id) = self.parameterAsSink(
             parameters,
@@ -372,19 +370,19 @@ class ImportPhotos(QgsProcessingAlgorithm):
 
                 if lon != 0:
                     if YPR:
-                        FlightYaw, FlightPitch, FlightRoll, GimbalYaw, GimbalPitch, GimbalRoll, FOV, SensorSize = self.extract_image_metadata(filepath, exif)
+                        FlightYaw, FlightPitch, FlightRoll, GimbalYaw, GimbalPitch, GimbalRoll = self.extract_dji_orientation(filepath)
                     if not CalcAz:
                         feature = QgsFeature(fields)
                         feature.setGeometry(QgsGeometry(QgsPoint(lon, lat, altitude if altitude != None else 0)))
                         att = [arquivo, lon, lat, altitude, Az, date_time, filepath, fabricante, modelo]
                         if YPR:
                             att[4] = FlightYaw
-                            att += [FlightYaw, FlightPitch, FlightRoll, GimbalYaw, GimbalPitch, GimbalRoll, FOV, SensorSize]
+                            att += [FlightYaw, FlightPitch, FlightRoll, GimbalYaw, GimbalPitch, GimbalRoll]
                         feature.setAttributes(att)
                         sink.addFeature(feature, QgsFeatureSink.FastInsert)
                     else:
                         if YPR:
-                            Atributos += [[arquivo, lon, lat, altitude, Az, date_time, filepath, fabricante, modelo, FlightYaw, FlightPitch, FlightRoll, GimbalYaw, GimbalPitch, GimbalRoll, FOV, SensorSize]]
+                            Atributos += [[arquivo, lon, lat, altitude, Az, date_time, filepath, fabricante, modelo, FlightYaw, FlightPitch, FlightRoll, GimbalYaw, GimbalPitch, GimbalRoll]]
                         else:
                             Atributos += [[arquivo, lon, lat, altitude, Az, date_time, filepath, fabricante, modelo]]
                 else:
@@ -453,19 +451,18 @@ class ImportPhotos(QgsProcessingAlgorithm):
 
                     if lon != 0:
                         if YPR:
-                            FlightYaw, FlightPitch, FlightRoll, GimbalYaw, GimbalPitch, GimbalRoll, FOV, SensorSize = self.extract_image_metadata(filepath, meta_dict)
+                            FlightYaw, FlightPitch, FlightRoll, GimbalYaw, GimbalPitch, GimbalRoll = self.extract_dji_orientation(filepath)
                         if not CalcAz:
                             feature = QgsFeature(fields)
                             feature.setGeometry(QgsGeometry(QgsPoint(lon, lat, altitude if altitude != None else 0)))
                             att = [arquivo, lon, lat, altitude, Az, date_time, filepath, fabricante, modelo]
                             if YPR:
-                                att[4] = FlightYaw
-                                att += [FlightYaw, FlightPitch, FlightRoll, GimbalYaw, GimbalPitch, GimbalRoll, FOV, SensorSize]
+                                att += [FlightYaw, FlightPitch, FlightRoll, GimbalYaw, GimbalPitch, GimbalRoll]
                             feature.setAttributes(att)
                             sink.addFeature(feature, QgsFeatureSink.FastInsert)
                         else:
                             if YPR:
-                                Atributos += [[arquivo, lon, lat, altitude, Az, date_time, filepath, fabricante, modelo, FlightYaw, FlightPitch, FlightRoll, GimbalYaw, GimbalPitch, GimbalRoll, FOV, SensorSize]]
+                                Atributos += [[arquivo, lon, lat, altitude, Az, date_time, filepath, fabricante, modelo, FlightYaw, FlightPitch, FlightRoll, GimbalYaw, GimbalPitch, GimbalRoll]]
                             else:
                                 Atributos += [[arquivo, lon, lat, altitude, Az, date_time, filepath, fabricante, modelo]]
                     else:
@@ -512,145 +509,51 @@ class ImportPhotos(QgsProcessingAlgorithm):
         return {self.OUTPUT: dest_id}
     
     
-    def extract_image_metadata(self, image_path, exif_data):
+    def extract_dji_orientation(self, image_path):
         """
-        Extrai yaw, pitch, roll, FOV e tamanho do sensor analisando XMP + EXIF.
-        Compatível com diversos modelos DJI (Phantom, Mavic, Enterprise, Matrice).
+        Extrai yaw, pitch e roll de imagens DJI (JPEG, DNG, etc.) analisando o bloco XMP embutido.
         """
-        FlightYaw = FlightPitch = FlightRoll = None
-        GimbalYaw = GimbalPitch = GimbalRoll = None
-        FOV = SensorWidth = SensorHeight = None
-
-        # Base de sensores DJI (mm)
-        DJI_SENSORS = {
-            'FC6310': (13.2, 8.8),     # Phantom 4 Pro
-            'FC6310S': (13.2, 8.8),    # Phantom 4 Pro V2
-            'FC220': (13.2, 8.8),      # Mavic 2 Pro
-            'FC2204': (6.4, 4.8),      # Mavic Air 2
-            'FC3170': (13.2, 8.8),     # Air 2S
-            'FC7303': (17.3, 13.0),    # Mavic 3
-            'FC3682': (6.4, 4.8),      # M2 Enterprise Adv
-            'FC8484': (17.3, 13.0),    # Mavic 3 Enterprise
-            'FC8482': (6.4, 4.8),      # Mavic 3 Thermal
-            'M30T': (6.4, 4.8),        # Matrice 30T
-            'ZenmuseP1': (35.9, 24.0),
-            'ZenmuseH20': (6.17, 4.55),
-            'ZenmuseH20T': (6.17, 4.55),
-            'FC6510': (13.2, 8.8),
-            'FC6520': (17.3, 13.0),
-            'FC6540': (23.5, 15.7),
-        }
-
         try:
-            # -------- 1. LEITURA DO XMP --------
+            # Lê o conteúdo binário e tenta localizar o bloco XMP
             with open(image_path, "rb") as fb:
-                data = fb.read(131072)  # lê só 128KB (mais eficiente)
-
-            import re
+                data = fb.read()
             m = re.search(br"<x:xmpmeta[\s\S]*?</x:xmpmeta>", data, re.IGNORECASE)
             if not m:
                 m = re.search(br"<xmpmeta[\s\S]*?</xmpmeta>", data, re.IGNORECASE)
+            if not m:
+                return None, None, None, None, None, None
+            xmp = m.group(0).decode("utf-8", errors="ignore")
+            # print(xmp)
+            def find_attr_or_elem(names):
+                """Busca valor numérico para qualquer nome de tag (atributo ou elemento)."""
+                for name in names:
+                    # Tenta achar como atributo
+                    rx_attr = re.compile(rf'{re.escape(name)}\s*=\s*"([\-+]?\d+(?:\.\d+)?)"', re.IGNORECASE)
+                    m = rx_attr.search(xmp)
+                    if m:
+                        return float(m.group(1))
+                    # Tenta achar como elemento
+                    rx_elem = re.compile(
+                        rf'<[^:>]*:{re.escape(name)}\s*>([\-+]?\d+(?:\.\d+)?)\s*</[^:>]*:{re.escape(name)}\s*>',
+                        re.IGNORECASE
+                    )
+                    m = rx_elem.search(xmp)
+                    if m:
+                        return float(m.group(1))
+                return None
 
-            if m:
-                xmp = m.group(0).decode("utf-8", errors="ignore")
+            FlightYawDegree = find_attr_or_elem(["FlightYawDegree"])
+            FlightPitchDegree = find_attr_or_elem(["FlightPitchDegree"])
+            FlightRollDegree = find_attr_or_elem(["FlightRollDegree"])
+            
+            GimbalYawDegree = find_attr_or_elem(["GimbalYawDegree"]) # "PoseYawDegrees"
+            GimbalPitchDegree = find_attr_or_elem(["GimbalPitchDegree"]) # "PosePitchDegrees", 
+            GimbalRollDegree = find_attr_or_elem(["GimbalRollDegree"]) # "PoseRollDegrees"
 
-                def find_attr_or_elem(names):
-                    for name in names:
-                        # atributo
-                        rx_attr = re.compile(
-                            rf'(?:[\w-]+:)?{name}\s*=\s*["\']([\-+]?\d+(?:\.\d+)?)["\']',
-                            re.IGNORECASE
-                        )
-                        m_attr = rx_attr.search(xmp)
-                        if m_attr:
-                            return float(m_attr.group(1))
+            return FlightYawDegree, FlightPitchDegree, FlightRollDegree, GimbalYawDegree, GimbalPitchDegree, GimbalRollDegree
 
-                        # elemento XML
-                        rx_elem = re.compile(
-                            rf'<([^:>]*:)?{name}>([\-+]?\d+(?:\.\d+)?)</([^:>]*:)?{name}>',
-                            re.IGNORECASE
-                        )
-                        m_elem = rx_elem.search(xmp)
-                        if m_elem:
-                            return float(m_elem.group(2))
-
-                    return None
-
-                # Drone
-                FlightYaw = find_attr_or_elem(["FlightYawDegree", "Yaw", "DroneYawDegree"])
-                FlightPitch = find_attr_or_elem(["FlightPitchDegree", "Pitch"])
-                FlightRoll = find_attr_or_elem(["FlightRollDegree", "Roll"])
-
-                # Gimbal
-                GimbalYaw = find_attr_or_elem(["GimbalYawDegree", "CameraYaw"])
-                GimbalPitch = find_attr_or_elem(["GimbalPitchDegree", "CameraPitch"])
-                GimbalRoll = find_attr_or_elem(["GimbalRollDegree", "CameraRoll"])
-
-                # Extras
-                FOV = find_attr_or_elem(["FieldOfView", "HFOV"])
-                SensorWidth = find_attr_or_elem(["SensorWidth"])
-                SensorHeight = find_attr_or_elem(["SensorHeight"])
-
-            # -------- 2. REFINAMENTO EXIF --------
-            if exif_data:
-                model = str(exif_data.get('Model', '')).replace('\x00', '').strip()
-                make = str(exif_data.get('Make', '')).replace('\x00', '').strip()
-
-                f_real = exif_data.get('FocalLength')
-                if isinstance(f_real, (tuple, list)) and f_real[1] != 0:
-                    f_real = float(f_real[0]) / f_real[1]
-
-                # Se for DJI
-                if "DJI" in make.upper() or model.startswith("FC"):
-
-                    # Pitch nadir
-                    if GimbalPitch is not None and abs(GimbalPitch) < 0.1:
-                        GimbalPitch = -90.0
-
-                    # Yaw fallback
-                    if GimbalYaw is None and FlightYaw is not None:
-                        GimbalYaw = FlightYaw
-
-                    # Sensor via banco
-                    if model in DJI_SENSORS:
-                        sw, sh = DJI_SENSORS[model]
-                        if SensorWidth is None:
-                            SensorWidth = sw
-                        if SensorHeight is None:
-                            SensorHeight = sh
-
-                    # Cálculo FOV
-                    f_35mm = exif_data.get('FocalLengthIn35mmFilm')
-                    if f_real and f_35mm:
-                        from math import atan, degrees
-
-                        if FOV is None:
-                            FOV = round(2 * degrees(atan(36.0 / (2.0 * float(f_35mm)))), 2)
-
-                        if SensorWidth is None:
-                            SensorWidth = round(36.0 * f_real / float(f_35mm), 2)
-
-                    # Altura do sensor
-                    if SensorWidth and SensorHeight is None:
-                        ratio = 0.75  # padrão 4:3
-                        if SensorWidth > 20:
-                            ratio = 0.66  # sensores grandes
-                        SensorHeight = round(SensorWidth * ratio, 2)
-
-            sensor_str = (
-                f"{SensorWidth} x {SensorHeight} mm"
-                if (SensorWidth and SensorHeight)
-                else (f"{SensorWidth} mm" if SensorWidth else None)
-            )
-
-            return (
-                FlightYaw, FlightPitch, FlightRoll,
-                GimbalYaw, GimbalPitch, GimbalRoll,
-                FOV, sensor_str
-            )
-
-        except Exception:
-            return None, None, None, None, None, None, None, None
+        except Exception as e:
+            return None, None, None, None, None, None
         
 
     def postProcessAlgorithm(self, context, feedback):
