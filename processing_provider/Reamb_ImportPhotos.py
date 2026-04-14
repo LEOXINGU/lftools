@@ -117,6 +117,19 @@ class ImportPhotos(QgsProcessingAlgorithm):
             )
         )
 
+        STYLES = [self.tr('Simple Camera', 'Camera simples'),
+                  self.tr('Drone'),
+                  self.tr('VR Photo 360°', 'RV Foto 360°') ]
+
+        self.addParameter(
+            QgsProcessingParameterEnum(
+                self.STYLE,
+                self.tr('Layer Style', 'Estilo da camada'),
+				options = STYLES,
+                defaultValue= 0
+            )
+        )
+
         self.addParameter(
             QgsProcessingParameterBoolean(
                 self.AZIMUTH,
@@ -143,18 +156,6 @@ class ImportPhotos(QgsProcessingAlgorithm):
             )
         )
 
-        STYLES = [self.tr('Simple Camera', 'Camera simples'),
-                  self.tr('Drone'),
-                  self.tr('VR Photo 360°', 'RV Foto 360°') ]
-
-        self.addParameter(
-            QgsProcessingParameterEnum(
-                self.STYLE,
-                self.tr('Layer Style', 'Estilo da camada'),
-				options = STYLES,
-                defaultValue= 0
-            )
-        )
 
         self.addParameter(
             QgsProcessingParameterFeatureSink(
