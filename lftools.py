@@ -261,19 +261,40 @@ class LFToolsPlugin(object):
                 nome = dlg.Name.text()
                 nome_campo = self.tr('name', 'nome')
 
+                # Verificando SRC
+                if not crs.isValid():
+                    raise ValueError(self.tr('Invalid CRS selected!', 'SRC inválido selecionado!'))
+
                 # Identificação e validação dos dados de entrada
                 if crs.isGeographic():
-                    try: # Se coordenadas estão em GMS, levar para graus decimais
-                        X = DMS2DD(coordX)
-                        Y = DMS2DD(coordY)
-                    except: # Testar se as coordenadas estão em graus decimais
-                        X = float(coordX)
-                        Y = float(coordY)
-                else: # Coordenadas projetadas
-                    X = float(coordX)
-                    Y = float(coordY)
+                    X = DMS2DD(coordX)
+                    if X is None:
+                        try:
+                            X = float(coordX)
+                        except:
+                            raise ValueError(self.tr('Invalid X/longitude coordinate: {}', 'Coordenada X/longitude inválida: {}').format(coordX))
 
-                Z = 0 if coordZ == '' else float(coordZ)
+                    Y = DMS2DD(coordY)
+                    if Y is None:
+                        try:
+                            Y = float(coordY)
+                        except:
+                            raise ValueError(self.tr('Invalid Y/latitude coordinate: {}', 'Coordenada Y/latitude inválida: {}').format(coordY))
+                else: # Coordenadas projetadas
+                    try:
+                        X = float(coordX)
+                    except:
+                        raise ValueError(self.tr('Invalid X coordinate: {}', 'Coordenada X inválida: {}').format(coordX))
+
+                    try:
+                        Y = float(coordY)
+                    except:
+                        raise ValueError(self.tr('Invalid Y coordinate: {}', 'Coordenada Y inválida: {}').format(coordY))
+
+                try:
+                    Z = 0 if coordZ == '' else float(coordZ)
+                except:
+                    raise ValueError(self.tr('Invalid Z coordinate: {}', 'Coordenada Z inválida: {}').format(coordZ))
 
                 # Criando camada pela primeira vez
                 if not projeto.mapLayer(self.layerid):
