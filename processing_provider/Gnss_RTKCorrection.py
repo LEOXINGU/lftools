@@ -26,7 +26,6 @@ from qgis.core import (QgsProcessing,
                        QgsProcessingException,
                        QgsProcessingParameterString,
                        QgsProcessingAlgorithm,
-                       QgsProcessingParameterPoint,
                        QgsProcessingParameterNumber,
                        QgsProcessingParameterFeatureSource,
                        QgsProcessingParameterFeatureSink,
@@ -34,7 +33,6 @@ from qgis.core import (QgsProcessing,
                        QgsProcessingParameterFileDestination,
                        QgsApplication,
                        QgsEllipsoidUtils,
-                       QgsPointXY,
                        QgsProject,
                        QgsProcessingParameterCrs,
                        QgsCoordinateTransform,
@@ -120,7 +118,7 @@ class RTKCorrection(QgsProcessingAlgorithm):
             QgsProcessingParameterString(
                 self.BASE_RTK,
                 self.tr('Initial X,Y,Z coordinates of the base', 'Coordenadas X,Y,Z iniciais da base'),
-                defaultValue='PointZ(X Y Z)'
+                defaultValue='PointZ (X Y Z)'
             )
         )
 
@@ -128,7 +126,7 @@ class RTKCorrection(QgsProcessingAlgorithm):
             QgsProcessingParameterString(
                 self.PPP,
                 self.tr('Post-processed X,Y,Z coordinates of the base', 'Coordenadas X,Y,Z pós-processadas da base'),
-                defaultValue='PointZ(X Y Z)'
+                defaultValue='PointZ (X Y Z)'
             )
         )
 
