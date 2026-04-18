@@ -59,7 +59,7 @@ class Accuracy_PC(QgsProcessingAlgorithm):
         return translate(string, self.LOC)
 
     def tags(self):
-        return 'GeoOne,PEC,qualidade,padrão,rmse,remq,exactness,point cloud,PC,nuvem de pontos,precision,precisão,tendência,tendency,correctness,accuracy,acurácia,discrepância,discrepancy,vector,deltas,3d,vertical,altimétrico,altimetric,cqdg,asprs'.split(',')
+        return 'GeoOne,PEC,PEC-PCD,qualidade,padrão,rmse,remq,exactness,point cloud,PC,nuvem de pontos,precision,precisão,tendência,tendency,correctness,accuracy,acurácia,discrepância,discrepancy,vector,deltas,3d,vertical,altimétrico,altimetric,cqdg,asprs'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/quality.png'))
