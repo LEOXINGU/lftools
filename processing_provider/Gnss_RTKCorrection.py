@@ -24,6 +24,7 @@ from qgis.core import (QgsProcessing,
                        QgsFeature,
                        QgsGeometry,
                        QgsProcessingException,
+                       QgsProcessingParameterString,
                        QgsProcessingAlgorithm,
                        QgsProcessingParameterPoint,
                        QgsProcessingParameterNumber,
@@ -35,6 +36,7 @@ from qgis.core import (QgsProcessing,
                        QgsEllipsoidUtils,
                        QgsPointXY,
                        QgsProject,
+                       QgsProcessingParameterCrs,
                        QgsCoordinateTransform,
                        QgsCoordinateReferenceSystem)
 
@@ -98,10 +100,9 @@ class RTKCorrection(QgsProcessingAlgorithm):
                     </div>'''
         return self.tr(self.txt_en, self.txt_pt) + footer
 
-    BASE = 'BASE'
-    ALTITUDE_INI = 'ALTITUDE_INI'
+    BASE_RTK = 'BASE_RTK'
     PPP = 'PPP'
-    ALTITUDE_END = 'ALTITUDE_END'
+    CRS = 'CRS'
     INPUT = 'INPUT'
     OUTPUT = 'OUTPUT'
     SIGMA_X_BASE = 'SIGMA_X_BASE'
@@ -116,34 +117,26 @@ class RTKCorrection(QgsProcessingAlgorithm):
 
         # INPUT
         self.addParameter(
-            QgsProcessingParameterPoint(
-                self.BASE,
-                self.tr('Initial X,Y coordinates of the base', 'Coordenadas X,Y iniciais da base'),
-                defaultValue = QgsPointXY(0.0, 0.0)
+            QgsProcessingParameterString(
+                self.BASE_RTK,
+                self.tr('Initial X,Y,Z coordinates of the base', 'Coordenadas X,Y,Z iniciais da base'),
+                defaultValue='PointZ(X Y Z)'
             )
         )
 
         self.addParameter(
-            QgsProcessingParameterNumber(
-                self.ALTITUDE_INI,
-                self.tr('Initial Z coordinate of the base (m)', 'Coordenada Z inicial da base (m)'),
-                type = QgsProcessingParameterNumber.Type.Double,
-                )
-            )
-
-        self.addParameter(
-            QgsProcessingParameterPoint(
+            QgsProcessingParameterString(
                 self.PPP,
-                self.tr('Post-processed X,Y coordinates of the base', 'Coordenadas X,Y pós-processadas da base'),
-                defaultValue = QgsPointXY(0.0, 0.0)
+                self.tr('Post-processed X,Y,Z coordinates of the base', 'Coordenadas X,Y,Z pós-processadas da base'),
+                defaultValue='PointZ(X Y Z)'
             )
         )
 
         self.addParameter(
-            QgsProcessingParameterNumber(
-                self.ALTITUDE_END,
-                self.tr('Post-processed Z coordinate of the base (m)', 'Coordenada Z pós-processada da base (m)'),
-                type = QgsProcessingParameterNumber.Type.Double,
+            QgsProcessingParameterCrs(
+                self.CRS,
+                self.tr('Base CRS', 'SRC da Base'),
+                QgsProject.instance().crs()
                 )
             )
 
@@ -231,6 +224,40 @@ class RTKCorrection(QgsProcessingAlgorithm):
             )
         )
 
+    
+    def ValidarPointZ_WKT(self, wkt_texto, descricao):
+            try:
+                geom = QgsGeometry.fromWkt(wkt_texto)
+            except:
+                raise QgsProcessingException(
+                    self.tr('Invalid {} WKT: {}'.format(descricao, wkt_texto),
+                            'WKT inválido para {}: {}'.format(descricao, wkt_texto))
+                )
+
+            if geom.isNull() or geom.type() != QgsWkbTypes.PointGeometry:
+                raise QgsProcessingException(
+                    self.tr('Invalid {} WKT: {}'.format(descricao, wkt_texto),
+                            'WKT inválido para {}: {}'.format(descricao, wkt_texto))
+                )
+
+            pnt = geom.constGet()
+
+            if not pnt.is3D():
+                raise QgsProcessingException(
+                    self.tr('{} must be a PointZ geometry: {}'.format(descricao, wkt_texto),
+                            '{} deve ser uma geometria PointZ: {}'.format(descricao, wkt_texto))
+                )
+
+            try:
+                float(pnt.z())
+            except:
+                raise QgsProcessingException(
+                    self.tr('Invalid Z coordinate in {}: {}'.format(descricao, wkt_texto),
+                            'Coordenada Z inválida em {}: {}'.format(descricao, wkt_texto))
+                )
+
+            return geom
+
 
     def processAlgorithm(self, parameters, context, feedback):
 
@@ -251,38 +278,18 @@ class RTKCorrection(QgsProcessingAlgorithm):
         transf_layer.setDestinationCrs(GRS)
         transf_layer.setSourceCrs(SRC)
 
-        ProjectCRS = QgsProject.instance().crs()
+        BaseCRS = self.parameterAsCrs(parameters, self.CRS, context)
         transf_pnt = QgsCoordinateTransform()
         transf_pnt.setDestinationCrs(GRS)
-        transf_pnt.setSourceCrs(ProjectCRS)
+        transf_pnt.setSourceCrs(BaseCRS)
 
-        base = self.parameterAsPoint(
-            parameters,
-            self.BASE,
-            context
-        )
-
-        z_ini = self.parameterAsDouble(
-            parameters,
-            self.ALTITUDE_INI,
-            context
-        )
-
-        base = QgsGeometry(QgsPoint(base.x(), base.y(), z_ini))
-        print(base)
+        base_wkt = self.parameterAsString(parameters, self.BASE_RTK, context).strip()
+        base = self.ValidarPointZ_WKT(base_wkt, self.tr('initial base', 'base inicial'))
         base.transform(transf_pnt)
 
-        ppp = self.parameterAsPoint(
-            parameters,
-            self.PPP,
-            context
-        )
-
-        z_fim = self.parameterAsDouble(
-            parameters,
-            self.ALTITUDE_END,
-            context
-        )
+        ppp_wkt = self.parameterAsString(parameters, self.PPP, context).strip()
+        ppp = self.ValidarPointZ_WKT(ppp_wkt, self.tr('post-processed base', 'base pós-processada'))
+        ppp.transform(transf_pnt)
 
         sigma_x_base_raw = parameters.get(self.SIGMA_X_BASE)
         sigma_y_base_raw = parameters.get(self.SIGMA_Y_BASE)
@@ -326,9 +333,6 @@ class RTKCorrection(QgsProcessingAlgorithm):
             context
         )
 
-        ppp = QgsGeometry(QgsPoint(ppp.x(), ppp.y(), z_fim))
-        ppp.transform(transf_pnt)
-
         # Novos atributos
         Fields = layer.fields()
         itens  = {
@@ -368,6 +372,10 @@ class RTKCorrection(QgsProcessingAlgorithm):
         delta_Y = Y_fim - Y_ini
         delta_Z = Z_fim - Z_ini
         DELTA = sqrt(delta_X**2 + delta_Y**2 + delta_Z**2)
+        if DELTA > 20:
+            raise QgsProcessingException(self.tr('Base correction above expected value. Check the initial and final base coordinates!',
+                                                 'Correção da base acima do esperado. Verifique as coordenadas inicial e final da base!'))
+        
         feedback.pushInfo((self.tr('Geocentric delta X: {:.4f} m', 'Delta geocêntrico em X: {:.4f} m')).format(delta_X))
         feedback.pushInfo((self.tr('Geocentric delta Y: {:.4f} m', 'Delta geocêntrico em Y: {:.4f} m')).format(delta_Y))
         feedback.pushInfo((self.tr('Geocentric delta Z: {:.4f} m', 'Delta geocêntrico em Z: {:.4f} m')).format(delta_Z))
