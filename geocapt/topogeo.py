@@ -96,36 +96,55 @@ def dd2dms(dd, n_digits):
 
 
 def dms2dd(txt):
-    txt = txt.replace(' ','').replace("''", '"').replace('\t','').replace(',','.')
-    newtxt =''
-    if (txt[-1]).upper() in ('W','O','S'):
+    txt = (txt.replace(' ', '')
+              .replace('\t', '')
+              .replace(',', '.')
+              .replace('º', '°')
+              .replace('’', "'")
+              .replace('‘', "'")
+              .replace('´', "'")
+              .replace('`', "'")
+              .replace('′', "'")
+              .replace('“', '"')
+              .replace('”', '"')
+              .replace('″', '"')
+              .replace("''", '"'))
+
+    newtxt = ''
+    if (txt[-1]).upper() in ('W', 'O', 'S'):
         if txt[0] != '-':
             txt = '-' + txt[:-1]
         else:
             txt = txt[:-1]
-    elif (txt[-1]).upper() in ('E','L','N'):
+    elif (txt[-1]).upper() in ('E', 'L', 'N'):
         txt = txt[:-1]
+
     for letter in txt:
         if not letter.isnumeric() and letter != '.' and letter != '-':
             newtxt += '|'
         else:
             newtxt += letter
+
+    while '||' in newtxt:
+        newtxt = newtxt.replace('||', '|')
+
     if newtxt[-1] == '|':
         lista = newtxt[:-1].split('|')
     else:
         lista = newtxt.split('|')
-    if len(lista) == 3: # GMS
+
+    if len(lista) == 3:  # GMS
         if '-' in lista[0]:
-            return -1*(abs(float(lista[0])) + float(lista[1])/60 + float(lista[2])/3600)
+            return -1 * (abs(float(lista[0])) + float(lista[1])/60 + float(lista[2])/3600)
         else:
             return float(lista[0]) + float(lista[1])/60 + float(lista[2])/3600
     elif len(lista) == 2:
         if '-' in lista[0]:
-            return -1*(abs(float(lista[0])) + float(lista[1])/60)
+            return -1 * (abs(float(lista[0])) + float(lista[1])/60)
         else:
             return float(lista[0]) + float(lista[1])/60
     elif len(lista) == 1:
-        return(float(lista[0]))
+        return float(lista[0])
     else:
         return None
 

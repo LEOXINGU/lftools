@@ -1497,5 +1497,8 @@ Nota: Las geometrías inválidas no son corregidas ni eliminadas por esta herram
 'Duplicate vertex cleanup skipped (only applies to line and polygon layers).': {'es': 'La eliminación de vértices duplicados fue omitida (solo aplica a capas de líneas y polígonos).'},
 'Could not save layer edits.': {'es': 'No se pudieron guardar las ediciones de la capa.'},
 'Edits were kept in edit mode and not committed.': {'es': 'Las ediciones se mantuvieron en modo de edición y no fueron guardadas.'},
+'Invalid X/longitude coordinate: {}': {'es': 'Coordenada X/longitud inválida: {}'},
+'Invalid Y/latitude coordinate: {}': {'es': 'Coordenada Y/latitud inválida: {}'},
+'Invalid CRS selected!': {'es': '¡SRC seleccionado inválido!'},
 
  }
