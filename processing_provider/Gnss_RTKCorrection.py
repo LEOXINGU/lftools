@@ -475,9 +475,9 @@ class RTKCorrection(QgsProcessingAlgorithm):
 
             if propagate_sigmas:
                 tabela += '''
-                  <td style="text-align: center; font-weight: bold;">σX</td>
-                  <td style="text-align: center; font-weight: bold;">σY</td>
-                  <td style="text-align: center; font-weight: bold;">σZ</td>'''
+                  <td style="text-align: center; font-weight: bold;">&sigma;X</td>
+                  <td style="text-align: center; font-weight: bold;">&sigma;Y</td>
+                  <td style="text-align: center; font-weight: bold;">&sigma;Z</td>'''
 
             tabela += '''
                 </tr>'''
@@ -532,9 +532,9 @@ class RTKCorrection(QgsProcessingAlgorithm):
 
             variance_text = '''
 &nbsp;&nbsp;&nbsp; <b>{}</b><br>
-&nbsp;&nbsp;&nbsp; σX ({}) = {} m<br>
-&nbsp;&nbsp;&nbsp; σY ({}) = {} m<br>
-&nbsp;&nbsp;&nbsp; σZ ({}) = {} m<br><br>
+&nbsp;&nbsp;&nbsp; &sigma;X ({}) = {} m<br>
+&nbsp;&nbsp;&nbsp; &sigma;Y ({}) = {} m<br>
+&nbsp;&nbsp;&nbsp; &sigma;Z ({}) = {} m<br><br>
 {}'''.format(
                 str2HTML(self.tr('Base precision', 'Precisão da base')),
                 str2HTML(self.tr('base', 'base')),
@@ -551,7 +551,7 @@ class RTKCorrection(QgsProcessingAlgorithm):
 
             variance_formula = '''
 &nbsp;&nbsp;&nbsp; <b>{}</b><br>
-&nbsp;&nbsp;&nbsp; σ<sub>final</sub> = √(σ<sub>base</sub><sup>2</sup> + σ<sub>rover</sub><sup>2</sup>)<br><br>
+&nbsp;&nbsp;&nbsp; &sigma;<sub>final</sub> = &radic;(&sigma;<sub>base</sub><sup>2</sup> + &sigma;<sub>rover</sub><sup>2</sup>)<br><br>
 &nbsp;&nbsp;&nbsp; {}'''.format(
                 str2HTML(self.tr('Propagation model', 'Modelo de propagação')),
                 str2HTML(self.tr(
@@ -562,9 +562,9 @@ class RTKCorrection(QgsProcessingAlgorithm):
 
             variance_stats = '''
 &nbsp;&nbsp;&nbsp; <b>{}</b><br>
-&nbsp;&nbsp;&nbsp; σX → {}: {} m | {}: {} m | {}: {} m<br>
-&nbsp;&nbsp;&nbsp; σY → {}: {} m | {}: {} m | {}: {} m<br>
-&nbsp;&nbsp;&nbsp; σZ → {}: {} m | {}: {} m | {}: {} m<br>'''.format(
+&nbsp;&nbsp;&nbsp; &sigma;X &rarr; {}: {} m | {}: {} m | {}: {} m<br>
+&nbsp;&nbsp;&nbsp; &sigma;Y &rarr; {}: {} m | {}: {} m | {}: {} m<br>
+&nbsp;&nbsp;&nbsp; &sigma;Z &rarr; {}: {} m | {}: {} m | {}: {} m<br>'''.format(
                 str2HTML(self.tr('Adjusted sigma statistics', 'Estatísticas dos sigmas ajustados')),
                 str2HTML(self.tr('minimum', 'mínimo')), format_num.format(float(SX.min())),
                 str2HTML(self.tr('mean', 'média')), format_num.format(float(SX.mean())),
@@ -637,10 +637,10 @@ class RTKCorrection(QgsProcessingAlgorithm):
 <br><hr><br>
 
 <span style="font-weight: bold;">''' + str2HTML(self.tr('APPLIED CORRECTION', 'CORREÇÃO APLICADA')) + '''</span><br>
-&nbsp;&nbsp;&nbsp; ΔX: [delta_x] m<br>
-&nbsp;&nbsp;&nbsp; ΔY: [delta_y] m<br>
-&nbsp;&nbsp;&nbsp; ΔZ: [delta_z] m<br>
-&nbsp;&nbsp;&nbsp; Δ3D: [delta_3d] m<br>
+&nbsp;&nbsp;&nbsp; &Delta;X: [delta_x] m<br>
+&nbsp;&nbsp;&nbsp; &Delta;Y: [delta_y] m<br>
+&nbsp;&nbsp;&nbsp; &Delta;Z: [delta_z] m<br>
+&nbsp;&nbsp;&nbsp; &Delta;3D: [delta_3d] m<br>
 
 <br><hr><br>
 
