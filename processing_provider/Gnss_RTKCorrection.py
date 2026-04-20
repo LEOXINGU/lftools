@@ -41,7 +41,8 @@ from qgis.core import (QgsProcessing,
 from lftools.geocapt.imgs import Imgs, lftools_logo
 from lftools.translations.translate import translate
 from numpy import sqrt
-from lftools.geocapt.topogeo import geod2geoc, geoc2geod, str2HTML
+from lftools.geocapt.topogeo import geod2geoc, geoc2geod, geoc2enu, str2HTML, dd2dms
+from lftools.geocapt.cartography import ellipsoidFromCRS
 from datetime import datetime
 from numpy import array
 import os
@@ -76,8 +77,9 @@ class RTKCorrection(QgsProcessingAlgorithm):
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/satellite.png'))
 
-    txt_en = '''Performs base RTK correction using post-process coordinates, for example by PPP, and applies corrections to all rover points.'''
-    txt_pt = '''Realiza a correção da base RTK utilizando as coordenas pós-processsas, por exemplo pelo PPP, e aplica as correções a todos os pontos Rover.'''
+    txt_en = '''Applies RTK base correction using post-processed coordinates (e.g., PPP) by computing a geocentric translation vector and applying it to all rover points. Optionally propagates positional uncertainties and provides results in both geocentric and local topocentric (E, N, U) systems.'''
+
+    txt_pt = '''Aplica a correção da base RTK utilizando coordenadas pós-processadas (por exemplo, PPP), por meio do cálculo de um vetor de translação geocêntrico aplicado a todos os pontos rover. Opcionalmente realiza a propagação das incertezas posicionais e fornece resultados nos sistemas geocêntrico e topocêntrico local (E, N, U).'''
 
     figure = 'images/tutorial/gnss_rtk_correction.jpg'
 
@@ -154,6 +156,7 @@ class RTKCorrection(QgsProcessingAlgorithm):
                 self.tr('Base Sigma X (m) - East', 'Sigma da Base X (m) - Este'),
                 type = QgsProcessingParameterNumber.Type.Double,
                 minValue = 0.0,
+                maxValue = 1.0,
                 optional = True
             )
         )
@@ -164,6 +167,7 @@ class RTKCorrection(QgsProcessingAlgorithm):
                 self.tr('Base Sigma Y (m) - North', 'Sigma da Base Y (m) - Norte'),
                 type = QgsProcessingParameterNumber.Type.Double,
                 minValue = 0.0,
+                maxValue = 1.0,
                 optional = True
             )
         )
@@ -174,6 +178,7 @@ class RTKCorrection(QgsProcessingAlgorithm):
                 self.tr('Base Sigma Z (m) - Up', 'Sigma da Base Z (m) - Altura'),
                 type = QgsProcessingParameterNumber.Type.Double,
                 minValue = 0.0,
+                maxValue = 1.0,
                 optional = True
             )
         )
@@ -324,7 +329,6 @@ class RTKCorrection(QgsProcessingAlgorithm):
                 )
             propagate_sigmas = True
 
-
         report = self.parameterAsFileOutput(
             parameters,
             self.REPORT,
@@ -370,17 +374,29 @@ class RTKCorrection(QgsProcessingAlgorithm):
         delta_Y = Y_fim - Y_ini
         delta_Z = Z_fim - Z_ini
         DELTA = sqrt(delta_X**2 + delta_Y**2 + delta_Z**2)
-        if DELTA > 20:
-            raise QgsProcessingException(self.tr('Base correction above expected value. Check the initial and final base coordinates!',
-                                                 'Correção da base acima do esperado. Verifique as coordenadas inicial e final da base!'))
-        
+        delta_E, delta_N, delta_U = geoc2enu(
+            X_fim, Y_fim, Z_fim,
+            pnt_ini.x(), pnt_ini.y(),
+            X_ini, Y_ini, Z_ini, Fo=array([[0],[0],[0]])
+            )
+        DELTA_Hz = sqrt(delta_E**2 + delta_N**2)
+       
         feedback.pushInfo((self.tr('Geocentric delta X: {:.4f} m', 'Delta geocêntrico em X: {:.4f} m')).format(delta_X))
         feedback.pushInfo((self.tr('Geocentric delta Y: {:.4f} m', 'Delta geocêntrico em Y: {:.4f} m')).format(delta_Y))
         feedback.pushInfo((self.tr('Geocentric delta Z: {:.4f} m', 'Delta geocêntrico em Z: {:.4f} m')).format(delta_Z))
         feedback.pushInfo((self.tr('Geocentric Delta 3D: {:.4f} m', 'Delta geocêntrico total (3D): {:.4f} m')).format(DELTA))
+        feedback.pushInfo((self.tr('Topocentric delta E: {:.4f} m', 'Delta topocêntrico em E: {:.4f} m')).format(delta_E))
+        feedback.pushInfo((self.tr('Topocentric delta N: {:.4f} m', 'Delta topocêntrico em N: {:.4f} m')).format(delta_N))
+        feedback.pushInfo((self.tr('Topocentric delta U: {:.4f} m', 'Delta topocêntrico em U: {:.4f} m')).format(delta_U))
+        feedback.pushInfo((self.tr('Topocentric horizontal delta: {:.4f} m', 'Delta horizontal topocêntrico: {:.4f} m')).format(DELTA_Hz))
 
-        decimal = 4
-        format_num = '{:,.Xf}'.replace('X', str(decimal))
+        if DELTA_Hz > 20:
+            raise QgsProcessingException(self.tr('Base correction above expected value. Check the initial and final base coordinates!',
+                                                 'Correção da base acima do esperado. Verifique as coordenadas inicial e final da base!'))
+        
+
+        def format_num(precision):
+            return '{:,.Xf}'.replace('X', str(precision))
 
         report_rows = []
         sigma_x_vals = []
@@ -423,6 +439,18 @@ class RTKCorrection(QgsProcessingAlgorithm):
                             'A feição ID {} possui sigmas do rover inválidos.'.format(feat.id())
                         )
                     )
+                for valor, nome in [
+                    (sigma_x_rover, self.tr('Rover sigma X', 'Sigma X do rover')),
+                    (sigma_y_rover, self.tr('Rover sigma Y', 'Sigma Y do rover')),
+                    (sigma_z_rover, self.tr('Rover sigma Z', 'Sigma Z do rover')),
+                ]:
+                    if abs(valor) > 1.0:
+                        raise QgsProcessingException(
+                            self.tr(
+                                'Feature ID {} has {} greater than {} m.',
+                                'A feição ID {} possui {} maior que {} m.'
+                            ).format(feat.id(), nome, 1.0)
+                        )
                 sigma_x_adj = sqrt(sigma_x_base**2 + sigma_x_rover**2)
                 sigma_y_adj = sqrt(sigma_y_base**2 + sigma_y_rover**2)
                 sigma_z_adj = sqrt(sigma_z_base**2 + sigma_z_rover**2)
@@ -435,21 +463,20 @@ class RTKCorrection(QgsProcessingAlgorithm):
             feature.setAttributes( att )
             sink.addFeature(feature, QgsFeatureSink.FastInsert)
 
-            # Guardar dados para o relatório (apenas os 10 primeiros pontos)
-            if len(report_rows) < 10:
-                row = [
-                    str(feat.id()),
-                    format_num.format(float(lon)),
-                    format_num.format(float(lat)),
-                    format_num.format(float(h))
+            # Guardar dados para o relatório
+            row = [
+                str(feat.id()),
+                format_num(8).format(float(lon)),
+                format_num(8).format(float(lat)),
+                format_num(8).format(float(h))
+            ]
+            if propagate_sigmas:
+                row += [
+                    format_num(4).format(float(sigma_x_adj)),
+                    format_num(4).format(float(sigma_y_adj)),
+                    format_num(4).format(float(sigma_z_adj))
                 ]
-                if propagate_sigmas:
-                    row += [
-                        format_num.format(float(sigma_x_adj)),
-                        format_num.format(float(sigma_y_adj)),
-                        format_num.format(float(sigma_z_adj))
-                    ]
-                report_rows.append(row)
+            report_rows.append(row)
             if propagate_sigmas:
                 sigma_x_vals.append(float(sigma_x_adj))
                 sigma_y_vals.append(float(sigma_y_adj))
@@ -493,37 +520,33 @@ class RTKCorrection(QgsProcessingAlgorithm):
             </table>'''
             return tabela
 
+
         def WarningBlock():
-            avisos = []
+            notas = []
 
-            if DELTA > 0.10:
-                avisos.append(
+            notas.append(
+                self.tr(
+                    'The base correction vector has a geocentric magnitude of {:.3f} m and a local horizontal magnitude of {:.3f} m.'.format(DELTA, DELTA_Hz),
+                    'O vetor de correção da base possui magnitude geocêntrica de {:.3f} m e magnitude horizontal local de {:.3f} m.'.format(DELTA, DELTA_Hz)
+                )
+            )
+
+            if propagate_sigmas:
+                notas.append(
                     self.tr(
-                        'Large base correction detected (> 0.100 m).',
-                        'Correção significativa da base detectada (> 0,100 m).'
+                        'Variance propagation was performed using a simplified model, assuming independence between base and rover uncertainties.',
+                        'A propagação das variâncias foi realizada por um modelo simplificado, assumindo independência entre as incertezas da base e do rover.'
+                    )
+                )
+            else:
+                notas.append(
+                    self.tr(
+                        'Variance propagation was not applied. The precisions of corrected points were not updated according to the base precision.',
+                        'A propagação das variâncias não foi aplicada. As precisões dos pontos corrigidos não foram atualizadas em função da precisão da base.'
                     )
                 )
 
-            if not propagate_sigmas:
-                avisos.append(
-                    self.tr(
-                        'Variance propagation was not applied.',
-                        'A propagação das variâncias não foi aplicada.'
-                    )
-                )
-
-            if propagate_sigmas and len(sigma_z_vals) > 0 and max(sigma_z_vals) > 0.10:
-                avisos.append(
-                    self.tr(
-                        'High propagated vertical sigma detected (> 0.100 m).',
-                        'Sigma vertical propagado alto detectado (> 0,100 m).'
-                    )
-                )
-
-            if not avisos:
-                return str2HTML(self.tr('No relevant warnings.', 'Sem avisos relevantes.'))
-
-            return '<br>'.join([str2HTML(txt) for txt in avisos])
+            return '<br>'.join([str2HTML(txt) for txt in notas])
 
         if propagate_sigmas:
             SX = array(sigma_x_vals)
@@ -538,11 +561,11 @@ class RTKCorrection(QgsProcessingAlgorithm):
 {}'''.format(
                 str2HTML(self.tr('Base precision', 'Precisão da base')),
                 str2HTML(self.tr('base', 'base')),
-                format_num.format(float(sigma_x_base)),
+                format_num(3).format(float(sigma_x_base)),
                 str2HTML(self.tr('base', 'base')),
-                format_num.format(float(sigma_y_base)),
+                format_num(3).format(float(sigma_y_base)),
                 str2HTML(self.tr('base', 'base')),
-                format_num.format(float(sigma_z_base)),
+                format_num(3).format(float(sigma_z_base)),
                 str2HTML(self.tr(
                     'The final standard deviation of each rover point was computed by combining base and rover sigmas.',
                     'O desvio-padrão final de cada ponto rover foi calculado pela combinação dos sigmas da base e do rover.'
@@ -551,7 +574,11 @@ class RTKCorrection(QgsProcessingAlgorithm):
 
             variance_formula = '''
 &nbsp;&nbsp;&nbsp; <b>{}</b><br>
-&nbsp;&nbsp;&nbsp; &sigma;<sub>final</sub> = &radic;(&sigma;<sub>base</sub><sup>2</sup> + &sigma;<sub>rover</sub><sup>2</sup>)<br><br>
+&nbsp;&nbsp;&nbsp; 
+$$
+\\sigma_{{final}} = \\sqrt{{\\sigma_{{base}}^2 + \\sigma_{{rover}}^2}}
+$$
+<br><br>
 &nbsp;&nbsp;&nbsp; {}'''.format(
                 str2HTML(self.tr('Propagation model', 'Modelo de propagação')),
                 str2HTML(self.tr(
@@ -566,15 +593,15 @@ class RTKCorrection(QgsProcessingAlgorithm):
 &nbsp;&nbsp;&nbsp; &sigma;Y &rarr; {}: {} m | {}: {} m | {}: {} m<br>
 &nbsp;&nbsp;&nbsp; &sigma;Z &rarr; {}: {} m | {}: {} m | {}: {} m<br>'''.format(
                 str2HTML(self.tr('Adjusted sigma statistics', 'Estatísticas dos sigmas ajustados')),
-                str2HTML(self.tr('minimum', 'mínimo')), format_num.format(float(SX.min())),
-                str2HTML(self.tr('mean', 'média')), format_num.format(float(SX.mean())),
-                str2HTML(self.tr('maximum', 'máximo')), format_num.format(float(SX.max())),
-                str2HTML(self.tr('minimum', 'mínimo')), format_num.format(float(SY.min())),
-                str2HTML(self.tr('mean', 'média')), format_num.format(float(SY.mean())),
-                str2HTML(self.tr('maximum', 'máximo')), format_num.format(float(SY.max())),
-                str2HTML(self.tr('minimum', 'mínimo')), format_num.format(float(SZ.min())),
-                str2HTML(self.tr('mean', 'média')), format_num.format(float(SZ.mean())),
-                str2HTML(self.tr('maximum', 'máximo')), format_num.format(float(SZ.max()))
+                str2HTML(self.tr('minimum', 'mínimo')), format_num(3).format(float(SX.min())),
+                str2HTML(self.tr('mean', 'média')), format_num(3).format(float(SX.mean())),
+                str2HTML(self.tr('maximum', 'máximo')), format_num(3).format(float(SX.max())),
+                str2HTML(self.tr('minimum', 'mínimo')), format_num(3).format(float(SY.min())),
+                str2HTML(self.tr('mean', 'média')), format_num(3).format(float(SY.mean())),
+                str2HTML(self.tr('maximum', 'máximo')), format_num(3).format(float(SY.max())),
+                str2HTML(self.tr('minimum', 'mínimo')), format_num(3).format(float(SZ.min())),
+                str2HTML(self.tr('mean', 'média')), format_num(3).format(float(SZ.mean())),
+                str2HTML(self.tr('maximum', 'máximo')), format_num(3).format(float(SZ.max()))
             )
         else:
             variance_text = str2HTML(self.tr(
@@ -585,8 +612,8 @@ class RTKCorrection(QgsProcessingAlgorithm):
             variance_stats = ''
 
         method_text = str2HTML(self.tr(
-            'Rover points were corrected by applying the differences between the geocentric coordinates of the initial base and the post-processed base. After applying the correction vector in the geocentric system, the adjusted coordinates were converted back to geodetic coordinates.',
-            'Os pontos rover foram corrigidos aplicando-se as diferenças entre as coordenadas geocêntricas da base inicial e da base pós-processada. Após a aplicação do vetor de correção no sistema geocêntrico, as coordenadas corrigidas foram convertidas novamente para coordenadas geodésicas.'
+            'Rover points were corrected by applying a rigid translation derived from the difference between the geocentric coordinates of the initial base and the post-processed base. The correction vector (ΔX, ΔY, ΔZ) was computed in the geocentric reference frame and applied uniformly to all rover points. The adjusted coordinates were then transformed back to geodetic coordinates. For interpretation purposes, the correction vector is also represented in the local topocentric system (E, N, U).',
+            'Os pontos rover foram corrigidos por meio da aplicação de uma translação rígida, derivada da diferença entre as coordenadas geocêntricas da base inicial e da base pós-processada. O vetor de correção (ΔX, ΔY, ΔZ) foi calculado no sistema geocêntrico e aplicado de forma uniforme a todos os pontos rover. As coordenadas ajustadas foram então convertidas de volta para coordenadas geodésicas. Para fins de interpretação, o vetor de correção também é representado no sistema topocêntrico local (E, N, U).'
         ))
 
         summary_table = SummaryTable(report_rows, propagate_sigmas)
@@ -604,6 +631,7 @@ class RTKCorrection(QgsProcessingAlgorithm):
   <link rel = "icon" href = "https://github.com/LEOXINGU/lftools/blob/main/images/lftools.png?raw=true" type = "image/x-icon">
   <meta name="qrichtext" content="1">
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 <body style="background-color: rgb(229, 233, 166);">
 <div style="text-align: center;"><span style="font-weight: bold;"><br>
@@ -623,7 +651,7 @@ class RTKCorrection(QgsProcessingAlgorithm):
 
 <br><hr><br>
 
-<span style="font-weight: bold;">''' + str2HTML(self.tr('BASE COORDINATES', 'COORDENADAS DA BASE')) + '''</span><br>
+<span style="font-weight: bold;">''' + str2HTML(self.tr('BASE COORDINATES', 'COORDENADAS DA BASE')) + '''</span><br><br>
 &nbsp;&nbsp;&nbsp; <b>''' + str2HTML(self.tr('Initial base coordinates', 'Coordenadas iniciais da base')) + '''</b><br>
 &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; Lon: [base_lon_ini]<br>
 &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; Lat: [base_lat_ini]<br>
@@ -636,20 +664,27 @@ class RTKCorrection(QgsProcessingAlgorithm):
 
 <br><hr><br>
 
-<span style="font-weight: bold;">''' + str2HTML(self.tr('APPLIED CORRECTION', 'CORREÇÃO APLICADA')) + '''</span><br>
+<span style="font-weight: bold;">''' + str2HTML(self.tr('APPLIED CORRECTION', 'CORREÇÃO APLICADA')) + '''</span><br><br>
+&nbsp;&nbsp;&nbsp; <b>''' + str2HTML(self.tr('Geocentric correction', 'Correção geocêntrica')) + '''</b><br>
 &nbsp;&nbsp;&nbsp; &Delta;X: [delta_x] m<br>
 &nbsp;&nbsp;&nbsp; &Delta;Y: [delta_y] m<br>
 &nbsp;&nbsp;&nbsp; &Delta;Z: [delta_z] m<br>
-&nbsp;&nbsp;&nbsp; &Delta;3D: [delta_3d] m<br>
+&nbsp;&nbsp;&nbsp; &Delta;3D: [delta_3d] m<br><br>
+
+&nbsp;&nbsp;&nbsp; <b>''' + str2HTML(self.tr('Local topocentric representation', 'Representação topocêntrica local')) + '''</b><br>
+&nbsp;&nbsp;&nbsp; &Delta;E: [delta_e] m<br>
+&nbsp;&nbsp;&nbsp; &Delta;N: [delta_n] m<br>
+&nbsp;&nbsp;&nbsp; &Delta;U: [delta_u] m<br>
+&nbsp;&nbsp;&nbsp; &Delta;Hz: [delta_h] m<br>
 
 <br><hr><br>
 
 <span style="font-weight: bold;">''' + str2HTML(self.tr('METHODOLOGY', 'METODOLOGIA')) + '''</span><br>
 [method_text]
 
-<br><hr><br>
+<br><br><hr><br>
 
-<span style="font-weight: bold;">''' + str2HTML(self.tr('VARIANCE PROPAGATION', 'PROPAGAÇÃO DAS VARIÂNCIAS')) + '''</span><br>
+<span style="font-weight: bold;">''' + str2HTML(self.tr('VARIANCE PROPAGATION', 'PROPAGAÇÃO DAS VARIÂNCIAS')) + '''</span><br><br>
 [variance_text]
 <br><br>
 [variance_formula]
@@ -658,12 +693,12 @@ class RTKCorrection(QgsProcessingAlgorithm):
 
 <br><hr><br>
 
-<span style="font-weight: bold;">''' + str2HTML(self.tr('WARNINGS', 'AVISOS')) + '''</span><br>
+<span style="font-weight: bold;">''' + str2HTML(self.tr('TECHNICAL NOTES', 'OBSERVAÇÕES TÉCNICAS')) + '''</span><br>
 [warning_text]
 
 <br><hr><br>
 
-<span style="font-weight: bold;">''' + str2HTML(self.tr('SUMMARY TABLE (first 10 points)', 'TABELA RESUMO (10 primeiros pontos)')) + '''</span><br><br>
+<span style="font-weight: bold;">''' + str2HTML(self.tr('FINAL ADJUSTED COORDINATES', 'COORDENADAS FINAIS AJUSTADAS')) + '''</span><br><br>
 [summary_table]
 
 <br><hr>''' + str2HTML(self.tr('Leandro Franca', 'Leandro França')) + ''' 2026<br>
@@ -679,21 +714,30 @@ email: contato@geoone.com.br<br>
             '[input_layer]': str2HTML(layer.sourceName()),
             '[layer_count]': str(layer.featureCount()),
             '[crs]': str2HTML(GRS.authid() + ' - ' + GRS.description() if GRS.isValid() else ''),
-            '[ellipsoid]': str2HTML(ellipsoid_id),
+            '[ellipsoid]': str2HTML('{}, a = {} m, 1/f = {}'.format(
+                                                                        ellipsoidFromCRS(GRS),
+                                                                        ellipsoid.semiMajor,
+                                                                        ellipsoid.inverseFlattening
+                                    )
+                                ),
             '[date_time]': str2HTML(html_time),
 
-            '[base_lon_ini]': format_num.format(float(pnt_ini.x())),
-            '[base_lat_ini]': format_num.format(float(pnt_ini.y())),
-            '[base_h_ini]': format_num.format(float(pnt_ini.z())),
+            '[base_lon_ini]': format_num(8).format(float(pnt_ini.x())) + '  |  ' + str2HTML(dd2dms(pnt_ini.x(), 4)),
+            '[base_lat_ini]': format_num(8).format(float(pnt_ini.y())) + '  |  ' + str2HTML(dd2dms(pnt_ini.y(), 4)),
+            '[base_h_ini]': format_num(3).format(float(pnt_ini.z())),
 
-            '[base_lon_ppp]': format_num.format(float(pnt_fim.x())),
-            '[base_lat_ppp]': format_num.format(float(pnt_fim.y())),
-            '[base_h_ppp]': format_num.format(float(pnt_fim.z())),
+            '[base_lon_ppp]': format_num(8).format(float(pnt_fim.x())) + '  |  ' + str2HTML(dd2dms(pnt_fim.x(), 4)),
+            '[base_lat_ppp]': format_num(8).format(float(pnt_fim.y())) + '  |  ' + str2HTML(dd2dms(pnt_fim.y(), 4)),
+            '[base_h_ppp]': format_num(3).format(float(pnt_fim.z())),
 
-            '[delta_x]': format_num.format(float(delta_X)),
-            '[delta_y]': format_num.format(float(delta_Y)),
-            '[delta_z]': format_num.format(float(delta_Z)),
-            '[delta_3d]': format_num.format(float(DELTA)),
+            '[delta_x]': format_num(3).format(float(delta_X)),
+            '[delta_y]': format_num(3).format(float(delta_Y)),
+            '[delta_z]': format_num(3).format(float(delta_Z)),
+            '[delta_3d]': format_num(3).format(float(DELTA)),
+            '[delta_e]': format_num(3).format(float(delta_E)),
+            '[delta_n]': format_num(3).format(float(delta_N)),
+            '[delta_u]': format_num(3).format(float(delta_U)),
+            '[delta_h]': format_num(3).format(float(DELTA_Hz)),
 
             '[method_text]': method_text,
             '[variance_text]': variance_text,
