@@ -27,7 +27,6 @@ __copyright__ = '(C) 2021 by Leandro Franca'
 
 
 from qgis.core import *
-from qgis.gui import *
 from qgis.utils import qgsfunction
 from lftools.geocapt.cartography import (map_sistem,
                                          MeridianConvergence,
@@ -59,7 +58,8 @@ import numpy as np
 import unicodedata
 from datetime import datetime, date
 import datetime as dt
-import re, os
+import re
+import os
 
 LOC = QgsApplication.locale()[:2]
 def tr(*string):
