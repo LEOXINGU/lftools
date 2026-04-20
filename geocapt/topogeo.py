@@ -221,9 +221,12 @@ def geoc2geod(X, Y, Z, a, f):
 
 
 # Conversão de Coordenadas Geocêntrica para Topocêntricas
-def geoc2enu(X, Y, Z, lon0, lat0, Xo, Yo, Zo):
+def geoc2enu(X, Y, Z, lon0, lat0, Xo, Yo, Zo, Fo=None):
     lon = radians(lon0)
     lat = radians(lat0)
+
+    if Fo is None:
+        Fo = array([[15e4], [25e4], [0]]) # False E and N
 
     M = array(
     [
@@ -236,8 +239,6 @@ def geoc2enu(X, Y, Z, lon0, lat0, Xo, Yo, Zo):
     T = array(
     [[X - Xo], [Y-Yo], [Z-Zo]]
     )
-
-    Fo = array([[15e4],[25e4],[0]]) # False E and N
 
     R = M@T + Fo
     return (R[0,0], R[1,0], R[2,0])
