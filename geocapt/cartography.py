@@ -98,6 +98,38 @@ def SRC_Projeto(output_type):
         return b.description()
 
 
+def ellipsoidFromCRS(crs):
+    """
+    Returns the ellipsoid name from a QgsCoordinateReferenceSystem.
+    It first tries to extract the ellipsoid name from the CRS WKT (SPHEROID/ELLIPSOID),
+    falling back to ellipsoidAcronym() if necessary.
+    Parameters
+    ----------
+    crs : QgsCoordinateReferenceSystem
+    Returns
+    -------
+    str
+        Ellipsoid name (e.g., 'GRS 1980', 'WGS 84', etc.)
+    """
+    try:
+        if not crs or not crs.isValid():
+            return 'Unknown'
+
+        # Try to extract from WKT (most reliable and international)
+        wkt = crs.toWkt()
+        match = re.search(r'(?:SPHEROID|ELLIPSOID)\s*\[\s*"([^"]+)"', wkt)
+        if match:
+            return match.group(1)
+
+        # Fallback to acronym (may return EPSG:XXXX or short name)
+        ellps = crs.ellipsoidAcronym()
+        if ellps:
+            return ellps
+    except:
+        pass
+    return 'Unknown'
+
+
 def areaGauss(coords):
     soma = 0
     tam = len(coords)
