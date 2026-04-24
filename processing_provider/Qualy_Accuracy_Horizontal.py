@@ -46,7 +46,7 @@ class Accuracy_Horizontal(QgsProcessingAlgorithm):
         return self.tr('Horizontal positional accuracy', 'Acurácia posicional planimétrica')
 
     def group(self):
-        return self.tr('Qualidade')
+        return self.tr('Quality','Qualidade')
 
     def groupId(self):
         return 'quality'
