@@ -15,7 +15,7 @@ __author__ = 'Leandro França'
 __date__ = '2019-10-06'
 __copyright__ = '(C) 2020, Leandro França'
 
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import *
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
@@ -176,13 +176,29 @@ class MeasureLayers(QgsProcessingAlgorithm):
 
         formula_tipo = [self.tr('ellip', 'elip'), self.tr('cart'), self.tr('LTP_LFTools', 'SGL_LFTools'), self.tr('LTP_INCRA', 'SGL_INCRA')][formula]
 
-        field_length = QgsField( self.tr('length', 'comprimento')+ '_' + formula_tipo + '_' + unid_abb_dist[units_dist], QVariant.Double, "numeric", 14, precisao)
-        field_perimeter = QgsField( self.tr('perimeter', 'perímetro') + '_'  + formula_tipo + '_' + unid_abb_dist[units_dist], QVariant.Double, "numeric", 14, precisao)
-        field_area = QgsField( self.tr('area', 'área') + '_'  + formula_tipo + '_' + unid_abb_area[units_area], QVariant.Double, "numeric", 14, precisao)
+        field_length = QgsField(
+            self.tr('length', 'comprimento') + '_' + formula_tipo + '_' + unid_abb_dist[units_dist],
+            QMetaType.Type.Double,
+            "numeric",
+            14,
+            precisao
+        )
 
-        camadas = [layer.name() for layer in QgsProject.instance().mapLayers().values()]
-        num_camadas = len(camadas)
-        total = 100.0 / num_camadas if num_camadas else 0
+        field_perimeter = QgsField(
+            self.tr('perimeter', 'perímetro') + '_' + formula_tipo + '_' + unid_abb_dist[units_dist],
+            QMetaType.Type.Double,
+            "numeric",
+            14,
+            precisao
+        )
+
+        field_area = QgsField(
+            self.tr('area', 'área') + '_' + formula_tipo + '_' + unid_abb_area[units_area],
+            QMetaType.Type.Double,
+            "numeric",
+            14,
+            precisao
+        )
 
         #layers = QgsProject.instance().mapLayers()
         layers = self.parameterAsLayerList(
@@ -190,6 +206,9 @@ class MeasureLayers(QgsProcessingAlgorithm):
             self.LAYERS,
             context
         )
+
+        num_camadas = len(layers)
+        total = 100.0 / num_camadas if num_camadas else 0
 
         for current, layer in enumerate(layers):
 
