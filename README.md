@@ -180,7 +180,7 @@ pip install Pillow
         <li><a href="#restore-database">Restore database</a></li>
       </ul>
       </li><li>
-      <a href="#qualidade">Qualidade</a>
+      <a href="#quality">Quality</a>
       <ul>
         <li><a href="#3d-positional-accuracy">3D positional accuracy</a></li>
       </ul>
@@ -1315,7 +1315,7 @@ This tool allows you to restore a database content by importing all the backup i
 
 
 
-## Qualidade
+## Quality
 
 
 ### 3D positional accuracy
