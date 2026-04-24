@@ -46,7 +46,7 @@ class Accuracy_3D(QgsProcessingAlgorithm):
         return self.tr('3D positional accuracy', 'Acurácia posicional 3D')
 
     def group(self):
-        return self.tr('Qualidade')
+        return self.tr('Quality','Qualidade')
 
     def groupId(self):
         return 'quality'
