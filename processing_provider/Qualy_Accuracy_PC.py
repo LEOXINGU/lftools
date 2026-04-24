@@ -48,7 +48,7 @@ class Accuracy_PC(QgsProcessingAlgorithm):
         return self.tr('Point Cloud positional accuracy', 'Acurácia posicional de Nuvem de Pontos')
 
     def group(self):
-        return self.tr('Qualidade')
+        return self.tr('Quality','Qualidade')
 
     def groupId(self):
         return 'quality'
