@@ -84,6 +84,12 @@ pip install Pillow
         <li><a href="#copy-selected-files">Copy selected files</a></li>
       </ul>
       <ul>
+        <li><a href="#export-flight-area-to-dji-kml">Export Flight Area to DJI KML</a></li>
+      </ul>
+      <ul>
+        <li><a href="#generate-gcp-file-for-agisoft-metashape">Generate GCP file for Agisoft Metashape</a></li>
+      </ul>
+      <ul>
         <li><a href="#generate-gcp-file-for-webodm">Generate GCP file for WebODM</a></li>
       </ul>
       <ul>
@@ -337,6 +343,9 @@ pip install Pillow
         <li><a href="#extend-lines">Extend lines</a></li>
       </ul>
       <ul>
+        <li><a href="#light-geometry-cleanup">Light Geometry Cleanup</a></li>
+      </ul>
+      <ul>
         <li><a href="#line-sequence">Line sequence</a></li>
       </ul>
       <ul>
@@ -457,7 +466,13 @@ pip install Pillow
         <li><a href="#copiar-arquivos-selecionados">Copiar arquivos selecionados</a></li>
       </ul>
       <ul>
+        <li><a href="#exportar-área-de-voo-para-kml-da-dji">Exportar área de voo para KML da DJI</a></li>
+      </ul>
+      <ul>
         <li><a href="#fotos-por-blocos">Fotos por blocos</a></li>
+      </ul>
+      <ul>
+        <li><a href="#gerar-arquivo-de-gcp-para-agisoft-metashape">Gerar arquivo de GCP para Agisoft Metashape</a></li>
       </ul>
       <ul>
         <li><a href="#gerar-arquivo-de-gcp-para-o-cloudcompare">Gerar arquivo de GCP para o CloudCompare</a></li>
@@ -506,7 +521,7 @@ pip install Pillow
         <li><a href="#pos-para-camada">POS para camada</a></li>
       </ul>
       <ul>
-        <li><a href="#semicinemático">Semicinemático</a></li>
+        <li><a href="#semicinemático-(stop-and-go)">Semicinemático (Stop and Go)</a></li>
       </ul>
       </li><li>
       <a href="#mão-na-roda">Mão na Roda</a>
@@ -678,6 +693,9 @@ pip install Pillow
       </ul>
       <ul>
         <li><a href="#inverter-ordem-dos-vértices">Inverter ordem dos vértices</a></li>
+      </ul>
+      <ul>
+        <li><a href="#limpeza-geométrica-leve">Limpeza Geométrica Leve</a></li>
       </ul>
       <ul>
         <li><a href="#linhas-para-polígono">Linhas para polígono</a></li>
@@ -920,6 +938,30 @@ This tool makes it possible to copy or move files to a new folder from a point l
 </table>
 </div>
 
+### Export Flight Area to DJI KML
+Exports polygon features to a simplified KML compatible with DJI flight controllers.</br>            Multipart geometries are reduced to the first polygon part, interior rings are removed, and the output is automatically transformed to WGS84 (EPSG:4326).
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/drone_exportDJI_KML.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Generate GCP file for Agisoft Metashape
+Generate a <b>TXT file with Ground Control Points (GCP)</b> from a <b>point layer</b><br> for import into <b>Agisoft Metashape</b>.</br><p></br>  <b>Output format:</b></br>  <code>Name, X, Y, Z, X_error, Y_error, Z_error</code></br></p></br><p></br>  <b>Notes:</b></br></p></br>  - <b>X</b> and <b>Y</b> coordinates are obtained from the <b>point geometry</b>.</br>  - <b>Z</b> values can be obtained from a <b>field</b> or from the <b>3D geometry</b> of the layer.</br>  - If no <b>Z field</b> is provided and the geometry has no <b>Z value</b>, the <b>Z coordinate</b> will be set to <b>0</b>.</br>  - For best results in <b>Agisoft Metashape</b>, use <b>projected coordinate systems</b>.</br>
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/drone_createGCP_Agisoft.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
 ### Generate GCP file for WebODM
 Generate text file with Ground Control Points (GCP) from a point layer to WebODM.
 <div align="center">
@@ -1082,7 +1124,7 @@ This algorithm fills in the attributes of a specific field from another layer, i
 </div>
 
 ### Magic Styles
-This tool automatically <b>applies cartographic styles</b> to your QGIS vector layers — as if by magic.</br>It turns points, lines, and polygons into ready-to-use visual representations for professional maps, quickly and effortlessly.
+This tool automatically <b>applies cartographic styles</b> to your QGIS layers — as if by magic.</br>It transforms point, line, polygon and raster layers into ready-to-use visual representations for professional maps, quickly and effortlessly.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
@@ -1147,7 +1189,7 @@ Loads a NMEA file (protocol 0183) from GNSS receivers as a point layer.</br>Mode
 </div>
 
 ### POS file (.pos) to layer
-Loads a POS file (.pos) from GNSS processing as a point layer.</br>Compatibility: RTKLIB, IBGE-PPP.</br>Types:</br>◼️ All processed points</br>◼️ Last point
+Loads a GNSS POS file (.pos) as a point layer.</br>Compatibility: RTKLIB and IBGE-PPP.</br>Types:</br>◼️ All processed points</br>◼️ Last point</br>For relative positioning (RTK/PPK), base station standard deviations may be used to propagate rover coordinate precisions.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
@@ -1159,7 +1201,7 @@ Loads a POS file (.pos) from GNSS processing as a point layer.</br>Compatibility
 </div>
 
 ### RTK Points Correction
-Performs base RTK correction using post-process coordinates, for example by PPP, and applies corrections to all rover points.
+Applies RTK base correction using post-processed coordinates (e.g., PPP) by computing a geocentric translation vector and applying it to all rover points. Optionally propagates positional uncertainties and provides results in both geocentric and local topocentric (E, N, U) systems.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
@@ -1899,6 +1941,18 @@ Extends lines at their <b>start</b> and/or <b>end</b> points.
 </table>
 </div>
 
+### Light Geometry Cleanup
+</br>This tool performs a light geometric cleanup directly on the input layer.</br></br>It:</br>- removes features with null or empty geometries directly from the original layer;</br>- records the deleted feature IDs in the processing log;</br>- exports the attributes of removed features to a no-geometry table;</br>- removes duplicate vertices for line and polygon features.</br></br>Note: Invalid geometries are not fixed or deleted by this tool.</br>
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/vect_geometry_cleanup.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
 ### Line sequence
 This tool assigns a sequential value to connected line features based on their topological order. It is ideal for mapping drainage networks, road segments, pipelines, irrigation systems, or any linear vector structure where directional order matters. Users can define the sequence direction (forward, reverse, or both), group by an attribute field, and set a spatial tolerance for node connection. The result is written directly to the layer in custom fields.
 <div align="center">
@@ -2335,6 +2389,18 @@ Esta ferramenta possibilita copiar ou mover arquivos para uma nova pasta a parti
 </table>
 </div>
 
+### Exportar área de voo para KML da DJI
+Exporta feições poligonais para um KML simplificado compatível com controles de voo da DJI.</br>            Geometrias multipartes são reduzidas à primeira parte do polígono, anéis internos são removidos e a saída é automaticamente transformada para WGS84 (EPSG:4326).
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/drone_exportDJI_KML.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
 ### Fotos por blocos
 Esta ferramenta separa fotografias de drones em novas pastas para serem processadas por blocos, a partir de uma camada de polígonos (blocos) e da camadas de fotografias com geotag.
 <div align="center">
@@ -2342,6 +2408,18 @@ Esta ferramenta separa fotografias de drones em novas pastas para serem processa
   <tbody>
     <tr>
       <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/drone_photosByBlocks.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Gerar arquivo de GCP para Agisoft Metashape
+Gera um <b>arquivo TXT com Pontos de Controle no Terreno (GCP)</b> a partir de uma <b>camada de pontos</b><br> para importação no <b>Agisoft Metashape</b>.</br></br><p></br>  <b>Formato de saída:</b></br>  <code>Name, X, Y, Z, X_error, Y_error, Z_error</code></br></p></br></br><p></br>  <b>Observações:</b></br></p></br>  - As coordenadas <b>X</b> e <b>Y</b> são obtidas da <b>geometria do ponto</b>.</br>  - O valor de <b>Z</b> pode ser obtido a partir de um <b>campo</b> ou da <b>geometria 3D</b> da camada.</br>  - Se nenhum <b>campo Z</b> for fornecido e a geometria não possuir <b>valor Z</b>, a <b>coordenada Z</b> será definida como <b>0</b>.</br>  - Para melhores resultados no <b>Agisoft Metashape</b>, utilize <b>sistemas de coordenadas projetados</b>.</br>
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/drone_createGCP_Agisoft.jpg"></td>
     </tr>
   </tbody>
 </table>
@@ -2490,7 +2568,7 @@ Esta ferramenta retorna o(s) ponto(s) de tendência central para agrupamento de 
 
 
 ### Correção de Pontos RTK
-Realiza a correção da base RTK utilizando as coordenas pós-processsas, por exemplo pelo PPP, e aplica as correções a todos os pontos Rover.
+Aplica a correção da base RTK utilizando coordenadas pós-processadas (por exemplo, PPP), por meio do cálculo de um vetor de translação geocêntrico aplicado a todos os pontos rover. Opcionalmente realiza a propagação das incertezas posicionais e fornece resultados nos sistemas geocêntrico e topocêntrico local (E, N, U).
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
@@ -2514,7 +2592,7 @@ Carrega um arquivo NMEA de rastreio GNSS (protocolo 0183) como uma camada do tip
 </div>
 
 ### POS para camada
-Carrega um arquivo POS resultante do processamento de dados GNSS como uma camada do tipo ponto.</br>Compatibilidade: RTKLIB, IBGE-PPP</br>Tipos:</br>◼️ Todos os pontos processados</br>◼️ Último ponto
+Carrega um arquivo POS (.pos) de processamento GNSS como camada de pontos.</br>Compatibilidade: RTKLIB e IBGE-PPP.</br>Tipos:</br>◼️ Todos os pontos processados</br>◼️ Último ponto</br></br>Para posicionamento relativo (RTK/PPK), os desvios-padrão da estação base podem ser usados para propagar as precisões das coordenadas do rover.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
@@ -2525,7 +2603,7 @@ Carrega um arquivo POS resultante do processamento de dados GNSS como uma camada
 </table>
 </div>
 
-### Semicinemático
+### Semicinemático (Stop and Go)
 Encontra os pontos centrais (vértices) das concentrações de pontos levantados pelo método Seminemático (stop and go) provenientes do processamento de dados GNSS.</br>Dados de entrada:</br>◼️ Camada do tipo ponto gerada do arquivo .pos do RTKLIB ou IBGE-PPP</br>◼️ Tempo mínimo de levantamento do ponto em minutos</br>◼️ Tolerância em centímetros para considerar o ponto estático
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
@@ -2543,7 +2621,7 @@ Encontra os pontos centrais (vértices) das concentrações de pontos levantados
 
 
 ### Estilos Mágicos
-Esta ferramenta <b>aplica estilos</b> cartográficos automáticos às suas camadas vetoriais no QGIS, como um passe de mágica.</br>Transforme pontos, linhas e polígonos em representações visuais prontas para mapas profissionais — simples, rápidas e com um toque criativo.
+Esta ferramenta <b>aplica estilos</b> cartográficos automáticos às suas camadas no QGIS, como um passe de mágica.</br>Transforme pontos, linhas, polígonos e rasters em representações visuais prontas para mapas profissionais — simples, rápidas e com um toque criativo.
 <div align="center">
 <table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
   <tbody>
@@ -3189,6 +3267,18 @@ Inverte a ordem dos vértices para polígonos e linhas.
   <tbody>
     <tr>
       <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/vect_reverse_vertex_sequence.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Limpeza Geométrica Leve
+</br>Esta ferramenta executa uma leve limpeza geométrica diretamente na camada de entrada.</br></br>Ela:</br>- remove da camada original as feições com geometria nula ou vazia;</br>- registra no log os IDs das feições apagadas;</br>- exporta os atributos das feições removidas para uma tabela sem geometria;</br>- remove vértices duplicados de feições lineares e poligonais.</br></br>Obs.: Geometrias inválidas não são corrigidas nem removidas por esta ferramenta.</br>
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/vect_geometry_cleanup.jpg"></td>
     </tr>
   </tbody>
 </table>
