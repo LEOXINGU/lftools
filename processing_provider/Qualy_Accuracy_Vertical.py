@@ -49,7 +49,7 @@ class Accuracy_Vertical(QgsProcessingAlgorithm):
         return self.tr('Vertical positional accuracy', 'Acurácia posicional altimétrica')
 
     def group(self):
-        return self.tr('Qualidade')
+        return self.tr('Quality','Qualidade')
 
     def groupId(self):
         return 'quality'
