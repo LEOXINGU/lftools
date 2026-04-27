@@ -202,12 +202,18 @@ class DEMdownloader(QgsProcessingAlgorithm):
         )
 
         # Listar datasets a partir da extensão
-        if mde in [0, 1, 3, 4]:  # SRTM, Copernicus, FABDEM, ANADEM
+        if mde in [0, 1, 2, 3]:  # SRTM, Copernicus, FABDEM, ANADEM
             tiles = gerar_tiles(lat_min, lat_max, lon_min, lon_max)
-        elif mde == 2:  # GMTED2010
-            tiles = gerar_tiles(lat_min, lat_max, lon_min, lon_max, lat0=-56.0, lon0=-180.0, step_lat=20.0, step_lon=30.0)
+
+        elif mde == 4:  # GMTED2010
+            tiles = gerar_tiles(
+                lat_min, lat_max, lon_min, lon_max,
+                lat0=-56.0, lon0=-180.0,
+                step_lat=20.0,
+                step_lon=30.0
+            )
         
-        max_tiles = 4 if mde in [0, 1, 4] else 9
+        max_tiles = 4 if mde in [0, 1, 2, 3] else 9
         if len(tiles) > max_tiles:
             raise QgsProcessingException(
                 self.tr("Define a smaller extent on the map!",
@@ -259,12 +265,12 @@ class DEMdownloader(QgsProcessingAlgorithm):
                 urllib.request.urlretrieve(url, out_path)
 
                 # Tratamento específico do SRTM
-                if mde == 3:
-                    # feedback.pushInfo(
-                    #     f"[{k+1}/{len(tiles)}] " +
-                    #     self.tr("Decompressing file", "Descompactando arquivo") +
-                    #     f" {tile_name} ..."
-                    # )
+                if mde == 0:
+                    feedback.pushInfo(
+                         f"[{k+1}/{len(tiles)}] " +
+                         self.tr("Decompressing file", "Descompactando arquivo") +
+                         f" {tile_name} ..."
+                    )
                     hgt_path = self.gunzip_file(out_path)
                     try:
                         os.remove(out_path)  # remove o .gz após descompactar
