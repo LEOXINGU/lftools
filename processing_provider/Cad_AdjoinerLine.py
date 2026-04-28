@@ -15,7 +15,7 @@ __author__ = 'Leandro França'
 __date__ = '2023-03-12'
 __copyright__ = '(C) 2023, Leandro França'
 
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (QgsApplication,
                        QgsGeometry,
                        QgsWkbTypes,
@@ -26,9 +26,6 @@ from qgis.core import (QgsApplication,
                        QgsSpatialIndex,
                        QgsFeatureRequest,
                        QgsProcessingParameterField,
-                       QgsProcessingParameterEnum,
-                       QgsProcessingParameterBoolean,
-                       QgsProcessingParameterNumber,
                        QgsFeatureSink,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
@@ -36,8 +33,6 @@ from qgis.core import (QgsApplication,
                        QgsProcessingParameterFeatureSink)
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
-from lftools.geocapt.cartography import OrientarPoligono
-import numpy as np
 import os
 from qgis.PyQt.QtGui import QIcon
 
@@ -55,7 +50,7 @@ class AdjoinerLine(QgsProcessingAlgorithm):
         return 'adjoinerline'
 
     def displayName(self):
-        return self.tr('Adjoiner Lines', 'Linhas de Confrontantes')
+        return self.tr('Parcel Boundary Lines', 'Linhas de Confrontantes')
 
     def group(self):
         return self.tr('Cadastre', 'Cadastro')
@@ -87,6 +82,7 @@ class AdjoinerLine(QgsProcessingAlgorithm):
 
     INPUT = 'INPUT'
     OUTPUT = 'OUTPUT'
+    FIELD = 'FIELD'
 
     def initAlgorithm(self, config = None):
         self.addParameter(
@@ -94,6 +90,15 @@ class AdjoinerLine(QgsProcessingAlgorithm):
                 self.INPUT,
                 self.tr('Parcels', 'Lotes'),
                 [QgsProcessing.TypeVectorPolygon]
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterField(
+                self.FIELD,
+                self.tr('Parcel ID', 'ID do Lote'),
+                parentLayerParameterName=self.INPUT,
+                optional = True 
             )
         )
 
@@ -114,13 +119,50 @@ class AdjoinerLine(QgsProcessingAlgorithm):
         )
         if layer is None:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.INPUT))
+        
 
+        campo = self.parameterAsFields(parameters, self.FIELD, context)
+
+        if not campo:
+            columnIndex = -1
+            id_type = QMetaType.Int
+        else:
+            columnIndex = layer.fields().indexFromName(campo[0])
+            if columnIndex == -1:
+                raise QgsProcessingException(
+                    self.tr(
+                        'Invalid ID field!',
+                        'Campo de ID inválido!'
+                    )
+                )
+            id_type = layer.fields()[columnIndex].type()
+
+        # Validar se o campo escolhido é único
+        if columnIndex != -1:
+            valores = set()
+            for feat in layer.getFeatures():
+                valor = feat[columnIndex]
+                if valor is None or (isinstance(valor, str) and valor.strip() == ''):
+                    raise QgsProcessingException(
+                        self.tr(
+                            'The field {} contains null or empty values and cannot be used as a primary key!',
+                            'O campo {} possui valores nulos ou vazios e não pode ser usado como chave primária!'
+                        ).format(campo[0])
+                    )
+                if valor in valores:
+                    raise QgsProcessingException(
+                        self.tr(
+                            'The field {} contains duplicate values and cannot be a primary key!',
+                            'O campo {} possui valores repetidos e não pode ser chave primária!'
+                        ).format(campo[0])
+                    )
+                valores.add(valor)
 
         # Camada de Saída
         Fields = QgsFields()
         itens  = {
-                     'ID1' : QVariant.Int,
-                     'ID2' : QVariant.Int,
+                     'ID1' : id_type,
+                     'ID2' : id_type,
                      }
         for item in itens:
             Fields.append(QgsField(item, itens[item]))
@@ -154,7 +196,8 @@ class AdjoinerLine(QgsProcessingAlgorithm):
             linha1 = QgsGeometry.fromPolylineXY(geom1.asPolygon()[0])
             bbox1 = geom1.boundingBox()
             feat_ids = index.intersects(bbox1)
-            for feat2 in layer.getFeatures(QgsFeatureRequest(feat_ids)):
+            request = QgsFeatureRequest().setFilterFids(feat_ids)
+            for feat2 in layer.getFeatures(request):
                 if feat1.id() != feat2.id():
                     geom2 = feat2.geometry()
                     bbox2 = geom2.boundingBox()
@@ -221,12 +264,18 @@ class AdjoinerLine(QgsProcessingAlgorithm):
                                     feature = QgsFeature()
                                     inter = QgsGeometry.fromPolylineXY(item)
                                     feature.setGeometry(inter)
-                                    feature.setAttributes([feat1.id(), feat2.id()])
+                                    if columnIndex == -1:
+                                        feature.setAttributes([feat1.id(), feat2.id()])
+                                    else:
+                                        feature.setAttributes([feat1[columnIndex], feat2[columnIndex]])
                                     lista_inter += [feature]
                             else:
                                 feature = QgsFeature()
                                 feature.setGeometry(inter)
-                                feature.setAttributes([feat1.id(), feat2.id()])
+                                if columnIndex == -1:
+                                    feature.setAttributes([feat1.id(), feat2.id()])
+                                else:
+                                    feature.setAttributes([feat1[columnIndex], feat2[columnIndex]])
                                 lista_inter += [feature]
 
                     # Linhas de testada dos polígonos
@@ -244,12 +293,18 @@ class AdjoinerLine(QgsProcessingAlgorithm):
                         geom = QgsGeometry.fromPolylineXY(linha)
                         feature = QgsFeature()
                         feature.setGeometry(geom)
-                        feature.setAttributes([feat1.id(), feat1.id()])
+                        if columnIndex == -1:
+                            feature.setAttributes([feat1.id(), feat1.id()])
+                        else:
+                            feature.setAttributes([feat1[columnIndex], feat1[columnIndex]])
                         lista_testada += [feature]
                 else:
                     feature = QgsFeature()
                     feature.setGeometry(linha1)
-                    feature.setAttributes([feat1.id(), feat1.id()])
+                    if columnIndex == -1:
+                        feature.setAttributes([feat1.id(), feat1.id()])
+                    else:
+                        feature.setAttributes([feat1[columnIndex], feat1[columnIndex]])
                     lista_testada += [feature]
 
             if feedback.isCanceled():
