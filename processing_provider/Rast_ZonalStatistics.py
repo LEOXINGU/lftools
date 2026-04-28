@@ -15,7 +15,7 @@ __author__ = 'Leandro França'
 __date__ = '2023-06-04'
 __copyright__ = '(C) 2023, Leandro França'
 
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (QgsProcessing,
                        QgsFeatureSink,
                        QgsWkbTypes,
@@ -380,7 +380,7 @@ Os valores das células do raster onde o centro do pixel se encontra exatamente 
         Fields = layer.fields()
         for band in n_bands:
             for st in stats:
-                Fields.append(QgsField(prefixo + self.tr('band{}_'.format(band), 'banda{}_'.format(band)) + self.STATS[st], QVariant.Double))
+                Fields.append(QgsField(prefixo + self.tr('band{}_'.format(band), 'banda{}_'.format(band)) + self.STATS[st], QMetaType.Double))
 
         (sink, dest_id) = self.parameterAsSink(
             parameters,

@@ -16,7 +16,7 @@ __author__ = 'Leandro França'
 __date__ = '2023-08-22'
 __copyright__ = '(C) 2023, Leandro França'
 
-from qgis.PyQt.QtCore import QCoreApplication, QVariant
+from qgis.PyQt.QtCore import QCoreApplication, QMetaType
 from qgis.core import (QgsProcessing,
                        QgsApplication,
                        QgsProcessingParameterString,
@@ -135,9 +135,9 @@ class ValidateTopology(QgsProcessingAlgorithm):
 
         Fields = QgsFields()
         itens  = {
-                     'ord' : QVariant.Int,
-                     'feat_id': QVariant.Int,
-                     self.tr('type','tipo') : QVariant.String,
+                     'ord' : QMetaType.Int,
+                     'feat_id': QMetaType.Int,
+                     self.tr('type','tipo') : QMetaType.String,
                      }
         for item in itens:
             Fields.append(QgsField(item, itens[item]))

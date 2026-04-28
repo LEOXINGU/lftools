@@ -15,7 +15,7 @@ __author__ = 'Leandro França'
 __date__ = '2019-10-06'
 __copyright__ = '(C) 2019, Leandro França'
 
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import *
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
@@ -170,9 +170,9 @@ class Coord2UTMGrid(QgsProcessingAlgorithm):
 
         # Output Definition
         Fields = QgsFields()
-        Fields.append(QgsField('inom', QVariant.String))
-        Fields.append(QgsField('mi', QVariant.String))
-        Fields.append(QgsField(self.tr('scale', 'escala'), QVariant.Int))
+        Fields.append(QgsField('inom', QMetaType.String))
+        Fields.append(QgsField('mi', QMetaType.String))
+        Fields.append(QgsField(self.tr('scale', 'escala'), QMetaType.Int))
         GeomType = QgsWkbTypes.Polygon
 
         (sink2, dest2_id) = self.parameterAsSink(

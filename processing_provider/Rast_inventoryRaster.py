@@ -15,7 +15,7 @@ __author__ = 'Leandro França'
 __date__ = '2020-11-29'
 __copyright__ = '(C) 2020, Leandro França'
 
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (QgsProcessing,
                        QgsFeatureSink,
                        QgsWkbTypes,
@@ -199,16 +199,16 @@ class InventoryRaster(QgsProcessingAlgorithm):
         GeomType = QgsWkbTypes.Point if geometria == 1 else QgsWkbTypes.Polygon
         Fields = QgsFields()
         itens  = {
-                     self.tr('name','nome') : QVariant.String,
-                     self.tr('extension','extensão') : QVariant.String,
-                     self.tr('path', 'caminho') : QVariant.String,
-                     self.tr('resX') : QVariant.Double,
-                     self.tr('resY') : QVariant.Double,
-                     self.tr('n_cols') : QVariant.Int,
-                     self.tr('n_rows', 'n_lin') : QVariant.Int,
-                     self.tr('crs','src') : QVariant.String,
-                     self.tr('n_bands', 'n_bandas') : QVariant.Int,
-                     self.tr('dataType', 'tipoDado') : QVariant.String,
+                     self.tr('name','nome') : QMetaType.String,
+                     self.tr('extension','extensão') : QMetaType.String,
+                     self.tr('path', 'caminho') : QMetaType.String,
+                     self.tr('resX') : QMetaType.Double,
+                     self.tr('resY') : QMetaType.Double,
+                     self.tr('n_cols') : QMetaType.Int,
+                     self.tr('n_rows', 'n_lin') : QMetaType.Int,
+                     self.tr('crs','src') : QMetaType.String,
+                     self.tr('n_bands', 'n_bandas') : QMetaType.Int,
+                     self.tr('dataType', 'tipoDado') : QMetaType.String,
                      }
         for item in itens:
             Fields.append(QgsField(item, itens[item]))

@@ -33,7 +33,7 @@ from qgis.core import (
     QgsWkbTypes
 )
 
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.PyQt.QtGui import QIcon
 
 from lftools.geocapt.imgs import Imgs
@@ -155,14 +155,14 @@ Obs.: Geometrias inválidas não são corrigidas nem removidas por esta ferramen
 
         # Campos auxiliares
         if fields.indexOf('lf_orig_id') == -1:
-            fields.append(QgsField('lf_orig_id', QVariant.LongLong))
+            fields.append(QgsField('lf_orig_id', QMetaType.LongLong))
         else:
-            fields.append(QgsField('lf_orig_id_2', QVariant.LongLong))
+            fields.append(QgsField('lf_orig_id_2', QMetaType.LongLong))
 
         if fields.indexOf('lf_reason') == -1:
-            fields.append(QgsField('lf_reason', QVariant.String, len=40))
+            fields.append(QgsField('lf_reason', QMetaType.String, len=40))
         else:
-            fields.append(QgsField('lf_reason_2', QVariant.String, len=40))
+            fields.append(QgsField('lf_reason_2', QMetaType.String, len=40))
 
         return fields
 

@@ -15,7 +15,7 @@ __author__ = 'Leandro França'
 __date__ = '2021-11-08'
 __copyright__ = '(C) 2021, Leandro França'
 
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (QgsProcessing,
                        QgsFeatureSink,
                        QgsWkbTypes,
@@ -275,9 +275,9 @@ class VerticalAdjustment(QgsProcessingAlgorithm):
         CRS = pontos.sourceCrs()
         prj = CRS.toWkt()
 
-        itens  = {   self.tr('delta_z') : QVariant.Double,
-                     self.tr('adjusted_z', 'z_ajustado') : QVariant.Double,
-                     self.tr('precision_z','precisao_z') : QVariant.Double
+        itens  = {   self.tr('delta_z') : QMetaType.Double,
+                     self.tr('adjusted_z', 'z_ajustado') : QMetaType.Double,
+                     self.tr('precision_z','precisao_z') : QMetaType.Double
                      }
         for item in itens:
             Fields.append(QgsField(item, itens[item]))

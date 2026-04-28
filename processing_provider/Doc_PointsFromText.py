@@ -21,7 +21,7 @@ __author__ = 'Leandro França'
 __date__ = 'Jun 12'
 __copyright__ = '(C) 2022, Leandro França'
 
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (QgsApplication,
                        QgsProcessingParameterString,
                        QgsProcessingParameterCrs,
@@ -224,10 +224,10 @@ class PointsFromText(QgsProcessingAlgorithm):
 
         Fields = QgsFields()
         itens  = {
-                     'ord' : QVariant.Int,
-                     self.tr('code') : QVariant.String,
-                     self.tr('x') : QVariant.Double,
-                     self.tr('y') : QVariant.Double
+                     'ord' : QMetaType.Int,
+                     self.tr('code') : QMetaType.String,
+                     self.tr('x') : QMetaType.Double,
+                     self.tr('y') : QMetaType.Double
                      }
         for item in itens:
             Fields.append(QgsField(item, itens[item]))

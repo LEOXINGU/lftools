@@ -15,7 +15,7 @@ __author__ = 'Leandro França'
 __date__ = '2019-12-29'
 __copyright__ = '(C) 2019, Leandro França'
 
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import *
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
@@ -242,22 +242,22 @@ class Extent2UTMGrid(QgsProcessingAlgorithm):
 
         # Output Definition
         Fields = QgsFields()
-        Fields.append(QgsField(self.tr('id'), QVariant.Int))
-        Fields.append(QgsField('inom', QVariant.String))
-        Fields.append(QgsField('mi', QVariant.String))
-        Fields.append(QgsField(self.tr('scale', 'escala'), QVariant.Int))
-        Fields.append(QgsField(self.tr('chart_name', 'nome'), QVariant.String))
+        Fields.append(QgsField(self.tr('id'), QMetaType.Int))
+        Fields.append(QgsField('inom', QMetaType.String))
+        Fields.append(QgsField('mi', QMetaType.String))
+        Fields.append(QgsField(self.tr('scale', 'escala'), QMetaType.Int))
+        Fields.append(QgsField(self.tr('chart_name', 'nome'), QMetaType.String))
         if tam_carta:
-            Fields.append(QgsField(self.tr('height', 'altura'), QVariant.Double))
-            Fields.append(QgsField(self.tr('width', 'largura'), QVariant.Double))
+            Fields.append(QgsField(self.tr('height', 'altura'), QMetaType.Double))
+            Fields.append(QgsField(self.tr('width', 'largura'), QMetaType.Double))
         if mer_conv:
-            Fields.append(QgsField(self.tr('MC', 'CM'), QVariant.Double))
+            Fields.append(QgsField(self.tr('MC', 'CM'), QMetaType.Double))
         if mag_decl:
-            Fields.append(QgsField(self.tr('MD', 'DM'), QVariant.Double))
-            Fields.append(QgsField(self.tr('VAR_MD', 'var_DM'), QVariant.Double))
-            Fields.append(QgsField(self.tr('Epoch', 'Época'), QVariant.Date))
+            Fields.append(QgsField(self.tr('MD', 'DM'), QMetaType.Double))
+            Fields.append(QgsField(self.tr('VAR_MD', 'var_DM'), QMetaType.Double))
+            Fields.append(QgsField(self.tr('Epoch', 'Época'), QMetaType.Date))
         if zone_hemisf:
-            Fields.append(QgsField(self.tr('zone_hemisphere', 'fuso_hemisfério'), QVariant.String))
+            Fields.append(QgsField(self.tr('zone_hemisphere', 'fuso_hemisfério'), QMetaType.String))
 
         GeomType = QgsWkbTypes.Polygon
 

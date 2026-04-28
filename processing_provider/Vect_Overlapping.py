@@ -15,7 +15,7 @@ __author__ = 'Leandro França'
 __date__ = '2023-05-14'
 __copyright__ = '(C) 2023, Leandro França'
 
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (QgsApplication,
                        QgsGeometry,
                        QgsWkbTypes,
@@ -119,8 +119,8 @@ class Overlapping(QgsProcessingAlgorithm):
         # Camada de Saída
         Fields = QgsFields()
         itens  = {
-                     'ID1' : QVariant.Int,
-                     'ID2' : QVariant.Int,
+                     'ID1' : QMetaType.Int,
+                     'ID2' : QMetaType.Int,
                      }
         for item in itens:
             Fields.append(QgsField(item, itens[item]))

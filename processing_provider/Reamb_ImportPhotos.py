@@ -15,7 +15,7 @@ __author__ = 'Leandro França'
 __date__ = '2021-02-16'
 __copyright__ = '(C) 2021, Leandro França'
 
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (QgsApplication,
                        QgsGeometry,
                        QgsPoint,
@@ -291,22 +291,22 @@ class ImportPhotos(QgsProcessingAlgorithm):
         # Criando Output
         crs = QgsCoordinateReferenceSystem('EPSG:4326')
         fields = QgsFields()
-        fields.append(QgsField(self.tr('name'), QVariant.String))
-        fields.append(QgsField(self.tr('longitude'), QVariant.Double))
-        fields.append(QgsField(self.tr('latitude'), QVariant.Double))
-        fields.append(QgsField(self.tr('altitude'), QVariant.Double))
-        fields.append(QgsField(self.tr('azimuth'), QVariant.Int))
-        fields.append(QgsField(self.tr('date_time'), QVariant.String))
-        fields.append(QgsField(self.tr('path'), QVariant.String))
-        fields.append(QgsField(self.tr('make','fabricante'), QVariant.String))
-        fields.append(QgsField(self.tr('model','modelo'), QVariant.String))
+        fields.append(QgsField(self.tr('name'), QMetaType.String))
+        fields.append(QgsField(self.tr('longitude'), QMetaType.Double))
+        fields.append(QgsField(self.tr('latitude'), QMetaType.Double))
+        fields.append(QgsField(self.tr('altitude'), QMetaType.Double))
+        fields.append(QgsField(self.tr('azimuth'), QMetaType.Int))
+        fields.append(QgsField(self.tr('date_time'), QMetaType.String))
+        fields.append(QgsField(self.tr('path'), QMetaType.String))
+        fields.append(QgsField(self.tr('make','fabricante'), QMetaType.String))
+        fields.append(QgsField(self.tr('model','modelo'), QMetaType.String))
         if YPR:
-            fields.append(QgsField(self.tr('FlightYaw'), QVariant.Double))
-            fields.append(QgsField(self.tr('FlightPitch'), QVariant.Double))
-            fields.append(QgsField(self.tr('FlightRoll'), QVariant.Double))
-            fields.append(QgsField(self.tr('GimbalYaw'), QVariant.Double))
-            fields.append(QgsField(self.tr('GimbalPitch'), QVariant.Double))
-            fields.append(QgsField(self.tr('GimbalRoll'), QVariant.Double))
+            fields.append(QgsField(self.tr('FlightYaw'), QMetaType.Double))
+            fields.append(QgsField(self.tr('FlightPitch'), QMetaType.Double))
+            fields.append(QgsField(self.tr('FlightRoll'), QMetaType.Double))
+            fields.append(QgsField(self.tr('GimbalYaw'), QMetaType.Double))
+            fields.append(QgsField(self.tr('GimbalPitch'), QMetaType.Double))
+            fields.append(QgsField(self.tr('GimbalRoll'), QMetaType.Double))
 
         (sink, dest_id) = self.parameterAsSink(
             parameters,

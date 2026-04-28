@@ -15,7 +15,7 @@ __author__ = 'Leandro França'
 __date__ = '2023-06-28'
 __copyright__ = '(C) 2023, Leandro França'
 
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (QgsProcessing,
                        QgsFeatureSink,
                        QgsWkbTypes,
@@ -239,12 +239,12 @@ Saída: Camada de multipoint com precisões posicionais em metros e outras estat
 
         # OUTPUT
         itens  = {
-             self.tr('count', 'contagem'): QVariant.Int,
-             'std_x' : QVariant.Double,
-             'std_y' : QVariant.Double,
+             self.tr('count', 'contagem'): QMetaType.Int,
+             'std_x' : QMetaType.Double,
+             'std_y' : QMetaType.Double,
              }
         if possuiZ:
-            itens['std_z'] = QVariant.Double
+            itens['std_z'] = QMetaType.Double
 
         Fields = ref.fields()
         for item in itens:
@@ -252,7 +252,7 @@ Saída: Camada de multipoint com precisões posicionais em metros e outras estat
 
         if campo:
             for st in stats:
-                Fields.append(QgsField(nome_campo + '_' + self.OPTIONS[st], QVariant.Double))
+                Fields.append(QgsField(nome_campo + '_' + self.OPTIONS[st], QMetaType.Double))
 
         (sink, dest_id) = self.parameterAsSink(
             parameters,

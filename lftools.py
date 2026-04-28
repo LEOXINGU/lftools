@@ -35,7 +35,7 @@ from qgis.core import (QgsProject,
                        QgsCoordinateTransform,
                        QgsApplication,
                        QgsExpression)
-from qgis.PyQt.QtCore import QVariant, QCoreApplication, QSettings, QTranslator, QUrl
+from qgis.PyQt.QtCore import QMetaType, QCoreApplication, QSettings, QTranslator, QUrl
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction, QMenu, QToolButton, QMessageBox    
 from .lftools_provider import LFToolsProvider
@@ -302,11 +302,11 @@ class LFToolsPlugin(object):
                     self.DP = self.layer.dataProvider()
                     crs0 = crs
                     # adicionar campos
-                    campos = [QgsField(nome_campo, QVariant.String),
-                              QgsField('X', QVariant.String),
-                              QgsField('Y', QVariant.String),
-                              QgsField('Z', QVariant.String),
-                              QgsField('CRS', QVariant.String)]
+                    campos = [QgsField(nome_campo, QMetaType.String),
+                              QgsField('X', QMetaType.String),
+                              QgsField('Y', QMetaType.String),
+                              QgsField('Z', QMetaType.String),
+                              QgsField('CRS', QMetaType.String)]
                     self.DP.addAttributes(campos)
                     self.layer.updateFields()
                     # Estilizar camada

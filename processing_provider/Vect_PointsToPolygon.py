@@ -15,7 +15,7 @@ __author__ = 'Leandro França'
 __date__ = '2023-01-21'
 __copyright__ = '(C) 2023, Leandro França'
 
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (QgsApplication,
                        QgsProcessingParameterFeatureSource,
                        QgsGeometry,
@@ -139,7 +139,7 @@ class PointsToPolygon(QgsProcessingAlgorithm):
         Fields = QgsFields()
 
         itens  = {
-                     'id' : QVariant.Int,
+                     'id' : QMetaType.Int,
                      }
         for item in itens:
             Fields.append(QgsField(item, itens[item]))

@@ -15,7 +15,7 @@ __author__ = 'Leandro França'
 __date__ = '2022-06-13'
 __copyright__ = '(C) 2022, Leandro França'
 
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import *
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
@@ -241,17 +241,17 @@ Para posicionamento relativo (RTK/PPK), os desvios-padrão da estação base pod
         sigma_y_base = 0.0 if sigma_y_base is None else sigma_y_base
         sigma_z_base = 0.0 if sigma_z_base is None else sigma_z_base
 
-        itens  = {"ord": QVariant.Int,
-                  "lat": QVariant.Double,
-                  "lon": QVariant.Double,
-                  "h": QVariant.Double,
-                  self.tr("datetime","datahora"): QVariant.String,
-                  "sigma_x": QVariant.Double,
-                  "sigma_y": QVariant.Double,
-                  "sigma_z": QVariant.Double,
-                  "num_sat": QVariant.Int,
-                  "quality": QVariant.String,
-                  "h_reduction": QVariant.Double,
+        itens  = {"ord": QMetaType.Int,
+                  "lat": QMetaType.Double,
+                  "lon": QMetaType.Double,
+                  "h": QMetaType.Double,
+                  self.tr("datetime","datahora"): QMetaType.String,
+                  "sigma_x": QMetaType.Double,
+                  "sigma_y": QMetaType.Double,
+                  "sigma_z": QMetaType.Double,
+                  "num_sat": QMetaType.Int,
+                  "quality": QMetaType.String,
+                  "h_reduction": QMetaType.Double,
              }
         Fields = QgsFields()
         for item in itens:

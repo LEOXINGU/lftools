@@ -15,7 +15,7 @@ __author__ = 'Leandro França'
 __date__ = '2019-11-17'
 __copyright__ = '(C) 2019, Leandro França'
 
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (QgsProcessing,
                        QgsFeatureSink,
                        QgsProcessingException,
@@ -362,7 +362,7 @@ class TraverseAdjustment(QgsProcessingAlgorithm):
 
         # OUTPUT
         Fields = QgsFields()
-        Fields.append(QgsField('id', QVariant.Int))
+        Fields.append(QgsField('id', QMetaType.Int))
         GeomType = QgsWkbTypes.Point
         (sink, dest_id) = self.parameterAsSink(
             parameters,

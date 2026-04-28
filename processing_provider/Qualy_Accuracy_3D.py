@@ -15,7 +15,7 @@ __author__ = 'Leandro França'
 __date__ = '2025-08-06'
 __copyright__ = '(C) 2025, Leandro França'
 
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import *
 from numpy import sqrt, array, mean, std, pi, sin
 from lftools.geocapt.imgs import *
@@ -211,12 +211,12 @@ class Accuracy_3D(QgsProcessingAlgorithm):
         
         Fields = QgsFields()
         itens  = {
-                     'name' : QVariant.String,
-                     'discrep_x' : QVariant.Double,
-                     'discrep_y' : QVariant.Double,
-                     'discrep_z' : QVariant.Double,
-                     'discrep_xy' : QVariant.Double,
-                     'discrep_xyz' : QVariant.Double,
+                     'name' : QMetaType.String,
+                     'discrep_x' : QMetaType.Double,
+                     'discrep_y' : QMetaType.Double,
+                     'discrep_z' : QMetaType.Double,
+                     'discrep_xy' : QMetaType.Double,
+                     'discrep_xyz' : QMetaType.Double,
                      }
         for item in itens:
             Fields.append(QgsField(item, itens[item]))

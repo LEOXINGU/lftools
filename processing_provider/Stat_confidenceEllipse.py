@@ -15,7 +15,7 @@ __author__ = 'Leandro França'
 __date__ = '2020-08-22'
 __copyright__ = '(C) 2020, Leandro França'
 
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (QgsProcessing,
                        QgsFeatureSink,
                        QgsWkbTypes,
@@ -195,16 +195,16 @@ class ConfidenceEllipse(QgsProcessingAlgorithm):
         Fields = QgsFields()
         CRS = layer.sourceCrs()
         itens  = {
-             'id' : QVariant.Int,
-             self.tr('group','grupo'): QVariant.String,
-             'avg_x' : QVariant.Double,
-             'avg_y' : QVariant.Double,
-             'std_x' : QVariant.Double,
-             'std_y' : QVariant.Double,
-             self.tr('confidence','confiança'): QVariant.Double,
-             self.tr('rotation','rotação'): QVariant.Double,
-             'major_axis': QVariant.Double,
-             'minor_axis': QVariant.Double
+             'id' : QMetaType.Int,
+             self.tr('group','grupo'): QMetaType.String,
+             'avg_x' : QMetaType.Double,
+             'avg_y' : QMetaType.Double,
+             'std_x' : QMetaType.Double,
+             'std_y' : QMetaType.Double,
+             self.tr('confidence','confiança'): QMetaType.Double,
+             self.tr('rotation','rotação'): QMetaType.Double,
+             'major_axis': QMetaType.Double,
+             'minor_axis': QMetaType.Double
              }
         for item in itens:
             Fields.append(QgsField(item, itens[item]))

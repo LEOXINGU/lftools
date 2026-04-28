@@ -15,7 +15,7 @@ __author__ = 'Leandro França'
 __date__ = '2025-05-03'
 __copyright__ = '(C) 2025, Leandro França'
 
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (QgsApplication,
                        QgsProcessingParameterVectorLayer,
                        QgsProcessing,
@@ -190,12 +190,12 @@ class ExportToCloudCompare(QgsProcessingAlgorithm):
         Fields = QgsFields()
 
         itens  = {
-                     'X' : QVariant.Double,
-                     'Y' : QVariant.Double,
-                     'Z' : QVariant.Double,
-                     'R' : QVariant.Int,
-                     'G' : QVariant.Int,
-                     'B' : QVariant.Int,
+                     'X' : QMetaType.Double,
+                     'Y' : QMetaType.Double,
+                     'Z' : QMetaType.Double,
+                     'R' : QMetaType.Int,
+                     'G' : QMetaType.Int,
+                     'B' : QMetaType.Int,
                      }
         for item in itens:
             Fields.append(QgsField(item, itens[item]))
@@ -248,7 +248,7 @@ class ExportToCloudCompare(QgsProcessingAlgorithm):
         expr = 'concat("R", \',\', "G", \',\', "B")'
         layer.startEditing()
         if 'RGB' not in [f.name() for f in layer.fields()]:
-            layer.dataProvider().addAttributes([QgsField('RGB', QVariant.String)])
+            layer.dataProvider().addAttributes([QgsField('RGB', QMetaType.String)])
             layer.updateFields()
 
         # Atualizar campo RGB

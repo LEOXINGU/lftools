@@ -15,7 +15,7 @@ __author__ = 'Leandro França'
 __date__ = '2023-01-06'
 __copyright__ = '(C) 2023, Leandro França'
 
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (QgsApplication,
                        QgsProcessingParameterVectorLayer,
                        QgsGeometry,
@@ -209,12 +209,12 @@ class LineSequence(QgsProcessingAlgorithm):
 
         if tipo == 0 or tipo == 2:  # Vante ou Ambos
             if nome not in campos_existentes:
-                DP.addAttributes([QgsField(nome,  QVariant.Int)])
+                DP.addAttributes([QgsField(nome,  QMetaType.Int)])
                 novos_campos.append(nome)
         if tipo == 1 or tipo == 2:  # Ré ou Ambos
             nome_inv = nome + '_inv'
             if nome_inv not in campos_existentes:
-                DP.addAttributes([QgsField(nome_inv,  QVariant.Int)])
+                DP.addAttributes([QgsField(nome_inv,  QMetaType.Int)])
                 novos_campos.append(nome_inv)
         if novos_campos:
             layer.updateFields()

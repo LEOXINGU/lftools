@@ -15,7 +15,7 @@ __author__ = 'Leandro França'
 __date__ = '2023-08-22'
 __copyright__ = '(C) 2023, Leandro França'
 
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (QgsApplication,
                        QgsProcessingParameterFeatureSource,
                        QgsGeometry,
@@ -147,9 +147,9 @@ class CrossSections(QgsProcessingAlgorithm):
         fieldnames = [field.name() for field in Fields]
 
         itens  = {
-                     self.tr('feat_id'): QVariant.Int,
-                     self.tr('sequence','ordem'): QVariant.Int,
-                     self.tr('length','distância'): QVariant.Double
+                     self.tr('feat_id'): QMetaType.Int,
+                     self.tr('sequence','ordem'): QMetaType.Int,
+                     self.tr('length','distância'): QMetaType.Double
                      }
 
         for item in itens:

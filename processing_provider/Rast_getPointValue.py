@@ -15,7 +15,7 @@ __author__ = 'Leandro França'
 __date__ = '2021-11-07'
 __copyright__ = '(C) 2021, Leandro França'
 
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (QgsProcessing,
                        QgsFeatureSink,
                        QgsWkbTypes,
@@ -240,10 +240,10 @@ class GetPointValue(QgsProcessingAlgorithm):
         CRS = pontos.sourceCrs()
         if n_banda == 0:
             for k in range(total_bands):
-                Fields.append(QgsField(prefixo + self.tr('band_{}'.format(k+1)), QVariant.Double))
+                Fields.append(QgsField(prefixo + self.tr('band_{}'.format(k+1)), QMetaType.Double))
 
         else:
-            Fields.append(QgsField(prefixo + self.tr('band_{}'.format(n_banda)), QVariant.Double))
+            Fields.append(QgsField(prefixo + self.tr('band_{}'.format(n_banda)), QMetaType.Double))
 
         (sink, dest_id) = self.parameterAsSink(
             parameters,

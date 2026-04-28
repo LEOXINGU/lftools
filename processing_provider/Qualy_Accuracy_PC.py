@@ -15,7 +15,7 @@ __author__ = 'Leandro França'
 __date__ = '2021-12-26'
 __copyright__ = '(C) 2021, Leandro França'
 
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import *
 from numpy import sqrt, array, mean, std, pi, sin
 import numpy as np
@@ -225,9 +225,9 @@ class Accuracy_PC(QgsProcessingAlgorithm):
         Fields = source.fields()
         
         itens  = {
-                     'np_distância' : QVariant.Double,
-                     'np_h' : QVariant.Double,
-                     'np_discrep_z' : QVariant.Double
+                     'np_distância' : QMetaType.Double,
+                     'np_h' : QMetaType.Double,
+                     'np_discrep_z' : QMetaType.Double
                      }
         for item in itens:
             Fields.append(QgsField(item, itens[item]))

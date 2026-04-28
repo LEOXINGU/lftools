@@ -15,7 +15,7 @@ __author__ = 'Leandro França'
 __date__ = '2023-08-12'
 __copyright__ = '(C) 2023, Leandro França'
 
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (QgsApplication,
                        QgsProcessingParameterFeatureSource,
                        QgsGeometry,
@@ -169,9 +169,9 @@ class FramesFromLines(QgsProcessingAlgorithm):
         Fields = QgsFields()
 
         itens  = {
-                     self.tr('feat_id'): QVariant.Int,
-                     self.tr('page','folha'): QVariant.Int,
-                     self.tr('sequence','ordem'): QVariant.Int,
+                     self.tr('feat_id'): QMetaType.Int,
+                     self.tr('page','folha'): QMetaType.Int,
+                     self.tr('sequence','ordem'): QMetaType.Int,
                      }
         for item in itens:
             Fields.append(QgsField(item, itens[item]))

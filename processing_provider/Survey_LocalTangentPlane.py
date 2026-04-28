@@ -15,7 +15,7 @@ __author__ = 'Leandro França'
 __date__ = '2019-10-28'
 __copyright__ = '(C) 2019, Leandro França'
 
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import *
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
@@ -265,17 +265,17 @@ Saiba mais:'''
         GeomType = QgsWkbTypes.Point
         Fields = QgsFields()
         itens  = {
-                     'lon' : QVariant.Double,
-                     'lon_dms' : QVariant.String,
-                     'lat':  QVariant.Double,
-                     'lat_dms':  QVariant.String,
-                     'h': QVariant.Double,
-                     'X':  QVariant.Double,
-                     'Y': QVariant.Double,
-                     'Z': QVariant.Double,
-                     'E': QVariant.Double,
-                     'N': QVariant.Double,
-                     'U': QVariant.Double
+                     'lon' : QMetaType.Double,
+                     'lon_dms' : QMetaType.String,
+                     'lat':  QMetaType.Double,
+                     'lat_dms':  QMetaType.String,
+                     'h': QMetaType.Double,
+                     'X':  QMetaType.Double,
+                     'Y': QMetaType.Double,
+                     'Z': QMetaType.Double,
+                     'E': QMetaType.Double,
+                     'N': QMetaType.Double,
+                     'U': QMetaType.Double
                      }
 
         field_list = []

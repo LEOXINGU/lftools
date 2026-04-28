@@ -15,7 +15,7 @@ __author__ = 'Leandro França'
 __date__ = '2021-12-18'
 __copyright__ = '(C) 2021, Leandro França'
 
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (QgsProcessing,
                        QgsFeatureSink,
                        QgsWkbTypes,
@@ -194,8 +194,8 @@ class SpotElevation(QgsProcessingAlgorithm):
         # OUTPUT
         Fields = QgsFields()
         itens  = {
-                     self.tr('elevation','cota') : QVariant.Double,
-                     self.tr('type','tipo') : QVariant.Int,
+                     self.tr('elevation','cota') : QMetaType.Double,
+                     self.tr('type','tipo') : QMetaType.Int,
                      }
         for item in itens:
             Fields.append(QgsField(item, itens[item]))

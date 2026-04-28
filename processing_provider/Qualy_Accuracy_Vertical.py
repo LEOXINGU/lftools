@@ -15,7 +15,7 @@ __author__ = 'Leandro França'
 __date__ = '2021-12-24'
 __copyright__ = '(C) 2021, Leandro França'
 
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import *
 from numpy import sqrt, array, mean, std, pi, sin, floor, ceil
 from osgeo import osr, gdal
@@ -227,7 +227,7 @@ class Accuracy_Vertical(QgsProcessingAlgorithm):
         
         Fields = source.fields()
         itens  = {
-                     'discrep_Z' : QVariant.Double
+                     'discrep_Z' : QMetaType.Double
                      }
         for item in itens:
             Fields.append(QgsField(item, itens[item]))

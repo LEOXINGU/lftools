@@ -15,7 +15,7 @@ __author__ = 'Leandro França'
 __date__ = '2022-02-27'
 __copyright__ = '(C) 2022, Leandro França'
 
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import *
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
@@ -226,30 +226,30 @@ Modos:
             valores = np.array(lista)
         # Campos
         if tipo == 0:
-            itens  = {"lat": QVariant.Double,
-                      "lon": QVariant.Double,
-                      "h_ellip": QVariant.Double,
-                      "H_orto": QVariant.Double,
-                      "N": QVariant.Double,
-                      "datetime": QVariant.String,
-                      "HDOP": QVariant.Double,
-                      "VDOP": QVariant.Double,
-                      "PDOP": QVariant.Double,
-                      "quality": QVariant.String,
-                      "num_sat": QVariant.Int
+            itens  = {"lat": QMetaType.Double,
+                      "lon": QMetaType.Double,
+                      "h_ellip": QMetaType.Double,
+                      "H_orto": QMetaType.Double,
+                      "N": QMetaType.Double,
+                      "datetime": QMetaType.String,
+                      "HDOP": QMetaType.Double,
+                      "VDOP": QMetaType.Double,
+                      "PDOP": QMetaType.Double,
+                      "quality": QMetaType.String,
+                      "num_sat": QMetaType.Int
                  }
         else:
-            itens  = {"lat": QVariant.Double,
-                      "lon": QVariant.Double,
-                      "h_ellip": QVariant.Double,
-                      "H_orto": QVariant.Double,
-                      "N": QVariant.Double,
-                      "start_datetime": QVariant.String,
-                      "end_datetime": QVariant.String,
-                      "sigma_x": QVariant.Double,
-                      "sigma_y": QVariant.Double,
-                      "sigma_z": QVariant.Double,
-                      "num_obs": QVariant.Int
+            itens  = {"lat": QMetaType.Double,
+                      "lon": QMetaType.Double,
+                      "h_ellip": QMetaType.Double,
+                      "H_orto": QMetaType.Double,
+                      "N": QMetaType.Double,
+                      "start_datetime": QMetaType.String,
+                      "end_datetime": QMetaType.String,
+                      "sigma_x": QMetaType.Double,
+                      "sigma_y": QMetaType.Double,
+                      "sigma_z": QMetaType.Double,
+                      "num_obs": QMetaType.Int
                  }
         Fields = QgsFields()
         for item in itens:

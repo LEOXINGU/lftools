@@ -15,7 +15,7 @@ __author__ = 'Leandro França'
 __date__ = '2021-11-04'
 __copyright__ = '(C) 2021, Leandro França'
 
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (QgsProcessing,
                        QgsFeatureSink,
                        QgsWkbTypes,
@@ -273,9 +273,9 @@ class GeorrefAdjust(QgsProcessingAlgorithm):
         prj = CRS.toWkt()
 
         itens  = {
-                     'ord' : QVariant.Int,
-                     self.tr('precision_x', 'precisao_x') : QVariant.Double,
-                     self.tr('precision_y','precisao_y') : QVariant.Double
+                     'ord' : QMetaType.Int,
+                     self.tr('precision_x', 'precisao_x') : QMetaType.Double,
+                     self.tr('precision_y','precisao_y') : QMetaType.Double
                      }
         for item in itens:
             Fields.append(QgsField(item, itens[item]))

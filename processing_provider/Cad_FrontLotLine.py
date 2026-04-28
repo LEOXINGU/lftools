@@ -15,7 +15,7 @@ __author__ = 'Leandro França'
 __date__ = '2022-03-08'
 __copyright__ = '(C) 2022, Leandro França'
 
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (QgsApplication,
                        QgsGeometry,
                        QgsWkbTypes,
@@ -140,9 +140,9 @@ class FrontLotLine(QgsProcessingAlgorithm):
         # Camada de Saída
         Fields = lotes.fields()
         itens  = {
-                     self.tr('sequence', 'sequencia') : QVariant.Int,
-                     self.tr('lenght', 'comprimento') : QVariant.Double,
-                     self.tr('cumulative', 'valor_testada') : QVariant.Double,
+                     self.tr('sequence', 'sequencia') : QMetaType.Int,
+                     self.tr('lenght', 'comprimento') : QMetaType.Double,
+                     self.tr('cumulative', 'valor_testada') : QMetaType.Double,
                      }
         for item in itens:
             Fields.append(QgsField(item, itens[item]))

@@ -15,7 +15,7 @@ __author__ = 'Leandro França'
 __date__ = '2022-06-05'
 __copyright__ = '(C) 2022, Leandro França'
 
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (QgsProcessing,
                        QgsFeatureSink,
                        QgsWkbTypes,
@@ -204,76 +204,76 @@ Observação: Camada em um SRC projetado obtém resultado mais acurados.'''
         if estat == 0: # média
             if not TemZ:
                 itens  = {
-                    'id' : QVariant.Int,
-                    self.tr('group','grupo'): QVariant.String,
-                    'min_x' : QVariant.Double,
-                    'min_y' : QVariant.Double,
-                    'avg_x' : QVariant.Double,
-                    'avg_y' : QVariant.Double,
-                    'max_x' : QVariant.Double,
-                    'max_y' : QVariant.Double,
-                    'std_x' : QVariant.Double,
-                    'std_y' : QVariant.Double,
+                    'id' : QMetaType.Int,
+                    self.tr('group','grupo'): QMetaType.String,
+                    'min_x' : QMetaType.Double,
+                    'min_y' : QMetaType.Double,
+                    'avg_x' : QMetaType.Double,
+                    'avg_y' : QMetaType.Double,
+                    'max_x' : QMetaType.Double,
+                    'max_y' : QMetaType.Double,
+                    'std_x' : QMetaType.Double,
+                    'std_y' : QMetaType.Double,
                     }
             else:
                 itens  = {
-                    'id' : QVariant.Int,
-                    self.tr('group','grupo'): QVariant.String,
-                    'min_x' : QVariant.Double,
-                    'min_y' : QVariant.Double,
-                    'min_z' : QVariant.Double,
-                    'avg_x' : QVariant.Double,
-                    'avg_y' : QVariant.Double,
-                    'avg_z' : QVariant.Double,
-                    'max_x' : QVariant.Double,
-                    'max_y' : QVariant.Double,
-                    'max_z' : QVariant.Double,
-                    'std_x' : QVariant.Double,
-                    'std_y' : QVariant.Double,
-                    'std_z' : QVariant.Double,
+                    'id' : QMetaType.Int,
+                    self.tr('group','grupo'): QMetaType.String,
+                    'min_x' : QMetaType.Double,
+                    'min_y' : QMetaType.Double,
+                    'min_z' : QMetaType.Double,
+                    'avg_x' : QMetaType.Double,
+                    'avg_y' : QMetaType.Double,
+                    'avg_z' : QMetaType.Double,
+                    'max_x' : QMetaType.Double,
+                    'max_y' : QMetaType.Double,
+                    'max_z' : QMetaType.Double,
+                    'std_x' : QMetaType.Double,
+                    'std_y' : QMetaType.Double,
+                    'std_z' : QMetaType.Double,
                     }
 
         elif estat == 1: # mediana
             if not TemZ:
                 itens  = {
-                    'id' : QVariant.Int,
-                    self.tr('group','grupo'): QVariant.String,
-                    'min_x' : QVariant.Double,
-                    'min_y' : QVariant.Double,
-                    'perc25_x' : QVariant.Double,
-                    'perc25_y' : QVariant.Double,
-                    'median_x' : QVariant.Double,
-                    'median_y' : QVariant.Double,
-                    'perc75_x' : QVariant.Double,
-                    'perc75_y' : QVariant.Double,
-                    'max_x' : QVariant.Double,
-                    'max_y' : QVariant.Double,
+                    'id' : QMetaType.Int,
+                    self.tr('group','grupo'): QMetaType.String,
+                    'min_x' : QMetaType.Double,
+                    'min_y' : QMetaType.Double,
+                    'perc25_x' : QMetaType.Double,
+                    'perc25_y' : QMetaType.Double,
+                    'median_x' : QMetaType.Double,
+                    'median_y' : QMetaType.Double,
+                    'perc75_x' : QMetaType.Double,
+                    'perc75_y' : QMetaType.Double,
+                    'max_x' : QMetaType.Double,
+                    'max_y' : QMetaType.Double,
                     }
             else:
                 itens  = {
-                    'id' : QVariant.Int,
-                    self.tr('group','grupo'): QVariant.String,
-                    'min_x' : QVariant.Double,
-                    'min_y' : QVariant.Double,
-                    'min_z' : QVariant.Double,
-                    'perc25_x' : QVariant.Double,
-                    'perc25_y' : QVariant.Double,
-                    'perc25_z' : QVariant.Double,
-                    'median_x' : QVariant.Double,
-                    'median_y' : QVariant.Double,
-                    'median_z' : QVariant.Double,
-                    'perc75_x' : QVariant.Double,
-                    'perc75_y' : QVariant.Double,
-                    'perc75_z' : QVariant.Double,
-                    'max_x' : QVariant.Double,
-                    'max_y' : QVariant.Double,
-                    'max_z' : QVariant.Double,
+                    'id' : QMetaType.Int,
+                    self.tr('group','grupo'): QMetaType.String,
+                    'min_x' : QMetaType.Double,
+                    'min_y' : QMetaType.Double,
+                    'min_z' : QMetaType.Double,
+                    'perc25_x' : QMetaType.Double,
+                    'perc25_y' : QMetaType.Double,
+                    'perc25_z' : QMetaType.Double,
+                    'median_x' : QMetaType.Double,
+                    'median_y' : QMetaType.Double,
+                    'median_z' : QMetaType.Double,
+                    'perc75_x' : QMetaType.Double,
+                    'perc75_y' : QMetaType.Double,
+                    'perc75_z' : QMetaType.Double,
+                    'max_x' : QMetaType.Double,
+                    'max_y' : QMetaType.Double,
+                    'max_z' : QMetaType.Double,
                     }
 
         elif estat == 2: # feição central
             itens = {
-                    self.tr('group','grupo'): QVariant.String,
-                    self.tr('count', 'contagem'): QVariant.Int}
+                    self.tr('group','grupo'): QMetaType.String,
+                    self.tr('count', 'contagem'): QMetaType.Int}
 
         if estat in (0,1):
             Fields = QgsFields()

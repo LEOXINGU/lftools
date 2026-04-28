@@ -15,7 +15,7 @@ __author__ = 'Leandro França'
 __date__ = '2022-06-13'
 __copyright__ = '(C) 2022, Leandro França'
 
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (QgsProcessing,
                        QgsFeatureSink,
                        QgsWkbTypes,
@@ -173,10 +173,10 @@ Dados de entrada:
         dist_max /= 1e2 # metros
 
         Fields = layer.fields()
-        itens  = {"start_time": QVariant.String,
-                  "end_time": QVariant.String,
-                  "count": QVariant.Int,
-                  "group": QVariant.Int
+        itens  = {"start_time": QMetaType.String,
+                  "end_time": QMetaType.String,
+                  "count": QMetaType.Int,
+                  "group": QMetaType.Int
              }
         for item in itens:
             Fields.append(QgsField(item, itens[item]))

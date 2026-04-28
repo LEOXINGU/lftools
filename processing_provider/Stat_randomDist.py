@@ -15,7 +15,7 @@ __author__ = 'Leandro França'
 __date__ = '2020-12-04'
 __copyright__ = '(C) 2020, Leandro França'
 
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (QgsProcessing,
                        QgsFeatureSink,
                        QgsWkbTypes,
@@ -232,7 +232,7 @@ class RandomDist(QgsProcessingAlgorithm):
         GeomType = QgsWkbTypes.Point
         Fields = QgsFields()
         itens  = {
-             'id' : QVariant.Int,
+             'id' : QMetaType.Int,
              }
         for item in itens:
             Fields.append(QgsField(item, itens[item]))

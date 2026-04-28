@@ -15,7 +15,7 @@ __author__ = 'Leandro França'
 __date__ = '2019-10-06'
 __copyright__ = '(C) 2019, Leandro França'
 
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import *
 import processing
 from numpy import sin, cos, modf, radians, sqrt, floor
@@ -487,18 +487,18 @@ dN</p>
         GeomType = QgsWkbTypes.Point
         Fields = QgsFields()
         itens  = {
-                     'estation' : QVariant.Int,
-                     'forward':  QVariant.Int,
-                     'angle': QVariant.String,
-                     'distance':  QVariant.Double,
-                     'corrAng': QVariant.String,
-                     'azimuth': QVariant.String,
-                     'deltaE': QVariant.Double,
-                     'deltaN': QVariant.Double,
-                     'CdeltaE': QVariant.Double,
-                     'CdeltaN': QVariant.Double,
-                     'E': QVariant.Double,
-                     'N': QVariant.Double,
+                     'estation' : QMetaType.Int,
+                     'forward':  QMetaType.Int,
+                     'angle': QMetaType.String,
+                     'distance':  QMetaType.Double,
+                     'corrAng': QMetaType.String,
+                     'azimuth': QMetaType.String,
+                     'deltaE': QMetaType.Double,
+                     'deltaN': QMetaType.Double,
+                     'CdeltaE': QMetaType.Double,
+                     'CdeltaN': QMetaType.Double,
+                     'E': QMetaType.Double,
+                     'N': QMetaType.Double,
                      }
         for item in itens:
             Fields.append(QgsField(item, itens[item]))

@@ -15,7 +15,7 @@ __author__ = 'Leandro França'
 __date__ = '2023-01-22'
 __copyright__ = '(C) 2023, Leandro França'
 
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (QgsProcessing,
                        QgsFeatureSink,
                        QgsWkbTypes,
@@ -192,14 +192,14 @@ class StandardDistance(QgsProcessingAlgorithm):
         Fields = QgsFields()
         CRS = layer.sourceCrs()
         itens  = {
-             'id' : QVariant.Int,
-             self.tr('group','grupo'): QVariant.String,
-             'avg_x' : QVariant.Double,
-             'avg_y' : QVariant.Double,
-             'std_x' : QVariant.Double,
-             'std_y' : QVariant.Double,
-             'std': QVariant.Double,
-             self.tr('size','tamanho'): QVariant.Double
+             'id' : QMetaType.Int,
+             self.tr('group','grupo'): QMetaType.String,
+             'avg_x' : QMetaType.Double,
+             'avg_y' : QMetaType.Double,
+             'std_x' : QMetaType.Double,
+             'std_y' : QMetaType.Double,
+             'std': QMetaType.Double,
+             self.tr('size','tamanho'): QMetaType.Double
              }
         for item in itens:
             Fields.append(QgsField(item, itens[item]))

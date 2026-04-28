@@ -15,7 +15,7 @@ __author__ = 'Leandro França'
 __date__ = '2022-06-13'
 __copyright__ = '(C) 2022, Leandro França'
 
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (QgsProcessing,
                        QgsFeatureSink,
                        QgsWkbTypes,
@@ -338,14 +338,14 @@ class RTKCorrection(QgsProcessingAlgorithm):
         # Novos atributos
         Fields = layer.fields()
         itens  = {
-            self.tr('lon_adjusted', 'lon_ajustada') : QVariant.Double,
-            self.tr('lat_adjusted', 'lat_ajustada') : QVariant.Double,
-            self.tr('h_adjusted', 'h_ajustada') : QVariant.Double,
+            self.tr('lon_adjusted', 'lon_ajustada') : QMetaType.Double,
+            self.tr('lat_adjusted', 'lat_ajustada') : QMetaType.Double,
+            self.tr('h_adjusted', 'h_ajustada') : QMetaType.Double,
         }
         if propagate_sigmas:
-            itens[self.tr('sigma_x_adj', 'sigma_x_ajust')] = QVariant.Double
-            itens[self.tr('sigma_y_adj', 'sigma_y_ajust')] = QVariant.Double
-            itens[self.tr('sigma_z_adj', 'sigma_z_ajust')] = QVariant.Double
+            itens[self.tr('sigma_x_adj', 'sigma_x_ajust')] = QMetaType.Double
+            itens[self.tr('sigma_y_adj', 'sigma_y_ajust')] = QMetaType.Double
+            itens[self.tr('sigma_z_adj', 'sigma_z_ajust')] = QMetaType.Double
         for item in itens:
             Fields.append(QgsField(item, itens[item]))
 
