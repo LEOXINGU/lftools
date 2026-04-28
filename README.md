@@ -7,18 +7,61 @@
     <br />
   </p>
 </p>
+## 🚀 Recommended QGIS Version (LTR)
+
+For the best stability and compatibility, it is highly recommended to use **LFTools with the QGIS LTR (Long Term Release) version**.
+
+👉 Download the latest QGIS LTR version here:  
+🔗 [QGIS Official Download Page](https://qgis.org/download/)
+
+---
+
+### 🎥 Installation Guide (QGIS + LFTools)
+
+For step-by-step instructions on installing QGIS and the LFTools plugin, watch this tutorial:
+
+🔗 [QGIS and LFTools Installation Tutorial](https://www.youtube.com/watch?v=XOTCQppKQJY&list=PLswoyLl1BbPrRnJhZDEIfwo6-7ECilN8V)
+
+---
+
+💡 Using the LTR version helps avoid compatibility issues and ensures a more stable experience when working with geospatial tools.
+
+
+## ⚠️ Python Dependencies (Pillow / Matplotlib)
+
+During QGIS installation (macOS, Linux, or Windows), the internal Python environment may not include all required libraries. This can cause import errors. A common issue is related to **Pillow (PIL)** or **matplotlib**, especially when running tools like descriptive reports.
+
+If you encounter errors such as:
+
+ModuleNotFoundError: No module named 'PIL'  
+ModuleNotFoundError: No module named 'matplotlib'
+
+👉 Please follow this step-by-step tutorial:  
+🔗 [How to fix Python import errors in QGIS](https://geoone.com.br/corrigir-erros-de-importacao-python-qgis/)
+
+---
+
+### ⚙️ Install using pip (recommended)
+
+Run directly in the QGIS Python Console:
+
+import pip  
+pip.main(["install", "Pillow"])
+
+For matplotlib:
+
+import pip  
+pip.main(["install", "matplotlib"])
+
+👉 This method using **pip** has shown the most reliable results, especially on macOS and Windows.
+
+---
 
 ## Tutorials
 <div style="text-align: center;"><a
  style="font-weight: bold;"
  href="https://www.youtube.com/watch?v=uuy39iutMhM&list=PLswoyLl1BbPp4zd-M4CmP_B2Qr2ROY3LT&index=1">Click here to learn how to use the LFTools plugin on YouTube</a></div>
 
-## Requirement for QGIS 3.22 in MacOS:
-    
-Install the following package as follows:
-```
-pip install Pillow
-```
 
 ## Description of each tool
 
@@ -30,9 +73,6 @@ pip install Pillow
     <li>
       <a href="#cadastre">Cadastre</a>
       <ul>
-        <li><a href="#adjoiner-lines">Adjoiner Lines</a></li>
-      </ul>
-      <ul>
         <li><a href="#connect-features">Connect features</a></li>
       </ul>
       <ul>
@@ -43,6 +83,9 @@ pip install Pillow
       </ul>
       <ul>
         <li><a href="#orient-polygons">Orient polygons</a></li>
+      </ul>
+      <ul>
+        <li><a href="#parcel-boundary-lines">Parcel Boundary Lines</a></li>
       </ul>
       </li><li>
       <a href="#cartography">Cartography</a>
@@ -731,18 +774,6 @@ pip install Pillow
 ## Cadastre
 
 
-### Adjoiner Lines
-Generates adjoiner lines from a polygon layer of parcels.
-<div align="center">
-<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
-  <tbody>
-    <tr>
-      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/cadastre_adjoiners.jpg"></td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
 ### Connect features
 Creates new vertices between adjacent polygons to ensure perfect connectivity (topology) between them.
 <div align="center">
@@ -786,6 +817,18 @@ This tool orients the geometry of polygon-like features clockwise or countercloc
   <tbody>
     <tr>
       <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/vect_orient_polygon.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+### Parcel Boundary Lines
+Generates adjoiner lines from a polygon layer of parcels.
+<div align="center">
+<table style="text-align: left; width: 275px;" border="0" cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td><img src="https://github.com/LEOXINGU/lftools/blob/main/images/tutorial/cadastre_adjoiners.jpg"></td>
     </tr>
   </tbody>
 </table>
