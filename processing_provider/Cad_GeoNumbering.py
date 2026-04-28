@@ -17,17 +17,14 @@ __copyright__ = '(C) 2022, Leandro França'
 
 from qgis.core import (QgsApplication,
                        QgsProcessingParameterVectorLayer,
-                       QgsGeometry,
                        QgsProcessing,
                        QgsProcessingParameterField,
                        QgsProcessingParameterEnum,
                        QgsProcessingParameterNumber,
                        QgsProcessingParameterBoolean,
-                       QgsFeatureSink,
                        QgsProcessingException,
-                       QgsProcessingAlgorithm,
-                       QgsProcessingParameterFeatureSource,
-                       QgsProcessingParameterFeatureSink)
+                       QgsProcessingAlgorithm
+                       )
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
 import numpy as np
