@@ -22,11 +22,9 @@ from qgis.core import (QgsProcessing,
                        QgsProcessingParameterBoolean,
                        QgsProcessingParameterEnum,
                        QgsProcessingParameterRasterLayer,
-                       QgsProcessingParameterFile,
-                       QgsProcessingParameterFileDestination,
                        QgsApplication,
-                       QgsRasterLayer,
-                       QgsCoordinateReferenceSystem)
+                       QgsSettings
+                       )
 
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
@@ -96,7 +94,7 @@ class ImportRaster(QgsProcessingAlgorithm):
     TILING = 'TILING'
     OVERVIEW = 'OVERVIEW'
     COPYPARAM = 'COPYPARAM'
-    versions = ['9.5', '9.6', '10', '11', '12', '13', '14', '15', '16', '17']
+    versions = ['9.5', '9.6', '10', '11', '12', '13', '14', '15', '16', '17', '18']
 
     def initAlgorithm(self, config=None):
         # INPUT
@@ -154,12 +152,15 @@ class ImportRaster(QgsProcessingAlgorithm):
             )
         )
 
+        my_settings = QgsSettings()
+        postgresql_version = my_settings.value("LFTools/postgresql_version", 10)
+
         self.addParameter(
             QgsProcessingParameterEnum(
                 self.VERSION,
                 self.tr('PostgreSQL version', 'Versão do PostgreSQL'),
 				options = self.versions,
-                defaultValue = 8
+                defaultValue = postgresql_version
             )
         )
 
@@ -261,6 +262,10 @@ class ImportRaster(QgsProcessingAlgorithm):
             self.VERSION,
             context
         )
+
+        my_settings = QgsSettings()
+        my_settings.setValue("LFTools/postgresql_version", version)
+        
         version = self.versions[version]
 
         user = self.parameterAsString(
