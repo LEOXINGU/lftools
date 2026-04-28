@@ -3,28 +3,27 @@
     <img src="https://github.com/LEOXINGU/lftools/blob/main/images/lftools_logo.png" alt="Logo" width="90" height="75">
   <h3 align="center">LF Tools</h3>
   <p align="center">
-    <b><i>Tools for cartographic production, surveying, digital image processing and spatial analysis</i><b>
+    <b><i>A comprehensive open-source geospatial toolkit for cartography, surveying, and spatial analysis in QGIS</i><b>
     <br />
   </p>
 </p>
-## 🚀 Recommended QGIS Version (LTR)
+
+
+### 🚀 Installation Guide (QGIS + LFTools)
+
+Recommended QGIS Version (LTR)
 
 For the best stability and compatibility, it is highly recommended to use **LFTools with the QGIS LTR (Long Term Release) version**.
 
 👉 Download the latest QGIS LTR version here:  
 🔗 [QGIS Official Download Page](https://qgis.org/download/)
 
----
-
-### 🎥 Installation Guide (QGIS + LFTools)
 
 For step-by-step instructions on installing QGIS and the LFTools plugin, watch this tutorial:
 
-🔗 [QGIS and LFTools Installation Tutorial](https://www.youtube.com/watch?v=XOTCQppKQJY&list=PLswoyLl1BbPrRnJhZDEIfwo6-7ECilN8V)
+🎥 [QGIS and LFTools Installation Tutorial](https://www.youtube.com/watch?v=XOTCQppKQJY&list=PLswoyLl1BbPrRnJhZDEIfwo6-7ECilN8V)
 
 ---
-
-💡 Using the LTR version helps avoid compatibility issues and ensures a more stable experience when working with geospatial tools.
 
 
 ## ⚠️ Python Dependencies (Pillow / Matplotlib)
@@ -32,36 +31,42 @@ For step-by-step instructions on installing QGIS and the LFTools plugin, watch t
 During QGIS installation (macOS, Linux, or Windows), the internal Python environment may not include all required libraries. This can cause import errors. A common issue is related to **Pillow (PIL)** or **matplotlib**, especially when running tools like descriptive reports.
 
 If you encounter errors such as:
-
+```
 ModuleNotFoundError: No module named 'PIL'  
 ModuleNotFoundError: No module named 'matplotlib'
+```
 
-👉 Please follow this step-by-step tutorial:  
-🔗 [How to fix Python import errors in QGIS](https://geoone.com.br/corrigir-erros-de-importacao-python-qgis/)
-
----
 
 ### ⚙️ Install using pip (recommended)
 
 Run directly in the QGIS Python Console:
-
+```
 import pip  
 pip.main(["install", "Pillow"])
-
+```
 For matplotlib:
-
+```
 import pip  
 pip.main(["install", "matplotlib"])
-
+```
 👉 This method using **pip** has shown the most reliable results, especially on macOS and Windows.
+
+👉 For more details, follow this step-by-step tutorial: 
+🔗 [How to fix Python import errors in QGIS](https://geoone.com.br/corrigir-erros-de-importacao-python-qgis/)
 
 ---
 
-## Tutorials
-<div style="text-align: center;"><a
- style="font-weight: bold;"
- href="https://www.youtube.com/watch?v=uuy39iutMhM&list=PLswoyLl1BbPp4zd-M4CmP_B2Qr2ROY3LT&index=1">Click here to learn how to use the LFTools plugin on YouTube</a></div>
+## 🎥 Tutorials
 
+<div>
+
+🔗 <a href="https://www.youtube.com/watch?v=uuy39iutMhM&list=PLswoyLl1BbPp4zd-M4CmP_B2Qr2ROY3LT&index=1"><b>Watch the LFTools tutorial playlist on YouTube</b></a>
+
+</div>
+
+Explore step-by-step tutorials covering the main tools and workflows available in the LFTools plugin.
+
+---
 
 ## Description of each tool
 
