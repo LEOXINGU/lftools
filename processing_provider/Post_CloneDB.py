@@ -15,18 +15,13 @@ __author__ = 'Leandro França'
 __date__ = '2021-03-10'
 __copyright__ = '(C) 2020, Leandro França'
 
-from qgis.core import (QgsProcessing,
-                       QgsProcessingException,
+from qgis.core import (QgsProcessingException,
                        QgsProcessingAlgorithm,
                        QgsProcessingParameterString,
-                       QgsProcessingParameterBoolean,
                        QgsProcessingParameterEnum,
-                       QgsProcessingParameterRasterLayer,
-                       QgsProcessingParameterFile,
-                       QgsProcessingParameterFileDestination,
                        QgsApplication,
-                       QgsRasterLayer,
-                       QgsCoordinateReferenceSystem)
+                       QgsSettings
+                       )
 
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
@@ -92,7 +87,7 @@ Obs.: Para criação de mais de um "clone", os novos nomes dos bancos devem ser 
     USER = 'USER'
     PORT = 'PORT'
     VERSION = 'VERSION'
-    versions = ['9.5', '9.6', '10', '11', '12', '13', '14', '15', '16', '17']
+    versions = ['9.5', '9.6', '10', '11', '12', '13', '14', '15', '16', '17', '18']
 
     def initAlgorithm(self, config=None):
         # INPUT
@@ -134,12 +129,15 @@ Obs.: Para criação de mais de um "clone", os novos nomes dos bancos devem ser 
             )
         )
 
+        my_settings = QgsSettings()
+        postgresql_version = my_settings.value("LFTools/postgresql_version", 10)
+
         self.addParameter(
             QgsProcessingParameterEnum(
                 self.VERSION,
                 self.tr('PostgreSQL version', 'Versão do PostgreSQL'),
 				options = self.versions,
-                defaultValue = 8
+                defaultValue = postgresql_version
             )
         )
 
@@ -178,6 +176,10 @@ Obs.: Para criação de mais de um "clone", os novos nomes dos bancos devem ser 
             self.VERSION,
             context
         )
+
+        my_settings = QgsSettings()
+        my_settings.setValue("LFTools/postgresql_version", version)
+        
         version = self.versions[version]
 
         user = self.parameterAsString(
