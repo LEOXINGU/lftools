@@ -51,7 +51,7 @@ pip.main(["install", "matplotlib"])
 ```
 👉 This method using **pip** has shown the most reliable results, especially on macOS and Windows.
 
-👉 For more details, follow this step-by-step tutorial: 
+💡 For more details, follow this step-by-step tutorial:<br> 
 🔗 [How to fix Python import errors in QGIS](https://geoone.com.br/corrigir-erros-de-importacao-python-qgis/)
 
 ---
