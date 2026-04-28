@@ -15,13 +15,11 @@ __author__ = 'Leandro França'
 __date__ = '2019-11-02'
 __copyright__ = '(C) 2019, Leandro França'
 
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import *
-from math import atan, pi, sqrt
+from math import pi
 from numpy.linalg import norm
 import numpy as np
-import math
-from numpy import floor
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
 from lftools.geocapt.topogeo import azimute, dd2dms, meters2degrees
@@ -37,6 +35,7 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
     DISTANCE = 'DISTANCE'
     INTERNAL = 'INTERNAL'
     EXTERNAL = 'EXTERNAL'
+    FIELD = 'FIELD'
 
     LOC = QgsApplication.locale()[:2]
 
@@ -100,6 +99,15 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
                 minValue = 0.001
                 )
             )
+        
+        self.addParameter(
+            QgsProcessingParameterField(
+                self.FIELD,
+                self.tr('Polygon ID', 'ID do polígono'),
+                parentLayerParameterName=self.POLYGONS,
+                optional = True 
+            )
+        )
 
         # OUTPUT
         self.addParameter(
@@ -140,7 +148,44 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
             context
         )
         if Distancia is None or Distancia < 0:
-            raise QgsProcessingException(self.tr('The input distance must be grater than 0!', 'A distância de entrada deve ser maior que 0!'))
+            raise QgsProcessingException(self.tr('The input distance must be greater than 0!', 'A distância de entrada deve ser maior que 0!'))
+        
+        campo = self.parameterAsFields(parameters, self.FIELD, context)
+
+        if not campo:
+            columnIndex = -1
+            id_type = QMetaType.Int
+        else:
+            columnIndex = source.fields().indexFromName(campo[0])
+            if columnIndex == -1:
+                raise QgsProcessingException(
+                    self.tr(
+                        'Invalid ID field!',
+                        'Campo de ID inválido!'
+                    )
+                )
+            id_type = source.fields()[columnIndex].type()
+
+        # Validar se o campo escolhido é único
+        if columnIndex != -1:
+            valores = set()
+            for feat in source.getFeatures():
+                valor = feat[columnIndex]
+                if valor is None or (isinstance(valor, str) and valor.strip() == ''):
+                    raise QgsProcessingException(
+                        self.tr(
+                            'The field {} contains null or empty values and cannot be used as a primary key!',
+                            'O campo {} possui valores nulos ou vazios e não pode ser usado como chave primária!'
+                        ).format(campo[0])
+                    )
+                if valor in valores:
+                    raise QgsProcessingException(
+                        self.tr(
+                            'The field {} contains duplicate values and cannot be a primary key!',
+                            'O campo {} possui valores repetidos e não pode ser chave primária!'
+                        ).format(campo[0])
+                    )
+                valores.add(valor)
 
         # Camada de entrada
         CRS = source.sourceCrs()
@@ -157,13 +202,13 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
         Fields = QgsFields()
 
         itens  = {
-                     'ord' : QVariant.Int,
-                     self.tr('ang_inner_dd','ang_int_dec') : QVariant.Double,
-                     self.tr('ang_inner_dms','ang_int_gms') : QVariant.String,
-                     self.tr('ang_outer_dd','ang_ext_dec') : QVariant.Double,
-                     self.tr('ang_outer_dms','ang_ext_gms') : QVariant.String,
-                     'feat_id': QVariant.Int,
-                     self.tr('label_azimuth','azimute_rotulo') : QVariant.Double,
+                     'ord' : QMetaType.Int,
+                     self.tr('ang_inner_dd','ang_int_dec') : QMetaType.Double,
+                     self.tr('ang_inner_dms','ang_int_gms') : QMetaType.String,
+                     self.tr('ang_outer_dd','ang_ext_dec') : QMetaType.Double,
+                     self.tr('ang_outer_dms','ang_ext_gms') : QMetaType.String,
+                     'feat_id': id_type,
+                     self.tr('label_azimuth','azimute_rotulo') : QMetaType.Double,
                      }
         for item in itens:
             Fields.append(QgsField(item, itens[item]))
@@ -184,10 +229,10 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
         Fields = QgsFields()
 
         itens  = {
-                     'ord' : QVariant.Int,
-                     self.tr('ang_dd','ang_dec') : QVariant.Double,
-                     self.tr('ang_dms','ang_gms') : QVariant.String,
-                     'feat_id': QVariant.Int,
+                     'ord' : QMetaType.Int,
+                     self.tr('ang_dd','ang_dec') : QMetaType.Double,
+                     self.tr('ang_dms','ang_gms') : QMetaType.String,
+                     'feat_id': id_type,
                      }
         for item in itens:
             Fields.append(QgsField(item, itens[item]))
@@ -270,7 +315,7 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
                                         dd2dms(pntsDic[ponto]['alfa_int'],1),
                                         float(pntsDic[ponto]['alfa_ext']),
                                         dd2dms(pntsDic[ponto]['alfa_ext'],1),
-                                        feat.id(),
+                                        feat.id() if columnIndex == -1 else feat[columnIndex],
                                         float(pntsDic[ponto]['azimute'])
                                             ])
                     sink1.addFeature(fet, QgsFeatureSink.FastInsert)
@@ -288,7 +333,7 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
                         fet.setAttributes([ponto,
                                             float(pntsDic[ponto]['alfa_int']),
                                             dd2dms(pntsDic[ponto]['alfa_int'],1),
-                                            feat.id()
+                                            feat.id() if columnIndex == -1 else feat[columnIndex],
                                                 ])
                         sink2.addFeature(fet, QgsFeatureSink.FastInsert)
 
@@ -298,7 +343,7 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
                         fet.setAttributes([ponto,
                                             float(pntsDic[ponto]['alfa_ext']),
                                             dd2dms(pntsDic[ponto]['alfa_ext'],1),
-                                            feat.id()
+                                            feat.id() if columnIndex == -1 else feat[columnIndex],
                                                 ])
                         sink3.addFeature(fet, QgsFeatureSink.FastInsert)
 
