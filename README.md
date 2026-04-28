@@ -16,12 +16,12 @@ Recommended QGIS Version (LTR)
 For the best stability and compatibility, it is highly recommended to use **LFTools with the QGIS LTR (Long Term Release) version**.
 
 👉 Download the latest QGIS LTR version here:  
-🔗 [QGIS Official Download Page](https://qgis.org/download/)
+🔗 <a href="https://qgis.org/download/" target="_blank" rel="noopener noreferrer">QGIS Official Download Page</a>
 
 
 For step-by-step instructions on installing QGIS and the LFTools plugin, watch this tutorial:
 
-🎥 [QGIS and LFTools Installation Tutorial](https://www.youtube.com/watch?v=XOTCQppKQJY&list=PLswoyLl1BbPrRnJhZDEIfwo6-7ECilN8V)
+🎥 <a href="https://www.youtube.com/watch?v=XOTCQppKQJY&list=PLswoyLl1BbPrRnJhZDEIfwo6-7ECilN8V" target="_blank" rel="noopener noreferrer">QGIS and LFTools Installation Tutorial</a>
 
 ---
 
@@ -52,7 +52,7 @@ pip.main(["install", "matplotlib"])
 👉 This method using **pip** has shown the most reliable results, especially on macOS and Windows.
 
 💡 For more details, follow this step-by-step tutorial:<br> 
-🔗 [How to fix Python import errors in QGIS](https://geoone.com.br/corrigir-erros-de-importacao-python-qgis/)
+🔗 <a href="https://geoone.com.br/corrigir-erros-de-importacao-python-qgis/" target="_blank" rel="noopener noreferrer">How to fix Python import errors in QGIS</a>
 
 ---
 
@@ -60,7 +60,8 @@ pip.main(["install", "matplotlib"])
 
 <div>
 
-🔗 <a href="https://www.youtube.com/watch?v=uuy39iutMhM&list=PLswoyLl1BbPp4zd-M4CmP_B2Qr2ROY3LT&index=1"><b>Watch the LFTools tutorial playlist on YouTube</b></a>
+🔗 <a href="https://www.youtube.com/watch?v=uuy39iutMhM&list=PLswoyLl1BbPp4zd-M4CmP_B2Qr2ROY3LT&index=1" target="_blank" rel="noopener noreferrer"><b>Watch the LFTools tutorial playlist on YouTube</b></a>
+
 
 </div>
 
