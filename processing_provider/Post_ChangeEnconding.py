@@ -15,18 +15,12 @@ __author__ = 'Leandro França'
 __date__ = '2021-03-10'
 __copyright__ = '(C) 2020, Leandro França'
 
-from qgis.core import (QgsProcessing,
-                       QgsProcessingException,
+from qgis.core import (QgsProcessingException,
                        QgsProcessingAlgorithm,
                        QgsProcessingParameterString,
-                       QgsProcessingParameterBoolean,
-                       QgsProcessingParameterEnum,
-                       QgsProcessingParameterRasterLayer,
                        QgsProcessingParameterFile,
-                       QgsProcessingParameterFileDestination,
-                       QgsApplication,
-                       QgsRasterLayer,
-                       QgsCoordinateReferenceSystem)
+                       QgsApplication
+                       )
 
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
