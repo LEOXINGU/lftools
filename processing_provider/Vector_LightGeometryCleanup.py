@@ -160,9 +160,9 @@ Obs.: Geometrias inválidas não são corrigidas nem removidas por esta ferramen
             fields.append(QgsField('lf_orig_id_2', QMetaType.LongLong))
 
         if fields.indexOf('lf_reason') == -1:
-            fields.append(QgsField('lf_reason', QMetaType.String, len=40))
+            fields.append(QgsField('lf_reason', QMetaType.QString, len=40))
         else:
-            fields.append(QgsField('lf_reason_2', QMetaType.String, len=40))
+            fields.append(QgsField('lf_reason_2', QMetaType.QString, len=40))
 
         return fields
 

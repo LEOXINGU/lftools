@@ -196,7 +196,7 @@ class ConfidenceEllipse(QgsProcessingAlgorithm):
         CRS = layer.sourceCrs()
         itens  = {
              'id' : QMetaType.Int,
-             self.tr('group','grupo'): QMetaType.String,
+             self.tr('group','grupo'): QMetaType.QString,
              'avg_x' : QMetaType.Double,
              'avg_y' : QMetaType.Double,
              'std_x' : QMetaType.Double,

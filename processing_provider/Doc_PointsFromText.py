@@ -225,7 +225,7 @@ class PointsFromText(QgsProcessingAlgorithm):
         Fields = QgsFields()
         itens  = {
                      'ord' : QMetaType.Int,
-                     self.tr('code') : QMetaType.String,
+                     self.tr('code') : QMetaType.QString,
                      self.tr('x') : QMetaType.Double,
                      self.tr('y') : QMetaType.Double
                      }

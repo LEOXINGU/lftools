@@ -211,7 +211,7 @@ class Accuracy_3D(QgsProcessingAlgorithm):
         
         Fields = QgsFields()
         itens  = {
-                     'name' : QMetaType.String,
+                     'name' : QMetaType.QString,
                      'discrep_x' : QMetaType.Double,
                      'discrep_y' : QMetaType.Double,
                      'discrep_z' : QMetaType.Double,

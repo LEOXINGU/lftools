@@ -145,8 +145,8 @@ class Inom2utmGrid(QgsProcessingAlgorithm):
 
         # Output Definition
         Fields = QgsFields()
-        Fields.append(QgsField('inom', QMetaType.String))
-        Fields.append(QgsField('mi', QMetaType.String))
+        Fields.append(QgsField('inom', QMetaType.QString))
+        Fields.append(QgsField('mi', QMetaType.QString))
         Fields.append(QgsField(self.tr('scale', 'escala'), QMetaType.Int))
         GeomType = QgsWkbTypes.Polygon
 

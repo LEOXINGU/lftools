@@ -248,7 +248,7 @@ class ExportToCloudCompare(QgsProcessingAlgorithm):
         expr = 'concat("R", \',\', "G", \',\', "B")'
         layer.startEditing()
         if 'RGB' not in [f.name() for f in layer.fields()]:
-            layer.dataProvider().addAttributes([QgsField('RGB', QMetaType.String)])
+            layer.dataProvider().addAttributes([QgsField('RGB', QMetaType.QString)])
             layer.updateFields()
 
         # Atualizar campo RGB

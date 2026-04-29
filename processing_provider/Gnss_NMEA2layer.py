@@ -231,11 +231,11 @@ Modos:
                       "h_ellip": QMetaType.Double,
                       "H_orto": QMetaType.Double,
                       "N": QMetaType.Double,
-                      "datetime": QMetaType.String,
+                      "datetime": QMetaType.QString,
                       "HDOP": QMetaType.Double,
                       "VDOP": QMetaType.Double,
                       "PDOP": QMetaType.Double,
-                      "quality": QMetaType.String,
+                      "quality": QMetaType.QString,
                       "num_sat": QMetaType.Int
                  }
         else:
@@ -244,8 +244,8 @@ Modos:
                       "h_ellip": QMetaType.Double,
                       "H_orto": QMetaType.Double,
                       "N": QMetaType.Double,
-                      "start_datetime": QMetaType.String,
-                      "end_datetime": QMetaType.String,
+                      "start_datetime": QMetaType.QString,
+                      "end_datetime": QMetaType.QString,
                       "sigma_x": QMetaType.Double,
                       "sigma_y": QMetaType.Double,
                       "sigma_z": QMetaType.Double,

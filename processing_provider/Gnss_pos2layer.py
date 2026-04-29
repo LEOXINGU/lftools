@@ -245,12 +245,12 @@ Para posicionamento relativo (RTK/PPK), os desvios-padrão da estação base pod
                   "lat": QMetaType.Double,
                   "lon": QMetaType.Double,
                   "h": QMetaType.Double,
-                  self.tr("datetime","datahora"): QMetaType.String,
+                  self.tr("datetime","datahora"): QMetaType.QString,
                   "sigma_x": QMetaType.Double,
                   "sigma_y": QMetaType.Double,
                   "sigma_z": QMetaType.Double,
                   "num_sat": QMetaType.Int,
-                  "quality": QMetaType.String,
+                  "quality": QMetaType.QString,
                   "h_reduction": QMetaType.Double,
              }
         Fields = QgsFields()

@@ -489,10 +489,10 @@ dN</p>
         itens  = {
                      'estation' : QMetaType.Int,
                      'forward':  QMetaType.Int,
-                     'angle': QMetaType.String,
+                     'angle': QMetaType.QString,
                      'distance':  QMetaType.Double,
-                     'corrAng': QMetaType.String,
-                     'azimuth': QMetaType.String,
+                     'corrAng': QMetaType.QString,
+                     'azimuth': QMetaType.QString,
                      'deltaE': QMetaType.Double,
                      'deltaN': QMetaType.Double,
                      'CdeltaE': QMetaType.Double,
