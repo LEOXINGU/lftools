@@ -241,17 +241,17 @@ Para posicionamento relativo (RTK/PPK), os desvios-padrão da estação base pod
         sigma_y_base = 0.0 if sigma_y_base is None else sigma_y_base
         sigma_z_base = 0.0 if sigma_z_base is None else sigma_z_base
 
-        itens  = {"ord": QMetaType.Int,
-                  "lat": QMetaType.Double,
-                  "lon": QMetaType.Double,
-                  "h": QMetaType.Double,
+        itens  = {"ord": QMetaType.Type.Int,
+                  "lat": QMetaType.Type.Double,
+                  "lon": QMetaType.Type.Double,
+                  "h": QMetaType.Type.Double,
                   self.tr("datetime","datahora"): QMetaType.QString,
-                  "sigma_x": QMetaType.Double,
-                  "sigma_y": QMetaType.Double,
-                  "sigma_z": QMetaType.Double,
-                  "num_sat": QMetaType.Int,
+                  "sigma_x": QMetaType.Type.Double,
+                  "sigma_y": QMetaType.Type.Double,
+                  "sigma_z": QMetaType.Type.Double,
+                  "num_sat": QMetaType.Type.Int,
                   "quality": QMetaType.QString,
-                  "h_reduction": QMetaType.Double,
+                  "h_reduction": QMetaType.Type.Double,
              }
         Fields = QgsFields()
         for item in itens:

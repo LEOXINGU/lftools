@@ -226,30 +226,30 @@ Modos:
             valores = np.array(lista)
         # Campos
         if tipo == 0:
-            itens  = {"lat": QMetaType.Double,
-                      "lon": QMetaType.Double,
-                      "h_ellip": QMetaType.Double,
-                      "H_orto": QMetaType.Double,
-                      "N": QMetaType.Double,
+            itens  = {"lat": QMetaType.Type.Double,
+                      "lon": QMetaType.Type.Double,
+                      "h_ellip": QMetaType.Type.Double,
+                      "H_orto": QMetaType.Type.Double,
+                      "N": QMetaType.Type.Double,
                       "datetime": QMetaType.QString,
-                      "HDOP": QMetaType.Double,
-                      "VDOP": QMetaType.Double,
-                      "PDOP": QMetaType.Double,
+                      "HDOP": QMetaType.Type.Double,
+                      "VDOP": QMetaType.Type.Double,
+                      "PDOP": QMetaType.Type.Double,
                       "quality": QMetaType.QString,
-                      "num_sat": QMetaType.Int
+                      "num_sat": QMetaType.Type.Int
                  }
         else:
-            itens  = {"lat": QMetaType.Double,
-                      "lon": QMetaType.Double,
-                      "h_ellip": QMetaType.Double,
-                      "H_orto": QMetaType.Double,
-                      "N": QMetaType.Double,
+            itens  = {"lat": QMetaType.Type.Double,
+                      "lon": QMetaType.Type.Double,
+                      "h_ellip": QMetaType.Type.Double,
+                      "H_orto": QMetaType.Type.Double,
+                      "N": QMetaType.Type.Double,
                       "start_datetime": QMetaType.QString,
                       "end_datetime": QMetaType.QString,
-                      "sigma_x": QMetaType.Double,
-                      "sigma_y": QMetaType.Double,
-                      "sigma_z": QMetaType.Double,
-                      "num_obs": QMetaType.Int
+                      "sigma_x": QMetaType.Type.Double,
+                      "sigma_y": QMetaType.Type.Double,
+                      "sigma_z": QMetaType.Type.Double,
+                      "num_obs": QMetaType.Type.Int
                  }
         Fields = QgsFields()
         for item in itens:

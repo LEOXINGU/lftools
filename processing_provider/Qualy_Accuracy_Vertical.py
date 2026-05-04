@@ -227,7 +227,7 @@ class Accuracy_Vertical(QgsProcessingAlgorithm):
         
         Fields = source.fields()
         itens  = {
-                     'discrep_Z' : QMetaType.Double
+                     'discrep_Z' : QMetaType.Type.Double
                      }
         for item in itens:
             Fields.append(QgsField(item, itens[item]))

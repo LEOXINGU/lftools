@@ -487,18 +487,18 @@ dN</p>
         GeomType = QgsWkbTypes.Point
         Fields = QgsFields()
         itens  = {
-                     'estation' : QMetaType.Int,
-                     'forward':  QMetaType.Int,
+                     'estation' : QMetaType.Type.Int,
+                     'forward':  QMetaType.Type.Int,
                      'angle': QMetaType.QString,
-                     'distance':  QMetaType.Double,
+                     'distance':  QMetaType.Type.Double,
                      'corrAng': QMetaType.QString,
                      'azimuth': QMetaType.QString,
-                     'deltaE': QMetaType.Double,
-                     'deltaN': QMetaType.Double,
-                     'CdeltaE': QMetaType.Double,
-                     'CdeltaN': QMetaType.Double,
-                     'E': QMetaType.Double,
-                     'N': QMetaType.Double,
+                     'deltaE': QMetaType.Type.Double,
+                     'deltaN': QMetaType.Type.Double,
+                     'CdeltaE': QMetaType.Type.Double,
+                     'CdeltaN': QMetaType.Type.Double,
+                     'E': QMetaType.Type.Double,
+                     'N': QMetaType.Type.Double,
                      }
         for item in itens:
             Fields.append(QgsField(item, itens[item]))

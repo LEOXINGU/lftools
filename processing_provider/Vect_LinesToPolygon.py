@@ -121,7 +121,7 @@ class LinesToPolygon(QgsProcessingAlgorithm):
         Fields = QgsFields()
 
         itens  = {
-                     'id' : QMetaType.Int,
+                     'id' : QMetaType.Type.Int,
                      }
         for item in itens:
             Fields.append(QgsField(item, itens[item]))

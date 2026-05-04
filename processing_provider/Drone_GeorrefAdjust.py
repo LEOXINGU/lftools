@@ -273,9 +273,9 @@ class GeorrefAdjust(QgsProcessingAlgorithm):
         prj = CRS.toWkt()
 
         itens  = {
-                     'ord' : QMetaType.Int,
-                     self.tr('precision_x', 'precisao_x') : QMetaType.Double,
-                     self.tr('precision_y','precisao_y') : QMetaType.Double
+                     'ord' : QMetaType.Type.Int,
+                     self.tr('precision_x', 'precisao_x') : QMetaType.Type.Double,
+                     self.tr('precision_y','precisao_y') : QMetaType.Type.Double
                      }
         for item in itens:
             Fields.append(QgsField(item, itens[item]))

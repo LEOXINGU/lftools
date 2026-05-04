@@ -209,12 +209,12 @@ class LineSequence(QgsProcessingAlgorithm):
 
         if tipo == 0 or tipo == 2:  # Vante ou Ambos
             if nome not in campos_existentes:
-                DP.addAttributes([QgsField(nome,  QMetaType.Int)])
+                DP.addAttributes([QgsField(nome,  QMetaType.Type.Int)])
                 novos_campos.append(nome)
         if tipo == 1 or tipo == 2:  # Ré ou Ambos
             nome_inv = nome + '_inv'
             if nome_inv not in campos_existentes:
-                DP.addAttributes([QgsField(nome_inv,  QMetaType.Int)])
+                DP.addAttributes([QgsField(nome_inv,  QMetaType.Type.Int)])
                 novos_campos.append(nome_inv)
         if novos_campos:
             layer.updateFields()

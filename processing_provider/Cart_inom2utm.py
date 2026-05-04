@@ -147,7 +147,7 @@ class Inom2utmGrid(QgsProcessingAlgorithm):
         Fields = QgsFields()
         Fields.append(QgsField('inom', QMetaType.QString))
         Fields.append(QgsField('mi', QMetaType.QString))
-        Fields.append(QgsField(self.tr('scale', 'escala'), QMetaType.Int))
+        Fields.append(QgsField(self.tr('scale', 'escala'), QMetaType.Type.Int))
         GeomType = QgsWkbTypes.Polygon
 
         (sink, dest_id) = self.parameterAsSink(

@@ -240,10 +240,10 @@ class GetPointValue(QgsProcessingAlgorithm):
         CRS = pontos.sourceCrs()
         if n_banda == 0:
             for k in range(total_bands):
-                Fields.append(QgsField(prefixo + self.tr('band_{}'.format(k+1)), QMetaType.Double))
+                Fields.append(QgsField(prefixo + self.tr('band_{}'.format(k+1)), QMetaType.Type.Double))
 
         else:
-            Fields.append(QgsField(prefixo + self.tr('band_{}'.format(n_banda)), QMetaType.Double))
+            Fields.append(QgsField(prefixo + self.tr('band_{}'.format(n_banda)), QMetaType.Type.Double))
 
         (sink, dest_id) = self.parameterAsSink(
             parameters,

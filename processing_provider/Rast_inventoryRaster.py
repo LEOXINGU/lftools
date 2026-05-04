@@ -202,12 +202,12 @@ class InventoryRaster(QgsProcessingAlgorithm):
                      self.tr('name','nome') : QMetaType.QString,
                      self.tr('extension','extensão') : QMetaType.QString,
                      self.tr('path', 'caminho') : QMetaType.QString,
-                     self.tr('resX') : QMetaType.Double,
-                     self.tr('resY') : QMetaType.Double,
-                     self.tr('n_cols') : QMetaType.Int,
-                     self.tr('n_rows', 'n_lin') : QMetaType.Int,
+                     self.tr('resX') : QMetaType.Type.Double,
+                     self.tr('resY') : QMetaType.Type.Double,
+                     self.tr('n_cols') : QMetaType.Type.Int,
+                     self.tr('n_rows', 'n_lin') : QMetaType.Type.Int,
                      self.tr('crs','src') : QMetaType.QString,
-                     self.tr('n_bands', 'n_bandas') : QMetaType.Int,
+                     self.tr('n_bands', 'n_bandas') : QMetaType.Type.Int,
                      self.tr('dataType', 'tipoDado') : QMetaType.QString,
                      }
         for item in itens:

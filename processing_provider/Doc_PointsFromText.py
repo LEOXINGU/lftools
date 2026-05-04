@@ -224,10 +224,10 @@ class PointsFromText(QgsProcessingAlgorithm):
 
         Fields = QgsFields()
         itens  = {
-                     'ord' : QMetaType.Int,
+                     'ord' : QMetaType.Type.Int,
                      self.tr('code') : QMetaType.QString,
-                     self.tr('x') : QMetaType.Double,
-                     self.tr('y') : QMetaType.Double
+                     self.tr('x') : QMetaType.Type.Double,
+                     self.tr('y') : QMetaType.Type.Double
                      }
         for item in itens:
             Fields.append(QgsField(item, itens[item]))

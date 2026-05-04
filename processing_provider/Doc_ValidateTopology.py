@@ -135,8 +135,8 @@ class ValidateTopology(QgsProcessingAlgorithm):
 
         Fields = QgsFields()
         itens  = {
-                     'ord' : QMetaType.Int,
-                     'feat_id': QMetaType.Int,
+                     'ord' : QMetaType.Type.Int,
+                     'feat_id': QMetaType.Type.Int,
                      self.tr('type','tipo') : QMetaType.QString,
                      }
         for item in itens:

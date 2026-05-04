@@ -212,11 +212,11 @@ class Accuracy_3D(QgsProcessingAlgorithm):
         Fields = QgsFields()
         itens  = {
                      'name' : QMetaType.QString,
-                     'discrep_x' : QMetaType.Double,
-                     'discrep_y' : QMetaType.Double,
-                     'discrep_z' : QMetaType.Double,
-                     'discrep_xy' : QMetaType.Double,
-                     'discrep_xyz' : QMetaType.Double,
+                     'discrep_x' : QMetaType.Type.Double,
+                     'discrep_y' : QMetaType.Type.Double,
+                     'discrep_z' : QMetaType.Type.Double,
+                     'discrep_xy' : QMetaType.Type.Double,
+                     'discrep_xyz' : QMetaType.Type.Double,
                      }
         for item in itens:
             Fields.append(QgsField(item, itens[item]))

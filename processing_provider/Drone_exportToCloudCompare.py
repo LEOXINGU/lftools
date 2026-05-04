@@ -190,12 +190,12 @@ class ExportToCloudCompare(QgsProcessingAlgorithm):
         Fields = QgsFields()
 
         itens  = {
-                     'X' : QMetaType.Double,
-                     'Y' : QMetaType.Double,
-                     'Z' : QMetaType.Double,
-                     'R' : QMetaType.Int,
-                     'G' : QMetaType.Int,
-                     'B' : QMetaType.Int,
+                     'X' : QMetaType.Type.Double,
+                     'Y' : QMetaType.Type.Double,
+                     'Z' : QMetaType.Type.Double,
+                     'R' : QMetaType.Type.Int,
+                     'G' : QMetaType.Type.Int,
+                     'B' : QMetaType.Type.Int,
                      }
         for item in itens:
             Fields.append(QgsField(item, itens[item]))

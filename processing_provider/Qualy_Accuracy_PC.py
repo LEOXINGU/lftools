@@ -225,9 +225,9 @@ class Accuracy_PC(QgsProcessingAlgorithm):
         Fields = source.fields()
         
         itens  = {
-                     'np_distância' : QMetaType.Double,
-                     'np_h' : QMetaType.Double,
-                     'np_discrep_z' : QMetaType.Double
+                     'np_distância' : QMetaType.Type.Double,
+                     'np_h' : QMetaType.Type.Double,
+                     'np_discrep_z' : QMetaType.Type.Double
                      }
         for item in itens:
             Fields.append(QgsField(item, itens[item]))

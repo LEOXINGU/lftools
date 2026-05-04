@@ -169,9 +169,9 @@ class FramesFromLines(QgsProcessingAlgorithm):
         Fields = QgsFields()
 
         itens  = {
-                     self.tr('feat_id'): QMetaType.Int,
-                     self.tr('page','folha'): QMetaType.Int,
-                     self.tr('sequence','ordem'): QMetaType.Int,
+                     self.tr('feat_id'): QMetaType.Type.Int,
+                     self.tr('page','folha'): QMetaType.Type.Int,
+                     self.tr('sequence','ordem'): QMetaType.Type.Int,
                      }
         for item in itens:
             Fields.append(QgsField(item, itens[item]))

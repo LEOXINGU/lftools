@@ -168,9 +168,9 @@ class Accuracy_Horizontal(QgsProcessingAlgorithm):
 
         Fields = source.fields()
         itens  = {
-                     'discrep_x' : QMetaType.Double,
-                     'discrep_y' : QMetaType.Double,
-                     'discrep_xy' : QMetaType.Double
+                     'discrep_x' : QMetaType.Type.Double,
+                     'discrep_y' : QMetaType.Type.Double,
+                     'discrep_xy' : QMetaType.Type.Double
                      }
         for item in itens:
             Fields.append(QgsField(item, itens[item]))

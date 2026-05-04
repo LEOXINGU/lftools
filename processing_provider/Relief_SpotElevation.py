@@ -194,8 +194,8 @@ class SpotElevation(QgsProcessingAlgorithm):
         # OUTPUT
         Fields = QgsFields()
         itens  = {
-                     self.tr('elevation','cota') : QMetaType.Double,
-                     self.tr('type','tipo') : QMetaType.Int,
+                     self.tr('elevation','cota') : QMetaType.Type.Double,
+                     self.tr('type','tipo') : QMetaType.Type.Int,
                      }
         for item in itens:
             Fields.append(QgsField(item, itens[item]))

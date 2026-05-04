@@ -338,14 +338,14 @@ class RTKCorrection(QgsProcessingAlgorithm):
         # Novos atributos
         Fields = layer.fields()
         itens  = {
-            self.tr('lon_adjusted', 'lon_ajustada') : QMetaType.Double,
-            self.tr('lat_adjusted', 'lat_ajustada') : QMetaType.Double,
-            self.tr('h_adjusted', 'h_ajustada') : QMetaType.Double,
+            self.tr('lon_adjusted', 'lon_ajustada') : QMetaType.Type.Double,
+            self.tr('lat_adjusted', 'lat_ajustada') : QMetaType.Type.Double,
+            self.tr('h_adjusted', 'h_ajustada') : QMetaType.Type.Double,
         }
         if propagate_sigmas:
-            itens[self.tr('sigma_x_adj', 'sigma_x_ajust')] = QMetaType.Double
-            itens[self.tr('sigma_y_adj', 'sigma_y_ajust')] = QMetaType.Double
-            itens[self.tr('sigma_z_adj', 'sigma_z_ajust')] = QMetaType.Double
+            itens[self.tr('sigma_x_adj', 'sigma_x_ajust')] = QMetaType.Type.Double
+            itens[self.tr('sigma_y_adj', 'sigma_y_ajust')] = QMetaType.Type.Double
+            itens[self.tr('sigma_z_adj', 'sigma_z_ajust')] = QMetaType.Type.Double
         for item in itens:
             Fields.append(QgsField(item, itens[item]))
 

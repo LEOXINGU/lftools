@@ -362,7 +362,7 @@ class TraverseAdjustment(QgsProcessingAlgorithm):
 
         # OUTPUT
         Fields = QgsFields()
-        Fields.append(QgsField('id', QMetaType.Int))
+        Fields.append(QgsField('id', QMetaType.Type.Int))
         GeomType = QgsWkbTypes.Point
         (sink, dest_id) = self.parameterAsSink(
             parameters,

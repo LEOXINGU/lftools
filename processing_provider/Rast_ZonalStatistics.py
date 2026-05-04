@@ -380,7 +380,7 @@ Os valores das células do raster onde o centro do pixel se encontra exatamente 
         Fields = layer.fields()
         for band in n_bands:
             for st in stats:
-                Fields.append(QgsField(prefixo + self.tr('band{}_'.format(band), 'banda{}_'.format(band)) + self.STATS[st], QMetaType.Double))
+                Fields.append(QgsField(prefixo + self.tr('band{}_'.format(band), 'banda{}_'.format(band)) + self.STATS[st], QMetaType.Type.Double))
 
         (sink, dest_id) = self.parameterAsSink(
             parameters,

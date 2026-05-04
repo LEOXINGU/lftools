@@ -140,9 +140,9 @@ class FrontLotLine(QgsProcessingAlgorithm):
         # Camada de Saída
         Fields = lotes.fields()
         itens  = {
-                     self.tr('sequence', 'sequencia') : QMetaType.Int,
-                     self.tr('lenght', 'comprimento') : QMetaType.Double,
-                     self.tr('cumulative', 'valor_testada') : QMetaType.Double,
+                     self.tr('sequence', 'sequencia') : QMetaType.Type.Int,
+                     self.tr('lenght', 'comprimento') : QMetaType.Type.Double,
+                     self.tr('cumulative', 'valor_testada') : QMetaType.Type.Double,
                      }
         for item in itens:
             Fields.append(QgsField(item, itens[item]))

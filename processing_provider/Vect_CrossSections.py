@@ -147,9 +147,9 @@ class CrossSections(QgsProcessingAlgorithm):
         fieldnames = [field.name() for field in Fields]
 
         itens  = {
-                     self.tr('feat_id'): QMetaType.Int,
-                     self.tr('sequence','ordem'): QMetaType.Int,
-                     self.tr('length','distância'): QMetaType.Double
+                     self.tr('feat_id'): QMetaType.Type.Int,
+                     self.tr('sequence','ordem'): QMetaType.Type.Int,
+                     self.tr('length','distância'): QMetaType.Type.Double
                      }
 
         for item in itens:

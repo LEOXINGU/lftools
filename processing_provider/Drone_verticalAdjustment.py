@@ -275,9 +275,9 @@ class VerticalAdjustment(QgsProcessingAlgorithm):
         CRS = pontos.sourceCrs()
         prj = CRS.toWkt()
 
-        itens  = {   self.tr('delta_z') : QMetaType.Double,
-                     self.tr('adjusted_z', 'z_ajustado') : QMetaType.Double,
-                     self.tr('precision_z','precisao_z') : QMetaType.Double
+        itens  = {   self.tr('delta_z') : QMetaType.Type.Double,
+                     self.tr('adjusted_z', 'z_ajustado') : QMetaType.Type.Double,
+                     self.tr('precision_z','precisao_z') : QMetaType.Type.Double
                      }
         for item in itens:
             Fields.append(QgsField(item, itens[item]))

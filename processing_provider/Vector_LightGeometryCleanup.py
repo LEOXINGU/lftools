@@ -155,9 +155,9 @@ Obs.: Geometrias inválidas não são corrigidas nem removidas por esta ferramen
 
         # Campos auxiliares
         if fields.indexOf('lf_orig_id') == -1:
-            fields.append(QgsField('lf_orig_id', QMetaType.LongLong))
+            fields.append(QgsField('lf_orig_id', QMetaType.Type.LongLong))
         else:
-            fields.append(QgsField('lf_orig_id_2', QMetaType.LongLong))
+            fields.append(QgsField('lf_orig_id_2', QMetaType.Type.LongLong))
 
         if fields.indexOf('lf_reason') == -1:
             fields.append(QgsField('lf_reason', QMetaType.QString, len=40))

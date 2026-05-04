@@ -242,19 +242,19 @@ class Extent2UTMGrid(QgsProcessingAlgorithm):
 
         # Output Definition
         Fields = QgsFields()
-        Fields.append(QgsField(self.tr('id'), QMetaType.Int))
+        Fields.append(QgsField(self.tr('id'), QMetaType.Type.Int))
         Fields.append(QgsField('inom', QMetaType.QString))
         Fields.append(QgsField('mi', QMetaType.QString))
-        Fields.append(QgsField(self.tr('scale', 'escala'), QMetaType.Int))
+        Fields.append(QgsField(self.tr('scale', 'escala'), QMetaType.Type.Int))
         Fields.append(QgsField(self.tr('chart_name', 'nome'), QMetaType.QString))
         if tam_carta:
-            Fields.append(QgsField(self.tr('height', 'altura'), QMetaType.Double))
-            Fields.append(QgsField(self.tr('width', 'largura'), QMetaType.Double))
+            Fields.append(QgsField(self.tr('height', 'altura'), QMetaType.Type.Double))
+            Fields.append(QgsField(self.tr('width', 'largura'), QMetaType.Type.Double))
         if mer_conv:
-            Fields.append(QgsField(self.tr('MC', 'CM'), QMetaType.Double))
+            Fields.append(QgsField(self.tr('MC', 'CM'), QMetaType.Type.Double))
         if mag_decl:
-            Fields.append(QgsField(self.tr('MD', 'DM'), QMetaType.Double))
-            Fields.append(QgsField(self.tr('VAR_MD', 'var_DM'), QMetaType.Double))
+            Fields.append(QgsField(self.tr('MD', 'DM'), QMetaType.Type.Double))
+            Fields.append(QgsField(self.tr('VAR_MD', 'var_DM'), QMetaType.Type.Double))
             Fields.append(QgsField(self.tr('Epoch', 'Época'), QMetaType.QDate))
         if zone_hemisf:
             Fields.append(QgsField(self.tr('zone_hemisphere', 'fuso_hemisfério'), QMetaType.QString))

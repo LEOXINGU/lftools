@@ -195,16 +195,16 @@ class ConfidenceEllipse(QgsProcessingAlgorithm):
         Fields = QgsFields()
         CRS = layer.sourceCrs()
         itens  = {
-             'id' : QMetaType.Int,
+             'id' : QMetaType.Type.Int,
              self.tr('group','grupo'): QMetaType.QString,
-             'avg_x' : QMetaType.Double,
-             'avg_y' : QMetaType.Double,
-             'std_x' : QMetaType.Double,
-             'std_y' : QMetaType.Double,
-             self.tr('confidence','confiança'): QMetaType.Double,
-             self.tr('rotation','rotação'): QMetaType.Double,
-             'major_axis': QMetaType.Double,
-             'minor_axis': QMetaType.Double
+             'avg_x' : QMetaType.Type.Double,
+             'avg_y' : QMetaType.Type.Double,
+             'std_x' : QMetaType.Type.Double,
+             'std_y' : QMetaType.Type.Double,
+             self.tr('confidence','confiança'): QMetaType.Type.Double,
+             self.tr('rotation','rotação'): QMetaType.Type.Double,
+             'major_axis': QMetaType.Type.Double,
+             'minor_axis': QMetaType.Type.Double
              }
         for item in itens:
             Fields.append(QgsField(item, itens[item]))

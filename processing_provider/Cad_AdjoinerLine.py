@@ -125,7 +125,7 @@ class AdjoinerLine(QgsProcessingAlgorithm):
 
         if not campo:
             columnIndex = -1
-            id_type = QMetaType.Int
+            id_type = QMetaType.Type.Int
         else:
             columnIndex = layer.fields().indexFromName(campo[0])
             if columnIndex == -1:

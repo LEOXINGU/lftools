@@ -119,8 +119,8 @@ class Overlapping(QgsProcessingAlgorithm):
         # Camada de Saída
         Fields = QgsFields()
         itens  = {
-                     'ID1' : QMetaType.Int,
-                     'ID2' : QMetaType.Int,
+                     'ID1' : QMetaType.Type.Int,
+                     'ID2' : QMetaType.Type.Int,
                      }
         for item in itens:
             Fields.append(QgsField(item, itens[item]))

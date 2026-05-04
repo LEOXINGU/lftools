@@ -154,7 +154,7 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
 
         if not campo:
             columnIndex = -1
-            id_type = QMetaType.Int
+            id_type = QMetaType.Type.Int
         else:
             columnIndex = source.fields().indexFromName(campo[0])
             if columnIndex == -1:
@@ -202,13 +202,13 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
         Fields = QgsFields()
 
         itens  = {
-                     'ord' : QMetaType.Int,
-                     self.tr('ang_inner_dd','ang_int_dec') : QMetaType.Double,
+                     'ord' : QMetaType.Type.Int,
+                     self.tr('ang_inner_dd','ang_int_dec') : QMetaType.Type.Double,
                      self.tr('ang_inner_dms','ang_int_gms') : QMetaType.QString,
-                     self.tr('ang_outer_dd','ang_ext_dec') : QMetaType.Double,
+                     self.tr('ang_outer_dd','ang_ext_dec') : QMetaType.Type.Double,
                      self.tr('ang_outer_dms','ang_ext_gms') : QMetaType.QString,
                      'feat_id': id_type,
-                     self.tr('label_azimuth','azimute_rotulo') : QMetaType.Double,
+                     self.tr('label_azimuth','azimute_rotulo') : QMetaType.Type.Double,
                      }
         for item in itens:
             Fields.append(QgsField(item, itens[item]))
@@ -229,8 +229,8 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
         Fields = QgsFields()
 
         itens  = {
-                     'ord' : QMetaType.Int,
-                     self.tr('ang_dd','ang_dec') : QMetaType.Double,
+                     'ord' : QMetaType.Type.Int,
+                     self.tr('ang_dd','ang_dec') : QMetaType.Type.Double,
                      self.tr('ang_dms','ang_gms') : QMetaType.QString,
                      'feat_id': id_type,
                      }

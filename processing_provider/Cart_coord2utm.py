@@ -172,7 +172,7 @@ class Coord2UTMGrid(QgsProcessingAlgorithm):
         Fields = QgsFields()
         Fields.append(QgsField('inom', QMetaType.QString))
         Fields.append(QgsField('mi', QMetaType.QString))
-        Fields.append(QgsField(self.tr('scale', 'escala'), QMetaType.Int))
+        Fields.append(QgsField(self.tr('scale', 'escala'), QMetaType.Type.Int))
         GeomType = QgsWkbTypes.Polygon
 
         (sink2, dest2_id) = self.parameterAsSink(

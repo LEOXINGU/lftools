@@ -175,8 +175,8 @@ Dados de entrada:
         Fields = layer.fields()
         itens  = {"start_time": QMetaType.QString,
                   "end_time": QMetaType.QString,
-                  "count": QMetaType.Int,
-                  "group": QMetaType.Int
+                  "count": QMetaType.Type.Int,
+                  "group": QMetaType.Type.Int
              }
         for item in itens:
             Fields.append(QgsField(item, itens[item]))

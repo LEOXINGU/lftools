@@ -265,17 +265,17 @@ Saiba mais:'''
         GeomType = QgsWkbTypes.Point
         Fields = QgsFields()
         itens  = {
-                     'lon' : QMetaType.Double,
+                     'lon' : QMetaType.Type.Double,
                      'lon_dms' : QMetaType.QString,
-                     'lat':  QMetaType.Double,
+                     'lat':  QMetaType.Type.Double,
                      'lat_dms':  QMetaType.QString,
-                     'h': QMetaType.Double,
-                     'X':  QMetaType.Double,
-                     'Y': QMetaType.Double,
-                     'Z': QMetaType.Double,
-                     'E': QMetaType.Double,
-                     'N': QMetaType.Double,
-                     'U': QMetaType.Double
+                     'h': QMetaType.Type.Double,
+                     'X':  QMetaType.Type.Double,
+                     'Y': QMetaType.Type.Double,
+                     'Z': QMetaType.Type.Double,
+                     'E': QMetaType.Type.Double,
+                     'N': QMetaType.Type.Double,
+                     'U': QMetaType.Type.Double
                      }
 
         field_list = []

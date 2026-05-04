@@ -239,12 +239,12 @@ Saída: Camada de multipoint com precisões posicionais em metros e outras estat
 
         # OUTPUT
         itens  = {
-             self.tr('count', 'contagem'): QMetaType.Int,
-             'std_x' : QMetaType.Double,
-             'std_y' : QMetaType.Double,
+             self.tr('count', 'contagem'): QMetaType.Type.Int,
+             'std_x' : QMetaType.Type.Double,
+             'std_y' : QMetaType.Type.Double,
              }
         if possuiZ:
-            itens['std_z'] = QMetaType.Double
+            itens['std_z'] = QMetaType.Type.Double
 
         Fields = ref.fields()
         for item in itens:
@@ -252,7 +252,7 @@ Saída: Camada de multipoint com precisões posicionais em metros e outras estat
 
         if campo:
             for st in stats:
-                Fields.append(QgsField(nome_campo + '_' + self.OPTIONS[st], QMetaType.Double))
+                Fields.append(QgsField(nome_campo + '_' + self.OPTIONS[st], QMetaType.Type.Double))
 
         (sink, dest_id) = self.parameterAsSink(
             parameters,
