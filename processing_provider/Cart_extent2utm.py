@@ -243,10 +243,10 @@ class Extent2UTMGrid(QgsProcessingAlgorithm):
         # Output Definition
         Fields = QgsFields()
         Fields.append(QgsField(self.tr('id'), QMetaType.Type.Int))
-        Fields.append(QgsField('inom', QMetaType.QString))
-        Fields.append(QgsField('mi', QMetaType.QString))
+        Fields.append(QgsField('inom', QMetaType.Type.QString))
+        Fields.append(QgsField('mi', QMetaType.Type.QString))
         Fields.append(QgsField(self.tr('scale', 'escala'), QMetaType.Type.Int))
-        Fields.append(QgsField(self.tr('chart_name', 'nome'), QMetaType.QString))
+        Fields.append(QgsField(self.tr('chart_name', 'nome'), QMetaType.Type.QString))
         if tam_carta:
             Fields.append(QgsField(self.tr('height', 'altura'), QMetaType.Type.Double))
             Fields.append(QgsField(self.tr('width', 'largura'), QMetaType.Type.Double))
@@ -257,7 +257,7 @@ class Extent2UTMGrid(QgsProcessingAlgorithm):
             Fields.append(QgsField(self.tr('VAR_MD', 'var_DM'), QMetaType.Type.Double))
             Fields.append(QgsField(self.tr('Epoch', 'Época'), QMetaType.QDate))
         if zone_hemisf:
-            Fields.append(QgsField(self.tr('zone_hemisphere', 'fuso_hemisfério'), QMetaType.QString))
+            Fields.append(QgsField(self.tr('zone_hemisphere', 'fuso_hemisfério'), QMetaType.Type.QString))
 
         GeomType = QgsWkbTypes.Polygon
 

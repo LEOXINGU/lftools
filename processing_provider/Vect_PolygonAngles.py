@@ -204,9 +204,9 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
         itens  = {
                      'ord' : QMetaType.Type.Int,
                      self.tr('ang_inner_dd','ang_int_dec') : QMetaType.Type.Double,
-                     self.tr('ang_inner_dms','ang_int_gms') : QMetaType.QString,
+                     self.tr('ang_inner_dms','ang_int_gms') : QMetaType.Type.QString,
                      self.tr('ang_outer_dd','ang_ext_dec') : QMetaType.Type.Double,
-                     self.tr('ang_outer_dms','ang_ext_gms') : QMetaType.QString,
+                     self.tr('ang_outer_dms','ang_ext_gms') : QMetaType.Type.QString,
                      'feat_id': id_type,
                      self.tr('label_azimuth','azimute_rotulo') : QMetaType.Type.Double,
                      }
@@ -231,7 +231,7 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
         itens  = {
                      'ord' : QMetaType.Type.Int,
                      self.tr('ang_dd','ang_dec') : QMetaType.Type.Double,
-                     self.tr('ang_dms','ang_gms') : QMetaType.QString,
+                     self.tr('ang_dms','ang_gms') : QMetaType.Type.QString,
                      'feat_id': id_type,
                      }
         for item in itens:

@@ -193,7 +193,7 @@ class StandardDistance(QgsProcessingAlgorithm):
         CRS = layer.sourceCrs()
         itens  = {
              'id' : QMetaType.Type.Int,
-             self.tr('group','grupo'): QMetaType.QString,
+             self.tr('group','grupo'): QMetaType.Type.QString,
              'avg_x' : QMetaType.Type.Double,
              'avg_y' : QMetaType.Type.Double,
              'std_x' : QMetaType.Type.Double,

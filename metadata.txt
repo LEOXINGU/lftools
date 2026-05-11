@@ -15,7 +15,7 @@ repository=https://github.com/LEOXINGU/lftools
 hasProcessingProvider=yes
 # Uncomment the following line and add your changelog:
 # changelog=
-  2.10.3 - Fixed compatibility issue with QMetaType: replaced invalid enum usage (e.g., QMetaType.String) with correct Qt6 equivalents (e.g., QMetaType.QString).
+  2.10.3 - Fixed compatibility issue with QMetaType: replaced invalid enum usage (e.g., QMetaType.String) with correct Qt6 equivalents (e.g., QMetaType.Type.QString).
   2.10.2 - fixed DEM downloader issues (ANADEM/FABDEM), added custom ID field for neighboring parcels tool, updated database tools for PostGIS 18, improved image handling, and replaced QVariant with QMetaType.
   2.10.1 - Enhanced RTK Correction tool with ENU output, variance propagation, and improved validation.
   2.10.0 - Added new tool "Light Geometry Cleanup" to remove null/empty geometries and duplicate vertices.

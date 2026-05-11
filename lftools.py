@@ -302,11 +302,11 @@ class LFToolsPlugin(object):
                     self.DP = self.layer.dataProvider()
                     crs0 = crs
                     # adicionar campos
-                    campos = [QgsField(nome_campo, QMetaType.QString),
-                              QgsField('X', QMetaType.QString),
-                              QgsField('Y', QMetaType.QString),
-                              QgsField('Z', QMetaType.QString),
-                              QgsField('CRS', QMetaType.QString)]
+                    campos = [QgsField(nome_campo, QMetaType.Type.QString),
+                              QgsField('X', QMetaType.Type.QString),
+                              QgsField('Y', QMetaType.Type.QString),
+                              QgsField('Z', QMetaType.Type.QString),
+                              QgsField('CRS', QMetaType.Type.QString)]
                     self.DP.addAttributes(campos)
                     self.layer.updateFields()
                     # Estilizar camada

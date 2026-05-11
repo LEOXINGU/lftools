@@ -266,9 +266,9 @@ Saiba mais:'''
         Fields = QgsFields()
         itens  = {
                      'lon' : QMetaType.Type.Double,
-                     'lon_dms' : QMetaType.QString,
+                     'lon_dms' : QMetaType.Type.QString,
                      'lat':  QMetaType.Type.Double,
-                     'lat_dms':  QMetaType.QString,
+                     'lat_dms':  QMetaType.Type.QString,
                      'h': QMetaType.Type.Double,
                      'X':  QMetaType.Type.Double,
                      'Y': QMetaType.Type.Double,

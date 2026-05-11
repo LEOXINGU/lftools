@@ -199,16 +199,16 @@ class InventoryRaster(QgsProcessingAlgorithm):
         GeomType = QgsWkbTypes.Point if geometria == 1 else QgsWkbTypes.Polygon
         Fields = QgsFields()
         itens  = {
-                     self.tr('name','nome') : QMetaType.QString,
-                     self.tr('extension','extensão') : QMetaType.QString,
-                     self.tr('path', 'caminho') : QMetaType.QString,
+                     self.tr('name','nome') : QMetaType.Type.QString,
+                     self.tr('extension','extensão') : QMetaType.Type.QString,
+                     self.tr('path', 'caminho') : QMetaType.Type.QString,
                      self.tr('resX') : QMetaType.Type.Double,
                      self.tr('resY') : QMetaType.Type.Double,
                      self.tr('n_cols') : QMetaType.Type.Int,
                      self.tr('n_rows', 'n_lin') : QMetaType.Type.Int,
-                     self.tr('crs','src') : QMetaType.QString,
+                     self.tr('crs','src') : QMetaType.Type.QString,
                      self.tr('n_bands', 'n_bandas') : QMetaType.Type.Int,
-                     self.tr('dataType', 'tipoDado') : QMetaType.QString,
+                     self.tr('dataType', 'tipoDado') : QMetaType.Type.QString,
                      }
         for item in itens:
             Fields.append(QgsField(item, itens[item]))

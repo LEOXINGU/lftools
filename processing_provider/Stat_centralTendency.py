@@ -205,7 +205,7 @@ Observação: Camada em um SRC projetado obtém resultado mais acurados.'''
             if not TemZ:
                 itens  = {
                     'id' : QMetaType.Type.Int,
-                    self.tr('group','grupo'): QMetaType.QString,
+                    self.tr('group','grupo'): QMetaType.Type.QString,
                     'min_x' : QMetaType.Type.Double,
                     'min_y' : QMetaType.Type.Double,
                     'avg_x' : QMetaType.Type.Double,
@@ -218,7 +218,7 @@ Observação: Camada em um SRC projetado obtém resultado mais acurados.'''
             else:
                 itens  = {
                     'id' : QMetaType.Type.Int,
-                    self.tr('group','grupo'): QMetaType.QString,
+                    self.tr('group','grupo'): QMetaType.Type.QString,
                     'min_x' : QMetaType.Type.Double,
                     'min_y' : QMetaType.Type.Double,
                     'min_z' : QMetaType.Type.Double,
@@ -237,7 +237,7 @@ Observação: Camada em um SRC projetado obtém resultado mais acurados.'''
             if not TemZ:
                 itens  = {
                     'id' : QMetaType.Type.Int,
-                    self.tr('group','grupo'): QMetaType.QString,
+                    self.tr('group','grupo'): QMetaType.Type.QString,
                     'min_x' : QMetaType.Type.Double,
                     'min_y' : QMetaType.Type.Double,
                     'perc25_x' : QMetaType.Type.Double,
@@ -252,7 +252,7 @@ Observação: Camada em um SRC projetado obtém resultado mais acurados.'''
             else:
                 itens  = {
                     'id' : QMetaType.Type.Int,
-                    self.tr('group','grupo'): QMetaType.QString,
+                    self.tr('group','grupo'): QMetaType.Type.QString,
                     'min_x' : QMetaType.Type.Double,
                     'min_y' : QMetaType.Type.Double,
                     'min_z' : QMetaType.Type.Double,
@@ -272,7 +272,7 @@ Observação: Camada em um SRC projetado obtém resultado mais acurados.'''
 
         elif estat == 2: # feição central
             itens = {
-                    self.tr('group','grupo'): QMetaType.QString,
+                    self.tr('group','grupo'): QMetaType.Type.QString,
                     self.tr('count', 'contagem'): QMetaType.Type.Int}
 
         if estat in (0,1):

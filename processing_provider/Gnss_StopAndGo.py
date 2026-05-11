@@ -173,8 +173,8 @@ Dados de entrada:
         dist_max /= 1e2 # metros
 
         Fields = layer.fields()
-        itens  = {"start_time": QMetaType.QString,
-                  "end_time": QMetaType.QString,
+        itens  = {"start_time": QMetaType.Type.QString,
+                  "end_time": QMetaType.Type.QString,
                   "count": QMetaType.Type.Int,
                   "group": QMetaType.Type.Int
              }
