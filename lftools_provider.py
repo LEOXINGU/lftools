@@ -138,8 +138,7 @@ from .processing_provider.VR360_ExtractPerspectiveView import ExtractPerspective
 from .processing_provider.Drone_exportToDJI_KML import ExportToDJI_KML
 from .processing_provider.Drone_CreateGCPfile_Agisoft import CreateGCPfileAgisoft
 from .processing_provider.Vector_LightGeometryCleanup import LightGeometryCleanup
-
-
+from .processing_provider.Relief_ThematicSlope import ThematicSlope
 
 class LFToolsProvider(QgsProcessingProvider):
 
@@ -262,7 +261,7 @@ class LFToolsProvider(QgsProcessingProvider):
         self.addAlgorithm(ExportToDJI_KML())
         self.addAlgorithm(CreateGCPfileAgisoft())
         self.addAlgorithm(LightGeometryCleanup())
-    
+        self.addAlgorithm(ThematicSlope())    
 
     def id(self):
         return 'lftools'
