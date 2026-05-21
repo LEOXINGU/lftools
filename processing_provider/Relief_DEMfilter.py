@@ -16,35 +16,15 @@ __date__ = '2021-12-18'
 __copyright__ = '(C) 2021, Leandro França'
 
 from qgis.core import (QgsProcessing,
-                       QgsFeatureSink,
-                       QgsWkbTypes,
-                       QgsFields,
-                       QgsField,
-                       QgsFeature,
-                       QgsPointXY,
-                       QgsGeometry,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
-                       QgsProcessingParameterString,
-                       QgsProcessingParameterNumber,
-                       QgsProcessingParameterField,
                        QgsProcessingParameterBoolean,
-                       QgsProcessingParameterCrs,
                        QgsProcessingParameterEnum,
-                       QgsFeatureRequest,
-                       QgsExpression,
-                       QgsProcessingParameterFeatureSource,
-                       QgsProcessingParameterFeatureSink,
                        QgsProcessingParameterFileDestination,
-                       QgsProcessingParameterMultipleLayers,
-                       QgsProcessingParameterVectorLayer,
                        QgsProcessingParameterRasterLayer,
-                       QgsProcessingParameterRasterDestination,
                        QgsApplication,
                        QgsProject,
-                       QgsRasterLayer,
-                       QgsCoordinateTransform,
-                       QgsCoordinateReferenceSystem)
+                       QgsRasterLayer)
 
 from osgeo import osr, gdal_array, gdal #https://gdal.org/python/
 import numpy as np
