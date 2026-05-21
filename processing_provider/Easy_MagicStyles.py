@@ -121,10 +121,15 @@ Transforme pontos, linhas, polígonos e rasters em representações visuais pron
                 self.tr('Cadastre', 'Cadastro')
             ],
             "RASTER": [
-                self.tr('- Select one style -', '- Selecione um estilo -'),
-                self.tr('Elevation', 'Elevação') + ' 1',
-                self.tr('Elevation', 'Elevação') + ' 2',
-                self.tr('Temperature', 'Temperatura')
+                self.tr('- Select one style -', '- Selecione um estilo -'), # 0
+                self.tr('Elevation', 'Elevação') + ' 1', # 1
+                self.tr('Elevation', 'Elevação') + ' 2', # 2
+                self.tr('Temperature', 'Temperatura'), # 3
+                self.tr('Slope FAO (%)', 'Declividade FAO (%)'), # 4
+                self.tr('Slope USDA/NRCS (%)', 'Declividade USDA/NRCS (%)'), # 5
+                self.tr('Slope Embrapa - Brazil (%)', 'Declividade Embrapa(%)'), # 6
+                self.tr('Slope CAR - Brazil (°)', 'Declividade CAR (°)'), # 7
+                self.tr('Aspect - Flow Direction', 'Aspecto - Direção de escoamento') # 8
             ]
         }
 
@@ -201,7 +206,12 @@ Transforme pontos, linhas, polígonos e rasters em representações visuais pron
             "RASTER": {
                 1: 'raster_dem',
                 2: 'raster_dem',
-                3: 'raster_dem'
+                3: 'raster_dem',
+                4: 'raster_slope_fao_soter_prof_leandro',
+                5: 'raster_slope_usda_nrcs_prof_leandro',
+                6: 'raster_slope_embrapa_prof_leandro',
+                7: 'raster_slope_car_degrees_prof_leandro',
+                8: 'raster_relief_aspect_prof_leandro'
             }
         }
 
@@ -215,49 +225,52 @@ Transforme pontos, linhas, polígonos e rasters em representações visuais pron
 
             estilo_base = os.path.join(caminho_estilos, QML["RASTER"][estilo_raster] + '.qml')
 
-            ramp_names = {
-                1: 'raster_elevation_1',
-                2: 'raster_elevation_2',
-                3: 'raster_temperature'
-            }
+            if estilo_raster in (1, 2, 3):  # estilos de elevação e temperatura
+                ramp_names = {
+                    1: 'raster_elevation_1',
+                    2: 'raster_elevation_2',
+                    3: 'raster_temperature'
+                }
 
-            ramp_sources = {
-                1: 'grass/elevation',
-                2: 'wkp/schwarzwald/wiki-schwarzwald-cont',
-                3: 'h5/jet'
-            }
+                ramp_sources = {
+                    1: 'grass/elevation',
+                    2: 'wkp/schwarzwald/wiki-schwarzwald-cont',
+                    3: 'h5/jet'
+                }
 
-            label_decimals_map = {
-                1: 0,
-                2: 0,
-                3: 1
-            }
+                label_decimals_map = {
+                    1: 0,
+                    2: 0,
+                    3: 1
+                }
 
-            min_val, max_val, nodata = self.get_raster_min_max(camada, band=1, feedback=feedback)
+                min_val, max_val, nodata = self.get_raster_min_max(camada, band=1, feedback=feedback)
 
-            ramp_name = ramp_names[estilo_raster]
-            source_name = ramp_sources[estilo_raster]
-            label_decimals = label_decimals_map[estilo_raster]
+                ramp_name = ramp_names[estilo_raster]
+                source_name = ramp_sources[estilo_raster]
+                label_decimals = label_decimals_map[estilo_raster]
 
-            colors = self.COLOR_RAMPS[ramp_name]
-            item_values = self.gerar_item_values(
-                colors=colors,
-                min_val=min_val,
-                max_val=max_val,
-                decimals=6,
-                label_decimals=label_decimals
-            )
+                colors = self.COLOR_RAMPS[ramp_name]
+                item_values = self.gerar_item_values(
+                    colors=colors,
+                    min_val=min_val,
+                    max_val=max_val,
+                    decimals=6,
+                    label_decimals=label_decimals
+                )
 
-            estilo_selec = self.prepare_temp_qml(
-                estilo_base,
-                ['[MIN]', '[MAX]', '[RAMP_NAME]', '[ITEM_VALUES]'],
-                [
-                    self.format_number(min_val, 6),
-                    self.format_number(max_val, 6),
-                    source_name,
-                    item_values
-                ]
-            )
+                estilo_selec = self.prepare_temp_qml(
+                    estilo_base,
+                    ['[MIN]', '[MAX]', '[RAMP_NAME]', '[ITEM_VALUES]'],
+                    [
+                        self.format_number(min_val, 6),
+                        self.format_number(max_val, 6),
+                        source_name,
+                        item_values
+                    ]
+                )
+            else:
+                estilo_selec = estilo_base
 
             camada.loadNamedStyle(estilo_selec)
             camada.triggerRepaint()
