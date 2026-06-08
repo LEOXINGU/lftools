@@ -45,7 +45,11 @@ import os, math
 from math import pi, sqrt
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
-from lftools.geocapt.cartography import MeridianConvergence, SRC_Projeto, geom2PointList, AzimuteDistanciaSGL
+from lftools.geocapt.cartography import (MeridianConvergence,
+                                          SRC_Projeto, 
+                                          geom2PointList, 
+                                          AzimuteDistanciaSGL,
+                                          AzimuteDistanciaINCRA)
 from lftools.geocapt.topogeo import azimute, dd2dms, str2HTML, validar_precisoes
 from qgis.PyQt.QtGui import QIcon
 
@@ -188,6 +192,7 @@ class DescriptiveTable(QgsProcessingAlgorithm):
         calc = [self.tr('Project CRS', 'SRC do projeto'),
                  self.tr('Local Tangent Plane (LTP)', 'Sistema Geodésico Local (SGL)'),
                  self.tr('LTP, Puissant azimuth', 'SGL, azimute de Puissant'),
+                 self.tr('INCRA'),
                ]
 
         self.addParameter(
@@ -295,6 +300,14 @@ class DescriptiveTable(QgsProcessingAlgorithm):
             context
         )
 
+        if calculo == 3: # INCRA
+            format_utm = '{:,.Xf}'.replace('X', 2)
+            format_h = '{:,.Xf}'.replace('X', str(2))
+            decimal_geo = 3
+            format_dist = '{:,.Xf}'.replace('X', str(2))
+            decimal_azim = -1
+            from lftools.geocapt.cartography import azimuteTrucandoINCRA as dd2dms
+
         # Pegando o SRC do Projeto
         SRC = QgsProject.instance().crs().description()
 
@@ -393,7 +406,7 @@ class DescriptiveTable(QgsProcessingAlgorithm):
                     Az, dist = AzimuteDistanciaSGL(pntA, pntB, geomGeo, crsGeo, 'SGL')
                     Az_lista += [Az]
                     Dist += [dist]
-            elif calculo == 2: # SGL e Puissant
+            elif calculo in 2: # SGL e Puissant
                 rotulo_azimute = self.tr('Puissant'.upper())
                 sufixo_azimute = '<br>' + rotulo_azimute
                 for k in range(tam):
@@ -401,6 +414,16 @@ class DescriptiveTable(QgsProcessingAlgorithm):
                     ind =  max((k+2)%(tam+1),1)
                     pntB = pnts_GEO[ind][0]
                     Az, dist = AzimuteDistanciaSGL(pntA, pntB, geomGeo, crsGeo, 'puissant')
+                    Az_lista += [Az]
+                    Dist += [dist]
+            elif calculo in 3: # INCRA
+                rotulo_azimute = self.tr('Puissant'.upper())
+                sufixo_azimute = '<br>' + rotulo_azimute
+                for k in range(tam):
+                    pntA = pnts_GEO[k+1][0]
+                    ind =  max((k+2)%(tam+1),1)
+                    pntB = pnts_GEO[ind][0]
+                    Az, dist = AzimuteDistanciaINCRA(pntA, pntB, geomGeo, crsGeo)
                     Az_lista += [Az]
                     Dist += [dist]
         else:
