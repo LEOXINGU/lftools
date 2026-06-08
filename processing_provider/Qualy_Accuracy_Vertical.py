@@ -46,7 +46,7 @@ class Accuracy_Vertical(QgsProcessingAlgorithm):
         return 'Accuracy_Vertical'.lower()
 
     def displayName(self):
-        return self.tr('Vertical positional accuracy', 'Acurácia posicional altimétrica')
+        return self.tr('DEM vertical positional accuracy', 'Acurácia posicional altimétrica de MDE')
 
     def group(self):
         return self.tr('Quality','Qualidade')
