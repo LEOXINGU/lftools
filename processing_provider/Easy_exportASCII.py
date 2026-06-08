@@ -145,6 +145,17 @@ class ExportASCII(QgsProcessingAlgorithm):
 
         layer_real = self.parameterAsVectorLayer(parameters, self.LAYER, context)
 
+        # Quando usa "feições selecionadas", o parâmetro pode vir como QgsProcessingFeatureSourceDefinition
+        if layer_real is None:
+            param_layer = parameters[self.LAYER]
+
+            if isinstance(param_layer, QgsProcessingFeatureSourceDefinition):
+                source = param_layer.source.staticValue()
+                layer_real = QgsProject.instance().mapLayer(source)
+
+            elif isinstance(param_layer, str):
+                layer_real = QgsProject.instance().mapLayer(param_layer)
+
         campo = self.parameterAsFields(
             parameters,
             self.ATT,
@@ -214,14 +225,18 @@ class ExportASCII(QgsProcessingAlgorithm):
 
             scope_feat = QgsExpressionContextScope("feature")
             scope_feat.setFeature(feat)
-            scope_feat.setVariable('layer_id', layer_real.id())  # define o id da camada
 
-            contexto.appendScopes([
+            scopes = [
                 QgsExpressionContextUtils.globalScope(),
-                QgsExpressionContextUtils.projectScope(QgsProject.instance()),
-                QgsExpressionContextUtils.layerScope(layer_real),
-                scope_feat
-            ])
+                QgsExpressionContextUtils.projectScope(QgsProject.instance())
+            ]
+
+            if layer_real is not None:
+                scope_feat.setVariable('layer_id', layer_real.id())
+                scopes.append(QgsExpressionContextUtils.layerScope(layer_real))
+
+            scopes.append(scope_feat)
+            contexto.appendScopes(scopes)
 
             contexto.setFeature(feat)
             texto_expr = str(expr.evaluate(contexto))
