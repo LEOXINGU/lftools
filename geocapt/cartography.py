@@ -464,18 +464,19 @@ def perimetroINCRA(geomGeo, crsGeo):
 # Azimute e Distância do INCRA
 def AzimuteDistanciaINCRA(pntA, pntB, geomGeo, crsGeo):
     # Origem do SGL
-    coordsXYZ = geom2PointList(geomGeo)
+    partes = geom2PointList(geomGeo)
     lon,lat,alt = [],[],[]
-    for pnt in coordsXYZ[:-1]:
-        lon +=[pnt.x()]
-        lat +=[pnt.y()]
-        if str(pnt.z()) != 'nan':
-            alt += [pnt.z()]
-        else:
-            alt += [0]
+    for parte in partes:
+        for pnt in parte[:-1]:
+            lon +=[pnt.x()]
+            lat +=[pnt.y()]
+            if str(pnt.z()) != 'nan':
+                alt += [pnt.z()]
+            else:
+                alt += [0]
     lon0 = np.array(lon).mean()
     lat0 = np.array(lat).mean()
-    h0 = np.array(alt).mean()    
+    h0 = np.array(alt).mean()
     X0, Y0, Z0, a, f = OrigemSGL(lon0, lat0, h0, crsGeo)
     # Transformar geodésicas para geocêntricas
     XA, YA, ZA = geod2geoc(pntA.x(), pntA.y(), pntA.z() if str(pntA.z()) != 'nan' else 0, a, f)
