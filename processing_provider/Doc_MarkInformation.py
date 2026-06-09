@@ -419,20 +419,17 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
         except:
             project_folder = ''
         
-        try:
-            itens['[FOTO_MARCO]'] = img2html_resized(os.path.join(project_folder, ponto['mark_photo'])) if ponto['mark_photo'] else ''
-        except:
-            raise QgsProcessingException(self.tr('Make sure the landmark photo is in JPEG format!', 'Verifique se a foto do marco está no formato JPEG!'))
+        filepath = self.VerificarArquivo(project_folder, ponto['mark_photo'])
+        self.VerificarJPEG(filepath)
+        itens['[FOTO_MARCO]'] = img2html_resized(filepath) if ponto['mark_photo'] else ''
 
-        try:
-            itens['[FOTO_PAN]'] = img2html_resized(os.path.join(project_folder, ponto['pan_photo'])) if ponto['pan_photo'] else ''
-        except:
-            raise QgsProcessingException(self.tr('Make sure the panoramic photo is in JPEG format!', 'Verifique se a foto panorâmica está no formato JPEG!'))
+        filepath = self.VerificarArquivo(project_folder, ponto['pan_photo'])
+        self.VerificarJPEG(filepath)
+        itens['[FOTO_PAN]'] = img2html_resized(filepath) if ponto['pan_photo'] else ''
 
-        try:
-            itens['[IMAGEM_AER]'] = img2html_resized(os.path.join(project_folder, ponto['aerial_image'])) if ponto['aerial_image'] else ''
-        except:
-            raise QgsProcessingException(self.tr('Make sure your aerial sketch is in JPEG format!', 'Verifique se o seu croqui aéreo está no formato JPEG!'))
+        filepath = self.VerificarArquivo(project_folder, ponto['aerial_image'])
+        self.VerificarJPEG(filepath)
+        itens['[IMAGEM_AER]'] = img2html_resized(filepath) if ponto['aerial_image'] else ''
 
 
         for item in itens:
@@ -452,3 +449,20 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
         feedback.pushInfo('Leandro França - Eng Cart')
 
         return {self.HTML: output}
+    
+    def VerificarArquivo(self, project_folder, relative_path):
+        try:
+            filepath = os.path.join(project_folder, relative_path)
+            if os.path.isfile(filepath):
+                return filepath
+            elif os.path.isfile(relative_path):
+                return relative_path
+            else:
+                raise QgsProcessingException(self.tr('Verify if the file {} exists!', 'Verifique se o arquivo {} existe!').format(filepath))
+        except:
+            raise QgsProcessingException(self.tr('Verify if the file {} exists!', 'Verifique se o arquivo {} existe!').format(filepath))
+    
+    def VerificarJPEG(self, filepath):
+        ext = os.path.splitext(filepath)[1].lower()
+        if ext not in ['.jpg', '.jpeg', '.JPG', '.JPEG']:
+            raise QgsProcessingException(self.tr('Make sure your file {} is in JPEG format!', 'Verifique se o seu arquivo {} está no formato JPEG!').format(filepath))
