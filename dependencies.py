@@ -1,7 +1,23 @@
 import sys
 import io
+import site
 import importlib
 import platform
+
+
+def _add_user_site_to_path(feedback=None):
+    try:
+        user_site = site.getusersitepackages()
+
+        if user_site and user_site not in sys.path:
+            sys.path.append(user_site)
+
+            if feedback:
+                feedback.pushInfo(f'Added user site-packages to sys.path: {user_site}')
+
+    except Exception as e:
+        if feedback:
+            feedback.pushInfo(f'Could not add user site-packages: {e}')
 
 
 def _import_module(module_name, feedback=None):
@@ -83,6 +99,8 @@ def _install_package(package_name, feedback=None):
         ok = _pip_install(args, feedback)
         if ok:
             importlib.invalidate_caches()
+            _add_user_site_to_path(feedback)
+
             if feedback:
                 feedback.pushInfo(f'Package "{package_name}" installed successfully.')
             return True
@@ -100,6 +118,8 @@ def _install_package(package_name, feedback=None):
 # ==========================
 
 def ensure_pillow(feedback=None):
+    _add_user_site_to_path(feedback)
+
     Image = _import_module("PIL.Image", feedback)
     if Image is not None:
         if feedback:
@@ -113,12 +133,14 @@ def ensure_pillow(feedback=None):
         return None
 
     importlib.invalidate_caches()
+    _add_user_site_to_path(feedback)
 
     Image = _import_module("PIL.Image", feedback)
     if Image is None:
         if feedback:
             feedback.reportError(
-                'Pillow installation was attempted, but PIL.Image is still unavailable.'
+                'Pillow installation was attempted, but PIL.Image is still unavailable. '
+                'Restart QGIS and try again.'
             )
         return None
 
@@ -136,6 +158,8 @@ def ensure_pillow(feedback=None):
 # ==========================
 
 def ensure_matplotlib(feedback=None):
+    _add_user_site_to_path(feedback)
+
     path = _import_module("matplotlib.path", feedback)
     if path is not None:
         if feedback:
@@ -149,12 +173,14 @@ def ensure_matplotlib(feedback=None):
         return None
 
     importlib.invalidate_caches()
+    _add_user_site_to_path(feedback)
 
     path = _import_module("matplotlib.path", feedback)
     if path is None:
         if feedback:
             feedback.reportError(
-                'Matplotlib installation was attempted, but matplotlib.path is still unavailable.'
+                'Matplotlib installation was attempted, but matplotlib.path is still unavailable. '
+                'Restart QGIS and try again.'
             )
         return None
 
@@ -165,3 +191,94 @@ def ensure_matplotlib(feedback=None):
             feedback.pushInfo('Matplotlib loaded after installation.')
 
     return path
+
+
+# ==========================
+# MATPLOTLIB PYPLOT
+# ==========================
+
+def ensure_pyplot(feedback=None):
+    _add_user_site_to_path(feedback)
+
+    pyplot = _import_module("matplotlib.pyplot", feedback)
+
+    if pyplot is not None:
+        if feedback:
+            try:
+                feedback.pushInfo(
+                    f'Matplotlib pyplot already available: {pyplot.__file__}'
+                )
+            except Exception:
+                feedback.pushInfo(
+                    'Matplotlib pyplot already available.'
+                )
+        return pyplot
+
+    if not _install_package("matplotlib", feedback):
+        return None
+
+    importlib.invalidate_caches()
+    _add_user_site_to_path(feedback)
+
+    pyplot = _import_module("matplotlib.pyplot", feedback)
+
+    if pyplot is None:
+        if feedback:
+            feedback.reportError(
+                'Matplotlib installation was attempted, '
+                'but matplotlib.pyplot is still unavailable. '
+                'Restart QGIS and try again.'
+            )
+        return None
+
+    if feedback:
+        try:
+            feedback.pushInfo(
+                f'Matplotlib pyplot loaded after installation: {pyplot.__file__}'
+            )
+        except Exception:
+            feedback.pushInfo(
+                'Matplotlib pyplot loaded after installation.'
+            )
+
+    return pyplot
+
+
+# ==========================
+# SCIPY
+# ==========================
+
+def ensure_scipy(feedback=None):
+    _add_user_site_to_path(feedback)
+
+    stats = _import_module("scipy.stats", feedback)
+    if stats is not None:
+        if feedback:
+            try:
+                feedback.pushInfo(f'SciPy already available: {stats.__file__}')
+            except Exception:
+                feedback.pushInfo('SciPy already available.')
+        return stats
+
+    if not _install_package("scipy", feedback):
+        return None
+
+    importlib.invalidate_caches()
+    _add_user_site_to_path(feedback)
+
+    stats = _import_module("scipy.stats", feedback)
+    if stats is None:
+        if feedback:
+            feedback.reportError(
+                'SciPy installation was attempted, but scipy.stats is still unavailable. '
+                'Restart QGIS and try again.'
+            )
+        return None
+
+    if feedback:
+        try:
+            feedback.pushInfo(f'SciPy loaded after installation: {stats.__file__}')
+        except Exception:
+            feedback.pushInfo('SciPy loaded after installation.')
+
+    return stats
