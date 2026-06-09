@@ -238,7 +238,7 @@ class Accuracy_3D(QgsProcessingAlgorithm):
         num_teste = teste.featureCount()
         num_ref = ref.featureCount()
         # Validação do número mínimo de feições em cada camada de entrada
-        if num_teste < 3 or num_teste < 3:
+        if num_teste < 3 or num_ref < 3:
             raise QgsProcessingException(self.tr('Insufficient number of features for quality evaluation!', 'Número de feições insuficiente para avaliação de qualidade!'))
         
         # O número de feições deve ser extamente o mesmo nas duas camadas
