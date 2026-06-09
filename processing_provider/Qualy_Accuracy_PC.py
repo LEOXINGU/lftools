@@ -27,7 +27,7 @@ from lftools.translations.translate import translate
 from lftools.geocapt.topogeo import str2HTML
 from lftools.geocapt.cartography import PEC
 import os
-from qgis.PyQt.QtGui import QIcon
+from qgis.PyQt.QtGui import QIcon, QColor, QFont
 from lftools.dependencies import (
                                     ensure_scipy,
                                     ensure_pyplot
@@ -443,6 +443,118 @@ class Accuracy_PC(QgsProcessingAlgorithm):
                 )
             except Exception as e:
                 anderson_text = str(e)
+
+        # Gráficos do relatório (Histograma e CDF)
+        def FigToBase64(fig):
+            buffer = BytesIO()
+            fig.savefig(buffer, format='png', dpi=200, bbox_inches='tight')
+            buffer.seek(0)
+            encoded = base64.b64encode(buffer.read()).decode('utf-8')
+            try:
+                plt.close(fig)
+            except Exception:
+                pass
+            return encoded
+
+        def ChartUnavailableBlock():
+            return '<div class="note">' + str2HTML(self.tr(
+                'Charts were not generated because Matplotlib is unavailable in the QGIS Python environment.',
+                'Os gráficos não foram gerados porque o Matplotlib não está disponível no ambiente Python do QGIS.'
+            )) + '</div>'
+
+        def GenerateHistogramBase64():
+            if plt is None:
+                return None
+            try:
+                fig, ax = plt.subplots(figsize=(9, 5.2))
+
+                ax.hist(DISCREP, bins='fd', edgecolor='black', alpha=0.75)
+
+                ax.axvline(DISCREP.mean(), linewidth=2,
+                           label='Mean = {} m'.format(fnum(DISCREP.mean())))
+                ax.axvline(np.median(DISCREP), linewidth=2, linestyle='--',
+                           label='Median = {} m'.format(fnum(np.median(DISCREP))))
+
+                ax.axvline(-RMSE, linewidth=1.5, linestyle=':',
+                           label='±RMSEz = {} m'.format(fnum(RMSE)))
+                ax.axvline(RMSE, linewidth=1.5, linestyle=':')
+
+                ax.axvline(-NVA_95, linewidth=1.5, linestyle='-.',
+                           label='±NVA95 = {} m'.format(fnum(NVA_95)))
+                ax.axvline(NVA_95, linewidth=1.5, linestyle='-.')
+
+                ax.axvline(-P95, linewidth=1.5, linestyle=(0, (5, 5)),
+                           label='±P95 = {} m'.format(fnum(P95)))
+                ax.axvline(P95, linewidth=1.5, linestyle=(0, (5, 5)))
+
+                ax.set_title(self.tr('Histogram of Vertical Residuals (ΔZ)',
+                                     'Histograma dos Resíduos Verticais (ΔZ)'))
+                ax.set_xlabel(self.tr('Vertical discrepancy ΔZ (m)',
+                                      'Discrepância vertical ΔZ (m)'))
+                ax.set_ylabel(self.tr('Frequency', 'Frequência'))
+                ax.grid(True, alpha=0.25)
+                ax.legend(loc='best')
+                fig.tight_layout()
+                return FigToBase64(fig)
+            except Exception as e:
+                if feedback:
+                    feedback.reportError(self.tr(
+                        'Could not generate histogram: {}',
+                        'Não foi possível gerar o histograma: {}'
+                    ).format(str(e)))
+                return None
+
+        def GenerateCDFBase64():
+            if plt is None:
+                return None
+            try:
+                abs_errors = np.sort(np.abs(DISCREP))
+                cdf = np.arange(1, len(abs_errors) + 1) / len(abs_errors) * 100.0
+
+                fig, ax = plt.subplots(figsize=(9, 5.2))
+                ax.plot(abs_errors, cdf, linewidth=2, label='CDF')
+
+                for p_value, label, level in [
+                    (P68, 'P68', 68),
+                    (P90, 'P90', 90),
+                    (P95, 'P95', 95),
+                    (P99, 'P99', 99)
+                ]:
+                    ax.axvline(p_value, linestyle='--', linewidth=1.4)
+                    ax.axhline(level, linestyle=':', linewidth=1.0)
+                    ax.annotate('{} = {} m'.format(label, fnum(p_value)),
+                                xy=(p_value, level),
+                                xytext=(5, 5),
+                                textcoords='offset points')
+
+                ax.axvline(NVA_95, linestyle='-.', linewidth=1.8,
+                           label='NVA95 = {} m'.format(fnum(NVA_95)))
+
+                ax.set_title(self.tr('CDF of Absolute Vertical Errors |ΔZ|',
+                                     'CDF dos Erros Verticais Absolutos |ΔZ|'))
+                ax.set_xlabel(self.tr('Absolute vertical error |ΔZ| (m)',
+                                      'Erro vertical absoluto |ΔZ| (m)'))
+                ax.set_ylabel(self.tr('Cumulative percentage (%)',
+                                      'Percentual acumulado (%)'))
+                ax.set_xlim(left=0)
+                ax.set_ylim(0, 100)
+                ax.grid(True, alpha=0.25)
+                ax.legend(loc='best')
+                fig.tight_layout()
+                return FigToBase64(fig)
+            except Exception as e:
+                if feedback:
+                    feedback.reportError(self.tr(
+                        'Could not generate CDF chart: {}',
+                        'Não foi possível gerar o gráfico CDF: {}'
+                    ).format(str(e)))
+                return None
+
+        histogram_b64 = GenerateHistogramBase64()
+        cdf_b64 = GenerateCDFBase64()
+
+        histogram_chart = '<img class="chart-img" src="data:image/png;base64,{}">'.format(histogram_b64) if histogram_b64 else ChartUnavailableBlock()
+        cdf_chart = '<img class="chart-img" src="data:image/png;base64,{}">'.format(cdf_b64) if cdf_b64 else ChartUnavailableBlock()
         
         # Criacao do arquivo html com os resultados
         arq = open(html_output, 'w', encoding='utf-8')
@@ -474,6 +586,7 @@ class Accuracy_PC(QgsProcessingAlgorithm):
     .ok { color:#1f7a1f; font-weight:bold; }
     .warn { color:#b36b00; font-weight:bold; }
     .footer { margin-top:30px; border-top:1px solid #ccc; padding-top:12px; color:#555; font-size:12px; }
+    .chart-img { width:100%; max-width:900px; display:block; margin:16px auto 8px auto; border:1px solid #ddd; border-radius:8px; }
   </style>
 </head>
 <body>
@@ -526,7 +639,25 @@ $$NMAD = 1.4826 \\times median(|\\Delta Z_i - median(\\Delta Z)|)$$
 <tr><td>NVA 95%</td><td>[NVA_95] m</td><td>1.96 × RMSE<sub>Z</sub></td></tr>
 </table>
 
-<h2>''' + str2HTML(self.tr('4. Percentile-based Accuracy', '4. Acurácia baseada em Percentis')) + '''</h2>
+<h2>''' + str2HTML(self.tr('4. Histogram of Residuals', '4. Histograma dos Resíduos')) + '''</h2>
+<p>''' + str2HTML(self.tr(
+'The histogram presents the distribution of vertical residuals (ΔZ), including the mean, median, RMSEz, NVA and P95 indicators.',
+'O histograma apresenta a distribuição dos resíduos verticais (ΔZ), incluindo os indicadores de média, mediana, RMSEz, NVA e P95.'
+)) + '''</p>
+[HISTOGRAM_CHART]
+
+<h2>''' + str2HTML(self.tr('5. CDF of Absolute Errors', '5. CDF dos Erros Absolutos')) + '''</h2>
+<p>''' + str2HTML(self.tr(
+'The cumulative distribution function (CDF) summarizes the percentage of checkpoints whose absolute vertical error is smaller than a given threshold. Percentiles P68, P90, P95 and P99 are highlighted and can be compared with the theoretical NVA.',
+'A função de distribuição acumulada (CDF) resume o percentual de checkpoints cujo erro vertical absoluto é menor que um determinado limiar. Os percentis P68, P90, P95 e P99 são destacados e podem ser comparados com o NVA teórico.'
+)) + '''</p>
+[CDF_CHART]
+<div class="note">''' + str2HTML(self.tr(
+'The proximity between P95 and NVA supports the interpretation of the residuals as approximately normal; large differences may indicate non-normal behavior, heavy tails or outliers.',
+'A proximidade entre P95 e NVA auxilia na interpretação dos resíduos como aproximadamente normais; grandes diferenças podem indicar comportamento não normal, caudas pesadas ou outliers.'
+)) + '''</div>
+
+<h2>''' + str2HTML(self.tr('6. Percentile-based Accuracy', '6. Acurácia baseada em Percentis')) + '''</h2>
 <table>
 <tr><th>Percentile</th><th>|ΔZ|</th></tr>
 <tr><td>P68</td><td>[P68] m</td></tr>
@@ -535,7 +666,7 @@ $$NMAD = 1.4826 \\times median(|\\Delta Z_i - median(\\Delta Z)|)$$
 <tr><td>P99</td><td>[P99] m</td></tr>
 </table>
 
-<h2>''' + str2HTML(self.tr('5. Robust Statistics and Outliers', '5. Estatísticas Robustas e Outliers')) + '''</h2>
+<h2>''' + str2HTML(self.tr('7. Robust Statistics and Outliers', '7. Estatísticas Robustas e Outliers')) + '''</h2>
 <table>
 <tr><th>Metric</th><th>Value</th></tr>
 <tr><td>Median Error</td><td>[median] m</td></tr>
@@ -546,14 +677,14 @@ $$NMAD = 1.4826 \\times median(|\\Delta Z_i - median(\\Delta Z)|)$$
 <tr><td>Outliers</td><td>[OUTLIERS] ([OUTLIERS_PERC]%)</td></tr>
 </table>
 
-<h2>''' + str2HTML(self.tr('6. Residual Normality Assessment', '6. Avaliação da Normalidade dos Resíduos')) + '''</h2>
+<h2>''' + str2HTML(self.tr('8. Residual Normality Assessment', '8. Avaliação da Normalidade dos Resíduos')) + '''</h2>
 <table>
 <tr><th>Test</th><th>Result</th></tr>
 <tr><td>Shapiro-Wilk</td><td>[SHAPIRO]</td></tr>
 <tr><td>Anderson-Darling</td><td>[ANDERSON]</td></tr>
 </table>
 
-<h2>''' + str2HTML(self.tr('7. Point Cloud Sampling Statistics', '7. Estatísticas de Amostragem da Nuvem')) + '''</h2>
+<h2>''' + str2HTML(self.tr('9. Point Cloud Sampling Statistics', '9. Estatísticas de Amostragem da Nuvem')) + '''</h2>
 <table>
 <tr><th>Metric</th><th>Distance</th></tr>
 <tr><td>Mean nearest-point distance</td><td>[dist_mean] m</td></tr>
@@ -562,7 +693,7 @@ $$NMAD = 1.4826 \\times median(|\\Delta Z_i - median(\\Delta Z)|)$$
 <tr><td>Maximum nearest-point distance</td><td>[dist_max] m</td></tr>
 </table>
 
-<h2>''' + str2HTML(self.tr('8. ASPRS Compliance Checklist', '8. Checklist de Conformidade ASPRS')) + '''</h2>
+<h2>''' + str2HTML(self.tr('10. ASPRS Compliance Checklist', '10. Checklist de Conformidade ASPRS')) + '''</h2>
 <table>
 <tr><th>Requirement</th><th>Status</th></tr>
 <tr><td>Independent checkpoints</td><td class="ok">''' + str2HTML(self.tr('User-defined', 'Definido pelo usuário')) + '''</td></tr>
@@ -573,10 +704,10 @@ $$NMAD = 1.4826 \\times median(|\\Delta Z_i - median(\\Delta Z)|)$$
 <tr><td>Outliers reported without automatic removal</td><td class="ok">OK</td></tr>
 </table>
 
-<h2>''' + str2HTML(self.tr('9. PEC-PCD Classification', '9. Classificação PEC-PCD')) + '''</h2>
+<h2>''' + str2HTML(self.tr('11. PEC-PCD Classification', '11. Classificação PEC-PCD')) + '''</h2>
 [PEC_Z]
 
-<h2>''' + str2HTML(self.tr('10. Automatic Interpretation', '10. Interpretação Automática')) + '''</h2>
+<h2>''' + str2HTML(self.tr('12. Automatic Interpretation', '12. Interpretação Automática')) + '''</h2>
 <div class="note">
 [INTERPRETATION]
 </div>
@@ -689,6 +820,8 @@ email: contato@geoone.com.br
             '[layer_count]': str(len(DISCREP)),
             '[dist_filter]': fnum(distProx),
             '[crs]': str2HTML(SRC.authid() + ' - ' + SRC.description() if SRC.isValid() else ''),
+            '[HISTOGRAM_CHART]': histogram_chart,
+            '[CDF_CHART]': cdf_chart,
 
             '[discrepZ_mean]': fnum(DISCREP.mean()),
             '[discrepZ_std]': fnum(DISCREP.std()),
@@ -734,5 +867,108 @@ email: contato@geoone.com.br
         
         feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
         feedback.pushInfo(self.tr('Leandro Franca - Cartographic Engineer', 'Leandro França - Eng Cart'))
+
+        self.SAIDA = dest_id
+        self.P68 = P68
+        self.P90 = P90
+        self.P95 = P95
+        self.P99 = P99
+
         return {self.OUTPUT: dest_id,
                 self.HTML: html_output}
+
+    def postProcessAlgorithm(self, context, feedback):
+
+        layer = QgsProcessingUtils.mapLayerFromString(self.SAIDA, context)
+
+        if layer is None or layer.featureCount() == 0:
+            return {}
+
+        field = 'np_discrep_z'
+
+        # Verifica se o campo existe
+        if layer.fields().indexFromName(field) == -1:
+            return {}
+
+        # Criar simbologia baseada em regras por |ΔZ|
+        root_rule = QgsRuleBasedRenderer.Rule(None)
+
+        classes = [
+            (
+                self.tr('|ΔZ| ≤ P68', '|ΔZ| ≤ P68'),
+                'abs("{}") <= {}'.format(field, self.P68),
+                '#1a9850',
+                2.4
+            ),
+            (
+                self.tr('P68 < |ΔZ| ≤ P90', 'P68 < |ΔZ| ≤ P90'),
+                'abs("{}") > {} AND abs("{}") <= {}'.format(field, self.P68, field, self.P90),
+                '#91cf60',
+                2.6
+            ),
+            (
+                self.tr('P90 < |ΔZ| ≤ P95', 'P90 < |ΔZ| ≤ P95'),
+                'abs("{}") > {} AND abs("{}") <= {}'.format(field, self.P90, field, self.P95),
+                '#fee08b',
+                2.8
+            ),
+            (
+                self.tr('P95 < |ΔZ| ≤ P99', 'P95 < |ΔZ| ≤ P99'),
+                'abs("{}") > {} AND abs("{}") <= {}'.format(field, self.P95, field, self.P99),
+                '#fc8d59',
+                3.0
+            ),
+            (
+                self.tr('|ΔZ| > P99', '|ΔZ| > P99'),
+                'abs("{}") > {}'.format(field, self.P99),
+                '#d73027',
+                3.4
+            ),
+        ]
+
+        for label, expression, color, size in classes:
+            symbol = QgsMarkerSymbol.createSimple({
+                'name': 'circle',
+                'color': color,
+                'outline_color': '0,0,0',
+                'outline_style': 'solid',
+                'size': str(size),
+                'size_unit': 'MM'
+            })
+
+            rule = QgsRuleBasedRenderer.Rule(symbol)
+            rule.setFilterExpression(expression)
+            rule.setLabel(label)
+            root_rule.appendChild(rule)
+
+        renderer = QgsRuleBasedRenderer(root_rule)
+        layer.setRenderer(renderer)
+
+        # Rotular com discrepância Z
+        label_settings = QgsPalLayerSettings()
+        label_settings.fieldName = 'round("{}", 3)'.format(field)
+        label_settings.isExpression = True
+        label_settings.enabled = True
+
+        text_format = QgsTextFormat()
+        font = QFont("Arial", 8)
+        font.setBold(True)
+        text_format.setFont(font)
+        text_format.setSize(8)
+        text_format.setColor(QColor("white"))
+
+        buffer_settings = QgsTextBufferSettings()
+        buffer_settings.setEnabled(True)
+        buffer_settings.setSize(0.6)
+        buffer_settings.setColor(QColor("black"))
+        text_format.setBuffer(buffer_settings)
+
+        label_settings.setFormat(text_format)
+
+        labeling = QgsVectorLayerSimpleLabeling(label_settings)
+        layer.setLabeling(labeling)
+        layer.setLabelsEnabled(True)
+
+        layer.triggerRepaint()
+
+        return {}
