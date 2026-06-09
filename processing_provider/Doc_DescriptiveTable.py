@@ -49,7 +49,8 @@ from lftools.geocapt.cartography import (MeridianConvergence,
                                           SRC_Projeto, 
                                           geom2PointList, 
                                           AzimuteDistanciaSGL,
-                                          AzimuteDistanciaINCRA)
+                                          AzimuteDistanciaINCRA,
+                                          azimuteTrucandoINCRA)
 from lftools.geocapt.topogeo import azimute, dd2dms, str2HTML, validar_precisoes
 from qgis.PyQt.QtGui import QIcon
 
@@ -172,7 +173,7 @@ class DescriptiveTable(QgsProcessingAlgorithm):
                   self.tr('E, N, h'),
                   self.tr('Lon, Lat, h, azimuth, distance', 'Lon, Lat, h, azimute, distância'),
                   self.tr('Lon, Lat, h'),
-                  self.tr('Lon, Lat, E, N, h, azimuth, distance', 'Lon, Lat, h, azimute, distância'),
+                  self.tr('Lon, Lat, E, N, h, azimuth, distance', 'Lon, Lat, E, N, h, azimute, distância'),
                   self.tr('Lon, Lat, E, N, h'),
                   self.tr('Lon and Lat (without suffix), h, azimuth, distance', 'Lon e Lat (sem sufixo), h, azimute, distância'),
                   self.tr('Lon and Lat (without suffix), h', 'Lon e Lat (sem sufixo), h'),
@@ -301,12 +302,11 @@ class DescriptiveTable(QgsProcessingAlgorithm):
         )
 
         if calculo == 3: # INCRA
-            format_utm = '{:,.Xf}'.replace('X', 2)
+            format_utm = '{:,.Xf}'.replace('X', str(2))
             format_h = '{:,.Xf}'.replace('X', str(2))
             decimal_geo = 3
             format_dist = '{:,.Xf}'.replace('X', str(2))
             decimal_azim = -1
-            from lftools.geocapt.cartography import azimuteTrucandoINCRA as dd2dms
 
         # Pegando o SRC do Projeto
         SRC = QgsProject.instance().crs().description()
@@ -385,7 +385,7 @@ class DescriptiveTable(QgsProcessingAlgorithm):
             Az_Geo_lista += [(180/pi)*azimute(pntA, pntB)[0]+ConvMerediana]
             Dist += [sqrt((pntA.x() - pntB.x())**2 + (pntA.y() - pntB.y())**2)]
 
-        if calculo in (1,2):
+        if calculo != 0: # Não projetado (UTM)
             crsGeo = vertices.sourceCrs()
             # Criar polígono a partir dos pontos
             COORDS = []
@@ -406,7 +406,7 @@ class DescriptiveTable(QgsProcessingAlgorithm):
                     Az, dist = AzimuteDistanciaSGL(pntA, pntB, geomGeo, crsGeo, 'SGL')
                     Az_lista += [Az]
                     Dist += [dist]
-            elif calculo in 2: # SGL e Puissant
+            elif calculo == 2: # SGL e Puissant
                 rotulo_azimute = self.tr('Puissant'.upper())
                 sufixo_azimute = '<br>' + rotulo_azimute
                 for k in range(tam):
@@ -416,8 +416,8 @@ class DescriptiveTable(QgsProcessingAlgorithm):
                     Az, dist = AzimuteDistanciaSGL(pntA, pntB, geomGeo, crsGeo, 'puissant')
                     Az_lista += [Az]
                     Dist += [dist]
-            elif calculo in 3: # INCRA
-                rotulo_azimute = self.tr('Puissant'.upper())
+            elif calculo == 3: # INCRA
+                rotulo_azimute = self.tr('INCRA'.upper())
                 sufixo_azimute = '<br>' + rotulo_azimute
                 for k in range(tam):
                     pntA = pnts_GEO[k+1][0]
@@ -708,7 +708,7 @@ class DescriptiveTable(QgsProcessingAlgorithm):
                             'lonn': longitude,
                             'latn': latitude,
                             'Ln': pnts_UTM[k+1][2] + '/' + pnts_UTM[1 if k+2 > tam else k+2][2],
-                            'Az_n': self.tr(dd2dms(Az_lista[k],decimal_azim), dd2dms(Az_lista[k],decimal_azim).replace('.', ',')),
+                            'Az_n': self.tr(dd2dms(Az_lista[k],decimal_azim), dd2dms(Az_lista[k],decimal_azim).replace('.', ',')) if calculo != 3 else self.tr(azimuteTrucandoINCRA(Az_lista[k],decimal_azim), azimuteTrucandoINCRA(Az_lista[k],decimal_azim).replace('.', ',')),
                             'Dn': self.tr(format_dist.format(Dist[k]), format_dist.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'))
                             }
                 for item in itens:
