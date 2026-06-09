@@ -12,20 +12,28 @@ Qualy_Accuracy_Vertical.py
 ***************************************************************************
 """
 __author__ = 'Leandro França'
-__date__ = '2021-12-24'
-__copyright__ = '(C) 2021, Leandro França'
+__date__ = '2026-06-09'
+__copyright__ = '(C) 2026, Leandro França'
 
 from qgis.PyQt.QtCore import QMetaType
 from qgis.core import *
 from numpy import sqrt, array, mean, std, pi, sin, floor, ceil
 from osgeo import osr, gdal
+import numpy as np
+from datetime import datetime
+import base64
+from io import BytesIO
 from lftools.geocapt.imgs import *
 from lftools.translations.translate import translate
 from lftools.geocapt.topogeo import str2HTML
 from lftools.geocapt.cartography import PEC
 from lftools.geocapt.dip import Interpolar
+from lftools.dependencies import (
+                                    ensure_scipy,
+                                    ensure_pyplot
+                                )
 import os
-from qgis.PyQt.QtGui import QIcon
+from qgis.PyQt.QtGui import QIcon, QColor, QFont
 
 
 class Accuracy_Vertical(QgsProcessingAlgorithm):
@@ -69,7 +77,7 @@ class Accuracy_Vertical(QgsProcessingAlgorithm):
 
 <b>Outputs</b>
 1. <b>Discrepancy calculations</b> in Z for the reference point.
-2. <b>Accuracy report</b>: Cartographic Accuracy Standard report containing RMSE results and classification according to the PEC-PCD.
+2. <b>Accuracy report</b>: ASPRS-oriented vertical accuracy report containing RMSEz, NVA, percentiles, robust statistics, normality tests, graphical analysis, and PEC-PCD classification.
 
 <b>Input Requirements:</b>
  - DEM as raster layer
@@ -79,7 +87,7 @@ class Accuracy_Vertical(QgsProcessingAlgorithm):
 
 <b>Saídas:</b>
 1. Cálculo das discrepâncias em Z para o ponto de referência.
-2. Relatório do Padrão de Exatidão Cartográfica com resultado da REMQ e classificação do PEC-PCD.
+2. Relatório de acurácia vertical orientado à ASPRS contendo REMQz, NVA, percentis, estatísticas robustas, testes de normalidade, análise gráfica e classificação PEC-PCD.
 
 <b>Requisitos de Entrada:</b>
 - Raster do MDE
@@ -134,7 +142,7 @@ class Accuracy_Vertical(QgsProcessingAlgorithm):
             QgsProcessingParameterEnum(
                 self.RESAMPLING,
                 self.tr('Interpolation', 'Interpolação'),
-				options = interp,
+                options = interp,
                 defaultValue= 1
             )
         )
@@ -143,7 +151,6 @@ class Accuracy_Vertical(QgsProcessingAlgorithm):
             QgsProcessingParameterCrs(
                 self.CRS,
                 self.tr('CRS', 'SRC'),
-                # QgsProject.instance().crs(),
                 optional = True
                 )
             )
@@ -175,6 +182,9 @@ class Accuracy_Vertical(QgsProcessingAlgorithm):
         
 
     def processAlgorithm(self, parameters, context, feedback):
+        
+        scipy_stats = ensure_scipy(feedback)
+        plt = ensure_pyplot(feedback)
         
         source = self.parameterAsSource(
             parameters,
@@ -210,6 +220,11 @@ class Accuracy_Vertical(QgsProcessingAlgorithm):
         if reamostragem is None:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.RESAMPLING))
         metodo = ['nearest','bilinear','bicubic'][reamostragem]
+        metodo_label = [
+            self.tr('Nearest neighbor', 'Vizinho mais próximo'),
+            self.tr('Bilinear'),
+            self.tr('Bicubic', 'Bicúbica')
+        ][reamostragem]
 
         decimal = self.parameterAsInt(
             parameters,
@@ -224,6 +239,11 @@ class Accuracy_Vertical(QgsProcessingAlgorithm):
         )
         
         format_num = '{:,.Xf}'.replace('X', str(decimal))
+        def fnum(value):
+            try:
+                return format_num.format(float(value))
+            except Exception:
+                return str(value)
         
         Fields = source.fields()
         itens  = {
@@ -246,7 +266,6 @@ class Accuracy_Vertical(QgsProcessingAlgorithm):
             if out_CRS.isGeographic():
                 raise QgsProcessingException(msg)
             else:
-                # Transformação de coordenadas
                 coordinateTransf = QgsCoordinateTransform(crs, out_CRS, QgsProject.instance())
                 coordTransf = True
                 SRC = out_CRS
@@ -284,14 +303,12 @@ class Accuracy_Vertical(QgsProcessingAlgorithm):
         band = image.GetRasterBand(1).ReadAsArray()
         NULO = image.GetRasterBand(1).GetNoDataValue()
         if NULO == None:
-            NULO =-9999
-        prj=image.GetProjection()
+            NULO = -9999
+        prj = image.GetProjection()
         SRC = QgsCoordinateReferenceSystem()
         SRC.createFromWkt(prj)
-        # Number of rows and columns
-        cols = image.RasterXSize # Number of columns
-        rows = image.RasterYSize # Number of rows
-        # Origem e resolucao da imagem
+        cols = image.RasterXSize
+        rows = image.RasterYSize
         ulx, xres, xskew, uly, yskew, yres  = image.GetGeoTransform()
         origem = (ulx, uly)
         resol_X = abs(xres)
@@ -299,7 +316,7 @@ class Accuracy_Vertical(QgsProcessingAlgorithm):
         lrx = ulx + (cols * xres)
         lry = uly + (rows * yres)
         bbox = [ulx, lrx, lry, uly]
-        image = None # Fechar imagem
+        image = None
         
         # Verificar SRC
         msg = self.tr('The raster layer and the homologous point vector layer must have the same CRS!', 'As camadas raster e vetorial de entrada devem ter o mesmo SRC!')
@@ -314,9 +331,6 @@ class Accuracy_Vertical(QgsProcessingAlgorithm):
         feedback.pushInfo(self.tr('Altimetric calculation...', 'Cálculo das discrepâncias altimétricas...'))
         DISCREP = []
         total_nulos = 0
-        # Para cada ponto
-            # calcular a discrepancia em relacao ao MDE, caso nao haja pixel nulo
-            # armazenar nas somas para gerar (media, desvPad, EMQ, max, min,). quantidade de pontos avaliados, qnt de pontos em pixel nulo
         total = 100.0 / source.featureCount() if source.featureCount() else 0
         for current, feat in enumerate(source.getFeatures()):
             geom = feat.geometry()
@@ -326,7 +340,7 @@ class Accuracy_Vertical(QgsProcessingAlgorithm):
             pnt = geom.asPoint()
             X = pnt.x()
             Y = pnt.y()
-            if bbox[0]<X and bbox[1]>X and bbox[2]<Y and bbox[3]>Y:
+            if bbox[0] < X and bbox[1] > X and bbox[2] < Y and bbox[3] > Y:
                 cotaRef = float(feat[columnIndex])
                 cotaTest = Interpolar(X, Y, band, origem, resol_X, resol_Y, metodo, NULO)
                 if cotaTest != NULO:
@@ -337,26 +351,46 @@ class Accuracy_Vertical(QgsProcessingAlgorithm):
                     feature.setAttributes(att + [float(discrep)])
                     sink.addFeature(feature, QgsFeatureSink.FastInsert)
                 else:
-                    total_nulos +=1
+                    total_nulos += 1
             else:
-               total_nulos +=1
+               total_nulos += 1
             if feedback.isCanceled():
                 break
             feedback.setProgress(int((current+1) * total))
 
+        if len(DISCREP) < 4:
+            raise QgsProcessingException(self.tr('Insufficient number of valid checkpoints for quality evaluation!', 'Número insuficiente de checkpoints válidos para avaliação de qualidade!'))
             
         # Gerar relatorio do metodo
-        feedback.pushInfo('Gerando relatório do PEC-PCD...')
-        DISCREP = array(DISCREP)
+        feedback.pushInfo(self.tr('Generating accuracy report...', 'Gerando relatório de acurácia...'))
+        DISCREP = array(DISCREP, dtype=float)
         RMSE = sqrt((DISCREP*DISCREP).sum()/len(DISCREP))
-        cont = 0
+        NVA_95 = 1.96 * RMSE
+
+        P68 = np.percentile(np.abs(DISCREP), 68)
+        P90 = np.percentile(np.abs(DISCREP), 90)
+        P95 = np.percentile(np.abs(DISCREP), 95)
+        P99 = np.percentile(np.abs(DISCREP), 99)
+
+        MEDIAN = np.median(DISCREP)
+        MAD = np.median(np.abs(DISCREP - MEDIAN))
+        NMAD = 1.4826 * MAD
+
+        Q1 = np.percentile(DISCREP, 25)
+        Q3 = np.percentile(DISCREP, 75)
+        IQR = Q3 - Q1
+        OUT_LOW = Q1 - 1.5 * IQR
+        OUT_HIGH = Q3 + 1.5 * IQR
+        OUTLIERS = ((DISCREP < OUT_LOW) | (DISCREP > OUT_HIGH)).sum()
+        OUTLIERS_PERC = 100.0 * OUTLIERS / len(DISCREP)
+
         RESULTADOS = {}
         for escala in Escalas:
             mudou = False
             for valor in valores[::-1]:
                 EM = PEC[escala]['altim'][valor]['EM']
                 EP = PEC[escala]['altim'][valor]['EP']
-                if ((DISCREP<EM).sum()/float(len(DISCREP)))>0.9 and (RMSE < EP):
+                if ((DISCREP < EM).sum()/float(len(DISCREP))) > 0.9 and (RMSE < EP):
                     RESULTADOS[escala] = valor
                     mudou = True
             if not mudou:
@@ -364,58 +398,281 @@ class Accuracy_Vertical(QgsProcessingAlgorithm):
         
         feedback.pushInfo('RMSE: {}'.format(round(RMSE,3)))
         for result in RESULTADOS:
-            feedback.pushInfo('{} ➜ {}'.format(dicionario[result],RESULTADOS[result]))
+            feedback.pushInfo('{} ➜ {}'.format(dicionario[result], RESULTADOS[result]))
+
+        # Testes de Normalidade
+        shapiro_text = self.tr('SciPy unavailable', 'SciPy indisponível')
+        anderson_text = self.tr('SciPy unavailable', 'SciPy indisponível')
+
+        if scipy_stats is not None and len(DISCREP) >= 3:
+            try:
+                shapiro = scipy_stats.shapiro(DISCREP)
+                shapiro_result = self.tr('Normal') if shapiro.pvalue > 0.05 else self.tr('Non-normal', 'Não normal')
+                shapiro_text = 'W = {}, p-value = {} ({})'.format(
+                    fnum(shapiro.statistic),
+                    fnum(shapiro.pvalue),
+                    shapiro_result
+                )
+            except Exception as e:
+                shapiro_text = str(e)
+
+            try:
+                anderson = scipy_stats.anderson(DISCREP, dist='norm')
+                critical_5 = anderson.critical_values[2]
+                ad_result = self.tr('Normal') if anderson.statistic < critical_5 else self.tr('Non-normal', 'Não normal')
+                anderson_text = 'A² = {}, critical 5% = {} ({})'.format(
+                    fnum(anderson.statistic),
+                    fnum(critical_5),
+                    ad_result
+                )
+            except Exception as e:
+                anderson_text = str(e)
+
+        def FigToBase64(fig):
+            buffer = BytesIO()
+            fig.savefig(buffer, format='png', dpi=200, bbox_inches='tight')
+            buffer.seek(0)
+            encoded = base64.b64encode(buffer.read()).decode('utf-8')
+            try:
+                plt.close(fig)
+            except Exception:
+                pass
+            return encoded
+
+        def ChartUnavailableBlock():
+            return '<div class="note">' + str2HTML(self.tr(
+                'Charts were not generated because Matplotlib is unavailable in the QGIS Python environment.',
+                'Os gráficos não foram gerados porque o Matplotlib não está disponível no ambiente Python do QGIS.'
+            )) + '</div>'
+
+        def GenerateHistogramBase64():
+            if plt is None:
+                return None
+            try:
+                fig, ax = plt.subplots(figsize=(9, 5.2))
+                ax.hist(DISCREP, bins='fd', edgecolor='black', alpha=0.75)
+
+                ax.axvline(DISCREP.mean(), linewidth=2, label='Mean = {} m'.format(fnum(DISCREP.mean())))
+                ax.axvline(np.median(DISCREP), linewidth=2, linestyle='--', label='Median = {} m'.format(fnum(np.median(DISCREP))))
+
+                ax.axvline(-RMSE, linewidth=1.5, linestyle=':', label='±RMSEz = {} m'.format(fnum(RMSE)))
+                ax.axvline(RMSE, linewidth=1.5, linestyle=':')
+
+                ax.axvline(-NVA_95, linewidth=1.5, linestyle='-.', label='±NVA95 = {} m'.format(fnum(NVA_95)))
+                ax.axvline(NVA_95, linewidth=1.5, linestyle='-.')
+
+                ax.axvline(-P95, linewidth=1.5, linestyle=(0, (5, 5)), label='±P95 = {} m'.format(fnum(P95)))
+                ax.axvline(P95, linewidth=1.5, linestyle=(0, (5, 5)))
+
+                ax.set_title(self.tr('Histogram of Vertical Residuals (ΔZ)', 'Histograma dos Resíduos Verticais (ΔZ)'))
+                ax.set_xlabel(self.tr('Vertical discrepancy ΔZ (m)', 'Discrepância vertical ΔZ (m)'))
+                ax.set_ylabel(self.tr('Frequency', 'Frequência'))
+                ax.grid(True, alpha=0.25)
+                ax.legend(loc='best')
+                fig.tight_layout()
+                return FigToBase64(fig)
+            except Exception as e:
+                feedback.reportError(self.tr('Could not generate histogram: {}', 'Não foi possível gerar o histograma: {}').format(str(e)))
+                return None
+
+        def GenerateCDFBase64():
+            if plt is None:
+                return None
+            try:
+                abs_errors = np.sort(np.abs(DISCREP))
+                cdf = np.arange(1, len(abs_errors) + 1) / len(abs_errors) * 100.0
+
+                fig, ax = plt.subplots(figsize=(8.5, 5.2))
+                ax.plot(abs_errors, cdf, linewidth=2, label='CDF')
+
+                for p_value, label, level in [(P68, 'P68', 68), (P90, 'P90', 90), (P95, 'P95', 95), (P99, 'P99', 99)]:
+                    ax.axvline(p_value, linestyle='--', linewidth=1.4)
+                    ax.axhline(level, linestyle=':', linewidth=1.0)
+                    ax.annotate('{} = {} m'.format(label, fnum(p_value)),
+                                xy=(p_value, level), xytext=(5, 5), textcoords='offset points')
+
+                ax.axvline(NVA_95, linestyle='-.', linewidth=1.8, label='NVA95 = {} m'.format(fnum(NVA_95)))
+
+                ax.set_title(self.tr('CDF of Absolute Vertical Errors |ΔZ|', 'FDA dos Erros Verticais Absolutos |ΔZ|'))
+                ax.set_xlabel(self.tr('Absolute vertical error |ΔZ| (m)', 'Erro vertical absoluto |ΔZ| (m)'))
+                ax.set_ylabel(self.tr('Cumulative percentage (%)', 'Porcentagem acumulada (%)'))
+                ax.set_xlim(left=0)
+                ax.set_ylim(0, 100)
+                ax.grid(True, alpha=0.30)
+                ax.legend(loc='best')
+                fig.tight_layout()
+                return FigToBase64(fig)
+            except Exception as e:
+                feedback.reportError(self.tr('Could not generate CDF: {}', 'Não foi possível gerar a FDA: {}').format(str(e)))
+                return None
+
+        histogram_b64 = GenerateHistogramBase64()
+        cdf_b64 = GenerateCDFBase64()
+
+        histogram_chart = '<img class="chart-img" src="data:image/png;base64,{}">'.format(histogram_b64) if histogram_b64 else ChartUnavailableBlock()
+        cdf_chart = '<img class="chart-img" src="data:image/png;base64,{}">'.format(cdf_b64) if cdf_b64 else ChartUnavailableBlock()
         
         # Criacao do arquivo html com os resultados
-        arq = open(html_output, 'w')
+        arq = open(html_output, 'w', encoding='utf-8')
         
-        texto = '''<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+        texto = '''<!DOCTYPE html>
 <html>
 <head>
-  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
-  <title>''' + str2HTML(self.tr('DEM POSITIONAL ACCURACY', 'ACURÁCIA POSICIONAL DE MDE')) + '''</title>
+  <meta charset="utf-8">
+  <title>''' + str2HTML(self.tr('DEM VERTICAL POSITIONAL ACCURACY REPORT', 'RELATÓRIO DE ACURÁCIA POSICIONAL ALTIMÉTRICA DE MDE')) + '''</title>
   <link rel = "icon" href = "https://github.com/LEOXINGU/lftools/blob/main/images/lftools.png?raw=true" type = "image/x-icon">
-  <meta name="qrichtext" content="1">
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; background:#f4f6f0; color:#222; margin:0; padding:0; }
+    .page { max-width:1100px; margin:24px auto; background:white; padding:32px; border-radius:12px; box-shadow:0 2px 12px rgba(0,0,0,.12); }
+    .header { text-align:center; border-bottom:3px solid #365f2c; padding-bottom:16px; margin-bottom:24px; }
+    .header img { height:72px; }
+    h1 { color:#274e22; font-size:24px; margin:12px 0 4px 0; }
+    h2 { color:#365f2c; font-size:18px; border-bottom:1px solid #ddd; padding-bottom:6px; margin-top:28px; }
+    .subtitle { color:#666; font-size:13px; }
+    .cards { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:20px 0; }
+    .card { background:#eef5ea; border-left:5px solid #365f2c; padding:14px; border-radius:8px; }
+    .label { color:#666; font-size:12px; text-transform:uppercase; }
+    .big { font-size:22px; font-weight:bold; color:#1f3f1b; margin-top:6px; }
+    table { width:100%; border-collapse:collapse; margin:12px 0; font-size:13px; }
+    th { background:#365f2c; color:white; padding:8px; text-align:left; }
+    td { border:1px solid #ddd; padding:8px; }
+    tr:nth-child(even) { background:#f8f8f8; }
+    .note { background:#fff8dc; border-left:5px solid #c9a227; padding:12px; margin:12px 0; border-radius:6px; }
+    .ok { color:#1f7a1f; font-weight:bold; }
+    .warn { color:#b36b00; font-weight:bold; }
+    .chart-img { width:100%; max-width:900px; display:block; margin:16px auto 8px auto; border:1px solid #ddd; border-radius:8px; }
+    .footer { margin-top:30px; border-top:1px solid #ccc; padding-top:12px; color:#555; font-size:12px; }
+  </style>
 </head>
-<body style="background-color: rgb(229, 233, 166);">
-<div style="text-align: center;"><span style="font-weight: bold;"><br>
-    <img height="80" src="data:image/'''+ 'png;base64,' + lftools_logo + '''">
+<body>
+<div class="page">
+
+<div class="header">
+  <img src="data:image/''' + 'png;base64,' + lftools_logo + '''">
+  <h1>''' + str2HTML(self.tr('DEM VERTICAL POSITIONAL ACCURACY REPORT', 'RELATÓRIO DE ACURÁCIA POSICIONAL ALTIMÉTRICA DE MDE')) + '''</h1>
+  <div class="subtitle">LFTools | ASPRS-oriented vertical accuracy assessment | ''' + datetime.now().strftime('%Y-%m-%d %H:%M:%S') + '''</div>
 </div>
-<div style="text-align: center;"><span style="font-weight: bold; text-decoration: underline;">''' + str2HTML(self.tr('DEM POSITIONAL ACCURACY', 'ACURÁCIA POSICIONAL DE MDE')) + '''</span><br>
+
+<div class="cards">
+  <div class="card"><div class="label">''' + str2HTML(self.tr('Valid checkpoints', 'Checkpoints válidos')) + '''</div><div class="big">[valid_count]</div></div>
+  <div class="card"><div class="label">RMSE<sub>Z</sub></div><div class="big">[RMSE_Z] m</div></div>
+  <div class="card"><div class="label">''' + str2HTML(self.tr('Mean Error', 'Erro médio')) + '''</div><div class="big">[discrepZ_mean] m</div></div>
+  <div class="card"><div class="label">P95 |ΔZ|</div><div class="big">[P95] m</div></div>
 </div>
-<br>
-<span style="font-weight: bold;"><br>''' + str2HTML(self.tr('EVALUATED DATA', 'DADOS AVALIADOS')) + '''</span><br>
-&nbsp;&nbsp;&nbsp; a. ''' + str2HTML(self.tr('Digital Elevation Model (DEM)', 'Modelo Digital de Elevação (MDE)')) + ''': [MDE]<br>
-&nbsp;&nbsp;&nbsp; b. ''' + str2HTML(self.tr('Reference Points', 'Pontos de referência')) + ''': [layer_name]<br>
-&nbsp;&nbsp;&nbsp; c. ''' + str2HTML(self.tr('Number of Points', 'Número de pontos')) + ''': [layer_count]<br>
-<span style="font-weight: bold;"><br>
-</span>
-<br>
-<p class="MsoNormal"><b>''' + str2HTML(self.tr('VERTICAL POSITIONAL ACCURACY', 'ACURÁCIA POSICIONAL ALTIMÉTRICA')) + ''' (Z)</b><o:p></o:p></p>
-&nbsp;&nbsp;&nbsp; <span style="font-weight: bold;">
-1. ''' + str2HTML(self.tr('Z Discrepancies', 'Discrepâncias em Z')) + ''':</span><br>
-&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; a. ''' + str2HTML(self.tr('average (tendency)', 'média (tendência)')) + ''': [discrepZ_mean] m<br>
-&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; b. ''' + str2HTML(self.tr('standard deviation (precision)', 'desvio-padrão (precisão)')) + ''':&nbsp;[discrepZ_std] m<br>
-&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; c. ''' + str2HTML(self.tr('maximum', 'máxima')) + ''':&nbsp;[discrepZ_max] m<br>
-&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; d. ''' + str2HTML(self.tr('minimum', 'mínima')) + ''':&nbsp;[discrepZ_min] m<br>
-&nbsp;<span style="font-weight: bold;"></span>&nbsp;&nbsp;&nbsp; <span style="font-weight: bold;">
-2. ''' + str2HTML(self.tr('RMSE', 'REMQ')) + ''':&nbsp;</span><span  style="font-weight: bold;">[RMSE_Z]</span><span  style="font-weight: bold;"> m</span><br>
-&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;<br>
-&nbsp;&nbsp;&nbsp; <span style="font-weight: bold;">
-3. ''' + str2HTML(self.tr('Cartographic Accuracy Standard', 'Padrão de Exatidão Cartográfica')) + ''' (</span><span  style="font-weight: bold;">PEC-PCD)<br>
-</span><br>
-[PEC_Z]<br>
-<br>
-<hr>''' + str2HTML(self.tr('Leandro Franca', 'Leandro França')) + ''' 2025<br>
-<address><font size="+l">''' + str2HTML(self.tr('Cartographic Engineer', 'Eng. Cartógrafo')) + '''<br>
-email: contato@geoone.com.br<br>
-</font>
-</address>
+
+<h2>''' + str2HTML(self.tr('1. Evaluated Data', '1. Dados Avaliados')) + '''</h2>
+<table>
+<tr><th>''' + str2HTML(self.tr('Item', 'Item')) + '''</th><th>''' + str2HTML(self.tr('Value', 'Valor')) + '''</th></tr>
+<tr><td>''' + str2HTML(self.tr('Digital Elevation Model', 'Modelo Digital de Elevação')) + '''</td><td>[MDE]</td></tr>
+<tr><td>''' + str2HTML(self.tr('Reference points', 'Pontos de referência')) + '''</td><td>[layer_name]</td></tr>
+<tr><td>''' + str2HTML(self.tr('Input checkpoints', 'Checkpoints de entrada')) + '''</td><td>[layer_count]</td></tr>
+<tr><td>''' + str2HTML(self.tr('Valid checkpoints', 'Checkpoints válidos')) + '''</td><td>[valid_count]</td></tr>
+<tr><td>''' + str2HTML(self.tr('NoData / outside raster', 'NoData / fora do raster')) + '''</td><td>[null_count]</td></tr>
+<tr><td>''' + str2HTML(self.tr('Interpolation method', 'Método de interpolação')) + '''</td><td>[interpolation]</td></tr>
+<tr><td>''' + str2HTML(self.tr('Raster resolution X', 'Resolução X do raster')) + '''</td><td>[resol_X] m</td></tr>
+<tr><td>''' + str2HTML(self.tr('Raster resolution Y', 'Resolução Y do raster')) + '''</td><td>[resol_Y] m</td></tr>
+<tr><td>''' + str2HTML(self.tr('Coordinate reference system', 'Sistema de referência')) + '''</td><td>[crs]</td></tr>
+</table>
+
+<h2>''' + str2HTML(self.tr('2. Methodology', '2. Metodologia')) + '''</h2>
+<p>''' + str2HTML(self.tr(
+'For each independent checkpoint, the DEM elevation was extracted at the checkpoint location using the selected interpolation method. The vertical discrepancy is computed as the DEM elevation minus the reference elevation. Checkpoints located outside the raster extent or on NoData pixels were not included in the accuracy statistics.',
+'Para cada checkpoint independente, a altitude do MDE foi extraída na localização do checkpoint utilizando o método de interpolação selecionado. A discrepância vertical é calculada como a altitude do MDE menos a altitude de referência. Checkpoints localizados fora da extensão do raster ou sobre pixels NoData não foram incluídos nas estatísticas de acurácia.'
+)) + '''</p>
+
+<div class="note">
+$$\\Delta Z_i = Z_{DEM,i} - Z_{CP,i}$$
+$$RMSE_z = \\sqrt{\\frac{\\sum_{i=1}^{n}(\\Delta Z_i)^2}{n}}$$
+$$NVA = 1.96 \\times RMSE_z$$
+$$NMAD = 1.4826 \\times median(|\\Delta Z_i - median(\\Delta Z)|)$$
+</div>
+
+<h2>''' + str2HTML(self.tr('3. ASPRS Vertical Accuracy Summary', '3. Resumo da Acurácia Vertical ASPRS')) + '''</h2>
+<table>
+<tr><th>Metric</th><th>Value</th><th>Description</th></tr>
+<tr><td>Mean Error</td><td>[discrepZ_mean] m</td><td>Vertical bias</td></tr>
+<tr><td>Standard Deviation</td><td>[discrepZ_std] m</td><td>Residual dispersion</td></tr>
+<tr><td>Minimum ΔZ</td><td>[discrepZ_min] m</td><td>Minimum vertical discrepancy</td></tr>
+<tr><td>Maximum ΔZ</td><td>[discrepZ_max] m</td><td>Maximum vertical discrepancy</td></tr>
+<tr><td>RMSE<sub>Z</sub></td><td>[RMSE_Z] m</td><td>ASPRS primary vertical accuracy metric</td></tr>
+<tr><td>NVA 95%</td><td>[NVA_95] m</td><td>1.96 × RMSE<sub>Z</sub></td></tr>
+</table>
+
+<h2>''' + str2HTML(self.tr('4. Histogram of Residuals', '4. Histograma dos Resíduos')) + '''</h2>
+<p>''' + str2HTML(self.tr(
+'The histogram presents the distribution of vertical residuals (ΔZ), including mean, median, RMSEz, NVA and P95 indicators.',
+'O histograma apresenta a distribuição dos resíduos verticais (ΔZ), incluindo os indicadores de média, mediana, REMQz, NVA e P95.'
+)) + '''</p>
+[HISTOGRAM_CHART]
+
+<h2>''' + str2HTML(self.tr('5. CDF of Absolute Errors', '5. FDA dos Erros Absolutos')) + '''</h2>
+<p>''' + str2HTML(self.tr(
+'The cumulative distribution function (CDF) summarizes the percentage of checkpoints whose absolute vertical error is smaller than a given threshold. Percentiles P68, P90, P95 and P99 are highlighted and can be compared with the theoretical NVA.',
+'A função de distribuição acumulada (FDA) resume a porcentagem de checkpoints cujo erro vertical absoluto é menor que um determinado limiar. Os percentis P68, P90, P95 e P99 são destacados e podem ser comparados com o NVA teórico.'
+)) + '''</p>
+[CDF_CHART]
+<div class="note">''' + str2HTML(self.tr(
+'The proximity between P95 and NVA supports the interpretation of the residuals as approximately normal; large differences may indicate non-normal behavior, heavy tails or outliers.',
+'A proximidade entre P95 e NVA favorece a interpretação dos resíduos como aproximadamente normais; grandes diferenças podem indicar comportamento não normal, caudas pesadas ou outliers.'
+)) + '''</div>
+
+<h2>''' + str2HTML(self.tr('6. Percentile-based Accuracy', '6. Acurácia baseada em Percentis')) + '''</h2>
+<table>
+<tr><th>Percentile</th><th>|ΔZ|</th></tr>
+<tr><td>P68</td><td>[P68] m</td></tr>
+<tr><td>P90</td><td>[P90] m</td></tr>
+<tr><td>P95</td><td>[P95] m</td></tr>
+<tr><td>P99</td><td>[P99] m</td></tr>
+</table>
+
+<h2>''' + str2HTML(self.tr('7. Robust Statistics and Outliers', '7. Estatísticas Robustas e Outliers')) + '''</h2>
+<table>
+<tr><th>Metric</th><th>Value</th></tr>
+<tr><td>Median Error</td><td>[median] m</td></tr>
+<tr><td>MAD</td><td>[MAD] m</td></tr>
+<tr><td>NMAD</td><td>[NMAD] m</td></tr>
+<tr><td>IQR Lower Limit</td><td>[OUT_LOW] m</td></tr>
+<tr><td>IQR Upper Limit</td><td>[OUT_HIGH] m</td></tr>
+<tr><td>Outliers</td><td>[OUTLIERS] ([OUTLIERS_PERC]%)</td></tr>
+</table>
+
+<h2>''' + str2HTML(self.tr('8. Residual Normality Assessment', '8. Avaliação da Normalidade dos Resíduos')) + '''</h2>
+<table>
+<tr><th>Test</th><th>Result</th></tr>
+<tr><td>Shapiro-Wilk</td><td>[SHAPIRO]</td></tr>
+<tr><td>Anderson-Darling</td><td>[ANDERSON]</td></tr>
+</table>
+
+<h2>''' + str2HTML(self.tr('9. ASPRS Compliance Checklist', '9. Checklist de Conformidade ASPRS')) + '''</h2>
+<table>
+<tr><th>Requirement</th><th>Status</th></tr>
+<tr><td>Independent checkpoints</td><td class="ok">''' + str2HTML(self.tr('User-defined', 'Definido pelo usuário')) + '''</td></tr>
+<tr><td>Minimum 30 checkpoints for NVA</td><td>[CHECK_30]</td></tr>
+<tr><td>RMSE<sub>Z</sub> reported</td><td class="ok">OK</td></tr>
+<tr><td>NVA reported</td><td class="ok">OK</td></tr>
+<tr><td>Residual normality assessed</td><td>[CHECK_NORMALITY]</td></tr>
+<tr><td>Outliers reported without automatic removal</td><td class="ok">OK</td></tr>
+</table>
+
+<h2>''' + str2HTML(self.tr('10. PEC-PCD Classification', '10. Classificação PEC-PCD')) + '''</h2>
+[PEC_Z]
+
+<h2>''' + str2HTML(self.tr('11. Automatic Interpretation', '11. Interpretação Automática')) + '''</h2>
+<div class="note">
+[INTERPRETATION]
+</div>
+
+<div class="footer">
+Leandro França 2026<br>
+Cartographic Engineer<br>
+email: contato@geoone.com.br
+</div>
+
+</div>
 </body>
 </html>
-
-        '''
+'''
         
         def TabelaPEC(RESULTADOS):
             tabela = '''<table style="margin: 0px;" border="1" cellpadding="4"
@@ -436,22 +693,127 @@ email: contato@geoone.com.br<br>
       </tbody>
     </table>'''
             return tabela
-        
-        valores = {'[layer_name]': str2HTML(source.sourceName()),
-                   '[MDE]': str2HTML(MDE.name()),
-                   '[layer_count]': str(source.featureCount()),
-                   
-                   '[discrepZ_mean]': format_num.format(DISCREP.mean()),
-                   '[discrepZ_std]': format_num.format(DISCREP.std()),
-                   '[discrepZ_max]': format_num.format(DISCREP.max()),
-                   '[discrepZ_min]': format_num.format(DISCREP.min()),
+
+        check30 = '<span class="ok">OK</span>' if len(DISCREP) >= 30 else '<span class="warn">Below ASPRS recommendation</span>'
+        check_norm = '<span class="ok">OK</span>' if scipy_stats is not None else '<span class="warn">SciPy unavailable</span>'
+
+        P95_DIFF = P95 - NVA_95
+        P95_DIFF_PERC = abs(P95_DIFF) / NVA_95 * 100 if NVA_95 > 0 else 0
+
+        if P95_DIFF_PERC < 5:
+            normality_comment_en = (
+                'The observed P95 closely matches the theoretical NVA (difference = {}%), '
+                'indicating that the residuals are approximately normally distributed.'
+            ).format(fnum(P95_DIFF_PERC))
+
+            normality_comment_pt = (
+                'O P95 observado é muito próximo do NVA teórico (diferença = {}%), '
+                'indicando que os resíduos apresentam comportamento aproximadamente normal.'
+            ).format(fnum(P95_DIFF_PERC))
+
+        elif P95_DIFF_PERC < 15:
+            normality_comment_en = (
+                'The observed P95 differs moderately from the theoretical NVA (difference = {}%), '
+                'suggesting minor departures from normality or the presence of a small number of atypical residuals.'
+            ).format(fnum(P95_DIFF_PERC))
+
+            normality_comment_pt = (
+                'O P95 observado difere moderadamente do NVA teórico (diferença = {}%), '
+                'sugerindo pequenos desvios da normalidade ou a presença de poucos resíduos atípicos.'
+            ).format(fnum(P95_DIFF_PERC))
+
+        else:
+            normality_comment_en = (
+                'The observed P95 substantially exceeds the theoretical NVA (difference = {}%), '
+                'indicating non-normal residual behavior and/or the presence of significant outliers.'
+            ).format(fnum(P95_DIFF_PERC))
+
+            normality_comment_pt = (
+                'O P95 observado excede significativamente o NVA teórico (diferença = {}%), '
+                'indicando comportamento não normal dos resíduos e/ou a presença de outliers relevantes.'
+            ).format(fnum(P95_DIFF_PERC))
+
+        interpretation = self.tr(
+            (
+                'The evaluated DEM achieved RMSEz = {} m and NVA = {} m based on {} valid independent checkpoints. '
+                'The mean error was {} m, indicating the vertical bias of the dataset. '
+                'The P95 absolute vertical discrepancy was {} m. {} '
+                'Elevations were extracted using the {} interpolation method. '
+                '{} checkpoints were ignored because they were outside the raster extent or located on NoData pixels. '
+                'No outliers were automatically removed from the analysis.'
+            ).format(
+                fnum(RMSE),
+                fnum(NVA_95),
+                len(DISCREP),
+                fnum(DISCREP.mean()),
+                fnum(P95),
+                normality_comment_en,
+                metodo_label,
+                total_nulos
+            ),
+            (
+                'O MDE avaliado obteve RMSEz = {} m e NVA = {} m com base em {} checkpoints independentes válidos. '
+                'A média das discrepâncias foi {} m, indicando a tendência vertical do conjunto de dados. '
+                'O percentil P95 das discrepâncias absolutas foi {} m. {} '
+                'As altitudes foram extraídas utilizando o método de interpolação {}. '
+                '{} checkpoints foram ignorados por estarem fora da extensão do raster ou sobre pixels NoData. '
+                'Nenhum outlier foi removido automaticamente da análise.'
+            ).format(
+                fnum(RMSE),
+                fnum(NVA_95),
+                len(DISCREP),
+                fnum(DISCREP.mean()),
+                fnum(P95),
+                normality_comment_pt,
+                metodo_label,
+                total_nulos
+            )
+        )
+
+        valores = {
+            '[layer_name]': str2HTML(source.sourceName()),
+            '[MDE]': str2HTML(MDE.name()),
+            '[layer_count]': str(source.featureCount()),
+            '[valid_count]': str(len(DISCREP)),
+            '[null_count]': str(total_nulos),
+            '[interpolation]': str2HTML(metodo_label),
+            '[resol_X]': fnum(resol_X),
+            '[resol_Y]': fnum(resol_Y),
+            '[crs]': str2HTML(SRC.authid() + ' - ' + SRC.description() if SRC.isValid() else ''),
+
+            '[discrepZ_mean]': fnum(DISCREP.mean()),
+            '[discrepZ_std]': fnum(DISCREP.std()),
+            '[discrepZ_max]': fnum(DISCREP.max()),
+            '[discrepZ_min]': fnum(DISCREP.min()),
                                       
-                   '[RMSE_Z]': format_num.format(RMSE),
-                   '[discrepZ_max]': format_num.format(DISCREP.max()),
-                   '[discrepZ_min]': format_num.format(DISCREP.min()),
-                   
-                   '[PEC_Z]': TabelaPEC(RESULTADOS),
-                   }
+            '[RMSE_Z]': fnum(RMSE),
+            '[NVA_95]': fnum(NVA_95),
+
+            '[P68]': fnum(P68),
+            '[P90]': fnum(P90),
+            '[P95]': fnum(P95),
+            '[P99]': fnum(P99),
+
+            '[median]': fnum(MEDIAN),
+            '[MAD]': fnum(MAD),
+            '[NMAD]': fnum(NMAD),
+            '[OUT_LOW]': fnum(OUT_LOW),
+            '[OUT_HIGH]': fnum(OUT_HIGH),
+            '[OUTLIERS]': str(int(OUTLIERS)),
+            '[OUTLIERS_PERC]': fnum(OUTLIERS_PERC),
+
+            '[SHAPIRO]': str2HTML(shapiro_text),
+            '[ANDERSON]': str2HTML(anderson_text),
+
+            '[CHECK_30]': check30,
+            '[CHECK_NORMALITY]': check_norm,
+
+            '[HISTOGRAM_CHART]': histogram_chart,
+            '[CDF_CHART]': cdf_chart,
+
+            '[PEC_Z]': TabelaPEC(RESULTADOS),
+            '[INTERPRETATION]': str2HTML(interpretation),
+        }
         
         for valor in valores:
             texto = texto.replace(valor, valores[valor])
@@ -461,5 +823,109 @@ email: contato@geoone.com.br<br>
         
         feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
         feedback.pushInfo(self.tr('Leandro Franca - Cartographic Engineer', 'Leandro França - Eng Cart'))
+
+        self.SAIDA = dest_id
+        self.P68 = P68
+        self.P90 = P90
+        self.P95 = P95
+        self.P99 = P99
+
         return {self.OUTPUT: dest_id,
                 self.HTML: html_output}
+
+
+    def postProcessAlgorithm(self, context, feedback):
+
+        layer = QgsProcessingUtils.mapLayerFromString(self.SAIDA, context)
+
+        if layer is None or layer.featureCount() == 0:
+            return {}
+
+        field = 'discrep_Z'
+
+        # Verifica se o campo existe
+        if layer.fields().indexFromName(field) == -1:
+            return {}
+
+        # Criar simbologia baseada em regras por |ΔZ|
+        root_rule = QgsRuleBasedRenderer.Rule(None)
+
+        classes = [
+            (
+                self.tr('|ΔZ| ≤ P68', '|ΔZ| ≤ P68'),
+                'abs("{}") <= {}'.format(field, self.P68),
+                '#1a9850',
+                2.4
+            ),
+            (
+                self.tr('P68 < |ΔZ| ≤ P90', 'P68 < |ΔZ| ≤ P90'),
+                'abs("{}") > {} AND abs("{}") <= {}'.format(field, self.P68, field, self.P90),
+                '#91cf60',
+                2.6
+            ),
+            (
+                self.tr('P90 < |ΔZ| ≤ P95', 'P90 < |ΔZ| ≤ P95'),
+                'abs("{}") > {} AND abs("{}") <= {}'.format(field, self.P90, field, self.P95),
+                '#fee08b',
+                2.8
+            ),
+            (
+                self.tr('P95 < |ΔZ| ≤ P99', 'P95 < |ΔZ| ≤ P99'),
+                'abs("{}") > {} AND abs("{}") <= {}'.format(field, self.P95, field, self.P99),
+                '#fc8d59',
+                3.0
+            ),
+            (
+                self.tr('|ΔZ| > P99', '|ΔZ| > P99'),
+                'abs("{}") > {}'.format(field, self.P99),
+                '#d73027',
+                3.4
+            ),
+        ]
+
+        for label, expression, color, size in classes:
+            symbol = QgsMarkerSymbol.createSimple({
+                'name': 'circle',
+                'color': color,
+                'outline_color': '0,0,0',
+                'outline_style': 'solid',
+                'size': str(size),
+                'size_unit': 'MM'
+            })
+
+            rule = QgsRuleBasedRenderer.Rule(symbol)
+            rule.setFilterExpression(expression)
+            rule.setLabel(label)
+            root_rule.appendChild(rule)
+
+        renderer = QgsRuleBasedRenderer(root_rule)
+        layer.setRenderer(renderer)
+
+        # Rotular com discrepância Z
+        label_settings = QgsPalLayerSettings()
+        label_settings.fieldName = 'round("{}", 3)'.format(field)
+        label_settings.isExpression = True
+        label_settings.enabled = True
+
+        text_format = QgsTextFormat()
+        font = QFont("Arial", 8)
+        font.setBold(True)
+        text_format.setFont(font)
+        text_format.setSize(8)
+        text_format.setColor(QColor("white"))
+
+        buffer_settings = QgsTextBufferSettings()
+        buffer_settings.setEnabled(True)
+        buffer_settings.setSize(0.6)
+        buffer_settings.setColor(QColor("black"))
+        text_format.setBuffer(buffer_settings)
+
+        label_settings.setFormat(text_format)
+
+        labeling = QgsVectorLayerSimpleLabeling(label_settings)
+        layer.setLabeling(labeling)
+        layer.setLabelsEnabled(True)
+
+        layer.triggerRepaint()
+
+        return {}
