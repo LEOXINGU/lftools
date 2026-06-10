@@ -241,9 +241,9 @@ class Accuracy_PC(QgsProcessingAlgorithm):
         Fields = source.fields()
         
         itens  = {
-                     'np_distância' : QMetaType.Type.Double,
-                     'np_h' : QMetaType.Type.Double,
-                     'np_discrep_z' : QMetaType.Type.Double
+                     'pc_distance' : QMetaType.Type.Double,
+                     'pc_h' : QMetaType.Type.Double,
+                     'pc_discrep_z' : QMetaType.Type.Double
                      }
         for item in itens:
             Fields.append(QgsField(item, itens[item]))
@@ -884,7 +884,7 @@ email: contato@geoone.com.br
         if layer is None or layer.featureCount() == 0:
             return {}
 
-        field = 'np_discrep_z'
+        field = 'pc_discrep_z'
 
         # Verifica se o campo existe
         if layer.fields().indexFromName(field) == -1:
