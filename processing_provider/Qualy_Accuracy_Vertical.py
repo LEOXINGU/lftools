@@ -77,7 +77,7 @@ class Accuracy_Vertical(QgsProcessingAlgorithm):
 
 <b>Outputs</b>
 1. <b>Discrepancy calculations</b> in Z for the reference point.
-2. <b>Accuracy report</b>: ASPRS-oriented vertical accuracy report containing RMSEz, NVA, percentiles, robust statistics, normality tests, graphical analysis, and PEC-PCD classification.
+2. <b>Accuracy report</b>: ASPRS-oriented vertical accuracy report containing RMSEz, percentile-based indicators, robust statistics, normality tests, graphical analysis, and PEC-PCD classification.
 
 <b>Input Requirements:</b>
  - DEM as raster layer
@@ -87,7 +87,7 @@ class Accuracy_Vertical(QgsProcessingAlgorithm):
 
 <b>Saídas:</b>
 1. Cálculo das discrepâncias em Z para o ponto de referência.
-2. Relatório de acurácia vertical orientado à ASPRS contendo REMQz, NVA, percentis, estatísticas robustas, testes de normalidade, análise gráfica e classificação PEC-PCD.
+2. Relatório de acurácia vertical orientado à ASPRS contendo REMQz, indicadores baseados em percentis, estatísticas robustas, testes de normalidade, análise gráfica e classificação PEC-PCD.
 
 <b>Requisitos de Entrada:</b>
 - Raster do MDE
@@ -365,7 +365,6 @@ class Accuracy_Vertical(QgsProcessingAlgorithm):
         feedback.pushInfo(self.tr('Generating accuracy report...', 'Gerando relatório de acurácia...'))
         DISCREP = array(DISCREP, dtype=float)
         RMSE = sqrt((DISCREP*DISCREP).sum()/len(DISCREP))
-        NVA_95 = 1.96 * RMSE
 
         P68 = np.percentile(np.abs(DISCREP), 68)
         P90 = np.percentile(np.abs(DISCREP), 90)
@@ -403,11 +402,29 @@ class Accuracy_Vertical(QgsProcessingAlgorithm):
         # Testes de Normalidade
         shapiro_text = self.tr('SciPy unavailable', 'SciPy indisponível')
         anderson_text = self.tr('SciPy unavailable', 'SciPy indisponível')
+        normality_class = self.tr('Not assessed', 'Não avaliada')
+        normality_explanation = self.tr(
+            'Normality was not assessed because SciPy is unavailable or the sample size is insufficient.',
+            'A normalidade não foi avaliada porque o SciPy está indisponível ou o tamanho da amostra é insuficiente.'
+        )
 
         if scipy_stats is not None and len(DISCREP) >= 3:
             try:
                 shapiro = scipy_stats.shapiro(DISCREP)
-                shapiro_result = self.tr('Normal') if shapiro.pvalue > 0.05 else self.tr('Non-normal', 'Não normal')
+                if shapiro.pvalue > 0.05:
+                    shapiro_result = self.tr('Normality not rejected', 'Normalidade não rejeitada')
+                    normality_class = self.tr('Compatible with normality', 'Compatível com normalidade')
+                    normality_explanation = self.tr(
+                        'The Shapiro-Wilk test did not reject the null hypothesis of normality at the 5% significance level (p > 0.05).',
+                        'O teste de Shapiro-Wilk não rejeitou a hipótese nula de normalidade ao nível de significância de 5% (p > 0,05).'
+                    )
+                else:
+                    shapiro_result = self.tr('Normality rejected', 'Normalidade rejeitada')
+                    normality_class = self.tr('Non-normal', 'Não normal')
+                    normality_explanation = self.tr(
+                        'The Shapiro-Wilk test rejected the null hypothesis of normality at the 5% significance level (p ≤ 0.05).',
+                        'O teste de Shapiro-Wilk rejeitou a hipótese nula de normalidade ao nível de significância de 5% (p ≤ 0,05).'
+                    )
                 shapiro_text = 'W = {}, p-value = {} ({})'.format(
                     fnum(shapiro.statistic),
                     fnum(shapiro.pvalue),
@@ -419,7 +436,7 @@ class Accuracy_Vertical(QgsProcessingAlgorithm):
             try:
                 anderson = scipy_stats.anderson(DISCREP, dist='norm')
                 critical_5 = anderson.critical_values[2]
-                ad_result = self.tr('Normal') if anderson.statistic < critical_5 else self.tr('Non-normal', 'Não normal')
+                ad_result = self.tr('below 5% critical value', 'abaixo do valor crítico de 5%') if anderson.statistic < critical_5 else self.tr('above 5% critical value', 'acima do valor crítico de 5%')
                 anderson_text = 'A² = {}, critical 5% = {} ({})'.format(
                     fnum(anderson.statistic),
                     fnum(critical_5),
@@ -458,8 +475,6 @@ class Accuracy_Vertical(QgsProcessingAlgorithm):
                 ax.axvline(-RMSE, linewidth=1.5, linestyle=':', label='±RMSEz = {} m'.format(fnum(RMSE)))
                 ax.axvline(RMSE, linewidth=1.5, linestyle=':')
 
-                ax.axvline(-NVA_95, linewidth=1.5, linestyle='-.', label='±NVA95 = {} m'.format(fnum(NVA_95)))
-                ax.axvline(NVA_95, linewidth=1.5, linestyle='-.')
 
                 ax.axvline(-P95, linewidth=1.5, linestyle=(0, (5, 5)), label='±P95 = {} m'.format(fnum(P95)))
                 ax.axvline(P95, linewidth=1.5, linestyle=(0, (5, 5)))
@@ -491,7 +506,6 @@ class Accuracy_Vertical(QgsProcessingAlgorithm):
                     ax.annotate('{} = {} m'.format(label, fnum(p_value)),
                                 xy=(p_value, level), xytext=(5, 5), textcoords='offset points')
 
-                ax.axvline(NVA_95, linestyle='-.', linewidth=1.8, label='NVA95 = {} m'.format(fnum(NVA_95)))
 
                 ax.set_title(self.tr('CDF of Absolute Vertical Errors |ΔZ|', 'FDA dos Erros Verticais Absolutos |ΔZ|'))
                 ax.set_xlabel(self.tr('Absolute vertical error |ΔZ| (m)', 'Erro vertical absoluto |ΔZ| (m)'))
@@ -582,13 +596,16 @@ class Accuracy_Vertical(QgsProcessingAlgorithm):
 )) + '''</p>
 
 <div class="note">
-$$\\Delta Z_i = Z_{DEM,i} - Z_{CP,i}$$
+$$\Delta Z_i = Z_{test,i} - Z_{reference,i}$$
 $$RMSE_z = \\sqrt{\\frac{\\sum_{i=1}^{n}(\\Delta Z_i)^2}{n}}$$
-$$NVA = 1.96 \\times RMSE_z$$
-$$NMAD = 1.4826 \\times median(|\\Delta Z_i - median(\\Delta Z)|)$$
+$$MAD = median(|\Delta Z_i - median(\Delta Z)|)$$
+$$NMAD = 1.4826 \times MAD$$
+$$IQR = Q_3 - Q_1$$
+$$Lower\ Limit = Q_1 - 1.5 \times IQR$$
+$$Upper\ Limit = Q_3 + 1.5 \times IQR$$
 </div>
 
-<h2>''' + str2HTML(self.tr('3. ASPRS Vertical Accuracy Summary', '3. Resumo da Acurácia Vertical ASPRS')) + '''</h2>
+<h2>''' + str2HTML(self.tr('3. ASPRS-Oriented Vertical Accuracy Summary', '3. Resumo da Acurácia Vertical orientado pela ASPRS')) + '''</h2>
 <table>
 <tr><th>Metric</th><th>Value</th><th>Description</th></tr>
 <tr><td>Mean Error</td><td>[discrepZ_mean] m</td><td>Vertical bias</td></tr>
@@ -596,26 +613,21 @@ $$NMAD = 1.4826 \\times median(|\\Delta Z_i - median(\\Delta Z)|)$$
 <tr><td>Minimum ΔZ</td><td>[discrepZ_min] m</td><td>Minimum vertical discrepancy</td></tr>
 <tr><td>Maximum ΔZ</td><td>[discrepZ_max] m</td><td>Maximum vertical discrepancy</td></tr>
 <tr><td>RMSE<sub>Z</sub></td><td>[RMSE_Z] m</td><td>ASPRS primary vertical accuracy metric</td></tr>
-<tr><td>NVA 95%</td><td>[NVA_95] m</td><td>1.96 × RMSE<sub>Z</sub></td></tr>
 </table>
 
 <h2>''' + str2HTML(self.tr('4. Histogram of Residuals', '4. Histograma dos Resíduos')) + '''</h2>
 <p>''' + str2HTML(self.tr(
-'The histogram presents the distribution of vertical residuals (ΔZ), including mean, median, RMSEz, NVA and P95 indicators.',
-'O histograma apresenta a distribuição dos resíduos verticais (ΔZ), incluindo os indicadores de média, mediana, REMQz, NVA e P95.'
+'The histogram presents the distribution of vertical residuals (ΔZ), including mean, median, RMSEz and P95 indicators.',
+'O histograma apresenta a distribuição dos resíduos verticais (ΔZ), incluindo os indicadores de média, mediana, REMQz e P95.'
 )) + '''</p>
 [HISTOGRAM_CHART]
 
 <h2>''' + str2HTML(self.tr('5. CDF of Absolute Errors', '5. FDA dos Erros Absolutos')) + '''</h2>
 <p>''' + str2HTML(self.tr(
-'The cumulative distribution function (CDF) summarizes the percentage of checkpoints whose absolute vertical error is smaller than a given threshold. Percentiles P68, P90, P95 and P99 are highlighted and can be compared with the theoretical NVA.',
-'A função de distribuição acumulada (FDA) resume a porcentagem de checkpoints cujo erro vertical absoluto é menor que um determinado limiar. Os percentis P68, P90, P95 e P99 são destacados e podem ser comparados com o NVA teórico.'
+'The cumulative distribution function (CDF) summarizes the percentage of checkpoints whose absolute vertical error is smaller than a given threshold. Percentiles P68, P90, P95 and P99 are highlighted as empirical indicators of the absolute error distribution.',
+'A função de distribuição acumulada (FDA) resume a porcentagem de checkpoints cujo erro vertical absoluto é menor que um determinado limiar. Os percentis P68, P90, P95 e P99 são destacados como indicadores empíricos da distribuição dos erros absolutos.'
 )) + '''</p>
 [CDF_CHART]
-<div class="note">''' + str2HTML(self.tr(
-'The proximity between P95 and NVA supports the interpretation of the residuals as approximately normal; large differences may indicate non-normal behavior, heavy tails or outliers.',
-'A proximidade entre P95 e NVA favorece a interpretação dos resíduos como aproximadamente normais; grandes diferenças podem indicar comportamento não normal, caudas pesadas ou outliers.'
-)) + '''</div>
 
 <h2>''' + str2HTML(self.tr('6. Percentile-based Accuracy', '6. Acurácia baseada em Percentis')) + '''</h2>
 <table>
@@ -642,15 +654,16 @@ $$NMAD = 1.4826 \\times median(|\\Delta Z_i - median(\\Delta Z)|)$$
 <tr><th>Test</th><th>Result</th></tr>
 <tr><td>Shapiro-Wilk</td><td>[SHAPIRO]</td></tr>
 <tr><td>Anderson-Darling</td><td>[ANDERSON]</td></tr>
+<tr><td>''' + str2HTML(self.tr('Classification', 'Classificação')) + '''</td><td>[NORMALITY_CLASS]</td></tr>
 </table>
+<div class="note">[NORMALITY_EXPLANATION]</div>
 
-<h2>''' + str2HTML(self.tr('9. ASPRS Compliance Checklist', '9. Checklist de Conformidade ASPRS')) + '''</h2>
+<h2>''' + str2HTML(self.tr('9. ASPRS-Oriented Checklist', '9. Checklist orientado pela ASPRS')) + '''</h2>
 <table>
 <tr><th>Requirement</th><th>Status</th></tr>
 <tr><td>Independent checkpoints</td><td class="ok">''' + str2HTML(self.tr('User-defined', 'Definido pelo usuário')) + '''</td></tr>
-<tr><td>Minimum 30 checkpoints for NVA</td><td>[CHECK_30]</td></tr>
+<tr><td>Minimum 30 checkpoints</td><td>[CHECK_30]</td></tr>
 <tr><td>RMSE<sub>Z</sub> reported</td><td class="ok">OK</td></tr>
-<tr><td>NVA reported</td><td class="ok">OK</td></tr>
 <tr><td>Residual normality assessed</td><td>[CHECK_NORMALITY]</td></tr>
 <tr><td>Outliers reported without automatic removal</td><td class="ok">OK</td></tr>
 </table>
@@ -697,74 +710,53 @@ email: contato@geoone.com.br
         check30 = '<span class="ok">OK</span>' if len(DISCREP) >= 30 else '<span class="warn">Below ASPRS recommendation</span>'
         check_norm = '<span class="ok">OK</span>' if scipy_stats is not None else '<span class="warn">SciPy unavailable</span>'
 
-        P95_DIFF = P95 - NVA_95
-        P95_DIFF_PERC = abs(P95_DIFF) / NVA_95 * 100 if NVA_95 > 0 else 0
-
-        if P95_DIFF_PERC < 5:
-            normality_comment_en = (
-                'The observed P95 closely matches the theoretical NVA (difference = {}%), '
-                'indicating that the residuals are approximately normally distributed.'
-            ).format(fnum(P95_DIFF_PERC))
-
-            normality_comment_pt = (
-                'O P95 observado é muito próximo do NVA teórico (diferença = {}%), '
-                'indicando que os resíduos apresentam comportamento aproximadamente normal.'
-            ).format(fnum(P95_DIFF_PERC))
-
-        elif P95_DIFF_PERC < 15:
-            normality_comment_en = (
-                'The observed P95 differs moderately from the theoretical NVA (difference = {}%), '
-                'suggesting minor departures from normality or the presence of a small number of atypical residuals.'
-            ).format(fnum(P95_DIFF_PERC))
-
-            normality_comment_pt = (
-                'O P95 observado difere moderadamente do NVA teórico (diferença = {}%), '
-                'sugerindo pequenos desvios da normalidade ou a presença de poucos resíduos atípicos.'
-            ).format(fnum(P95_DIFF_PERC))
-
+        # Interpretação automática
+        if OUTLIERS == 0:
+            outlier_comment_en = 'No IQR-based outliers were detected.'
+            outlier_comment_pt = 'Nenhum outlier pelo critério IQR foi detectado.'
+        elif OUTLIERS == 1:
+            outlier_comment_en = 'One IQR-based outlier was detected and kept in the analysis.'
+            outlier_comment_pt = 'Um outlier pelo critério IQR foi detectado e mantido na análise.'
         else:
-            normality_comment_en = (
-                'The observed P95 substantially exceeds the theoretical NVA (difference = {}%), '
-                'indicating non-normal residual behavior and/or the presence of significant outliers.'
-            ).format(fnum(P95_DIFF_PERC))
-
-            normality_comment_pt = (
-                'O P95 observado excede significativamente o NVA teórico (diferença = {}%), '
-                'indicando comportamento não normal dos resíduos e/ou a presença de outliers relevantes.'
-            ).format(fnum(P95_DIFF_PERC))
+            outlier_comment_en = '{} IQR-based outliers were detected and kept in the analysis.'.format(int(OUTLIERS))
+            outlier_comment_pt = '{} outliers pelo critério IQR foram detectados e mantidos na análise.'.format(int(OUTLIERS))
 
         interpretation = self.tr(
             (
-                'The evaluated DEM achieved RMSEz = {} m and NVA = {} m based on {} valid independent checkpoints. '
-                'The mean error was {} m, indicating the vertical bias of the dataset. '
-                'The P95 absolute vertical discrepancy was {} m. {} '
+                'The evaluated DEM achieved RMSEz = {} m based on {} valid independent checkpoints. '
+                'The mean vertical error was {} m, indicating the vertical bias of the dataset. '
+                'The P95 absolute vertical discrepancy was {} m, meaning that 95% of the valid checkpoints presented |ΔZ| below this value. '
+                'Residual normality classification: {}. {} {} '
                 'Elevations were extracted using the {} interpolation method. '
                 '{} checkpoints were ignored because they were outside the raster extent or located on NoData pixels. '
                 'No outliers were automatically removed from the analysis.'
             ).format(
                 fnum(RMSE),
-                fnum(NVA_95),
                 len(DISCREP),
                 fnum(DISCREP.mean()),
                 fnum(P95),
-                normality_comment_en,
+                normality_class,
+                normality_explanation,
+                outlier_comment_en,
                 metodo_label,
                 total_nulos
             ),
             (
-                'O MDE avaliado obteve RMSEz = {} m e NVA = {} m com base em {} checkpoints independentes válidos. '
-                'A média das discrepâncias foi {} m, indicando a tendência vertical do conjunto de dados. '
-                'O percentil P95 das discrepâncias absolutas foi {} m. {} '
+                'O MDE avaliado obteve RMSEz = {} m com base em {} checkpoints independentes válidos. '
+                'A média das discrepâncias verticais foi {} m, indicando a tendência vertical do conjunto de dados. '
+                'O percentil P95 das discrepâncias verticais absolutas foi {} m, ou seja, 95% dos checkpoints válidos apresentaram |ΔZ| abaixo desse valor. '
+                'Classificação da normalidade dos resíduos: {}. {} {} '
                 'As altitudes foram extraídas utilizando o método de interpolação {}. '
                 '{} checkpoints foram ignorados por estarem fora da extensão do raster ou sobre pixels NoData. '
                 'Nenhum outlier foi removido automaticamente da análise.'
             ).format(
                 fnum(RMSE),
-                fnum(NVA_95),
                 len(DISCREP),
                 fnum(DISCREP.mean()),
                 fnum(P95),
-                normality_comment_pt,
+                normality_class,
+                normality_explanation,
+                outlier_comment_pt,
                 metodo_label,
                 total_nulos
             )
@@ -787,7 +779,6 @@ email: contato@geoone.com.br
             '[discrepZ_min]': fnum(DISCREP.min()),
                                       
             '[RMSE_Z]': fnum(RMSE),
-            '[NVA_95]': fnum(NVA_95),
 
             '[P68]': fnum(P68),
             '[P90]': fnum(P90),
@@ -804,6 +795,8 @@ email: contato@geoone.com.br
 
             '[SHAPIRO]': str2HTML(shapiro_text),
             '[ANDERSON]': str2HTML(anderson_text),
+            '[NORMALITY_CLASS]': str2HTML(normality_class),
+            '[NORMALITY_EXPLANATION]': str2HTML(normality_explanation),
 
             '[CHECK_30]': check30,
             '[CHECK_NORMALITY]': check_norm,
