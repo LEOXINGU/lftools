@@ -19,6 +19,7 @@ from qgis.core import QgsEllipsoidUtils
 from datetime import datetime, timedelta
 import datetime as dt
 import numpy as np
+from math import isfinite
 import math
 
 
@@ -46,53 +47,76 @@ def DifAz(Az_ini, Az_fim):
     return dAz
 
 
+
+
 def dd2dms(dd, n_digits):
-    if dd != 0:
-        graus = int(floor(abs(dd)))
-        resto1 = round(abs(dd) - graus, 10)
-        minutos = 60*resto1
-        if n_digits >= 0:
-            minutos = int(floor(minutos))
-            resto2 = round(resto1*60 - minutos, 10)
-            segundos = resto2*60
-            if round(segundos,n_digits) == 60:
-                minutos += 1
-                segundos = 0
-            if minutos == 60:
-                graus += 1
-                minutos = 0
-        else:
-            mindec = -1*(n_digits+1)
-            if round(minutos,mindec) == 60:
-                graus += 1
-                minutos = 0
-        if dd < 0:
-            texto = '-' + str(graus) + '°'
-        else:
-            texto = str(graus) + '°'
+    if dd is None:
+        raise ValueError("dd cannot be None")
 
-        if n_digits < -1: # graus e minutos decimais
-            texto = texto + ('{:0' + str(3+mindec) + '.' + str(mindec) + 'f}').format(minutos) + "'"
-        elif n_digits == -1: # graus e minutos inteiros
-            texto = texto + '{:02d}'.format(round(minutos)) + "'"
-        else: # graus, minutos e segundos
-            texto = texto + '{:02d}'.format(minutos) + "'"
+    if not isinstance(n_digits, int):
+        raise TypeError("n_digits must be an integer")
 
-        if n_digits == 0: # segundos inteiros
-            texto = texto + '{:02d}'.format(round(segundos)) + '"'
-        elif n_digits > 0: # segundos decimais
-            texto = texto + ('{:0' + str(3+n_digits) + '.' + str(n_digits) + 'f}').format(segundos) + '"'
-        return texto
+    dd = float(dd)
+
+    if not math.isfinite(dd):
+        raise ValueError("dd must be a finite number")
+
+    sign = '-' if dd < 0 else ''
+    value = abs(dd)
+
+    degrees = int(math.floor(value))
+    decimal_degrees = round(value - degrees, 12)
+
+    # Case 1: degrees, minutes and seconds
+    if n_digits >= 0:
+        minutes_float = decimal_degrees * 60
+        minutes = int(math.floor(minutes_float))
+
+        decimal_minutes = round(minutes_float - minutes, 12)
+        seconds = round(decimal_minutes * 60, n_digits)
+
+        if seconds >= 60:
+            seconds = 0
+            minutes += 1
+
+        if minutes >= 60:
+            minutes = 0
+            degrees += 1
+
+        text = f"{sign}{degrees}°{minutes:02d}'"
+
+        if n_digits == 0:
+            text += f'{int(seconds):02d}"'
+        else:
+            width = 3 + n_digits
+            text += f'{seconds:0{width}.{n_digits}f}"'
+
+        return text
+
+    # Case 2: degrees and integer minutes
+    elif n_digits == -1:
+        minutes = round(decimal_degrees * 60)
+
+        if minutes >= 60:
+            minutes = 0
+            degrees += 1
+
+        return f"{sign}{degrees}°{minutes:02d}'"
+
+    # Case 3: degrees and decimal minutes
     else:
-        if n_digits > 0:
-            return "0°00'" + ('{:0' + str(3+n_digits) + '.' + str(n_digits) + 'f}').format(0) + '"'
-        elif n_digits == 0:
-            return "0°00'" + '"'
-        elif n_digits == -1:
-            return "0°00'"
-        else:
-            mindec = -1*(n_digits+1)
-            return "0°" + ('{:0' + str(3+mindec) + '.' + str(mindec) + 'f}').format(0) + "'"
+        minute_decimals = -1 * (n_digits + 1)
+
+        minutes = round(decimal_degrees * 60, minute_decimals)
+
+        if minutes >= 60:
+            minutes = 0
+            degrees += 1
+
+        width = 3 + minute_decimals
+
+        return f"{sign}{degrees}°{minutes:0{width}.{minute_decimals}f}'"
+    
 
 
 def dms2dd(txt):
