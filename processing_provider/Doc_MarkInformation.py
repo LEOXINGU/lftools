@@ -22,7 +22,6 @@ __date__ = 'Jul 10'
 __copyright__ = '(C) 2020, Leandro França'
 
 from qgis.core import (QgsProcessing,
-                       QgsFeatureSink,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
                        QgsProcessingParameterFile,
@@ -30,12 +29,10 @@ from qgis.core import (QgsProcessing,
                        QgsFeatureRequest,
                        QgsExpression,
                        QgsProcessingParameterFeatureSource,
-                       QgsProcessingParameterFeatureSink,
                        QgsProcessingParameterFileDestination,
                        QgsApplication,
                        QgsProject,
-                       QgsCoordinateTransform,
-                       QgsCoordinateReferenceSystem)
+                       QgsCoordinateTransform)
 
 import os
 from lftools.geocapt.imgs import *
@@ -121,8 +118,8 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
             QgsProcessingParameterFile(
                 self.LOGO,
                 self.tr('Logo (JPEG)', 'Logomarca (JPEG)'),
-                behavior=QgsProcessingParameterFile.File,
-                defaultValue=None,
+                behavior = QgsProcessingParameterFile.File,
+                defaultValue = None,
                 fileFilter = 'Image (*.jpeg *.jpg *.JPG)',
                 optional = True
             )
@@ -169,9 +166,9 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
             context
         )
         if logo:
-            LOGO = 'jpg;base64,'+img2html_resized(logo, lado=380)
+            LOGO = 'jpg;base64,'+ img2html_resized(logo, lado=380)
         else:
-            LOGO = 'png;base64,'+lftools_logo
+            LOGO = 'png;base64,'+ lftools_logo
 
         SLOGAN = self.parameterAsString(
             parameters,
@@ -418,19 +415,21 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
             raise QgsProcessingException(self.tr('Check that your layer "reference_point_p" has the correct field names for the TopoGeo model! More information: https://bit.ly/3FDNQGC', 'Verifique se sua camada "Ponto de Referência Geodésica" está com os nomes dos campos corretos para o modelo TopoGeo! Mais informações: https://geoone.com.br/ebooks/livro2/'))
 
         try:
-            itens['[FOTO_MARCO]'] = img2html_resized(ponto['mark_photo']) if ponto['mark_photo'] else ''
+            project_folder = os.path.dirname(QgsProject.instance().fileName())
         except:
-            raise QgsProcessingException(self.tr('Make sure the landmark photo is in JPEG format!', 'Verifique se a foto do marco está no formato JPEG!'))
+            project_folder = ''
+        
+        filepath = self.VerificarArquivo(project_folder, ponto['mark_photo'])
+        self.VerificarJPEG(filepath)
+        itens['[FOTO_MARCO]'] = img2html_resized(filepath) if ponto['mark_photo'] else ''
 
-        try:
-            itens['[FOTO_PAN]'] = img2html_resized(ponto['pan_photo']) if ponto['pan_photo'] else ''
-        except:
-            raise QgsProcessingException(self.tr('Make sure the panoramic photo is in JPEG format!', 'Verifique se a foto panorâmica está no formato JPEG!'))
+        filepath = self.VerificarArquivo(project_folder, ponto['pan_photo'])
+        self.VerificarJPEG(filepath)
+        itens['[FOTO_PAN]'] = img2html_resized(filepath) if ponto['pan_photo'] else ''
 
-        try:
-            itens['[IMAGEM_AER]'] = img2html_resized(ponto['aerial_image']) if ponto['aerial_image'] else ''
-        except:
-            raise QgsProcessingException(self.tr('Make sure your aerial sketch is in JPEG format!', 'Verifique se o seu croqui aéreo está no formato JPEG!'))
+        filepath = self.VerificarArquivo(project_folder, ponto['aerial_image'])
+        self.VerificarJPEG(filepath)
+        itens['[IMAGEM_AER]'] = img2html_resized(filepath) if ponto['aerial_image'] else ''
 
 
         for item in itens:
@@ -450,3 +449,20 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
         feedback.pushInfo('Leandro França - Eng Cart')
 
         return {self.HTML: output}
+    
+    def VerificarArquivo(self, project_folder, relative_path):
+        try:
+            filepath = os.path.join(project_folder, relative_path)
+            if os.path.isfile(filepath):
+                return filepath
+            elif os.path.isfile(relative_path):
+                return relative_path
+            else:
+                raise QgsProcessingException(self.tr('Verify if the file {} exists!', 'Verifique se o arquivo {} existe!').format(filepath))
+        except:
+            raise QgsProcessingException(self.tr('Verify if the file {} exists!', 'Verifique se o arquivo {} existe!').format(filepath))
+    
+    def VerificarJPEG(self, filepath):
+        ext = os.path.splitext(filepath)[1].lower()
+        if ext not in ['.jpg', '.jpeg', '.JPG', '.JPEG']:
+            raise QgsProcessingException(self.tr('Make sure your file {} is in JPEG format!', 'Verifique se o seu arquivo {} está no formato JPEG!').format(filepath))

@@ -400,6 +400,116 @@ def comprimentoSGL(geomGeo, crsGeo, dim):
         return Distancia(coordsSGL, dim)
 
 
+# ---------------
+#  INCRA - Sigef
+# ---------------
+
+def AreaPerimetroParteINCRA(coordsXYZ, crsGeo):
+    lon,lat,alt = [],[],[]
+    for pnt in coordsXYZ[:-1]:
+        lon +=[pnt.x()]
+        lat +=[pnt.y()]
+        if str(pnt.z()) != 'nan':
+            alt += [pnt.z()]
+        else:
+            alt += [0]
+    lon0 = np.array(lon).mean()
+    lat0 = np.array(lat).mean()
+    h0 = np.array(alt).mean()
+    Xo, Yo, Zo, a, f = OrigemSGL(lon0, lat0, h0, crsGeo)
+    # CONVERSÃO DAS COORDENADAS
+    coordsSGL = []
+    for coord in coordsXYZ:
+        lon = coord.x()
+        lat = coord.y()
+        h = coord.z() if str(coord.z()) != 'nan' else 0
+        X, Y, Z = geod2geoc(lon, lat, h, a, f)
+        E, N, U = geoc2enu(X, Y, Z, lon0, lat0, Xo, Yo, Zo)
+        coordsSGL += [QgsPointXY(E, N)]
+    return (abs(areaGauss(coordsSGL)), Distancia(coordsSGL, '2D'))
+
+
+def areaINCRA(geomGeo, crsGeo):
+    if geomGeo.isMultipart():
+        coordsXYZ = geom2PointList(geomGeo)
+        area_final = 0
+        for coordsGeo in coordsXYZ:
+            area_final += AreaPerimetroParteINCRA(coordsGeo[0], crsGeo)[0]
+            n_aneis = len(coordsGeo)
+            if n_aneis > 1:
+                for w in range(1, n_aneis):
+                    area_final -= AreaPerimetroParteINCRA(coordsGeo[w], crsGeo)[0]
+    else:
+        coordsGeo = geom2PointList(geomGeo)
+        area_final = AreaPerimetroParteINCRA(coordsGeo[0], crsGeo)[0]
+        n_aneis = len(coordsGeo)
+        if n_aneis > 1:
+            for w in range(1, n_aneis):
+                area_final -= AreaPerimetroParteINCRA(coordsGeo[w], crsGeo)[0]
+
+    return area_final
+
+
+def perimetroINCRA(geomGeo, crsGeo):
+    if geomGeo.isMultipart():
+        coordsXYZ = geom2PointList(geomGeo)
+        perimetroSGL = 0
+        for coordsGeo in coordsXYZ:
+            perimetroSGL += AreaPerimetroParteINCRA(coordsGeo[0], crsGeo)[1]
+    else:
+        coordsGeo = geom2PointList(geomGeo)
+        perimetroSGL = AreaPerimetroParteINCRA(coordsGeo[0], crsGeo)[1]
+    return float(perimetroSGL)
+
+# Azimute e Distância do INCRA
+def AzimuteDistanciaINCRA(pntA, pntB, geomGeo, crsGeo):
+    # Origem do SGL
+    partes = geom2PointList(geomGeo)
+    lon,lat,alt = [],[],[]
+    for parte in partes:
+        for pnt in parte[:-1]:
+            lon +=[pnt.x()]
+            lat +=[pnt.y()]
+            if str(pnt.z()) != 'nan':
+                alt += [pnt.z()]
+            else:
+                alt += [0]
+    lon0 = np.array(lon).mean()
+    lat0 = np.array(lat).mean()
+    h0 = np.array(alt).mean()
+    X0, Y0, Z0, a, f = OrigemSGL(lon0, lat0, h0, crsGeo)
+    # Transformar geodésicas para geocêntricas
+    XA, YA, ZA = geod2geoc(pntA.x(), pntA.y(), pntA.z() if str(pntA.z()) != 'nan' else 0, a, f)
+    XB, YB, ZB = geod2geoc(pntB.x(), pntB.y(), pntB.z() if str(pntB.z()) != 'nan' else 0, a, f)
+    # Transformar geocêntricas para topocêntricas (SGL)
+    Ea, Na, Ua = geoc2enu(XA, YA, ZA, lon0, lat0, X0, Y0, Z0)
+    Eb, Nb, Ub = geoc2enu(XB, YB, ZB, lon0, lat0, X0, Y0, Z0)
+    # Calcular distância
+    dist = distEuclidiana2D(QgsPointXY(Ea, Na), QgsPointXY(Eb, Nb))
+    # Calcular azimute de Puissant
+    Az = AzimutePuissant(pntA.y(), pntA.x(), pntB.y(), pntB.x(), a, f)
+    return Az, dist
+
+def azimuteTrucandoINCRA(dd, prec=-1):
+    if dd is None:
+        raise ValueError("dd não pode ser None")
+    dd = float(dd)
+    if not math.isfinite(dd):
+        raise ValueError("dd deve ser um número finito")
+    sinal = '-' if dd < 0 else ''
+    valor = abs(dd)
+    graus = int(valor)
+    minutos_dec = (valor - graus) * 60
+    minutos = math.floor(minutos_dec) #trunca e não arredonda, coisas do Sigef...
+
+    return f"{sinal}{graus}°{minutos:02d}'"
+
+
+# ---------------
+#  CARTOGRAFIA
+# ---------------
+
+
 def ChartSize(geom, zone, hemisf, escala):
     # Transformar Coordenadas de Geográficas para o sistema UTM
     coordinateTransformer = QgsCoordinateTransform()
