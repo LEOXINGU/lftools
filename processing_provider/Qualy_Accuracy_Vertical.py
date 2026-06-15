@@ -596,13 +596,13 @@ class Accuracy_Vertical(QgsProcessingAlgorithm):
 )) + '''</p>
 
 <div class="note">
-$$\Delta Z_i = Z_{test,i} - Z_{reference,i}$$
-$$RMSE_z = \\sqrt{\\frac{\\sum_{i=1}^{n}(\\Delta Z_i)^2}{n}}$$
-$$MAD = median(|\Delta Z_i - median(\Delta Z)|)$$
-$$NMAD = 1.4826 \times MAD$$
-$$IQR = Q_3 - Q_1$$
-$$Lower\ Limit = Q_1 - 1.5 \times IQR$$
-$$Upper\ Limit = Q_3 + 1.5 \times IQR$$
+$$\\Delta Z_i = Z_{test,i} - Z_{ref,i}$$
+$$RMSE_Z = \\sqrt{\\frac{\\sum_{i=1}^{n}(\\Delta Z_i)^2}{n}}$$
+$$MAD = median(|\\Delta_i - median(\\Delta)|)$$
+$$NMAD = 1.4826 \\times MAD$$
+$$IQR=Q_3-Q_1$$
+$$Lower\\ Limit=Q_1-1.5 \\times IQR$$
+$$Upper\\ Limit=Q_3+1.5 \\times IQR$$
 </div>
 
 <h2>''' + str2HTML(self.tr('3. ASPRS-Oriented Vertical Accuracy Summary', '3. Resumo da Acurácia Vertical orientado pela ASPRS')) + '''</h2>
