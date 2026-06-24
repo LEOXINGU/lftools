@@ -571,8 +571,8 @@ class DescriptiveMemorial(QgisAlgorithm):
                         cont += 1
                         break
             if not encontrou:
-                raise QgsProcessingException(self.tr('Coordinate point ({}, {}) of the "boundary_element_l" layer is not connected!',
-                                                     'Ponto de coordenadas ({}, {}) da camada "Elemento confrontante" não está conectado!').format(ponto_fim.y(), ponto_fim.x()))
+                raise QgsProcessingException(self.tr('All lines must be sequenced with a consistent orientation, either clockwise or counterclockwise. Check coordinate point ({}, {})!',
+                                                     'Todas as linhas devem ser sequenciadas mantendo a mesma orientação, seja no sentido horário ou anti-horário. Verificar ponto de coordenadas ({}, {})!').format(ponto_fim.y(), ponto_fim.x()))
 
         # Pegando informações dos confrontantes (limites)
         ListaDescr = []
