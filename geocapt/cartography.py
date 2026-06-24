@@ -466,14 +466,26 @@ def AzimuteDistanciaINCRA(pntA, pntB, geomGeo, crsGeo):
     # Origem do SGL
     partes = geom2PointList(geomGeo)
     lon,lat,alt = [],[],[]
-    for parte in partes:
-        for pnt in parte[:-1]:
-            lon +=[pnt.x()]
-            lat +=[pnt.y()]
-            if str(pnt.z()) != 'nan':
-                alt += [pnt.z()]
-            else:
-                alt += [0]
+    if geomGeo.isMultipart():
+        for aneis in partes:
+            for anel in aneis:
+                for pnt in anel[:-1]:
+                    lon +=[pnt.x()]
+                    lat +=[pnt.y()]
+                    if str(pnt.z()) != 'nan':
+                        alt += [pnt.z()]
+                    else:
+                        alt += [0]
+    else:
+        aneis = partes
+        for anel in aneis:
+                for pnt in anel[:-1]:
+                    lon +=[pnt.x()]
+                    lat +=[pnt.y()]
+                    if str(pnt.z()) != 'nan':
+                        alt += [pnt.z()]
+                    else:
+                        alt += [0]
     lon0 = np.array(lon).mean()
     lat0 = np.array(lat).mean()
     h0 = np.array(alt).mean()
