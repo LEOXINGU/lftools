@@ -504,7 +504,9 @@ class DescriptiveTable(QgsProcessingAlgorithm):
             texto = '''<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
             <html>
             <head>
-              <title>''' + str2HTML(self.tr('Synthetic deed description', 'Memorial Sintético')) + '''</title>    </head>
+              <title>''' + str2HTML(self.tr('Synthetic deed description', 'Memorial Sintético')) + '''</title>
+              <link rel = "icon" href = "https://github.com/LEOXINGU/lftools/blob/main/images/lftools.png?raw=true" type = "image/x-icon">
+            </head>
             <body>
             <table
             style="text-align: center; width: 100%; font-size: [FONTSIZE]px; font-family: Arial; border: medium none; border-collapse: collapse;"
