@@ -16,12 +16,9 @@ __author__ = 'Leandro França'
 __date__ = '2023-08-22'
 __copyright__ = '(C) 2023, Leandro França'
 
-from qgis.PyQt.QtCore import QCoreApplication, QMetaType
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (QgsProcessing,
                        QgsApplication,
-                       QgsProcessingParameterString,
-                       QgsProcessingParameterCrs,
-                       QgsProcessingParameterBoolean,
                        QgsFields,
                        QgsWkbTypes,
                        QgsField,
@@ -35,13 +32,11 @@ from qgis.core import (QgsProcessing,
                        QgsProcessingUtils,
                        QgsProcessingParameterFeatureSource,
                        QgsProcessingParameterFeatureSink)
-import re, os
+import os
 from lftools.geocapt.imgs import *
 from lftools.translations.translate import translate
-from lftools.geocapt.topogeo import dd2dms, dd2dms
 from lftools.geocapt.cartography import LabelConf, SymbolSimplePoint
 from qgis.PyQt.QtGui import QIcon
-import numpy as np
 
 class ValidateTopology(QgsProcessingAlgorithm):
 
@@ -133,6 +128,29 @@ class ValidateTopology(QgsProcessingAlgorithm):
         context.setInvalidGeometryCheck(QgsFeatureRequest.GeometryNoCheck)
         area = self.parameterAsSource(parameters, self.POLYGON, context)
 
+        # Verificar se as 3 camadas estão no mesmo SRC Geográfico
+        crs_vertices = vertices.sourceCrs()
+        crs_limites = limites.sourceCrs()
+        crs_area = area.sourceCrs()
+
+        if not (crs_vertices.isGeographic() and crs_limites.isGeographic() and crs_area.isGeographic()):
+            raise QgsProcessingException(
+                self.tr(
+                    'All input layers must use a geographic CRS!',
+                    'Todas as camadas de entrada devem utilizar um SRC geográfico!'
+                )
+            )
+        
+        if crs_vertices != crs_limites or crs_vertices != crs_area:
+            raise QgsProcessingException(
+                self.tr(
+                    'All input layers must use the same CRS!',
+                    'Todas as camadas de entrada devem usar o mesmo SRC!'
+                )
+            )
+        
+        tolerancia = 0.001/111000  # 1 mm em graus
+
         Fields = QgsFields()
         itens  = {
                      'ord' : QMetaType.Type.Int,
@@ -157,21 +175,24 @@ class ValidateTopology(QgsProcessingAlgorithm):
         cont = 0
 
         def validarGeometria(layer, nome_camada):
+            cont_erros_estrutura = 0
             for feat in layer.getFeatures():
                 geom = feat.geometry()
 
-                if geom.isEmpty():
-                    erro = self.tr(
-                        'Empty geometry in feature ID {} of layer "{}"!',
-                        'Geometria vazia na feição de ID {} da camada "{}"!'
-                    ).format(feat.id(), nome_camada)
-                    feedback.reportError(erro)
-
-                elif geom is None:
+                if geom is None:
                     erro = self.tr(
                         'Null geometry in feature ID {} of layer "{}"!',
                         'Geometria nula na feição de ID {} da camada "{}"!'
                     ).format(feat.id(), nome_camada)
+                    cont_erros_estrutura += 1
+                    feedback.reportError(erro)
+
+                elif geom.isEmpty():
+                    erro = self.tr(
+                        'Empty geometry in feature ID {} of layer "{}"!',
+                        'Geometria vazia na feição de ID {} da camada "{}"!'
+                    ).format(feat.id(), nome_camada)
+                    cont_erros_estrutura += 1
                     feedback.reportError(erro)
 
                 elif not geom.isGeosValid():
@@ -185,12 +206,34 @@ class ValidateTopology(QgsProcessingAlgorithm):
                         'Invalid geometry in feature ID {} of layer "{}"!',
                         'Geometria inválida na feição de ID {} da camada "{}"!'
                     ).format(feat.id(), nome_camada)
+                    cont_erros_estrutura += 1
                     feedback.reportError(erro)
+            return cont_erros_estrutura
 
-        validarGeometria(vertices, self.tr('Vertices (points)', 'Vértices (pontos)'))
-        validarGeometria(limites, self.tr('Limits (lines)', 'Limites (linhas)'))
-        validarGeometria(area, self.tr('Area (polygon)', 'Área (polígono)'))
+        cont_erros_estrutura = validarGeometria(vertices, self.tr('Vertices (points)', 'Vértices (pontos)'))
+        cont_erros_estrutura+= validarGeometria(limites, self.tr('Limits (lines)', 'Limites (linhas)'))
+        cont_erros_estrutura+= validarGeometria(area, self.tr('Area (polygon)', 'Área (polígono)'))
 
+        # Validar limites geográficos
+        def validarLimitesGeograficos(layer, nome_camada):
+            ext = layer.sourceExtent()
+            xmin = ext.xMinimum()
+            xmax = ext.xMaximum()
+            ymin = ext.yMinimum()
+            ymax = ext.yMaximum()
+
+            if xmin < -180 or xmax > 180 or ymin < -90 or ymax > 90:
+                raise QgsProcessingException(
+                    self.tr(
+                        'The layers are defined as geographic CRS, but their coordinates are outside valid longitude/latitude limits. Check whether the CRS was assigned incorrectly.',
+                        'As camadas estão definidas em SRC geográfico, porém as coordenadas estão fora dos limites válidos de longitude/latitude. Verifique se o SRC foi atribuído incorretamente.'
+                    )
+                )
+        validarLimitesGeograficos(vertices, self.tr('Vertices (points)', 'Vértices (pontos)'))
+        validarLimitesGeograficos(limites, self.tr('Limits (lines)', 'Limites (linhas)'))
+        validarLimitesGeograficos(area, self.tr('Area (polygon)', 'Área (polígono)'))
+
+        # Validações das geometrias
 
         feedback.pushInfo(self.tr('Checking if each vertex of the Limit layer (line) has the corresponding one of the Vertex layer (point)...', 'Verificando se cada vértice da camada Limite (linha) tem o correspondente da camada Vértice (ponto)...'))
         for feat1 in limites.getFeatures():
@@ -284,7 +327,7 @@ class ValidateTopology(QgsProcessingAlgorithm):
             geom1 = feat1.geometry()
             if geom1:
                 vert = geom1.asPoint()
-                geom1 = geom1.buffer(0.001/110000,5)
+                geom1 = geom1.buffer(tolerancia,5)
                 corresp = False
                 for feat2 in limites.getFeatures():
                     geom2 = feat2.geometry()
@@ -303,13 +346,14 @@ class ValidateTopology(QgsProcessingAlgorithm):
                     sink.addFeature(fet, QgsFeatureSink.FastInsert)
 
         feedback.pushInfo(self.tr('Checking for duplicate vertices inside the vertex (point) layer...', 'Verificando vértices duplicados dentro da camada vértice (ponto)...'))
-        pontos = []
+        pontos = set()
         for feat1 in vertices.getFeatures():
             geom1 = feat1.geometry()
             if geom1:
                 vert = geom1.asPoint()
-                if vert not in pontos:
-                    pontos += [vert]
+                chave = (vert.x(), vert.y())
+                if chave not in pontos:
+                    pontos.add(chave)
                 else:
                     cont += 1
                     X, Y = vert.x(), vert.y()
@@ -328,10 +372,11 @@ class ValidateTopology(QgsProcessingAlgorithm):
                     linha = feat1.geometry().asMultiPolyline()[0]
                 else:
                     linha = feat1.geometry().asPolyline()
-                pontos = []
+                pontos = set()
                 for pnt in linha:
-                    if pnt not in pontos:
-                        pontos += [pnt]
+                    chave = (pnt.x(), pnt.y())
+                    if chave not in pontos:
+                        pontos.add(chave)
                     else:
                         if not pnt == linha[-1]: # fechamento de anel linear
                             cont += 1
@@ -354,10 +399,11 @@ class ValidateTopology(QgsProcessingAlgorithm):
                     pols = [geom1.asPolygon()]
                 for aneis in pols:
                     for anel in aneis:
-                        pontos = []
+                        pontos = set()
                         for pnt in anel[:-1]:
-                            if pnt not in pontos:
-                                pontos += [pnt]
+                            chave = (pnt.x(), pnt.y())
+                            if chave not in pontos:
+                                pontos.add(chave)
                             else:
                                 cont += 1
                                 X, Y = pnt.x(), pnt.y()
@@ -391,6 +437,7 @@ class ValidateTopology(QgsProcessingAlgorithm):
                                 break
                 else:
                     if ultimo_pnt != p0: # não for fechamento de anel linear
+                        cont += 1
                         X, Y = ultimo_pnt.x(), ultimo_pnt.y()
                         erro = self.tr('Problem with the orientation of the vertices of the line layer!',
                                     'Problema na orientação dos vértices da camada de linhas!')
@@ -401,13 +448,15 @@ class ValidateTopology(QgsProcessingAlgorithm):
 
         # Checar geometrias duplicadas para linhas
         feedback.pushInfo(self.tr('Checking for duplicate geometry line layer...', 'Verificando geometria duplicada na camada de linhas...'))
-        geoms = []
+        geoms = set()
         for feat1 in limites.getFeatures():
             geom = feat1.geometry()
             if geom:
-                if geom.asWkt() not in geoms:
-                    geoms += [geom.asWkt()]
+                wkt = geom.asWkt()
+                if wkt not in geoms:
+                    geoms.add(wkt)
                 else:
+                    cont += 1
                     pnt = geom.centroid().asPoint()
                     X, Y = pnt.x(), pnt.y()
                     erro = self.tr('Duplicated line geometry in feature ID {}!'.format(feat1.id()),
@@ -419,13 +468,15 @@ class ValidateTopology(QgsProcessingAlgorithm):
 
         # Checar geometrias duplicadas para polígono
         feedback.pushInfo(self.tr('Checking for duplicate geometry polygon layer...', 'Verificando geometria duplicada na camada de polígonos...'))
-        geoms = []
+        geoms = set()
         for feat1 in area.getFeatures():
             geom = feat1.geometry()
             if geom:
-                if geom.asWkt() not in geoms:
-                    geoms += [geom.asWkt()]
+                wkt = geom.asWkt()
+                if wkt not in geoms:
+                    geoms.add(wkt)
                 else:
+                    cont += 1
                     pnt = geom.centroid().asPoint()
                     X, Y = pnt.x(), pnt.y()
                     erro = self.tr('Duplicated polygon geometry in feature ID {}!'.format(feat1.id()),
@@ -440,9 +491,13 @@ class ValidateTopology(QgsProcessingAlgorithm):
         for feat1 in vertices.getFeatures():
             geom1 =  feat1.geometry()
             if geom1:
-                z = float(geom1.constGet().z())
+                try:
+                    z = float(geom1.constGet().z())
+                except Exception:
+                    z = float('nan')
                 pnt = geom1.asPoint()
                 if str(z) == 'nan' or z == 0:
+                    cont += 1
                     X, Y = pnt.x(), pnt.y()
                     erro = self.tr('Z altitude not filled in correctly!',
                                 'Altitude Z não preenchida corretamente!')
@@ -454,17 +509,32 @@ class ValidateTopology(QgsProcessingAlgorithm):
         def avaliar_erros(cont):
             if cont == 0:
                 return "🎉"
-            elif 1 <= cont <= 5:
+            elif cont <= 5:
                 return "🙁"
-            elif 6 <= cont <= 20:
+            elif cont <= 20:
                 return "😢"
             else:
                 return "😱"
 
-        if cont > 0:
-            feedback.reportError(avaliar_erros(cont) + self.tr(' {} topological inconsistencies detected!', ' Foram encontradas {} inconsistências topológicas!').format(cont))
+        total_erros = cont + cont_erros_estrutura
+
+        if total_erros > 0:
+
+            msg = self.tr(
+                ' {} inconsistencies detected ({} topological errors and {} structural geometry errors)!',
+                ' Foram encontradas {} inconsistências ({} erros topológicos e {} erros estruturais de geometria)!'
+            ).format(total_erros, cont, cont_erros_estrutura)
+
+            feedback.reportError(avaliar_erros(total_erros) + msg)
+
         else:
-            feedback.pushInfo(avaliar_erros(cont) + self.tr(' Congratulations! No topological inconsistency was detected.', ' Parabéns! Nenhuma inconsistência topológica detectada.'))
+            feedback.pushInfo(
+                avaliar_erros(total_erros) +
+                self.tr(
+                    ' Congratulations! No topological inconsistency was detected.',
+                    ' Parabéns! Nenhuma inconsistência topológica foi detectada.'
+                )
+            )
 
         feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
         feedback.pushInfo('Leandro França - Eng Cart')
