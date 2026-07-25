@@ -351,6 +351,7 @@ class CreateGCPfileAgisoft(QgsProcessingAlgorithm):
 
         with open(output_file, 'w', encoding='utf-8', newline='') as arq:
             writer = csv.writer(arq, delimiter=',', lineterminator='\n')
+            writer.writerow(['Name', 'X', 'Y', 'Z', 'X_error', 'Y_error', 'Z_error' ])
 
             for current, feat in enumerate(layer.getFeatures(), start=1):
 
