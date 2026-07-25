@@ -440,8 +440,7 @@ Transforme pontos, linhas, polígonos e rasters em representações visuais pron
             raise QgsProcessingException(
                 self.tr(
                     f'Invalid QML document: {detalhe}',
-                    f'Documento QML inválido: {detalhe}'
-                )
+                    )
             )
 
         # Importa diretamente o XML, sem consultar o estilo do GeoPackage.
@@ -450,8 +449,7 @@ Transforme pontos, linhas, polígonos e rasters em representações visuais pron
         if not sucesso:
             raise QgsProcessingException(
                 self.tr(
-                    f'Could not apply the QML style: {mensagem}',
-                    f'Não foi possível aplicar o estilo QML: {mensagem}'
+                    f'Could not apply the QML style: {mensagem}'
                 )
             )
 
