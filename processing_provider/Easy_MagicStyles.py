@@ -33,6 +33,8 @@ import os
 import shutil
 import tempfile
 from qgis.PyQt.QtGui import QIcon
+from qgis.PyQt.QtXml import QDomDocument
+from qgis.utils import iface
 
 
 class MagicStyles(QgsProcessingAlgorithm):
@@ -373,13 +375,94 @@ Transforme pontos, linhas, polígonos e rasters em representações visuais pron
         else:
             raise QgsProcessingException(self.tr('Unsupported layer type!', 'Tipo de camada não suportado!'))
 
-        camada.loadNamedStyle(estilo_selec)
-        camada.triggerRepaint()
+        mensagem_estilo = self.aplicar_estilo_qml(
+            camada,
+            estilo_selec
+        )
+
+        if mensagem_estilo:
+            feedback.pushInfo(mensagem_estilo)
 
         feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
         feedback.pushInfo(self.tr('Leandro Franca - Cartographic Engineer', 'Leandro França - Eng Cart'))
 
         return {}
+
+
+    def aplicar_estilo_qml(self, camada, caminho_qml):
+        """
+        Aplica diretamente um estilo QML à camada.
+
+        Utiliza importNamedStyle() para evitar que o QGIS carregue
+        prioritariamente o estilo armazenado no provedor, como ocorre
+        com estilos salvos dentro de arquivos GeoPackage.
+        """
+        if not os.path.isfile(caminho_qml):
+            raise QgsProcessingException(
+                self.tr(
+                    f'QML style not found: {caminho_qml}',
+                    f'Estilo QML não encontrado: {caminho_qml}'
+                )
+            )
+
+        try:
+            with open(caminho_qml, 'r', encoding='utf-8') as arquivo:
+                conteudo_qml = arquivo.read()
+        except (OSError, UnicodeError) as erro:
+            raise QgsProcessingException(
+                self.tr(
+                    f'Could not read the QML style: {erro}',
+                    f'Não foi possível ler o estilo QML: {erro}'
+                )
+            )
+
+        documento = QDomDocument()
+        resultado_xml = documento.setContent(conteudo_qml)
+
+        # O retorno de setContent varia conforme a versão do PyQt.
+        if isinstance(resultado_xml, tuple):
+            xml_valido = resultado_xml[0]
+            erro_xml = resultado_xml[1] if len(resultado_xml) > 1 else ''
+            linha = resultado_xml[2] if len(resultado_xml) > 2 else ''
+            coluna = resultado_xml[3] if len(resultado_xml) > 3 else ''
+        else:
+            xml_valido = resultado_xml
+            erro_xml = ''
+            linha = ''
+            coluna = ''
+
+        if not xml_valido:
+            detalhe = erro_xml
+
+            if linha != '' and coluna != '':
+                detalhe += f' ({linha}:{coluna})'
+
+            raise QgsProcessingException(
+                self.tr(
+                    f'Invalid QML document: {detalhe}',
+                    f'Documento QML inválido: {detalhe}'
+                )
+            )
+
+        # Importa diretamente o XML, sem consultar o estilo do GeoPackage.
+        sucesso, mensagem = camada.importNamedStyle(documento)
+
+        if not sucesso:
+            raise QgsProcessingException(
+                self.tr(
+                    f'Could not apply the QML style: {mensagem}',
+                    f'Não foi possível aplicar o estilo QML: {mensagem}'
+                )
+            )
+
+        # Atualiza a renderização no mapa.
+        camada.triggerRepaint()
+
+        # Reconstrói a legenda no painel de camadas.
+        iface.layerTreeView().refreshLayerSymbology(camada.id())
+
+        return mensagem
+    
 
     def format_number(self, value, decimals=6):
         txt = f"{float(value):.{decimals}f}"
@@ -661,3 +744,9 @@ Transforme pontos, linhas, polígonos e rasters em representações visuais pron
             "#bf0000"
         ]
     }
+
+    def flags(self):
+        return (
+            super().flags()
+            | QgsProcessingAlgorithm.FlagNoThreading
+        )
