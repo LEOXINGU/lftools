@@ -296,7 +296,7 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
       <td><b><span style="font-size: 9pt; font-family: &quot;Times New Roman&quot;,serif;"></span></b><b><span style="font-size: 9pt; font-family: &quot;Times New Roman&quot;,serif;"></span></b>&sigma;(h) = <span style="font-family: &quot;Times New Roman&quot;,serif;">[sigma_h]</span></td>
     </tr>
     <tr>
-      <td>'''+ str2HTML(self.tr('Orthometric Altitude','Altitude Ortométrica')) + ''' (H)</td>
+      <td>'''+ str2HTML(self.tr('Orthometric Altitude','Altitude Física')) + ''' (H)</td>
       <td>[H] m</td>
       <td style="text-align: center;" colspan="3" rowspan="1"><span style="font-weight: bold;">[SRC]</td>
     </tr>
@@ -356,8 +356,8 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
     </tr>
     <tr>
       <td style="text-align: center; font-weight: bold;" colspan="3" rowspan="1">'''+ str2HTML(self.tr('TECHNICAL MANAGER','RESPONSÁVEL TÉCNICO')) + '''</td>
-      <td style="text-align: center; font-weight: bold;">'''+ str2HTML(self.tr('PROFESSION/SPECIALIZATION','CONFEA/CREA')) + '''</td>
-      <td style="text-align: center; font-weight: bold;">'''+ str2HTML(self.tr('PROFESSIONAL REGISTRATION','CÓD. CRED. INCRA')) + '''</td>
+      <td style="text-align: center; font-weight: bold;">'''+ str2HTML(self.tr('PROFESSION/SPECIALIZATION','FORMAÇÃO PROFISSIONAL')) + '''</td>
+      <td style="text-align: center; font-weight: bold;">'''+ str2HTML(self.tr('PROFESSIONAL REGISTRATION','REGISTRO PROFISSIONAL')) + '''</td>
     </tr>
     <tr>
       <td style="text-align: center;" colspan="3" rowspan="1">[REP_TEC]</td>
