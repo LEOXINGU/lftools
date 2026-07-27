@@ -3,7 +3,7 @@
 dic = {
 'Elaboration of Deed Description based on vector layers that define a property survey.': {'es': 'Elaboración de la Descripción de la Escritura basada en capas vectoriales que definen un levantamiento de la propiedad.'},
 'This tool works properly only with data in "TopoGeo" modeling.': {'es': 'Esta herramienta funciona correctamente sólo con datos en el modelado "TopoGeo".'},
-'Click here for understanding this data model.': {'es': 'Haga clic aquí para comprender este modelo de datos.'},
+'Click here for understanding more about this data model.': {'es': 'Haga clic aquí para comprender este modelo de datos.'},
 'Deed description': {'es': 'Descripción de Escritura'},
 'Documents': {'es': 'Documentación'},
 'Author: Leandro Franca': {'es': 'Autor: Leandro Franca'},
@@ -1563,5 +1563,91 @@ Nota: Las geometrías inválidas no son corregidas ni eliminadas por esta herram
 'All input layers must use the same CRS!': {'es': '¡Todas las capas de entrada deben utilizar el mismo SRC!'},
 'The layers are defined as geographic CRS, but their coordinates are outside valid longitude/latitude limits. Check whether the CRS was assigned incorrectly.': {'es': 'Las capas están definidas en un SRC geográfico, pero sus coordenadas están fuera de los límites válidos de longitud y latitud. Verifique si el SRC fue asignado correctamente.'},
 'All input layers must use a geographic CRS!': {'es': '¡Todas las capas de entrada deben utilizar un SRC geográfico!'},
+'parcel': {'es': 'parcela'},
+'Concrete monument with plate': {'es': 'Mojón de hormigón con placa'},
+'Type P (point)': {'es': 'Tipo P (punto)'},
+'Type V (virtual)': {'es': 'Tipo V (virtual)'},
+'Concrete monument without plate': {'es': 'Mojón de hormigón sin placa'},
+'borderer': {'es': 'colindante'},
+'borderer_label': {'es': 'rotulo_colindante'},
+'start_point_description': {'es': 'descripcion_punto_inicial'},
+'authorizer': {'es': 'responsable'},
+'authorizer_id': {'es': 'identificacion_responsable'},
+'borderer_registry': {'es': 'registro_colindante'},
+'property': {'es': 'inmueble'},
+'registry': {'es': 'registro'},
+'transcript': {'es': 'matrícula'},
+'owner': {'es': 'propietario'},
+'owner_id': {'es': 'identificación del propietario'},
+'address': {'es': 'dirección'},
+'county': {'es': 'municipio'},
+'state': {'es': 'estado'},
+'survey_date': {'es': 'levantamiento - fecha'},
+'surveyor': {'es': 'agrimensor'},
+'Technical Manager': {'es': 'Responsable Técnico'},
+'Professional registration': {'es': 'Registro profesional'},
+'GEODETIC MARK': {'es': 'MOJÓN GEODÉSICO'},
+'Ellipsoidal height': {'es': 'altura elipsoidal'},
+'Orthometric height': {'es': 'altura ortométrica'},
+'GNSS receiver': {'es': 'receptor GNSS'},
+'Survey method': {'es': 'método de levantamiento'},
+'Static Relative': {'es': 'Relativo Estático'},
+'Reference base': {'es': 'Base de referencia'},
+'Survey responsible': {'es': 'levantamiento - responsable'},
+'Processing date': {'es': 'procesamiento - fecha'},
+'Processing responsible': {'es': 'procesamiento - responsable'},
+'Report date': {'es': 'monografía - fecha'},
+'Report responsible': {'es': 'monografía - responsable'},
+'Mark photo': {'es': 'foto del mojón'},
+'Panoramic photo': {'es': 'foto panorámica'},
+'Aerial image': {'es': 'imagen aérea'},
+'Professional qualification': {'es': 'formación profesional'},
+'Methodology': {'es': 'Metodología'},
+'Reference Base(s)': {'es': 'Base(s) de referencia'},
+'Phases': {'es': 'Etapas'},
+'Images': {'es': 'Imágenes'},
+'Responsibility': {'es': 'Responsabilidad'},
+'Altimetric': {'es': 'Altimétrico'},
+'Planimetric': {'es': 'Planimétrico'},
+'Planialtimetric': {'es': 'Planialtimétrico'},
+'Gravimetric': {'es': 'Gravimétrico'},
+'Other': {'es': 'Otro'},
+'''This tool creates a new GeoPackage file based on the simplified <b>TopoGeo Demo</b> template.
+<p>
+The generated database contains the minimum set of layers required to use the automated documentation tools available in the <b>LFTools</b> plugin, such as the generation of Survey Descriptions and other technical documents.
+</p>
+<h3>Generated layers</h3>
+<ul>
+  <li><code>limit_point_p</code></li>
+  <li><code>boundary_element_l</code></li>
+  <li><code>property_area_a</code></li>
+  <li><code>reference_point_p</code> — optional</li>
+</ul>
+<h3>Important notes</h3>
+<p>
+<b>1.</b> The <code>reference_point_p</code> layer is used exclusively to generate the <b>Geodetic mark report</b>.
+</p>
+<p>
+<b>2.</b> For the LFTools documentation tools to work correctly, the Coordinate Reference System (CRS) of the database <b>must be Geographic</b>.
+</p>
+''': {'es': '''Esta herramienta crea un nuevo archivo GeoPackage basado en la plantilla simplificada <b>TopoGeo Demo</b>.
+<p>
+La base de datos generada contiene el conjunto mínimo de capas necesarias para utilizar las herramientas de documentación automatizada disponibles en el complemento <b>LFTools</b>, como la generación de Memorias Descriptivas y otros documentos técnicos.
+</p>
+<h3>Capas generadas</h3>
+<ul>
+  <li><code>limit_point_p</code></li>
+  <li><code>boundary_element_l</code></li>
+  <li><code>property_area_a</code></li>
+  <li><code>reference_point_p</code> — opcional</li>
+</ul>
+<h3>Notas importantes</h3>
+<p>
+<b>1.</b> La capa <code>reference_point_p</code> se utiliza exclusivamente para generar la <b>Monografía del Marco Geodésico</b>.
+</p>
+<p>
+<b>2.</b> Para que las herramientas de documentación del <b>LFTools</b> funcionen correctamente, el Sistema de Referencia de Coordenadas (SRC) de la base de datos <b>debe ser Geográfico</b>.
+</p>
+'''},
 
  }
