@@ -139,6 +139,8 @@ from .processing_provider.Drone_exportToDJI_KML import ExportToDJI_KML
 from .processing_provider.Drone_CreateGCPfile_Agisoft import CreateGCPfileAgisoft
 from .processing_provider.Vector_LightGeometryCleanup import LightGeometryCleanup
 from .processing_provider.Relief_ThematicSlope import ThematicSlope
+from .processing_provider.Doc_CreateTopoGeo import CreateTopoGeo
+
 
 class LFToolsProvider(QgsProcessingProvider):
 
@@ -261,7 +263,8 @@ class LFToolsProvider(QgsProcessingProvider):
         self.addAlgorithm(ExportToDJI_KML())
         self.addAlgorithm(CreateGCPfileAgisoft())
         self.addAlgorithm(LightGeometryCleanup())
-        self.addAlgorithm(ThematicSlope())    
+        self.addAlgorithm(ThematicSlope())
+        self.addAlgorithm(CreateTopoGeo())
 
     def id(self):
         return 'lftools'
