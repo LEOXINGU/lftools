@@ -15,36 +15,16 @@ __author__ = 'Leandro França'
 __date__ = '2024-10-19'
 __copyright__ = '(C) 2024, Leandro França'
 
-from qgis.core import (QgsProcessing,
-                       QgsFeatureSink,
-                       QgsWkbTypes,
-                       QgsVectorLayer,
-                       QgsFields,
-                       QgsField,
-                       QgsPoint,
-                       QgsFeature,
-                       QgsGeometry,
-                       QgsVectorFileWriter,
+from qgis.core import (QgsVectorLayer,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
                        QgsProcessingParameterFile,
-                       QgsProcessingParameterEnum,
-                       QgsProcessingParameterNumber,
-                       QgsFeatureRequest,
-                       QgsProcessingUtils,
-                       QgsProcessingParameterFeatureSource,
-                       QgsProcessingParameterFeatureSink,
                        QgsProcessingParameterFileDestination,
-                       QgsProcessingParameterRasterLayer,
-                       QgsProcessingParameterRasterDestination,
                        QgsApplication,
                        QgsProcessingParameterCrs,
                        QgsProcessingParameterBoolean,
                        QgsProject,
-                       QgsRasterLayer,
-                       QgsCoordinateTransform,
-                       QgsProcessingLayerPostProcessorInterface,
-                       QgsCoordinateReferenceSystem)
+                       QgsCoordinateTransform)
 
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
