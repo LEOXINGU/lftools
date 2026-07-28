@@ -32,6 +32,7 @@ import sys
 import inspect
 
 from qgis.core import (QgsProject,
+                       Qgis,
                        QgsCoordinateTransform,
                        QgsApplication,
                        QgsExpression)
