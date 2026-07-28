@@ -1649,5 +1649,6 @@ La base de datos generada contiene el conjunto mínimo de capas necesarias para 
 <b>2.</b> Para que las herramientas de documentación del <b>LFTools</b> funcionen correctamente, el Sistema de Referencia de Coordenadas (SRC) de la base de datos <b>debe ser Geográfico</b>.
 </p>
 '''},
+'There is no feature in the layer!': {'es': '¡No hay ninguna entidad en la capa!'},
 
  }
