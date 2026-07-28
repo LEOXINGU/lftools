@@ -485,7 +485,7 @@ def removespetialchar (text, feature, parent):
     nfkd = unicodedata.normalize('NFKD', text)
     palavraSemAcento = u"".join([c for c in nfkd if not unicodedata.combining(c)])
     # Usa expressão regular para retornar a palavra apenas com números, letras e espaço
-    return re.sub('[^a-zA-Z0-9 \\\]', '', palavraSemAcento)
+    return re.sub(r'[^a-zA-Z0-9 \\]', '', palavraSemAcento)
 
 
 @qgsfunction(args='auto', group='LF Tools')
@@ -569,7 +569,7 @@ def img2html(filepath, size, feature, parent):
     <h2>Examples:</h2>
     <ul>
       <li>img2html (filepath, size) -> HTML </li>
-      <li>img2html ('C:\photos\test.jpg', 350) -> HTML </li>
+      <li>img2html ('C:/photos/test.jpg', 350) -> HTML </li>
     </ul>
     """
 
