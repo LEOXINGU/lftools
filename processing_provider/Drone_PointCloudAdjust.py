@@ -241,8 +241,6 @@ class PointCloudAdjust(QgsProcessingAlgorithm):
         Percent = 100.0/total_lines if total_lines else 0
 
         for current, line in enumerate(arq_in.readlines()):
-            print(line)
-            print(line.split(' '))
             try:
                 lista = line.split(' ')
                 if len(lista) == 3:
