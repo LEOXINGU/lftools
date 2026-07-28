@@ -1113,7 +1113,7 @@ except:
     ALT_CLAMP_RELATIVE = Qgs3DTypes.AltClampRelative
     ALT_CLAMP_TERRAIN  = Qgs3DTypes.AltClampTerrain
 
-def simbologiaPontos3D(forma = QgsPoint3DSymbol.Cube, 
+def simbologiaPontos3D(forma = Qgis.Point3DShape.Cube, 
                        props = {"size": 1.2 }, 
                        altitude = ALT_CLAMP_ABSOLUTE,
                        cor_difusa=QColor(122, 122, 122), 
