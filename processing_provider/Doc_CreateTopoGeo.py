@@ -209,9 +209,6 @@ O banco de dados gerado contém o conjunto mínimo de camadas necessário para u
                     'A pasta de saída selecionada não existe!'
                 )
             )
-        
-        print(output_gpkg )
-        print( output_directory)
 
         output_crs = self.parameterAsCrs(
             parameters,
