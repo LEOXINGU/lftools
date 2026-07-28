@@ -15,7 +15,7 @@ __author__ = 'Leandro França'
 __date__ = '2021-01-12'
 __copyright__ = '(C) 2021, Leandro França'
 
-from qgis.core import (QgsProcessing,
+from qgis.core import (Qgis,
                        QgsPointXY,
                        QgsGeometry,
                        QgsProcessingException,
@@ -30,7 +30,6 @@ from qgis.core import (QgsProcessing,
                        QgsApplication,
                        QgsProject,
                        QgsRasterLayer,
-                       QgsCoordinateTransform,
                        QgsCoordinateReferenceSystem)
 
 from osgeo import osr, gdal_array, gdal #https://gdal.org/python/
@@ -106,7 +105,7 @@ class MosaicRaster(QgsProcessingAlgorithm):
             QgsProcessingParameterMultipleLayers(
                 self.RASTERLIST,
                 self.tr('Raster List', 'Lista de Rasters'),
-                layerType = QgsProcessing.TypeRaster
+                layerType = Qgis.ProcessingSourceType.TypeRaster
             )
         )
 
@@ -162,7 +161,7 @@ class MosaicRaster(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.FRAME,
                 self.tr('Clip by frame', 'Cortar pela moldura'),
-                [QgsProcessing.TypeVectorPolygon],
+                [Qgis.ProcessingSourceType.TypeVectorPolygon],
                 optional = True
             )
         )

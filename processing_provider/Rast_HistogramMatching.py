@@ -15,35 +15,16 @@ __author__ = 'Leandro França'
 __date__ = '2023-06-18'
 __copyright__ = '(C) 2023, Leandro França'
 
-from qgis.core import (QgsProcessing,
-                       QgsFeatureSink,
-                       QgsWkbTypes,
-                       QgsFields,
-                       QgsField,
-                       QgsFeature,
-                       QgsPointXY,
-                       QgsGeometry,
+from qgis.core import (Qgis,
                        QgsProject,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
-                       QgsProcessingParameterString,
-                       QgsProcessingParameterBand,
                        QgsProcessingParameterBoolean,
-                       QgsProcessingParameterCrs,
-                       QgsProcessingParameterEnum,
-                       QgsFeatureRequest,
-                       QgsExpression,
-                       QgsProcessingParameterFeatureSource,
-                       QgsProcessingParameterFeatureSink,
                        QgsProcessingParameterFileDestination,
-                       QgsProcessingParameterMultipleLayers,
                        QgsProcessingParameterRasterLayer,
-                       QgsProcessingParameterRasterDestination,
                        QgsApplication,
                        QgsProject,
-                       QgsRasterLayer,
-                       QgsCoordinateTransform,
-                       QgsCoordinateReferenceSystem)
+                       QgsRasterLayer)
 
 from math import floor, ceil
 from osgeo import osr, gdal_array, gdal #https://gdal.org/python/
@@ -109,7 +90,7 @@ class HistogramMatching(QgsProcessingAlgorithm):
             QgsProcessingParameterRasterLayer(
                 self.INPUT,
                 self.tr('Input Raster', 'Raster a ser ajustado'),
-                [QgsProcessing.TypeRaster]
+                [Qgis.ProcessingSourceType.TypeRaster]
             )
         )
 
@@ -117,7 +98,7 @@ class HistogramMatching(QgsProcessingAlgorithm):
             QgsProcessingParameterRasterLayer(
                 self.REFERENCE,
                 self.tr('Reference raster', 'Referência'),
-                [QgsProcessing.TypeRaster]
+                [Qgis.ProcessingSourceType.TypeRaster]
             )
         )
 
@@ -125,7 +106,7 @@ class HistogramMatching(QgsProcessingAlgorithm):
         #     QgsProcessingParameterFeatureSource(
         #         self.POLYGONS,
         #         self.tr('Polygons', 'Polígonos'),
-        #         [QgsProcessing.TypeVectorPolygon]
+        #         [Qgis.ProcessingSourceType.TypeVectorPolygon]
         #     )
         # )
 

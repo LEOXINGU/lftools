@@ -18,17 +18,14 @@ __copyright__ = '(C) 2025, Leandro França'
 from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (QgsApplication,
                        QgsProcessingParameterVectorLayer,
-                       QgsProcessing,
-                       QgsWkbTypes,
+                       Qgis,
                        QgsFields,
                        QgsField,
                        QgsFeature,
                        QgsProcessingParameterCrs,
                        QgsCoordinateTransform,
                        QgsProject,
-                       QgsProcessingParameterEnum,
                        QgsProcessingParameterNumber,
-                       QgsProcessingParameterBoolean,
                        QgsProcessingParameterFileDestination,
                        QgsFeatureSink,
                        QgsProcessingException,
@@ -102,7 +99,7 @@ class ExportToCloudCompare(QgsProcessingAlgorithm):
             QgsProcessingParameterVectorLayer(
                 self.POINTS,
                 self.tr('Point Layer', 'Camada de Pontos'),
-                [QgsProcessing.TypeVectorPoint]
+                [Qgis.ProcessingSourceType.TypeVectorPoint]
             )
         )
 
@@ -150,7 +147,7 @@ class ExportToCloudCompare(QgsProcessingAlgorithm):
             raise QgsProcessingException(self.invalidSourceError(parameters, self.POINTS))
 
         # Verificar se a camada de entrada é do tipo PointZ
-        if pontos.wkbType() != QgsWkbTypes.PointZ:
+        if pontos.wkbType() != Qgis.WkbType.PointZ:
             raise QgsProcessingException(self.tr('Input point layer must have PointZ geometry!', 'Camada de pontos de entrada deve ter geometria do tipo PointZ!'))
 
 
@@ -227,7 +224,7 @@ class ExportToCloudCompare(QgsProcessingAlgorithm):
             feat2.setGeometry(geom)
             att = [float(X), float(Y), float(Z), int(R), int(G), int(B)]
             feat2.setAttributes(att)
-            sink.addFeature(feat2, QgsFeatureSink.FastInsert)
+            sink.addFeature(feat2, QgsFeatureSink.Flag.FastInsert)
 
             if feedback.isCanceled():
                 break

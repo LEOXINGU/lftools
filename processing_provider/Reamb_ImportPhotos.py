@@ -19,11 +19,10 @@ from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (QgsApplication,
                        QgsGeometry,
                        QgsPoint,
-                       QgsWkbTypes,
+                       Qgis,
                        QgsFeature,
                        QgsField,
                        QgsFields,
-                       QgsAction,
                        QgsCoordinateReferenceSystem,
                        QgsProcessingParameterFile,
                        QgsProcessingParameterBoolean,
@@ -104,7 +103,7 @@ class ImportPhotos(QgsProcessingAlgorithm):
             QgsProcessingParameterFile(
                 self.FOLDER,
                 self.tr('Folder with geotagged photos', 'Pasta de fotos com Geotag'),
-                behavior=QgsProcessingParameterFile.Folder,
+                behavior=Qgis.ProcessingFileParameterBehavior.Folder,
                 defaultValue=None
             )
         )
@@ -150,7 +149,7 @@ class ImportPhotos(QgsProcessingAlgorithm):
             QgsProcessingParameterFile(
                 self.NONGEO,
                 self.tr('Folder to copy the photos without geotag', 'Pasta para copiar as fotos sem geotag'),
-                behavior=QgsProcessingParameterFile.Folder,
+                behavior=Qgis.ProcessingFileParameterBehavior.Folder,
                 defaultValue=None,
                 optional = True
             )
@@ -313,7 +312,7 @@ class ImportPhotos(QgsProcessingAlgorithm):
             self.OUTPUT,
             context,
             fields,
-            QgsWkbTypes.PointZ,
+            Qgis.WkbType.PointZ,
             crs
         )
         if sink is None:
@@ -380,7 +379,7 @@ class ImportPhotos(QgsProcessingAlgorithm):
                             att[4] = FlightYaw
                             att += [FlightYaw, FlightPitch, FlightRoll, GimbalYaw, GimbalPitch, GimbalRoll]
                         feature.setAttributes(att)
-                        sink.addFeature(feature, QgsFeatureSink.FastInsert)
+                        sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
                     else:
                         if YPR:
                             Atributos += [[arquivo, lon, lat, altitude, Az, date_time, filepath, fabricante, modelo, FlightYaw, FlightPitch, FlightRoll, GimbalYaw, GimbalPitch, GimbalRoll]]
@@ -460,7 +459,7 @@ class ImportPhotos(QgsProcessingAlgorithm):
                             if YPR:
                                 att += [FlightYaw, FlightPitch, FlightRoll, GimbalYaw, GimbalPitch, GimbalRoll]
                             feature.setAttributes(att)
-                            sink.addFeature(feature, QgsFeatureSink.FastInsert)
+                            sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
                         else:
                             if YPR:
                                 Atributos += [[arquivo, lon, lat, altitude, Az, date_time, filepath, fabricante, modelo, FlightYaw, FlightPitch, FlightRoll, GimbalYaw, GimbalPitch, GimbalRoll]]
@@ -494,7 +493,7 @@ class ImportPhotos(QgsProcessingAlgorithm):
                 h = att[3] if att[3] != None else 0
                 feature.setGeometry(QgsGeometry(QgsPoint(float(lon), float(lat), float(h))))
                 feature.setAttributes(att)
-                sink.addFeature(feature, QgsFeatureSink.FastInsert)
+                sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
 
         feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
         feedback.pushInfo(self.tr('Leandro Franca - Cartographic Engineer', 'Leandro França - Eng Cart'))

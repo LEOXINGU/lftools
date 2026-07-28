@@ -108,7 +108,7 @@ class Accuracy_Horizontal(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.INPUT,
                 self.tr('Discrepancy vectors', 'Vetores de discrepância'),
-                [QgsProcessing.TypeVectorLine]
+                [Qgis.ProcessingSourceType.TypeVectorLine]
             )
         )
 
@@ -236,7 +236,7 @@ class Accuracy_Horizontal(QgsProcessingAlgorithm):
             feature = QgsFeature(Fields)
             feature.setGeometry(geom)
             feature.setAttributes(att + [float(deltax), float(deltay), float(discrep_xy)])
-            sink.addFeature(feature, QgsFeatureSink.FastInsert)
+            sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
             if feedback.isCanceled():
                 break
             feedback.setProgress(int((current+1) * total))

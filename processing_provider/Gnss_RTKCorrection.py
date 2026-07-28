@@ -16,9 +16,8 @@ __date__ = '2022-06-13'
 __copyright__ = '(C) 2022, Leandro França'
 
 from qgis.PyQt.QtCore import QMetaType
-from qgis.core import (QgsProcessing,
+from qgis.core import (Qgis,
                        QgsFeatureSink,
-                       QgsWkbTypes,
                        QgsField,
                        QgsPoint,
                        QgsFeature,
@@ -144,7 +143,7 @@ class RTKCorrection(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.INPUT,
                 self.tr('GNSS RTK Point Layer', 'Camada de Pontos GNSS RTK'),
-                [QgsProcessing.TypeVectorPoint]
+                [Qgis.ProcessingSourceType.TypeVectorPoint]
             )
         )
 
@@ -237,7 +236,7 @@ class RTKCorrection(QgsProcessingAlgorithm):
                             'WKT inválido para {}: {}'.format(descricao, wkt_texto))
                 )
 
-            if geom.isNull() or geom.type() != QgsWkbTypes.PointGeometry:
+            if geom.isNull() or geom.type() != Qgis.WkbType.PointGeometry:
                 raise QgsProcessingException(
                     self.tr('Invalid {} WKT: {}'.format(descricao, wkt_texto),
                             'WKT inválido para {}: {}'.format(descricao, wkt_texto))
@@ -271,7 +270,7 @@ class RTKCorrection(QgsProcessingAlgorithm):
         )
         if layer is None:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.INPUT))
-        if layer.wkbType() != QgsWkbTypes.PointZ:
+        if layer.wkbType() != Qgis.WkbType.PointZ:
             raise QgsProcessingException(self.tr('Input points layer must be of type PointZ!', 'Camada de pontos de entrada deve ser do tipo PointZ!'))
 
         # Transformação para o SGR da camada
@@ -349,7 +348,7 @@ class RTKCorrection(QgsProcessingAlgorithm):
         for item in itens:
             Fields.append(QgsField(item, itens[item]))
 
-        (sink, dest_id) = self.parameterAsSink( parameters, self.OUTPUT, context, Fields, QgsWkbTypes.PointZ, GRS)
+        (sink, dest_id) = self.parameterAsSink( parameters, self.OUTPUT, context, Fields, Qgis.WkbType.PointZ, GRS)
         if sink is None:
             raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT))
 
@@ -461,7 +460,7 @@ class RTKCorrection(QgsProcessingAlgorithm):
             if propagate_sigmas:
                 att += [float(sigma_x_adj), float(sigma_y_adj), float(sigma_z_adj)]
             feature.setAttributes( att )
-            sink.addFeature(feature, QgsFeatureSink.FastInsert)
+            sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
 
             # Guardar dados para o relatório
             row = [

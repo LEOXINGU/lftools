@@ -17,17 +17,14 @@ __copyright__ = '(C) 2020, Leandro França'
 
 from qgis.core import (QgsApplication,
                        QgsProcessingParameterVectorLayer,
-                       QgsGeometry,
-                       QgsProcessing,
+                       Qgis,
                        QgsProject,
                        QgsProcessingParameterField,
                        QgsProcessingParameterEnum,
                        QgsProcessingParameterBoolean,
-                       QgsFeatureSink,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
-                       QgsCoordinateTransform,
-                       QgsProcessingParameterFeatureSink)
+                       QgsCoordinateTransform)
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
 from lftools.geocapt.cartography import OrientarPoligono
@@ -91,7 +88,7 @@ class SequencePoints(QgsProcessingAlgorithm):
             QgsProcessingParameterVectorLayer(
                 self.POINTS,
                 self.tr('Points', 'Pontos'),
-                [QgsProcessing.TypeVectorPoint]
+                [Qgis.ProcessingSourceType.TypeVectorPoint]
             )
         )
 
@@ -108,7 +105,7 @@ class SequencePoints(QgsProcessingAlgorithm):
                 self.FIELD,
                 self.tr('Sequence Field', 'Campo de ordenação dos vértices'),
                 parentLayerParameterName = self.POINTS,
-                type = QgsProcessingParameterField.Numeric
+                type = Qgis.ProcessingFieldParameterDataType.Numeric
             )
         )
 
@@ -116,7 +113,7 @@ class SequencePoints(QgsProcessingAlgorithm):
             QgsProcessingParameterVectorLayer(
                 self.POLYGON,
                 self.tr('Polygon', 'Polígono'),
-                [QgsProcessing.TypeVectorPolygon]
+                [Qgis.ProcessingSourceType.TypeVectorPolygon]
             )
         )
 

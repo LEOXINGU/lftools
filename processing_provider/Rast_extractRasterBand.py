@@ -15,34 +15,16 @@ __author__ = 'Leandro França'
 __date__ = '2020-12-15'
 __copyright__ = '(C) 2020, Leandro França'
 
-from qgis.core import (QgsProcessing,
-                       QgsFeatureSink,
-                       QgsWkbTypes,
-                       QgsFields,
-                       QgsField,
-                       QgsFeature,
-                       QgsPointXY,
-                       QgsGeometry,
+from qgis.core import (Qgis,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
-                       QgsProcessingParameterString,
-                       QgsProcessingParameterField,
                        QgsProcessingParameterBoolean,
-                       QgsProcessingParameterCrs,
-                       QgsProcessingParameterEnum,
-                       QgsFeatureRequest,
-                       QgsExpression,
-                       QgsProcessingParameterFeatureSource,
-                       QgsProcessingParameterFeatureSink,
                        QgsProcessingParameterFileDestination,
                        QgsProcessingParameterRasterLayer,
                        QgsProcessingParameterBand,
-                       QgsProcessingParameterRasterDestination,
                        QgsApplication,
                        QgsProject,
-                       QgsRasterLayer,
-                       QgsCoordinateTransform,
-                       QgsCoordinateReferenceSystem)
+                       QgsRasterLayer)
 
 from osgeo import osr, gdal_array, gdal #https://gdal.org/python/
 from lftools.geocapt.imgs import Imgs
@@ -110,7 +92,7 @@ class ExtractRasterBand(QgsProcessingAlgorithm):
             QgsProcessingParameterRasterLayer(
                 self.INPUT,
                 self.tr('Multiband Input Raster', 'Raster multibandas'),
-                [QgsProcessing.TypeRaster]
+                [Qgis.ProcessingSourceType.TypeRaster]
             )
         )
 

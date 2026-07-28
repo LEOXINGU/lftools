@@ -20,18 +20,14 @@ from qgis.core import (QgsApplication,
                        QgsProcessingParameterVectorLayer,
                        QgsGeometry,
                        QgsField,
-                       QgsProcessing,
-                       QgsProject,
+                       Qgis,
                        QgsProcessingParameterField,
                        QgsProcessingParameterEnum,
                        QgsProcessingParameterBoolean,
                        QgsProcessingParameterNumber,
                        QgsProcessingParameterString,
-                       QgsFeatureSink,
                        QgsProcessingException,
-                       QgsProcessingAlgorithm,
-                       QgsCoordinateTransform,
-                       QgsProcessingParameterFeatureSink)
+                       QgsProcessingAlgorithm)
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
 import os
@@ -96,7 +92,7 @@ class LineSequence(QgsProcessingAlgorithm):
             QgsProcessingParameterVectorLayer(
                 self.LINHAS,
                 self.tr('Line layer', 'Camada de linhas'),
-                [QgsProcessing.TypeVectorLine]
+                [Qgis.ProcessingSourceType.TypeVectorLine]
             )
         )
 

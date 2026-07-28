@@ -24,14 +24,8 @@ from qgis.core import (QgsApplication,
                        QgsProject,
                        QgsFields,
                        QgsField,
-                       QgsWkbTypes,
-                       QgsLineString,
-                       QgsPolygon,
-                       QgsPoint,
+                       Qgis,
                        QgsPointXY,
-                       QgsProcessingParameterField,
-                       QgsProcessingParameterEnum,
-                       QgsProcessingParameterBoolean,
                        QgsProcessingParameterNumber,
                        QgsFeatureSink,
                        QgsProcessingException,
@@ -102,7 +96,7 @@ class FramesFromLines(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.LINES,
                 self.tr('Line layer', 'Camada de linhas'),
-                [QgsProcessing.TypeVectorLine]
+                [Qgis.ProcessingSourceType.TypeVectorLine]
             )
         )
 
@@ -181,7 +175,7 @@ class FramesFromLines(QgsProcessingAlgorithm):
             self.OUTPUT,
             context,
             Fields,
-            QgsWkbTypes.Polygon,
+            Qgis.WkbType.Polygon,
             SRC
         )
         if sink is None:
@@ -310,7 +304,7 @@ class FramesFromLines(QgsProcessingAlgorithm):
                 att = LIST_ATT[index]
                 feature.setGeometry(geom)
                 feature.setAttributes(att)
-                sink.addFeature(feature, QgsFeatureSink.FastInsert)
+                sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
 
             if feedback.isCanceled():
                 break

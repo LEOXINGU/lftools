@@ -259,7 +259,7 @@ class Extent2UTMGrid(QgsProcessingAlgorithm):
         if zone_hemisf:
             Fields.append(QgsField(self.tr('zone_hemisphere', 'fuso_hemisfério'), QMetaType.Type.QString))
 
-        GeomType = QgsWkbTypes.Polygon
+        GeomType = Qgis.WkbType.Polygon
 
         (sink2, dest2_id) = self.parameterAsSink(
             parameters,
@@ -349,7 +349,7 @@ class Extent2UTMGrid(QgsProcessingAlgorithm):
                 # Coordinate Transformations (if needed)
                 geom = geom if crs.isGeographic() else reprojectPoints(geom, coordinateTransformer)
                 feat.setGeometry(geom)
-                sink2.addFeature(feat, QgsFeatureSink.FastInsert)
+                sink2.addFeature(feat, QgsFeatureSink.Flag.FastInsert)
                 current += 1
                 feedback.setProgress(int(current * Percent))
 

@@ -21,17 +21,13 @@ from qgis.core import (
     QgsField,
     QgsFields,
     QgsGeometry,
-    QgsProcessing,
+    Qgis,
     QgsProcessingAlgorithm,
     QgsProcessingException,
     QgsProcessingParameterBoolean,
     QgsProcessingParameterFeatureSink,
     QgsProcessingParameterVectorLayer,
-    QgsFeatureRequest,
-    QgsProject,
-    QgsVectorLayer,
-    QgsWkbTypes
-)
+    QgsFeatureRequest)
 
 from qgis.PyQt.QtCore import QMetaType
 from qgis.PyQt.QtGui import QIcon
@@ -120,7 +116,7 @@ Obs.: Geometrias inválidas não são corrigidas nem removidas por esta ferramen
             QgsProcessingParameterVectorLayer(
                 self.INPUT,
                 self.tr('Input Layer', 'Camada de entrada'),
-                [QgsProcessing.TypeVectorAnyGeometry]
+                [Qgis.ProcessingSourceType.TypeVectorAnyGeometry]
             )
         )
 
@@ -144,7 +140,7 @@ Obs.: Geometrias inválidas não são corrigidas nem removidas por esta ferramen
             QgsProcessingParameterFeatureSink(
                 self.OUTPUT,
                 self.tr('Output table of removed features', 'Tabela de saída das feições removidas'),
-                QgsProcessing.TypeVector
+                Qgis.ProcessingSourceType.TypeVector
             )
         )
 
@@ -240,7 +236,7 @@ Obs.: Geometrias inválidas não são corrigidas nem removidas por esta ferramen
             self.OUTPUT,
             context,
             sink_fields,
-            QgsWkbTypes.NoGeometry,
+            Qgis.WkbType.NoGeometry,
             layer.sourceCrs()
         )
         if sink is None:
@@ -332,7 +328,7 @@ Obs.: Geometrias inválidas não são corrigidas nem removidas por esta ferramen
         # 2) Remover vértices duplicados para linhas e polígonos
         # ------------------------------------------------------------------
         geom_type = layer.geometryType()
-        if geom_type in (QgsWkbTypes.LineGeometry, QgsWkbTypes.PolygonGeometry) and remaining_ids:
+        if geom_type in (Qgis.GeometryType.Line, Qgis.WkbType.PolygonGeometry) and remaining_ids:
 
             feedback.pushInfo(self.tr(
                 'Removing duplicate vertices...',

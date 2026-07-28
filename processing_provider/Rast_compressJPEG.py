@@ -15,35 +15,16 @@ __author__ = 'Leandro França'
 __date__ = '2020-11-25'
 __copyright__ = '(C) 2020, Leandro França'
 
-from qgis.core import (QgsProcessing,
-                       QgsFeatureSink,
-                       QgsWkbTypes,
-                       QgsFields,
-                       QgsField,
-                       QgsFeature,
-                       QgsPointXY,
-                       QgsGeometry,
+from qgis.core import (Qgis,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
-                       QgsProcessingParameterString,
-                       QgsProcessingParameterNumber,
-                       QgsProcessingParameterField,
                        QgsProcessingParameterBoolean,
-                       QgsProcessingParameterCrs,
                        QgsProcessingParameterEnum,
-                       QgsFeatureRequest,
-                       QgsExpression,
-                       QgsProcessingParameterFeatureSource,
-                       QgsProcessingParameterFeatureSink,
                        QgsProcessingParameterFileDestination,
-                       QgsProcessingParameterMultipleLayers,
                        QgsProcessingParameterRasterLayer,
-                       QgsProcessingParameterRasterDestination,
                        QgsApplication,
                        QgsProject,
-                       QgsRasterLayer,
-                       QgsCoordinateTransform,
-                       QgsCoordinateReferenceSystem)
+                       QgsRasterLayer)
 
 from osgeo import osr, gdal_array, gdal #https://gdal.org/python/
 from lftools.geocapt.imgs import Imgs
@@ -113,7 +94,7 @@ class CompressJPEG(QgsProcessingAlgorithm):
             QgsProcessingParameterRasterLayer(
                 self.RasterIN,
                 self.tr('RGB Raster', 'Raster RGB'),
-                [QgsProcessing.TypeRaster]
+                [Qgis.ProcessingSourceType.TypeRaster]
             )
         )
 

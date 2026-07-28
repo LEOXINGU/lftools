@@ -17,12 +17,9 @@ __date__ = '2021-02-13'
 __copyright__ = '(C) 2021, Leandro França'
 
 from qgis.core import (QgsApplication,
-                       QgsProcessingParameterVectorLayer,
+                       Qgis,
                        QgsGeometry,
                        QgsFeature,
-                       QgsProcessing,
-                       QgsProcessingParameterField,
-                       QgsProcessingParameterBoolean,
                        QgsProcessingParameterEnum,
                        QgsProcessingParameterNumber,
                        QgsFeatureSink,
@@ -91,7 +88,7 @@ class DirectionalMerge(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.LINES,
                 self.tr('Line Layer', 'Camada de Linhas'),
-                [QgsProcessing.TypeVectorLine]
+                [Qgis.ProcessingSourceType.TypeVectorLine]
             )
         )
 
@@ -323,7 +320,7 @@ class DirectionalMerge(QgsProcessingAlgorithm):
             fet = QgsFeature()
             fet.setGeometry(QgsGeometry.fromPolylineXY(item[0]))
             fet.setAttributes(item[1])
-            sink.addFeature(fet, QgsFeatureSink.FastInsert)
+            sink.addFeature(fet, QgsFeatureSink.Flag.FastInsert)
             if feedback.isCanceled():
                 break
             feedback.setProgress(int((k+1) * total))

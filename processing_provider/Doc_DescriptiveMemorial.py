@@ -21,7 +21,7 @@ __author__ = 'Leandro França'
 __date__ = 'Sept 22'
 __copyright__ = '(C) 2019, Leandro França'
 
-from qgis.core import (QgsProcessing,
+from qgis.core import (Qgis,
                        QgsProject,
                        QgsPoint,
                        QgsCoordinateTransform,
@@ -124,21 +124,21 @@ class DescriptiveMemorial(QgisAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.INPUT1,
                 self.tr('Boundary Survey Points', 'Pontos de Limite'),
-                types=[QgsProcessing.TypeVectorPoint]
+                types=[Qgis.ProcessingSourceType.TypeVectorPoint]
             )
         )
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT2,
                 self.tr('Neighborhood Dividing Lines', 'Elementos Confrontantes'),
-                types=[QgsProcessing.TypeVectorLine]
+                types=[Qgis.ProcessingSourceType.TypeVectorLine]
             )
         )
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT3,
                 self.tr('Property Polygon', 'Área do Imóvel'),
-                types=[QgsProcessing.TypeVectorPolygon]
+                types=[Qgis.ProcessingSourceType.TypeVectorPolygon]
             )
         )
 
@@ -188,7 +188,7 @@ class DescriptiveMemorial(QgisAlgorithm):
             QgsProcessingParameterFile(
                 self.LOGO,
                 self.tr('Logo (JPEG)', 'Logomarca (JPEG)'),
-                behavior=QgsProcessingParameterFile.File,
+                behavior=Qgis.ProcessingFileParameterBehavior.File,
                 defaultValue=None,
                 fileFilter = 'Image (*.jpeg *.jpg *.JPG)',
                 optional = True

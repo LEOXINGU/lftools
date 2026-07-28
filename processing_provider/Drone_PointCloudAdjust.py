@@ -15,35 +15,16 @@ __author__ = 'Leandro França'
 __date__ = '2023-01-22'
 __copyright__ = '(C) 2023, Leandro França'
 
-from qgis.core import (QgsProcessing,
-                       QgsFeatureSink,
-                       QgsWkbTypes,
-                       QgsFields,
-                       QgsField,
-                       QgsFeature,
+from qgis.core import (Qgis,
                        QgsPointXY,
-                       QgsGeometry,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
-                       QgsProcessingParameterString,
                        QgsProcessingParameterNumber,
-                       QgsProcessingParameterField,
-                       QgsProcessingParameterBoolean,
                        QgsProcessingParameterFile,
                        QgsProcessingParameterEnum,
-                       QgsFeatureRequest,
-                       QgsExpression,
                        QgsProcessingParameterFeatureSource,
-                       QgsProcessingParameterFeatureSink,
                        QgsProcessingParameterFileDestination,
-                       QgsProcessingParameterVectorLayer,
-                       QgsProcessingParameterRasterLayer,
-                       QgsProcessingParameterRasterDestination,
-                       QgsApplication,
-                       QgsProject,
-                       QgsRasterLayer,
-                       QgsCoordinateTransform,
-                       QgsCoordinateReferenceSystem)
+                       QgsApplication)
 
 from osgeo import osr, gdal_array, gdal #https://gdal.org/python/
 import numpy as np
@@ -113,7 +94,7 @@ class PointCloudAdjust(QgsProcessingAlgorithm):
             QgsProcessingParameterFile(
                 self.PC,
                 self.tr('Point Cloud', 'Nuvem de Pontos'),
-                behavior = QgsProcessingParameterFile.File,
+                behavior = Qgis.ProcessingFileParameterBehavior.File,
                 fileFilter = 'Text (*.txt)'
             )
         )
@@ -122,7 +103,7 @@ class PointCloudAdjust(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.VECTORS,
                 self.tr('Vectors Lines (two 3D vertices)', 'Linhas de vetores (dois vértices 3D)'),
-                [QgsProcessing.TypeVectorLine]
+                [Qgis.ProcessingSourceType.TypeVectorLine]
             )
         )
 
@@ -190,7 +171,7 @@ class PointCloudAdjust(QgsProcessingAlgorithm):
             raise QgsProcessingException(self.invalidSourceError(parameters, self.VECTORS))
 
         # Verificar se é 3D
-        if deslc.wkbType() != QgsWkbTypes.LineStringZ:
+        if deslc.wkbType() != Qgis.WkbType.LineStringZ:
             raise QgsProcessingException(self.tr('Input layer must be of type LineStringZ!',
                                                  'Camada de entrada deve ser do tipo LineStringZ!'))
 

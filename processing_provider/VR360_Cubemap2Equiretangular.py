@@ -16,6 +16,7 @@ __date__ = '2025-12-25'
 __copyright__ = '(C) 2025, Leandro França'
 
 from qgis.core import (QgsApplication,
+                       Qgis,
                        QgsProcessingParameterFile,
                        QgsProcessingParameterNumber,
                        QgsProcessingException,
@@ -94,7 +95,7 @@ Quando disponível, os metadados EXIF da imagem original podem ser reaplicados n
             QgsProcessingParameterFile(
                 self.FOLDER,
                 self.tr('Cubemap faces folder', 'Pasta com as faces do cubo'),
-                behavior = QgsProcessingParameterFile.Folder,
+                behavior = Qgis.ProcessingFileParameterBehavior.Folder,
                 defaultValue=None
             )
         )
@@ -113,7 +114,7 @@ Quando disponível, os metadados EXIF da imagem original podem ser reaplicados n
             QgsProcessingParameterFile(
                 self.ORIGIN,
                 self.tr('Original equirectangular image', 'Imagem equiretangular original'),
-                behavior = QgsProcessingParameterFile.File,
+                behavior = Qgis.ProcessingFileParameterBehavior.File,
                 fileFilter = 'Image (*.jpeg *.jpg *.JPG)',
                 optional = True
             )

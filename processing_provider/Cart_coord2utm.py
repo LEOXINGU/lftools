@@ -173,7 +173,7 @@ class Coord2UTMGrid(QgsProcessingAlgorithm):
         Fields.append(QgsField('inom', QMetaType.Type.QString))
         Fields.append(QgsField('mi', QMetaType.Type.QString))
         Fields.append(QgsField(self.tr('scale', 'escala'), QMetaType.Type.Int))
-        GeomType = QgsWkbTypes.Polygon
+        GeomType = Qgis.WkbType.Polygon
 
         (sink2, dest2_id) = self.parameterAsSink(
             parameters,
@@ -236,7 +236,7 @@ class Coord2UTMGrid(QgsProcessingAlgorithm):
 
         feat.setGeometry(geom)
         feat.setAttributes(att)
-        sink2.addFeature(feat, QgsFeatureSink.FastInsert)
+        sink2.addFeature(feat, QgsFeatureSink.Flag.FastInsert)
         if sink2 is None:
             raise QgsProcessingException(self.invalidSinkError(parameters, self.FRAME))
 

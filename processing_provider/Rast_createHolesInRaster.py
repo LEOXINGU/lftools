@@ -15,29 +15,13 @@ __author__ = 'Leandro França'
 __date__ = '2020-09-02'
 __copyright__ = '(C) 2020, Leandro França'
 
-from qgis.core import (QgsProcessing,
-                       QgsFeatureSink,
-                       QgsWkbTypes,
-                       QgsFields,
-                       QgsField,
-                       QgsFeature,
-                       QgsPointXY,
-                       QgsGeometry,
+from qgis.core import (Qgis,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
-                       QgsProcessingParameterString,
-                       QgsProcessingParameterField,
                        QgsProcessingParameterBoolean,
-                       QgsProcessingParameterCrs,
-                       QgsProcessingParameterEnum,
-                       QgsFeatureRequest,
-                       QgsExpression,
                        QgsProcessingParameterFeatureSource,
-                       QgsProcessingParameterFeatureSink,
                        QgsProcessingParameterFileDestination,
-                       QgsProcessingParameterMultipleLayers,
                        QgsProcessingParameterRasterLayer,
-                       QgsProcessingParameterRasterDestination,
                        QgsApplication,
                        QgsProject,
                        QgsRasterLayer,
@@ -111,7 +95,7 @@ class CreateHolesInRaster(QgsProcessingAlgorithm):
             QgsProcessingParameterRasterLayer(
                 self.RasterIN,
                 self.tr('Input Raster', 'Raster de Entrada'),
-                [QgsProcessing.TypeRaster]
+                [Qgis.ProcessingSourceType.TypeRaster]
             )
         )
 
@@ -119,7 +103,7 @@ class CreateHolesInRaster(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.HOLES,
                 self.tr('Polygon layer'),
-                [QgsProcessing.TypeVectorPolygon]
+                [Qgis.ProcessingSourceType.TypeVectorPolygon]
             )
         )
 

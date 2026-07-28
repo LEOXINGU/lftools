@@ -18,11 +18,10 @@ __copyright__ = '(C) 2023, Leandro França'
 from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (QgsApplication,
                        QgsGeometry,
-                       QgsWkbTypes,
+                       Qgis,
                        QgsFeature,
                        QgsField,
                        QgsFields,
-                       QgsProcessing,
                        QgsSpatialIndex,
                        QgsFeatureRequest,
                        QgsProcessingParameterField,
@@ -89,7 +88,7 @@ class AdjoinerLine(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.INPUT,
                 self.tr('Parcels', 'Lotes'),
-                [QgsProcessing.TypeVectorPolygon]
+                [Qgis.ProcessingSourceType.TypeVectorPolygon]
             )
         )
 
@@ -171,7 +170,7 @@ class AdjoinerLine(QgsProcessingAlgorithm):
             self.OUTPUT,
             context,
             Fields,
-            QgsWkbTypes.LineString,
+            Qgis.WkbType.LineString,
             layer.sourceCrs()
         )
         if sink is None:
@@ -316,7 +315,7 @@ class AdjoinerLine(QgsProcessingAlgorithm):
         lista = lista_inter + lista_testada
         feedback.pushInfo(self.tr('Creating new layer...', 'Criando nova camada...'))
         for feat in lista:
-            sink.addFeature(feat, QgsFeatureSink.FastInsert)
+            sink.addFeature(feat, QgsFeatureSink.Flag.FastInsert)
             if feedback.isCanceled():
                 break
 

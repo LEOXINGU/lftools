@@ -115,7 +115,7 @@ class Accuracy_3D(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.TEST,
                 self.tr('Test Points', 'Pontos de Teste'),
-                [QgsProcessing.TypeVectorPoint]
+                [Qgis.ProcessingSourceType.TypeVectorPoint]
             )
         )
         
@@ -123,7 +123,7 @@ class Accuracy_3D(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.REF,
                 self.tr('Reference Points', 'Pontos de Referência'),
-                [QgsProcessing.TypeVectorPoint]
+                [Qgis.ProcessingSourceType.TypeVectorPoint]
             )
         )
 
@@ -257,7 +257,7 @@ class Accuracy_3D(QgsProcessingAlgorithm):
         ValidaZ(teste, self.tr('Test', 'Teste'))
         ValidaZ(ref, self.tr('Reference', 'Referência'))
         
-        (sink, dest_id) = self.parameterAsSink(parameters, self.OUTPUT, context, Fields, QgsWkbTypes.LineStringZ, SRC)
+        (sink, dest_id) = self.parameterAsSink(parameters, self.OUTPUT, context, Fields, Qgis.WkbType.LineStringZ, SRC)
         if sink is None:
             raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT))
         
@@ -313,7 +313,7 @@ class Accuracy_3D(QgsProcessingAlgorithm):
             feature = QgsFeature(Fields)
             feature.setGeometry(QgsLineString([p1, p2]))
             feature.setAttributes([nome, float(deltax), float(deltay), float(deltaz), float(discrep_xy), float(discrep_xyz)])
-            sink.addFeature(feature, QgsFeatureSink.FastInsert)
+            sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
             if feedback.isCanceled():
                 break
             feedback.setProgress(int((current+1) * total))

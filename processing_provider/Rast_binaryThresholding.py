@@ -15,29 +15,15 @@ __author__ = 'Leandro França'
 __date__ = '2021-07-03'
 __copyright__ = '(C) 2021, Leandro França'
 
-from qgis.core import (QgsProcessing,
-                       QgsFeatureSink,
-                       QgsWkbTypes,
-                       QgsFields,
-                       QgsField,
-                       QgsFeature,
-                       QgsPointXY,
-                       QgsGeometry,
+from qgis.core import (Qgis,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
                        QgsProcessingParameterString,
-                       QgsProcessingParameterField,
                        QgsProcessingParameterBoolean,
-                       QgsProcessingParameterCrs,
                        QgsProcessingParameterEnum,
-                       QgsFeatureRequest,
-                       QgsExpression,
                        QgsProcessingParameterFeatureSource,
-                       QgsProcessingParameterFeatureSink,
                        QgsProcessingParameterFileDestination,
-                       QgsProcessingParameterMultipleLayers,
                        QgsProcessingParameterRasterLayer,
-                       QgsProcessingParameterRasterDestination,
                        QgsApplication,
                        QgsProject,
                        QgsRasterLayer,
@@ -45,7 +31,7 @@ from qgis.core import (QgsProcessing,
                        QgsCoordinateReferenceSystem)
 
 from math import floor, ceil
-from osgeo import osr, gdal_array, gdal #https://gdal.org/python/
+from osgeo import gdal #https://gdal.org/python/
 import numpy as np
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
@@ -122,7 +108,7 @@ Uma classe irá corresponder aos valores compreendidos dentro do intervalo dos l
             QgsProcessingParameterRasterLayer(
                 self.RasterIN,
                 self.tr('Input Raster', 'Raster de Entrada'),
-                [QgsProcessing.TypeRaster]
+                [Qgis.ProcessingSourceType.TypeRaster]
             )
         )
 
@@ -130,7 +116,7 @@ Uma classe irá corresponder aos valores compreendidos dentro do intervalo dos l
             QgsProcessingParameterFeatureSource(
                 self.SAMPLES,
                 self.tr('Sample Polygons', 'Polígonos de Amostra'),
-                [QgsProcessing.TypeVectorPolygon, QgsProcessing.TypeVectorPoint],
+                [Qgis.ProcessingSourceType.TypeVectorPolygon, Qgis.ProcessingSourceType.TypeVectorPoint],
                 optional = True
             )
         )
@@ -281,7 +267,7 @@ Uma classe irá corresponder aos valores compreendidos dentro do intervalo dos l
                 coordinateTransformer.setDestinationCrs(SRC_rater)
                 coordinateTransformer.setSourceCrs(layer.sourceCrs())
 
-            try: #poligono if layer.wkbType() == QgsWkbTypes.PolygonGeometry:
+            try: #poligono if layer.wkbType() == Qgis.WkbType.PolygonGeometry:
                 for feat in layer.getFeatures():
                     geom = feat.geometry() if mesmoSRC else reprojectPoints(feat.geometry(), coordinateTransformer)
                     if geom.isMultipart():
@@ -330,7 +316,7 @@ Uma classe irá corresponder aos valores compreendidos dentro do intervalo dos l
                         for y in range(tam[1]):
                             if recorte[x][y]:
                                 valores += [float(recorte_img[x][y])]
-            except: #ponto elif layer.wkbType() == QgsWkbTypes.PointGeometry:
+            except: #ponto elif layer.wkbType() == Qgis.WkbType.PointGeometry:
                 for feat in layer.getFeatures():
                     geom = feat.geometry() if mesmoSRC else reprojectPoints(feat.geometry(), coordinateTransformer)
                     if geom.isMultipart():

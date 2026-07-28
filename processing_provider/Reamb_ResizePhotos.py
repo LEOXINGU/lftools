@@ -17,6 +17,7 @@ __copyright__ = '(C) 2022, Leandro França'
 
 
 from qgis.core import (QgsApplication,
+                       Qgis,
                        QgsProcessingParameterFile,
                        QgsProcessingParameterBoolean,
                        QgsProcessingParameterNumber,
@@ -86,7 +87,7 @@ class ResizePhotos(QgsProcessingAlgorithm):
             QgsProcessingParameterFile(
                 self.INPUT_FOLDER,
                 self.tr('Folder with photos (.jpeg or .jpg)', 'Pasta com fotografias (.jpeg ou .jpg)'),
-                behavior=QgsProcessingParameterFile.Folder,
+                behavior=Qgis.ProcessingFileParameterBehavior.Folder,
                 defaultValue=None
             )
         )
@@ -113,7 +114,7 @@ class ResizePhotos(QgsProcessingAlgorithm):
             QgsProcessingParameterFile(
                 self.OUTPUT_FOLDER,
                 self.tr('Folder for the resized photos', 'Pasta para as fotos redimensionadas'),
-                behavior=QgsProcessingParameterFile.Folder,
+                behavior=Qgis.ProcessingFileParameterBehavior.Folder,
                 defaultValue=None
             )
         )

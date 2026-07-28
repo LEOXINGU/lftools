@@ -18,14 +18,13 @@ __copyright__ = '(C) 2026, Leandro França'
 from qgis.core import (
     QgsApplication,
     QgsProcessingParameterVectorLayer,
-    QgsProcessing,
+    Qgis,
     QgsCoordinateReferenceSystem,
     QgsCoordinateTransform,
     QgsProject,
     QgsProcessingParameterFileDestination,
     QgsProcessingException,
     QgsProcessingAlgorithm,
-    QgsGeometry
 )
 from lftools.geocapt.imgs import Imgs
 from xml.sax.saxutils import escape
@@ -101,7 +100,7 @@ class ExportToDJI_KML(QgsProcessingAlgorithm):
             QgsProcessingParameterVectorLayer(
                 self.POLYGON,
                 self.tr('Polygon Layer', 'Camada de Polígono'),
-                [QgsProcessing.TypeVectorPolygon]
+                [Qgis.ProcessingSourceType.TypeVectorPolygon]
             )
         )
 

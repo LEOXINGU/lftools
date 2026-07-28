@@ -106,7 +106,7 @@ Para posicionamento relativo (RTK/PPK), os desvios-padrão da estação base pod
             QgsProcessingParameterFile(
                 self.FILE,
                 self.tr('POS file (.pos)', 'Arquivo POS (.pos)'),
-                behavior = QgsProcessingParameterFile.File,
+                behavior = Qgis.ProcessingFileParameterBehavior.File,
                 fileFilter = 'POS (*.pos)'
             )
         )
@@ -257,7 +257,7 @@ Para posicionamento relativo (RTK/PPK), os desvios-padrão da estação base pod
         for item in itens:
             Fields.append(QgsField(item, itens[item]))
 
-        (sink, dest_id) = self.parameterAsSink( parameters, self.OUTPUT, context, Fields, QgsWkbTypes.PointZ, crs)
+        (sink, dest_id) = self.parameterAsSink( parameters, self.OUTPUT, context, Fields, Qgis.WkbType.PointZ, crs)
         if sink is None:
             raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT))
 
@@ -379,7 +379,7 @@ Para posicionamento relativo (RTK/PPK), os desvios-padrão da estação base pod
 
             if saida == 0:
                 feat.setGeometry(QgsPoint(lon, lat, h))
-                sink.addFeature(feat, QgsFeatureSink.FastInsert)
+                sink.addFeature(feat, QgsFeatureSink.Flag.FastInsert)
             if feedback.isCanceled():
                 break
             feedback.setProgress(int((k+1) * total))
@@ -397,7 +397,7 @@ Para posicionamento relativo (RTK/PPK), os desvios-padrão da estação base pod
                 feat['lat'] = float(lat)
                 feat['lon'] = float(lon)
             feat.setGeometry(QgsPoint(lon, lat, h))
-            sink.addFeature(feat, QgsFeatureSink.FastInsert)
+            sink.addFeature(feat, QgsFeatureSink.Flag.FastInsert)
 
         feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
         feedback.pushInfo(self.tr('Leandro Franca - Cartographic Engineer', 'Leandro França - Eng Cart'))

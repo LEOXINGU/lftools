@@ -18,15 +18,10 @@ __copyright__ = '(C) 2021, Leandro França'
 
 from qgis.core import (QgsApplication,
                        QgsProcessingParameterVectorLayer,
-                       QgsGeometry,
-                       QgsProcessing,
-                       QgsProcessingParameterField,
+                       Qgis,
                        QgsProcessingParameterBoolean,
-                       QgsFeatureSink,
                        QgsProcessingException,
-                       QgsProcessingAlgorithm,
-                       QgsProcessingParameterFeatureSource,
-                       QgsProcessingParameterFeatureSink)
+                       QgsProcessingAlgorithm)
 from lftools.geocapt.imgs import Imgs
 from lftools.geocapt.cartography import inv_vertex_order
 from lftools.translations.translate import translate
@@ -89,8 +84,8 @@ class ReverseVertexOrder(QgsProcessingAlgorithm):
             QgsProcessingParameterVectorLayer(
                 self.INPUT,
                 self.tr('Input Layer', 'Camada de entrada'),
-                [QgsProcessing.TypeVectorLine,
-                 QgsProcessing.TypeVectorPolygon]
+                [Qgis.ProcessingSourceType.TypeVectorLine,
+                 Qgis.ProcessingSourceType.TypeVectorPolygon]
             )
         )
 

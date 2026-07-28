@@ -16,9 +16,8 @@ __date__ = '2020-11-29'
 __copyright__ = '(C) 2020, Leandro França'
 
 from qgis.PyQt.QtCore import QMetaType
-from qgis.core import (QgsProcessing,
+from qgis.core import (Qgis,
                        QgsFeatureSink,
-                       QgsWkbTypes,
                        QgsFields,
                        QgsField,
                        QgsFeature,
@@ -27,23 +26,12 @@ from qgis.core import (QgsProcessing,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
                        QgsProcessingParameterString,
-                       QgsProcessingParameterNumber,
-                       QgsProcessingParameterField,
                        QgsProcessingParameterBoolean,
                        QgsProcessingParameterCrs,
                        QgsProcessingParameterEnum,
-                       QgsProcessingParameterMultipleLayers,
-                       QgsProcessingParameterFeatureSource,
-                       QgsProcessingParameterRasterLayer,
                        QgsProcessingParameterFile,
-                       QgsFeatureRequest,
-                       QgsExpression,
                        QgsProcessingParameterFeatureSink,
-                       QgsProcessingParameterFileDestination,
-                       QgsProcessingParameterRasterDestination,
                        QgsApplication,
-                       QgsProject,
-                       QgsRasterLayer,
                        QgsCoordinateTransform,
                        QgsCoordinateReferenceSystem)
 
@@ -117,7 +105,7 @@ class InventoryRaster(QgsProcessingAlgorithm):
             QgsProcessingParameterFile(
                 self.FOLDER,
                 self.tr('Folder with raster files', 'Pasta com arquivos raster'),
-                behavior=QgsProcessingParameterFile.Folder,
+                behavior=Qgis.ProcessingFileParameterBehavior.Folder,
                 defaultValue=None
             )
         )
@@ -196,7 +184,7 @@ class InventoryRaster(QgsProcessingAlgorithm):
         )
 
         # OUTPUT
-        GeomType = QgsWkbTypes.Point if geometria == 1 else QgsWkbTypes.Polygon
+        GeomType = Qgis.WkbType.Point if geometria == 1 else Qgis.WkbType.Polygon
         Fields = QgsFields()
         itens  = {
                      self.tr('name','nome') : QMetaType.Type.QString,
@@ -285,7 +273,7 @@ class InventoryRaster(QgsProcessingAlgorithm):
             feat = QgsFeature()
             feat.setGeometry(geom_transf.centroid()) if geometria == 1 else feat.setGeometry(geom_transf) # centroid or polygon
             feat.setAttributes(att)
-            sink.addFeature(feat, QgsFeatureSink.FastInsert)
+            sink.addFeature(feat, QgsFeatureSink.Flag.FastInsert)
 
             if feedback.isCanceled():
                 break

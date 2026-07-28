@@ -18,7 +18,7 @@ __copyright__ = '(C) 2026, Leandro França'
 from qgis.core import (
     QgsApplication,
     QgsProcessingParameterVectorLayer,
-    QgsProcessing,
+    Qgis,
     QgsProcessingParameterField,
     QgsProcessingParameterCrs,
     QgsCoordinateTransform,
@@ -141,7 +141,7 @@ class CreateGCPfileAgisoft(QgsProcessingAlgorithm):
             QgsProcessingParameterVectorLayer(
                 self.INPUT_LAYER,
                 self.tr('Point Layer', 'Camada de Pontos'),
-                [QgsProcessing.TypeVectorPoint]
+                [Qgis.ProcessingSourceType.TypeVectorPoint]
             )
         )
 
@@ -150,7 +150,7 @@ class CreateGCPfileAgisoft(QgsProcessingAlgorithm):
                 self.NAME_FIELD,
                 self.tr('GCP name', 'Nome do ponto de controle'),
                 parentLayerParameterName=self.INPUT_LAYER,
-                type=QgsProcessingParameterField.Any,
+                type=Qgis.ProcessingFieldParameterDataType.Any,
                 # optional=True
             )
         )
@@ -160,7 +160,7 @@ class CreateGCPfileAgisoft(QgsProcessingAlgorithm):
                 self.Z_FIELD,
                 self.tr('Z Coordinate', 'Coordenada Z'),
                 parentLayerParameterName=self.INPUT_LAYER,
-                type=QgsProcessingParameterField.Any,
+                type=Qgis.ProcessingFieldParameterDataType.Any,
                 optional=True
             )
         )
@@ -170,7 +170,7 @@ class CreateGCPfileAgisoft(QgsProcessingAlgorithm):
                 self.X_ERROR_FIELD,
                 self.tr('X Error', 'Erro em X'),
                 parentLayerParameterName=self.INPUT_LAYER,
-                type=QgsProcessingParameterField.Any,
+                type=Qgis.ProcessingFieldParameterDataType.Any,
                 optional=True
             )
         )
@@ -180,7 +180,7 @@ class CreateGCPfileAgisoft(QgsProcessingAlgorithm):
                 self.Y_ERROR_FIELD,
                 self.tr('Y Error', 'Erro em Y'),
                 parentLayerParameterName=self.INPUT_LAYER,
-                type=QgsProcessingParameterField.Any,
+                type=Qgis.ProcessingFieldParameterDataType.Any,
                 optional=True
             )
         )
@@ -190,7 +190,7 @@ class CreateGCPfileAgisoft(QgsProcessingAlgorithm):
                 self.Z_ERROR_FIELD,
                 self.tr('Z Error', 'Erro em Z'),
                 parentLayerParameterName=self.INPUT_LAYER,
-                type=QgsProcessingParameterField.Any,
+                type=Qgis.ProcessingFieldParameterDataType.Any,
                 optional=True
             )
         )

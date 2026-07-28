@@ -17,7 +17,7 @@ __copyright__ = '(C) 2021, Leandro França'
 
 from qgis.core import (QgsApplication,
                        QgsProcessingParameterVectorLayer,
-                       QgsProcessing,
+                       Qgis,
                        QgsProcessingParameterField,
                        QgsProcessingParameterCrs,
                        QgsCoordinateTransform,
@@ -94,7 +94,7 @@ class CreateGCPfile(QgsProcessingAlgorithm):
             QgsProcessingParameterVectorLayer(
                 self.POINTS,
                 self.tr('Point Layer', 'Camada de Pontos'),
-                [QgsProcessing.TypeVectorPoint]
+                [Qgis.ProcessingSourceType.TypeVectorPoint]
             )
         )
 
@@ -103,7 +103,7 @@ class CreateGCPfile(QgsProcessingAlgorithm):
                 self.NAME,
                 self.tr('GCP name', 'Nome do ponto de controle'),
                 parentLayerParameterName=self.POINTS,
-                type=QgsProcessingParameterField.Any
+                type=Qgis.ProcessingFieldParameterDataType.Any
             )
         )
 
@@ -112,7 +112,7 @@ class CreateGCPfile(QgsProcessingAlgorithm):
                 self.Z_FIELD,
                 self.tr('Z Coordinate', 'Coordenada Z'),
                 parentLayerParameterName=self.POINTS,
-                type=QgsProcessingParameterField.Any,
+                type=Qgis.ProcessingFieldParameterDataType.Any,
                 optional=True
             )
         )

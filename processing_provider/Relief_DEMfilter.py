@@ -15,7 +15,7 @@ __author__ = 'Leandro França'
 __date__ = '2021-12-18'
 __copyright__ = '(C) 2021, Leandro França'
 
-from qgis.core import (QgsProcessing,
+from qgis.core import (Qgis,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
                        QgsProcessingParameterBoolean,
@@ -91,7 +91,7 @@ O processo de filtragem é feito utilizando matrizes denominadas máscaras (ou k
             QgsProcessingParameterRasterLayer(
                 self.INPUT,
                 self.tr('Input Raster', 'Raster de Entrada'),
-                [QgsProcessing.TypeRaster]
+                [Qgis.ProcessingSourceType.TypeRaster]
             )
         )
 

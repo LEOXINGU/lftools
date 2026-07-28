@@ -18,14 +18,10 @@ __copyright__ = '(C) 2022, Leandro França'
 from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (QgsApplication,
                        QgsGeometry,
-                       QgsWkbTypes,
                        QgsFeature,
                        QgsField,
-                       QgsProcessing,
-                       QgsProcessingParameterField,
+                       Qgis,
                        QgsProcessingParameterEnum,
-                       QgsProcessingParameterBoolean,
-                       QgsProcessingParameterNumber,
                        QgsFeatureSink,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
@@ -91,7 +87,7 @@ class FrontLotLine(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.INPUT,
                 self.tr('Parcels', 'Lotes'),
-                [QgsProcessing.TypeVectorPolygon]
+                [Qgis.ProcessingSourceType.TypeVectorPolygon]
             )
         )
 
@@ -151,7 +147,7 @@ class FrontLotLine(QgsProcessingAlgorithm):
             self.OUTPUT,
             context,
             Fields,
-            QgsWkbTypes.LineString,
+            Qgis.WkbType.LineString,
             lotes.sourceCrs()
         )
         if sink is None:
@@ -321,7 +317,7 @@ class FrontLotLine(QgsProcessingAlgorithm):
                     feature = QgsFeature(Fields)
                     feature.setGeometry(feat.geometry())
                     feature.setAttributes(feat.attributes() + [k+1, comprimento, soma])
-                    sink.addFeature(feature, QgsFeatureSink.FastInsert)
+                    sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
                     if feedback.isCanceled():
                         break
 

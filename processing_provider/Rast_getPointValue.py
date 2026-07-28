@@ -16,10 +16,8 @@ __date__ = '2021-11-07'
 __copyright__ = '(C) 2021, Leandro França'
 
 from qgis.PyQt.QtCore import QMetaType
-from qgis.core import (QgsProcessing,
+from qgis.core import (Qgis,
                        QgsFeatureSink,
-                       QgsWkbTypes,
-                       QgsFields,
                        QgsField,
                        QgsFeature,
                        QgsPointXY,
@@ -27,24 +25,13 @@ from qgis.core import (QgsProcessing,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
                        QgsProcessingParameterString,
-                       QgsProcessingParameterNumber,
-                       QgsProcessingParameterField,
-                       QgsProcessingParameterBoolean,
-                       QgsProcessingParameterCrs,
                        QgsProcessingParameterEnum,
-                       QgsProcessingParameterMultipleLayers,
                        QgsProcessingParameterFeatureSource,
                        QgsProcessingParameterRasterLayer,
                        QgsProcessingParameterBand,
-                       QgsProcessingParameterFile,
-                       QgsFeatureRequest,
-                       QgsExpression,
                        QgsProcessingParameterFeatureSink,
-                       QgsProcessingParameterFileDestination,
-                       QgsProcessingParameterRasterDestination,
                        QgsApplication,
                        QgsProject,
-                       QgsRasterLayer,
                        QgsCoordinateTransform,
                        QgsCoordinateReferenceSystem)
 
@@ -119,7 +106,7 @@ class GetPointValue(QgsProcessingAlgorithm):
             QgsProcessingParameterRasterLayer(
                 self.INPUT,
                 self.tr('Input Raster', 'Raster de entrada'),
-                [QgsProcessing.TypeRaster]
+                [Qgis.ProcessingSourceType.TypeRaster]
             )
         )
 
@@ -136,7 +123,7 @@ class GetPointValue(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.POINTS,
                 self.tr('Vector Layer de Pontos', 'Camada Vetorial de Pontos'),
-                [QgsProcessing.TypeVectorPoint]
+                [Qgis.ProcessingSourceType.TypeVectorPoint]
             )
         )
 
@@ -250,7 +237,7 @@ class GetPointValue(QgsProcessingAlgorithm):
             self.OUTPUT,
             context,
             Fields,
-            QgsWkbTypes.Point,
+            Qgis.WkbType.Point,
             CRS
         )
         if sink is None:
@@ -298,7 +285,7 @@ class GetPointValue(QgsProcessingAlgorithm):
                     newGeom.transform(InvCoordTransf)
                 newfeat.setGeometry(newGeom)
                 newfeat.setAttributes(feicoes[coord])
-                sink.addFeature(newfeat, QgsFeatureSink.FastInsert)
+                sink.addFeature(newfeat, QgsFeatureSink.Flag.FastInsert)
 
         else: # Calculo para uma banda específica
             Percent = 100.0/pontos.featureCount() if pontos.featureCount()>0 else 0
@@ -326,7 +313,7 @@ class GetPointValue(QgsProcessingAlgorithm):
                             newGeom.transform(InvCoordTransf)
                         newfeat.setGeometry(newGeom)
                         newfeat.setAttributes(att + [valor])
-                        sink.addFeature(newfeat, QgsFeatureSink.FastInsert)
+                        sink.addFeature(newfeat, QgsFeatureSink.Flag.FastInsert)
                 else:
                     pnt = geom.asPoint()
                     X, Y = pnt.x(), pnt.y()
@@ -342,7 +329,7 @@ class GetPointValue(QgsProcessingAlgorithm):
                         newGeom.transform(InvCoordTransf)
                     newfeat.setGeometry(newGeom)
                     newfeat.setAttributes(att + [valor])
-                    sink.addFeature(newfeat, QgsFeatureSink.FastInsert)
+                    sink.addFeature(newfeat, QgsFeatureSink.Flag.FastInsert)
 
                 if feedback.isCanceled():
                     break

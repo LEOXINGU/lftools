@@ -484,7 +484,7 @@ dN</p>
         arq.close()
 
         # Camada de Saída
-        GeomType = QgsWkbTypes.Point
+        GeomType = Qgis.WkbType.Point
         Fields = QgsFields()
         itens  = {
                      'estation' : QMetaType.Type.Int,
@@ -536,7 +536,7 @@ dN</p>
                 feat[item] = itens[item]
             geom = QgsGeometry.fromPointXY(QgsPointXY(readings[est]['E'], readings[est]['N']))
             feat.setGeometry(geom)
-            sink.addFeature(feat, QgsFeatureSink.FastInsert)
+            sink.addFeature(feat, QgsFeatureSink.Flag.FastInsert)
             if feedback.isCanceled():
                 break
 

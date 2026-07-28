@@ -85,7 +85,7 @@ Os campos de origem e de destino devem ser indicadas para preenchimento dos atri
             QgsProcessingParameterVectorLayer(
                 self.SOURCE,
                 self.tr('Attribute source layer', 'Camada fonte de atributo'),
-                [QgsProcessing.TypeVector]
+                [Qgis.ProcessingSourceType.TypeVector]
             )
         )
 
@@ -109,7 +109,7 @@ Os campos de origem e de destino devem ser indicadas para preenchimento dos atri
         QgsProcessingParameterVectorLayer(
             self.DEST,
             self.tr('Target layer for attribute', 'Camada de destino para o atributo'),
-            [QgsProcessing.TypeVector]
+            [Qgis.ProcessingSourceType.TypeVector]
             )
         )
 

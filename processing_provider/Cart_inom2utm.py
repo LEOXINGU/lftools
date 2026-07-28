@@ -148,7 +148,7 @@ class Inom2utmGrid(QgsProcessingAlgorithm):
         Fields.append(QgsField('inom', QMetaType.Type.QString))
         Fields.append(QgsField('mi', QMetaType.Type.QString))
         Fields.append(QgsField(self.tr('scale', 'escala'), QMetaType.Type.Int))
-        GeomType = QgsWkbTypes.Polygon
+        GeomType = Qgis.WkbType.Polygon
 
         (sink, dest_id) = self.parameterAsSink(
             parameters,
@@ -267,7 +267,7 @@ class Inom2utmGrid(QgsProcessingAlgorithm):
         feedback.pushInfo('MI: {}'.format(mi))
         feat.setGeometry(geom)
         feat.setAttributes(att)
-        sink.addFeature(feat, QgsFeatureSink.FastInsert)
+        sink.addFeature(feat, QgsFeatureSink.Flag.FastInsert)
 
         if sink is None:
             raise QgsProcessingException(self.invalidSinkError(parameters, self.FRAME))

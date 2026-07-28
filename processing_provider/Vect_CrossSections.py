@@ -20,23 +20,13 @@ from qgis.core import (QgsApplication,
                        QgsProcessingParameterFeatureSource,
                        QgsGeometry,
                        QgsFeature,
-                       QgsProcessing,
-                       QgsProject,
-                       QgsFields,
+                       Qgis,
                        QgsField,
-                       QgsWkbTypes,
-                       QgsLineString,
-                       QgsPolygon,
-                       QgsPoint,
                        QgsPointXY,
-                       QgsProcessingParameterField,
-                       QgsProcessingParameterEnum,
-                       QgsProcessingParameterBoolean,
                        QgsProcessingParameterNumber,
                        QgsFeatureSink,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
-                       QgsCoordinateTransform,
                        QgsProcessingParameterFeatureSink)
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
@@ -100,7 +90,7 @@ class CrossSections(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.LINES,
                 self.tr('Line layer', 'Camada de linhas'),
-                [QgsProcessing.TypeVectorLine]
+                [Qgis.ProcessingSourceType.TypeVectorLine]
             )
         )
 
@@ -169,7 +159,7 @@ class CrossSections(QgsProcessingAlgorithm):
             self.OUTPUT,
             context,
             Fields,
-            QgsWkbTypes.LineString,
+            Qgis.WkbType.LineString,
             SRC
         )
         if sink is None:
@@ -269,7 +259,7 @@ class CrossSections(QgsProcessingAlgorithm):
                 att = LIST_ATT[index]
                 feature.setGeometry(geom)
                 feature.setAttributes(att)
-                sink.addFeature(feature, QgsFeatureSink.FastInsert)
+                sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
 
             if feedback.isCanceled():
                 break

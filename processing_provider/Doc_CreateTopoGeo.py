@@ -22,6 +22,7 @@ import processing
 
 from qgis.PyQt.QtGui import QIcon
 from qgis.core import (
+    Qgis,
     QgsApplication,
     QgsCoordinateReferenceSystem,
     QgsProcessingAlgorithm,
@@ -75,7 +76,7 @@ class CreateTopoGeo(QgsProcessingAlgorithm):
         # The layers are inserted directly into the current QGIS project after
         # the child algorithm finishes. Therefore, this algorithm must run in
         # the main thread.
-        return super().flags() | QgsProcessingAlgorithm.FlagNoThreading
+        return super().flags() | Qgis.ProcessingAlgorithmFlag.FlagNoThreading
 
     txt_en = '''This tool creates a new GeoPackage file based on the simplified <b>TopoGeo Demo</b> template.
 <p>

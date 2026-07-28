@@ -18,20 +18,8 @@ __copyright__ = '(C) 2023, Leandro França'
 from qgis.core import (QgsApplication,
                        QgsProcessingParameterFeatureSource,
                        QgsGeometry,
-                       QgsFeature,
-                       QgsProcessing,
-                       QgsProject,
-                       QgsFields,
-                       QgsField,
-                       QgsWkbTypes,
+                       Qgis,
                        QgsSpatialIndex,
-                       QgsLineString,
-                       QgsPolygon,
-                       QgsPoint,
-                       QgsPointXY,
-                       QgsProcessingParameterField,
-                       QgsProcessingParameterEnum,
-                       QgsProcessingParameterBoolean,
                        QgsProcessingParameterNumber,
                        QgsFeatureSink,
                        QgsProcessingException,
@@ -98,7 +86,7 @@ class ConnectLayers(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.POLYGONS,
                 self.tr('Input layer', 'Camada de Entrada'),
-                [QgsProcessing.TypeVectorPolygon, QgsProcessing.TypeVectorLine]
+                [Qgis.ProcessingSourceType.TypeVectorPolygon, Qgis.ProcessingSourceType.TypeVectorLine]
             )
         )
 
@@ -106,7 +94,7 @@ class ConnectLayers(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.LAYER,
                 self.tr('Reference layer', 'Camada de referência'),
-                [QgsProcessing.TypeVectorAnyGeometry]
+                [Qgis.ProcessingSourceType.TypeVectorAnyGeometry]
             )
         )
 
@@ -210,7 +198,7 @@ class ConnectLayers(QgsProcessingAlgorithm):
             bbox_a = geom_a.boundingBox()
             feat_ids = index.intersects(bbox_a)
 
-            if lotes.wkbType() in [QgsWkbTypes.Polygon, QgsWkbTypes.PolygonZ, QgsWkbTypes.PolygonZM]:
+            if lotes.wkbType() in [Qgis.WkbType.Polygon, Qgis.WkbType.PolygonZ, Qgis.WkbType.PolygonZM]:
                 for feat_id in feat_ids:
                     feat_b = feicoes[feat_id]
                     geom_b = feat_b.geometry()
@@ -237,7 +225,7 @@ class ConnectLayers(QgsProcessingAlgorithm):
                     feat_b.setGeometry(QgsGeometry.fromPolygonXY([new_coord_b]))
                     feicoes[feat_id] = feat_b
 
-            elif lotes.wkbType() in [QgsWkbTypes.LineString, QgsWkbTypes.LineStringZ, QgsWkbTypes.LineStringZM]:
+            elif lotes.wkbType() in [Qgis.WkbType.LineString, Qgis.WkbType.LineStringZ, Qgis.WkbType.LineStringZM]:
                 for feat_id in feat_ids:
                     feat_b = feicoes[feat_id]
                     geom_b = feat_b.geometry()
@@ -266,7 +254,7 @@ class ConnectLayers(QgsProcessingAlgorithm):
 
         for index, ID in enumerate(feicoes):
             feature = feicoes[ID]
-            sink.addFeature(feature, QgsFeatureSink.FastInsert)
+            sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
 
         feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
         feedback.pushInfo(self.tr('Leandro Franca - Cartographic Engineer', 'Leandro França - Eng Cart'))

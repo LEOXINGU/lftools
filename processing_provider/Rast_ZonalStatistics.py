@@ -16,33 +16,21 @@ __date__ = '2023-06-04'
 __copyright__ = '(C) 2023, Leandro França'
 
 from qgis.PyQt.QtCore import QMetaType
-from qgis.core import (QgsProcessing,
+from qgis.core import (Qgis,
                        QgsFeatureSink,
-                       QgsWkbTypes,
-                       QgsFields,
                        QgsField,
                        QgsFeature,
-                       QgsPointXY,
-                       QgsGeometry,
                        QgsProject,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
                        QgsProcessingParameterString,
                        QgsProcessingParameterBand,
-                       QgsProcessingParameterBoolean,
-                       QgsProcessingParameterCrs,
                        QgsProcessingParameterEnum,
-                       QgsFeatureRequest,
-                       QgsExpression,
                        QgsProcessingParameterFeatureSource,
                        QgsProcessingParameterFeatureSink,
-                       QgsProcessingParameterFileDestination,
-                       QgsProcessingParameterMultipleLayers,
                        QgsProcessingParameterRasterLayer,
-                       QgsProcessingParameterRasterDestination,
                        QgsApplication,
                        QgsProject,
-                       QgsRasterLayer,
                        QgsCoordinateTransform,
                        QgsCoordinateReferenceSystem)
 
@@ -114,7 +102,7 @@ Os valores das células do raster onde o centro do pixel se encontra exatamente 
             QgsProcessingParameterRasterLayer(
                 self.INPUT,
                 self.tr('Input Raster', 'Raster de Entrada'),
-                [QgsProcessing.TypeRaster]
+                [Qgis.ProcessingSourceType.TypeRaster]
             )
         )
 
@@ -131,7 +119,7 @@ Os valores das células do raster onde o centro do pixel se encontra exatamente 
             QgsProcessingParameterFeatureSource(
                 self.POLYGONS,
                 self.tr('Polygons', 'Polígonos'),
-                [QgsProcessing.TypeVectorPolygon]
+                [Qgis.ProcessingSourceType.TypeVectorPolygon]
             )
         )
 
@@ -401,7 +389,7 @@ Os valores das células do raster onde o centro do pixel se encontra exatamente 
             feature = QgsFeature(Fields)
             feature.setAttributes(att)
             feature.setGeometry(feat.geometry())
-            sink.addFeature(feature, QgsFeatureSink.FastInsert)
+            sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
 
         feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
         feedback.pushInfo(self.tr('Leandro Franca - Cartographic Engineer', 'Leandro França - Eng Cart'))

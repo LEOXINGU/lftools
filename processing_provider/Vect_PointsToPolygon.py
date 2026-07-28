@@ -20,23 +20,17 @@ from qgis.core import (QgsApplication,
                        QgsProcessingParameterFeatureSource,
                        QgsGeometry,
                        QgsFeature,
-                       QgsProcessing,
-                       QgsProject,
+                       Qgis,
                        QgsFields,
                        QgsField,
-                       QgsWkbTypes,
                        QgsLineString,
                        QgsPolygon,
                        QgsPoint,
                        QgsPointXY,
                        QgsProcessingParameterField,
-                       QgsProcessingParameterEnum,
-                       QgsProcessingParameterBoolean,
-                       QgsProcessingParameterNumber,
                        QgsFeatureSink,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
-                       QgsCoordinateTransform,
                        QgsProcessingParameterFeatureSink)
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
@@ -96,7 +90,7 @@ class PointsToPolygon(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.POINTS,
                 self.tr('Point layer', 'Camada de pontos'),
-                [QgsProcessing.TypeVectorPoint]
+                [Qgis.ProcessingSourceType.TypeVectorPoint]
             )
         )
 
@@ -105,7 +99,7 @@ class PointsToPolygon(QgsProcessingAlgorithm):
                 self.FIELD,
                 self.tr('Sequence Field', 'Campo de ordenação'),
                 parentLayerParameterName=self.POINTS,
-                type = QgsProcessingParameterField.Numeric
+                type = Qgis.ProcessingFieldParameterDataType.Numeric
             )
         )
 
@@ -149,7 +143,7 @@ class PointsToPolygon(QgsProcessingAlgorithm):
             self.POLYGON,
             context,
             Fields,
-            QgsWkbTypes.PolygonZ if layer.wkbType() != 1 else QgsWkbTypes.Polygon,
+            Qgis.WkbType.PolygonZ if layer.wkbType() != 1 else Qgis.WkbType.Polygon,
             layer.sourceCrs()
         )
         if sink is None:
@@ -188,7 +182,7 @@ class PointsToPolygon(QgsProcessingAlgorithm):
         feature = QgsFeature()
         feature.setGeometry(Poligono)
         feature.setAttributes([1])
-        sink.addFeature(feature, QgsFeatureSink.FastInsert)
+        sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
 
         feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
         feedback.pushInfo(self.tr('Leandro Franca - Cartographic Engineer', 'Leandro França - Eng Cart'))

@@ -263,9 +263,9 @@ class AzimuthDistance(QgsProcessingAlgorithm):
 
         # Camada de Saída
         if tipo == 0:
-            GeomType = QgsWkbTypes.Point
+            GeomType = Qgis.WkbType.Point
         elif tipo == 1:
-            GeomType = QgsWkbTypes.LineString
+            GeomType = Qgis.WkbType.LineString
 
         Fields = QgsFields()
         itens  = {
@@ -292,14 +292,14 @@ class AzimuthDistance(QgsProcessingAlgorithm):
                 feat = QgsFeature(Fields)
                 feat.setGeometry(geom)
                 feat.setAttributes([k])
-                sink.addFeature(feat, QgsFeatureSink.FastInsert)
+                sink.addFeature(feat, QgsFeatureSink.Flag.FastInsert)
                 if feedback.isCanceled():
                     break
         elif tipo == 1:
             geom = QgsGeometry.fromPolylineXY(pnts)
             feat = QgsFeature(Fields)
             feat.setGeometry(geom)
-            sink.addFeature(feat, QgsFeatureSink.FastInsert)
+            sink.addFeature(feat, QgsFeatureSink.Flag.FastInsert)
 
         feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
         feedback.pushInfo(self.tr('Leandro Franca - Cartographic Engineer', 'Leandro França - Eng Cart'))

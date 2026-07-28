@@ -76,10 +76,7 @@ class LFToolsPlugin(object):
         return translate(string, QgsApplication.locale()[:2])
     
     def exec_dialog(self, dlg):
-        try:
-            return dlg.exec()      # PyQt6
-        except AttributeError:
-            return dlg.exec_()     # PyQt5
+        return dlg.exec()
 
     def initProcessing(self):
         """Init Processing provider for QGIS >= 3.8."""
@@ -167,7 +164,7 @@ class LFToolsPlugin(object):
             popup_mode = QToolButton.ToolButtonPopupMode.MenuButtonPopup
         except AttributeError:
             # Qt5
-            popup_mode = QToolButton.MenuButtonPopup
+            popup_mode = QToolButton.ToolButtonPopupMode.MenuButtonPopup
         self.MainLFToolsButton.setPopupMode(popup_mode)
 
         self.MainLFToolsButton.triggered.connect(self.toolButtonTriggered)
@@ -360,7 +357,7 @@ class LFToolsPlugin(object):
                 return
 
     def runDimensioning(self):
-        self.iface.messageBar().pushMessage(self.tr('Use snapping, if possible.', 'Use a Aderência, se possível.'), level=Qgis.Info, duration=10)
+        self.iface.messageBar().pushMessage(self.tr('Use snapping, if possible.', 'Use a Aderência, se possível.'), level=Qgis.MessageLevel.Info, duration=10)
         projeto = QgsProject.instance()
         crs = projeto.crs()
         # Criando camada pela primeira vez

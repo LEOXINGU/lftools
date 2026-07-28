@@ -80,7 +80,7 @@ class ExportASCII(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.LAYER,
                 self.tr('Input layer', 'Camada de entrada'),
-                [QgsProcessing.TypeVector]
+                [Qgis.ProcessingSourceType.TypeVector]
             )
         )
 
@@ -129,7 +129,7 @@ class ExportASCII(QgsProcessingAlgorithm):
             QgsProcessingParameterFile(
                 self.FOLDER,
                 self.tr('Destination folder', 'Pasta de destino'),
-                behavior = QgsProcessingParameterFile.Folder
+                behavior = Qgis.ProcessingFileParameterBehavior.Folder
             )
         )
 

@@ -15,13 +15,11 @@ __author__ = 'Leandro França'
 __date__ = '2025-10-25'
 __copyright__ = '(C) 2025, Leandro França'
 
-from qgis.core import (
+from qgis.core import (Qgis,
     QgsApplication,
     QgsProcessingParameterMapLayer,
     QgsWkbTypes,
-    QgsProcessing,
     QgsProcessingParameterEnum,
-    QgsRasterBandStats,
     QgsProcessingException,
     QgsProcessingAlgorithm,
     QgsMapLayerType
@@ -95,15 +93,15 @@ Transforme pontos, linhas, polígonos e rasters em representações visuais pron
             QgsProcessingParameterMapLayer(
                 self.LAYER,
                 self.tr('Layer', 'Camada'),
-                [QgsProcessing.TypeVectorPoint,
-                 QgsProcessing.TypeVectorLine,
-                 QgsProcessing.TypeVectorPolygon,
-                 QgsProcessing.TypeRaster]
+                   [Qgis.ProcessingSourceType.TypeVectorPoint,
+                    Qgis.ProcessingSourceType.TypeVectorLine,
+                    Qgis.ProcessingSourceType.TypeVectorPolygon,
+                    Qgis.ProcessingSourceType.TypeRaster]
             )
         )
 
         STYLES = {
-            QgsWkbTypes.PointGeometry: [
+            Qgis.GeometryType.Point: [
                 self.tr('- Select one style -', '- Selecione um estilo -'),
                 self.tr('Drone'),
                 self.tr('VR Photo 360°', 'RV Foto 360°'),
@@ -111,14 +109,14 @@ Transforme pontos, linhas, polígonos e rasters em representações visuais pron
                 self.tr('Simple Camera', 'Camera simples'),
                 self.tr('Spot elevation', 'Ponto cotado')
             ],
-            QgsWkbTypes.LineGeometry: [
+            Qgis.GeometryType.Line: [
                 self.tr('- Select one style -', '- Selecione um estilo -'),
                 self.tr('Dimensioning', 'Cotagem'),
                 self.tr('Contour Lines', 'Curvas de nível'),
                 self.tr('Distance and Azimuth', 'Distância e Azimute'),
                 self.tr('VR Video 360°', 'RV Video 360°')
             ],
-            QgsWkbTypes.PolygonGeometry: [
+            Qgis.GeometryType.Polygon: [
                 self.tr('- Select one style -', '- Selecione um estilo -'),
                 self.tr('Cadastre', 'Cadastro')
             ],
@@ -139,7 +137,7 @@ Transforme pontos, linhas, polígonos e rasters em representações visuais pron
             QgsProcessingParameterEnum(
                 self.STYLE_POINT,
                 self.tr('POINT Layer Style'),
-                options=STYLES[QgsWkbTypes.PointGeometry],
+                options=STYLES[Qgis.GeometryType.Point],
                 defaultValue=0
             )
         )
@@ -148,7 +146,7 @@ Transforme pontos, linhas, polígonos e rasters em representações visuais pron
             QgsProcessingParameterEnum(
                 self.STYLE_LINE,
                 self.tr('LINE Layer Style'),
-                options=STYLES[QgsWkbTypes.LineGeometry],
+                options=STYLES[Qgis.GeometryType.Line],
                 defaultValue=0
             )
         )
@@ -157,7 +155,7 @@ Transforme pontos, linhas, polígonos e rasters em representações visuais pron
             QgsProcessingParameterEnum(
                 self.STYLE_POLYGON,
                 self.tr('POLYGON Layer Style'),
-                options=STYLES[QgsWkbTypes.PolygonGeometry],
+                options=STYLES[Qgis.GeometryType.Polygon],
                 defaultValue=0
             )
         )
@@ -189,20 +187,20 @@ Transforme pontos, linhas, polígonos e rasters em representações visuais pron
         caminho_estilos = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'styles')
 
         QML = {
-            QgsWkbTypes.PointGeometry: {
+            Qgis.GeometryType.Point: {
                 1: 'drone_prof_leandro',
                 2: 'vr_photo_360_prof_leandro',
                 3: 'vr_video_point_360_prof_leandro',
                 4: 'camera_prof_leandro',
                 5: 'spot_elevation_prof_leandro'
             },
-            QgsWkbTypes.LineGeometry: {
+            QgsWkbTypes.GeometryType.LineGeometry: {
                 1: 'cotagem_prof_leandro',
                 2: 'contours_prof_leandro',
                 3: 'dist_azim_linha_prof_leandro',
                 4: 'vr_video_line_360_prof_leandro'
             },
-            QgsWkbTypes.PolygonGeometry: {
+            Qgis.GeometryType.Polygon: {
                 1: 'cadastro_prof_leandro'
             },
             "RASTER": {
@@ -288,7 +286,7 @@ Transforme pontos, linhas, polígonos e rasters em representações visuais pron
         tipo_geom = QgsWkbTypes.geometryType(camada.wkbType())
         CRS = camada.crs()
 
-        if tipo_geom == QgsWkbTypes.PointGeometry:
+        if tipo_geom == Qgis.GeometryType.Point:
             if estilo_ponto == 0:
                 raise QgsProcessingException(self.tr('Select a Point Layer Style!', 'Selecione um estilo para camada de pontos!'))
             else:
@@ -326,7 +324,7 @@ Transforme pontos, linhas, polígonos e rasters em representações visuais pron
                     ATT = self.detectar_campo(camada, feedback=feedback)
                     estilo_selec = self.prepare_temp_qml(estilo_selec, ['[COTA]'], [ATT])
 
-        elif tipo_geom == QgsWkbTypes.LineGeometry:
+        elif tipo_geom == QgsWkbTypes.GeometryType.LineGeometry:
             if estilo_linha == 0:
                 raise QgsProcessingException(self.tr('Select a Line Layer Style!', 'Selecione um estilo para camada de linhas!'))
             else:
@@ -353,7 +351,7 @@ Transforme pontos, linhas, polígonos e rasters em representações visuais pron
                         ]
                     )
 
-        elif tipo_geom == QgsWkbTypes.PolygonGeometry:
+        elif tipo_geom == Qgis.GeometryType.Polygon:
             if estilo_poligono == 0:
                 raise QgsProcessingException(self.tr('Select a Polygon Layer Style!', 'Selecione um estilo para camada de polígonos!'))
             else:
@@ -648,7 +646,7 @@ Transforme pontos, linhas, polígonos e rasters em representações visuais pron
 
         stats = provider.bandStatistics(
             band,
-            QgsRasterBandStats.Min | QgsRasterBandStats.Max,
+            Qgis.RasterBandStatistic.Min | Qgis.RasterBandStatistic.Max,
             raster_layer.extent(),
             0
         )
@@ -746,5 +744,5 @@ Transforme pontos, linhas, polígonos e rasters em representações visuais pron
     def flags(self):
         return (
             super().flags()
-            | QgsProcessingAlgorithm.FlagNoThreading
+            | Qgis.ProcessingAlgorithmFlag.FlagNoThreading
         )

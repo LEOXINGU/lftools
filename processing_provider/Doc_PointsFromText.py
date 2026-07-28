@@ -27,7 +27,7 @@ from qgis.core import (QgsApplication,
                        QgsProcessingParameterCrs,
                        QgsProcessingParameterBoolean,
                        QgsFields,
-                       QgsWkbTypes,
+                       Qgis,
                        QgsField,
                        QgsFeature,
                        QgsGeometry,
@@ -237,7 +237,7 @@ class PointsFromText(QgsProcessingAlgorithm):
             self.OUTPUT,
             context,
             Fields,
-            QgsWkbTypes.Point,
+            Qgis.WkbType.Point,
             crs
         )
         if sink is None:
@@ -344,7 +344,7 @@ class PointsFromText(QgsProcessingAlgorithm):
             Y = lista_Y[k]
             feat.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(X,Y)))
             feat.setAttributes([k+1, NOME, X, Y])
-            sink.addFeature(feat, QgsFeatureSink.FastInsert)
+            sink.addFeature(feat, QgsFeatureSink.Flag.FastInsert)
             if feedback.isCanceled():
                 break
             feedback.setProgress(int((k+1) * total))

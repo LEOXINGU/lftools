@@ -112,7 +112,7 @@ class Accuracy_PC(QgsProcessingAlgorithm):
             QgsProcessingParameterFile(
                 self.CLOUD,
                 self.tr('Point Cloud', 'Nuvem de pontos') + ' .TXT',
-                behavior = QgsProcessingParameterFile.File,
+                behavior = Qgis.ProcessingFileParameterBehavior.File,
                 fileFilter = 'Texto (*.txt)'
             )
         )
@@ -121,7 +121,7 @@ class Accuracy_PC(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.CHECKPOINTS,
                 self.tr('Reference points', 'Pontos de referência'),
-                [QgsProcessing.TypeVectorPoint]
+                [Qgis.ProcessingSourceType.TypeVectorPoint]
             )
         )
         
@@ -130,7 +130,7 @@ class Accuracy_PC(QgsProcessingAlgorithm):
                 self.FIELD,
                 self.tr('Reference altitude', 'Altitude de referência'),
                 parentLayerParameterName=self.CHECKPOINTS,
-                type=QgsProcessingParameterField.Numeric
+                type=Qgis.ProcessingFieldParameterDataType.Numeric
             )
         )
         
@@ -366,7 +366,7 @@ class Accuracy_PC(QgsProcessingAlgorithm):
             fet = QgsFeature(Fields)
             fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(float(nearestPoint[0]),float(nearestPoint[1]))))
             fet.setAttributes(att + [float(np.sqrt(distMin)), float(nearestPoint[2]), float(discrep)])
-            sink.addFeature(fet, QgsFeatureSink.FastInsert)
+            sink.addFeature(fet, QgsFeatureSink.Flag.FastInsert)
             if feedback.isCanceled():
                 break
             feedback.setProgress(int((w+1) * total))

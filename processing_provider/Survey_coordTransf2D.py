@@ -92,7 +92,7 @@ Com esta ferramenta é possível realizar o correto georreferenciamento de arqui
             QgsProcessingParameterFeatureSource(
                 self.INPUT,
                 self.tr('Input Vector Layer', 'Camada vetorial de entrada'),
-                [QgsProcessing.TypeVectorAnyGeometry]
+                [Qgis.ProcessingSourceType.TypeVectorAnyGeometry]
             )
         )
 
@@ -100,7 +100,7 @@ Com esta ferramenta é possível realizar o correto georreferenciamento de arqui
             QgsProcessingParameterFeatureSource(
                 self.VECTOR,
                 self.tr('Vectors Lines (two vertices)', 'Linhas de vetores (dois vértices)'),
-                [QgsProcessing.TypeVectorLine]
+                [Qgis.ProcessingSourceType.TypeVectorLine]
             )
         )
 
@@ -205,7 +205,7 @@ Com esta ferramenta é possível realizar o correto georreferenciamento de arqui
             newgeom = transformGeom2D(geom, CoordTransf)
             feature.setGeometry(newgeom)
             feature.setAttributes(feat.attributes())
-            sink.addFeature(feature, QgsFeatureSink.FastInsert)
+            sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
             if feedback.isCanceled():
                 break
             feedback.setProgress(int(current * total))

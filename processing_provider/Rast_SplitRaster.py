@@ -15,37 +15,17 @@ __author__ = 'Leandro França'
 __date__ = '2023-06-18'
 __copyright__ = '(C) 2023, Leandro França'
 
-from qgis.core import (QgsProcessing,
-                       QgsFeatureSink,
-                       QgsWkbTypes,
-                       QgsFields,
-                       QgsField,
-                       QgsFeature,
-                       QgsPointXY,
-                       QgsGeometry,
+from qgis.core import (Qgis,
                        QgsProject,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
-                       QgsProcessingParameterString,
-                       QgsProcessingParameterBand,
                        QgsProcessingParameterBoolean,
-                       QgsProcessingParameterCrs,
-                       QgsProcessingParameterEnum,
-                       QgsFeatureRequest,
-                       QgsExpression,
-                       QgsProcessingParameterFeatureSource,
-                       QgsProcessingParameterFeatureSink,
-                       QgsProcessingParameterFileDestination,
                        QgsProcessingParameterFile,
                        QgsProcessingParameterNumber,
-                       QgsProcessingParameterMultipleLayers,
                        QgsProcessingParameterRasterLayer,
-                       QgsProcessingParameterRasterDestination,
                        QgsApplication,
                        QgsProject,
-                       QgsRasterLayer,
-                       QgsCoordinateTransform,
-                       QgsCoordinateReferenceSystem)
+                       QgsRasterLayer)
 
 from math import floor, ceil
 from osgeo import osr, gdal_array, gdal #https://gdal.org/python/
@@ -111,7 +91,7 @@ class SplitRaster(QgsProcessingAlgorithm):
             QgsProcessingParameterRasterLayer(
                 self.INPUT,
                 self.tr('Input Raster', 'Raster de entrada'),
-                [QgsProcessing.TypeRaster]
+                [Qgis.ProcessingSourceType.TypeRaster]
             )
         )
 
@@ -140,7 +120,7 @@ class SplitRaster(QgsProcessingAlgorithm):
             QgsProcessingParameterFile(
                 self.OUTPUT_FOLDER,
                 self.tr('Folder for split rasters', 'Pasta para rasters divididos'),
-                behavior = QgsProcessingParameterFile.Folder,
+                behavior = Qgis.ProcessingFileParameterBehavior.Folder,
                 defaultValue = None
             )
         )

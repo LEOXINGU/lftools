@@ -1067,7 +1067,7 @@ def LabelConf(nome, fonte="Arial", tam=10, bold=True, cor="white", buffer_tam = 
     label_settings = QgsPalLayerSettings()
     label_settings.fieldName = '"[nome]"'.replace('[nome]',nome)
     label_settings.isExpression = True
-    label_settings.placement = QgsPalLayerSettings.AroundPoint
+    label_settings.placement = Qgis.LabelPlacement.AroundPoint
     label_settings.dist = dist
     label_settings.enabled = True
     # Configurar o estilo do texto

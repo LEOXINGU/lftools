@@ -15,31 +15,15 @@ __author__ = 'Leandro França'
 __date__ = '2023-05-30'
 __copyright__ = '(C) 2023, Leandro França'
 
-from qgis.core import (QgsProcessing,
-                       QgsFeatureSink,
-                       QgsWkbTypes,
-                       QgsFields,
-                       QgsField,
-                       QgsFeature,
+from qgis.core import (Qgis,
                        QgsPointXY,
                        QgsGeometry,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
-                       QgsProcessingParameterString,
-                       QgsProcessingParameterNumber,
-                       QgsProcessingParameterField,
                        QgsProcessingParameterBoolean,
-                       QgsProcessingParameterCrs,
                        QgsProcessingParameterEnum,
-                       QgsFeatureRequest,
-                       QgsExpression,
-                       QgsProcessingParameterFeatureSource,
-                       QgsProcessingParameterFeatureSink,
                        QgsProcessingParameterFileDestination,
-                       QgsProcessingParameterMultipleLayers,
-                       QgsProcessingParameterVectorLayer,
                        QgsProcessingParameterRasterLayer,
-                       QgsProcessingParameterRasterDestination,
                        QgsApplication,
                        QgsProject,
                        QgsRasterLayer,
@@ -116,7 +100,7 @@ Subtraendo é o rastar que está subtraindo.'''
             QgsProcessingParameterRasterLayer(
                 self.MINUEND,
                 self.tr('Minuend', 'Minuendo'),
-                [QgsProcessing.TypeRaster]
+                [Qgis.ProcessingSourceType.TypeRaster]
             )
         )
 
@@ -124,7 +108,7 @@ Subtraendo é o rastar que está subtraindo.'''
             QgsProcessingParameterRasterLayer(
                 self.SUBTRAHEND,
                 self.tr('Subtrahend', 'Subtraendo'),
-                [QgsProcessing.TypeRaster]
+                [Qgis.ProcessingSourceType.TypeRaster]
             )
         )
 

@@ -15,7 +15,7 @@ __author__ = 'Leandro França'
 __date__ = '2020-11-24'
 __copyright__ = '(C) 2020, Leandro França'
 
-from qgis.core import (QgsProcessing,
+from qgis.core import (Qgis,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
                        QgsProcessingParameterBoolean,
@@ -92,7 +92,7 @@ class SaveAsJPEG(QgsProcessingAlgorithm):
             QgsProcessingParameterRasterLayer(
                 self.RasterIN,
                 self.tr('Input Raster (3 or 4 bands - 8bit)', 'Raster de entrada (3 ou 4 bandas - 8bits)'),
-                [QgsProcessing.TypeRaster]
+                [Qgis.ProcessingSourceType.TypeRaster]
             )
         )
 

@@ -21,23 +21,19 @@ __author__ = 'Leandro França'
 __date__ = 'Jul 09'
 __copyright__ = '(C) 2020, Leandro França'
 
-from qgis.core import (QgsProcessing,
-                       QgsFeatureSink,
+from qgis.core import (Qgis,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
                        QgsProcessingParameterFeatureSource,
                        QgsProcessingParameterFile,
                        QgsProcessingParameterString,
                        QgsProcessingParameterEnum,
-                       QgsProcessingParameterNumber,
                        QgsProcessingParameterBoolean,
-                       QgsProcessingParameterFeatureSink,
                        QgsProcessingParameterFileDestination,
                        QgsApplication,
                        QgsProject,
                        QgsPoint,
-                       QgsCoordinateTransform,
-                       QgsCoordinateReferenceSystem)
+                       QgsCoordinateTransform)
 from math import atan, pi, sqrt, floor
 import math
 from lftools.geocapt.imgs import *
@@ -112,7 +108,7 @@ class AreaPerimterReport(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.PONTOLIMITE,
                 self.tr('Boundary Survey Points', 'Pontos de Limite'),
-                types=[QgsProcessing.TypeVectorPoint]
+                types=[Qgis.ProcessingSourceType.TypeVectorPoint]
             )
         )
 
@@ -120,7 +116,7 @@ class AreaPerimterReport(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.AREAIMOVEL,
                 self.tr('Property Polygon', 'Área do Imóvel'),
-                types=[QgsProcessing.TypeVectorPolygon]
+                types=[Qgis.ProcessingSourceType.TypeVectorPolygon]
             )
         )
 
@@ -143,7 +139,7 @@ class AreaPerimterReport(QgsProcessingAlgorithm):
             QgsProcessingParameterFile(
                 self.LOGO,
                 self.tr('Logo (JPEG)', 'Logomarca (JPEG)'),
-                behavior=QgsProcessingParameterFile.File,
+                behavior=Qgis.ProcessingFileParameterBehavior.File,
                 defaultValue=None,
                 fileFilter = 'Image (*.jpeg *.jpg *.JPG)',
                 optional = True

@@ -15,22 +15,17 @@ __author__ = 'Leandro França'
 __date__ = '2023-06-18'
 __copyright__ = '(C) 2023, Leandro França'
 
-from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (QgsApplication,
-                       QgsProcessing,
-                       QgsProcessingParameterFile,
-                       QgsProcessingParameterBoolean,
+                       Qgis,
                        QgsProcessingParameterNumber,
                        QgsProcessingParameterField,
                        QgsCoordinateReferenceSystem,
                        QgsProcessingParameterFileDestination,
-                       QgsProcessingUtils,
                        QgsCoordinateTransform,
                        QgsProject,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
-                       QgsProcessingParameterFeatureSource,
-                       QgsProcessingParameterFeatureSink)
+                       QgsProcessingParameterFeatureSource)
 
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
@@ -100,7 +95,7 @@ class KmlPhotos(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.LAYER,
                 self.tr('Input photo layer', 'Camada de fotos'),
-                [QgsProcessing.TypeVectorPoint]
+                [Qgis.ProcessingSourceType.TypeVectorPoint]
             )
         )
 
@@ -109,7 +104,7 @@ class KmlPhotos(QgsProcessingAlgorithm):
                 self.FILEPATH,
                 self.tr('Filepath to image', 'Caminho para imagem'),
                 parentLayerParameterName = self.LAYER,
-                type = QgsProcessingParameterField.String,
+                type = Qgis.ProcessingFieldParameterDataType.String,
             )
         )
 
@@ -136,7 +131,7 @@ class KmlPhotos(QgsProcessingAlgorithm):
                 self.DESCRIPTION,
                 self.tr('Description', 'Descrição'),
                 parentLayerParameterName = self.LAYER,
-                type = QgsProcessingParameterField.String,
+                type = Qgis.ProcessingFieldParameterDataType.String,
                 optional = True
             )
         )
@@ -146,7 +141,7 @@ class KmlPhotos(QgsProcessingAlgorithm):
                 self.ALTITUDE,
                 self.tr('Altitude'),
                 parentLayerParameterName = self.LAYER,
-                type = QgsProcessingParameterField.Numeric,
+                type = Qgis.ProcessingFieldParameterDataType.Numeric,
                 optional = True
             )
         )

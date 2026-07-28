@@ -16,37 +16,16 @@ __date__ = '2021-11-01'
 __copyright__ = '(C) 2021, Leandro França'
 
 from qgis.PyQt.QtCore import QMetaType
-from qgis.core import (QgsProcessing,
-                       QgsFeatureSink,
-                       QgsWkbTypes,
-                       QgsFields,
-                       QgsField,
-                       QgsFeature,
-                       QgsPointXY,
-                       QgsGeometry,
+from qgis.core import (Qgis,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
                        QgsProcessingParameterString,
-                       QgsProcessingParameterNumber,
-                       QgsProcessingParameterField,
-                       QgsProcessingParameterBoolean,
-                       QgsProcessingParameterCrs,
                        QgsProcessingParameterEnum,
-                       QgsFeatureRequest,
-                       QgsExpression,
-                       QgsProcessingParameterFeatureSource,
-                       QgsProcessingParameterFeatureSink,
-                       QgsProcessingParameterFileDestination,
-                       QgsProcessingParameterMultipleLayers,
                        QgsProcessingParameterRasterLayer,
-                       QgsProcessingParameterRasterDestination,
-                       QgsApplication,
-                       QgsProject,
-                       QgsRasterLayer,
-                       QgsCoordinateTransform,
-                       QgsCoordinateReferenceSystem)
+                       QgsApplication
+                       )
 
-from osgeo import osr, gdal_array, gdal # https://gdal.org/programs/gdaladdo.html
+from osgeo import gdal # https://gdal.org/programs/gdaladdo.html
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
 from qgis.PyQt.QtGui import QIcon
@@ -116,7 +95,7 @@ class OverviewsJPEG(QgsProcessingAlgorithm):
             QgsProcessingParameterRasterLayer(
                 self.RasterIN,
                 self.tr('RGB Raster', 'Raster RGB'),
-                [QgsProcessing.TypeRaster]
+                [Qgis.ProcessingSourceType.TypeRaster]
             )
         )
 

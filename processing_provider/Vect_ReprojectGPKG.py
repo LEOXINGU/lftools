@@ -24,6 +24,7 @@ from qgis.core import (QgsVectorLayer,
                        QgsProcessingParameterCrs,
                        QgsProcessingParameterBoolean,
                        QgsProject,
+                       Qgis,
                        QgsCoordinateTransform)
 
 from lftools.geocapt.imgs import Imgs
@@ -89,7 +90,7 @@ class ReprojectGPKG(QgsProcessingAlgorithm):
             QgsProcessingParameterFile(
                 self.INPUT,
                 self.tr('Input GeoPackage'),
-                behavior = QgsProcessingParameterFile.File,
+                behavior = Qgis.ProcessingFileParameterBehavior.File,
                 fileFilter = 'GeoPackage (*.gpkg)'
             )
         )

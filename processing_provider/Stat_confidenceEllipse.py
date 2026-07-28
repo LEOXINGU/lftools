@@ -16,9 +16,8 @@ __date__ = '2020-08-22'
 __copyright__ = '(C) 2020, Leandro França'
 
 from qgis.PyQt.QtCore import QMetaType
-from qgis.core import (QgsProcessing,
+from qgis.core import (Qgis,
                        QgsFeatureSink,
-                       QgsWkbTypes,
                        QgsFields,
                        QgsField,
                        QgsFeature,
@@ -26,20 +25,11 @@ from qgis.core import (QgsProcessing,
                        QgsGeometry,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
-                       QgsProcessingParameterString,
                        QgsProcessingParameterField,
-                       QgsProcessingParameterBoolean,
-                       QgsProcessingParameterCrs,
                        QgsProcessingParameterEnum,
-                       QgsFeatureRequest,
-                       QgsExpression,
                        QgsProcessingParameterFeatureSource,
                        QgsProcessingParameterFeatureSink,
-                       QgsProcessingParameterFileDestination,
-                       QgsApplication,
-                       QgsProject,
-                       QgsCoordinateTransform,
-                       QgsCoordinateReferenceSystem)
+                       QgsApplication)
 import processing
 import numpy as np
 from numpy import pi, cos, sin, sqrt
@@ -106,7 +96,7 @@ class ConfidenceEllipse(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.INPUT,
                 self.tr('Point Layer', 'Camada de Pontos'),
-                [QgsProcessing.TypeVectorPoint]
+                [Qgis.ProcessingSourceType.TypeVectorPoint]
             )
         )
 
@@ -129,7 +119,7 @@ class ConfidenceEllipse(QgsProcessingAlgorithm):
                 self.CAMPO_PESO,
                 self.tr('Weight Field', 'Campo de Peso'),
                 parentLayerParameterName = self.INPUT,
-                type = QgsProcessingParameterField.Numeric,
+                type = Qgis.ProcessingFieldParameterDataType.Numeric,
                 optional = True
             )
         )
@@ -139,7 +129,7 @@ class ConfidenceEllipse(QgsProcessingAlgorithm):
                 self.CAMPO_AGRUPAR,
                 self.tr('Group Field', 'Campo de Agrupamento'),
                 parentLayerParameterName = self.INPUT,
-                type = QgsProcessingParameterField.Any,
+                type = Qgis.ProcessingFieldParameterDataType.Any,
                 optional = True
             )
         )
@@ -191,7 +181,7 @@ class ConfidenceEllipse(QgsProcessingAlgorithm):
             Campo_Agrupar = layer.fields().indexFromName(Campo_Agrupar[0])
 
         # OUTPUT
-        GeomType = QgsWkbTypes.Polygon
+        GeomType = Qgis.WkbType.Polygon
         Fields = QgsFields()
         CRS = layer.sourceCrs()
         itens  = {
@@ -343,7 +333,7 @@ class ConfidenceEllipse(QgsProcessingAlgorithm):
                    float(np.sqrt(size)*a), float(np.sqrt(size)*b)]
             feat.setAttributes(att)
 
-            sink.addFeature(feat, QgsFeatureSink.FastInsert)
+            sink.addFeature(feat, QgsFeatureSink.Flag.FastInsert)
             if feedback.isCanceled():
                 break
 

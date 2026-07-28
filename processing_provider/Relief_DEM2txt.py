@@ -15,36 +15,13 @@ __author__ = 'Leandro França'
 __date__ = '2023-01-23'
 __copyright__ = '(C) 2023, Leandro França'
 
-from qgis.core import (QgsProcessing,
-                       QgsFeatureSink,
-                       QgsWkbTypes,
-                       QgsFields,
-                       QgsField,
-                       QgsFeature,
-                       QgsPointXY,
-                       QgsGeometry,
+from qgis.core import (Qgis,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
-                       QgsProcessingParameterString,
                        QgsProcessingParameterNumber,
-                       QgsProcessingParameterField,
-                       QgsProcessingParameterBoolean,
-                       QgsProcessingParameterCrs,
-                       QgsProcessingParameterEnum,
-                       QgsFeatureRequest,
-                       QgsExpression,
-                       QgsProcessingParameterFeatureSource,
-                       QgsProcessingParameterFeatureSink,
                        QgsProcessingParameterFileDestination,
-                       QgsProcessingParameterMultipleLayers,
-                       QgsProcessingParameterVectorLayer,
                        QgsProcessingParameterRasterLayer,
-                       QgsProcessingParameterRasterDestination,
-                       QgsApplication,
-                       QgsProject,
-                       QgsRasterLayer,
-                       QgsCoordinateTransform,
-                       QgsCoordinateReferenceSystem)
+                       QgsApplication)
 
 from osgeo import osr, gdal_array, gdal #https://gdal.org/python/
 import numpy as np
@@ -112,7 +89,7 @@ Opcionalmente, as cores RGB associadas do Ortomosaico podem ser levadas para o a
             QgsProcessingParameterRasterLayer(
                 self.DEM,
                 self.tr('DEM', 'MDE'),
-                [QgsProcessing.TypeRaster]
+                [Qgis.ProcessingSourceType.TypeRaster]
             )
         )
 
@@ -120,7 +97,7 @@ Opcionalmente, as cores RGB associadas do Ortomosaico podem ser levadas para o a
             QgsProcessingParameterRasterLayer(
                 self.ORTO,
                 self.tr('Orthomosaic', 'Ortomosaico'),
-                [QgsProcessing.TypeRaster],
+                [Qgis.ProcessingSourceType.TypeRaster],
                 optional = True
             )
         )

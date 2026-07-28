@@ -16,9 +16,8 @@ __date__ = '2023-01-22'
 __copyright__ = '(C) 2023, Leandro França'
 
 from qgis.PyQt.QtCore import QMetaType
-from qgis.core import (QgsProcessing,
+from qgis.core import (Qgis,
                        QgsFeatureSink,
-                       QgsWkbTypes,
                        QgsFields,
                        QgsField,
                        QgsFeature,
@@ -26,20 +25,11 @@ from qgis.core import (QgsProcessing,
                        QgsGeometry,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
-                       QgsProcessingParameterString,
                        QgsProcessingParameterField,
-                       QgsProcessingParameterBoolean,
-                       QgsProcessingParameterCrs,
                        QgsProcessingParameterEnum,
-                       QgsFeatureRequest,
-                       QgsExpression,
                        QgsProcessingParameterFeatureSource,
                        QgsProcessingParameterFeatureSink,
-                       QgsProcessingParameterFileDestination,
-                       QgsApplication,
-                       QgsProject,
-                       QgsCoordinateTransform,
-                       QgsCoordinateReferenceSystem)
+                       QgsApplication)
 import processing
 import numpy as np
 from numpy import pi, cos, sin, sqrt
@@ -106,7 +96,7 @@ class StandardDistance(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.INPUT,
                 self.tr('Point Layer', 'Camada de Pontos'),
-                [QgsProcessing.TypeVectorPoint]
+                [Qgis.ProcessingSourceType.TypeVectorPoint]
             )
         )
 
@@ -130,7 +120,7 @@ class StandardDistance(QgsProcessingAlgorithm):
                 self.CAMPO_PESO,
                 self.tr('Weight Field', 'Campo de Peso'),
                 parentLayerParameterName = self.INPUT,
-                type = QgsProcessingParameterField.Numeric,
+                type = Qgis.ProcessingFieldParameterDataType.Numeric,
                 optional = True
             )
         )
@@ -140,7 +130,7 @@ class StandardDistance(QgsProcessingAlgorithm):
                 self.CAMPO_AGRUPAR,
                 self.tr('Group Field', 'Campo de Agrupamento'),
                 parentLayerParameterName=self.INPUT,
-                type = QgsProcessingParameterField.Any,
+                type = Qgis.ProcessingFieldParameterDataType.Any,
                 optional = True
             )
         )
@@ -188,7 +178,7 @@ class StandardDistance(QgsProcessingAlgorithm):
             Campo_Agrupar = layer.fields().indexFromName(Campo_Agrupar[0])
 
         # OUTPUT
-        GeomType = QgsWkbTypes.Polygon
+        GeomType = Qgis.WkbType.Polygon
         Fields = QgsFields()
         CRS = layer.sourceCrs()
         itens  = {
@@ -302,7 +292,7 @@ class StandardDistance(QgsProcessingAlgorithm):
             att = [current+1, str(grupo), mediaX, mediaY, std_X, std_Y, float(R), float(s)]
             feat.setAttributes(att)
 
-            sink.addFeature(feat, QgsFeatureSink.FastInsert)
+            sink.addFeature(feat, QgsFeatureSink.Flag.FastInsert)
             if feedback.isCanceled():
                 break
             feedback.setProgress(int(current * total))

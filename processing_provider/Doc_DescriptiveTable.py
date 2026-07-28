@@ -21,20 +21,16 @@ __author__ = 'Leandro França'
 __date__ = 'Jul 10'
 __copyright__ = '(C) 2020, Leandro França'
 
-from qgis.core import (QgsProcessing,
-                       QgsFeatureSink,
+from qgis.core import (Qgis,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
                        QgsProcessingParameterNumber,
                        QgsProcessingParameterString,
                        QgsProcessingParameterNumber,
                        QgsProcessingParameterEnum,
-                       QgsFeatureRequest,
                        QgsPoint, QgsLineString, QgsPolygon,
                        QgsGeometry,
-                       QgsExpression,
                        QgsProcessingParameterFeatureSource,
-                       QgsProcessingParameterFeatureSink,
                        QgsProcessingParameterFileDestination,
                        QgsApplication,
                        QgsProject,
@@ -120,7 +116,7 @@ class DescriptiveTable(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.PONTOS,
                 self.tr('Boundary Survey Points', 'Pontos de Limite'),
-                types=[QgsProcessing.TypeVectorPoint]
+                types=[Qgis.ProcessingSourceType.TypeVectorPoint]
             )
         )
 

@@ -88,7 +88,7 @@ class MeasureLayers(QgsProcessingAlgorithm):
             QgsProcessingParameterMultipleLayers(
                 self.LAYERS,
                 self.tr('Layers', 'Camadas'),
-                layerType = QgsProcessing.TypeVectorAnyGeometry
+                layerType = Qgis.ProcessingSourceType.TypeVectorAnyGeometry
             )
         )
 
@@ -226,9 +226,9 @@ class MeasureLayers(QgsProcessingAlgorithm):
                                 'areaLTP( $geometry, @layer_crs)',
                                 'areaINCRA( $geometry, @layer_crs)'][formula]
 
-                if layer.geometryType() == QgsWkbTypes.LineGeometry:
+                if layer.geometryType() == Qgis.GeometryType.Line:
                     layer.addExpressionField(formula_length + '/' + str(unidade_dist), field_length)
-                if layer.geometryType() == QgsWkbTypes.PolygonGeometry:
+                if layer.geometryType() == Qgis.WkbType.PolygonGeometry:
                     layer.addExpressionField(formula_perimeter + '/' + str(unidade_dist), field_perimeter)
                     layer.addExpressionField(formula_area + '/' + str(unidade_area), field_area)
 

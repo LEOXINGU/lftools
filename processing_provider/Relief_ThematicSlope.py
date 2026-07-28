@@ -15,7 +15,7 @@ __author__ = 'Leandro França'
 __date__ = '2026-05-20'
 __copyright__ = '(C) 2026, Leandro França'
 
-from qgis.core import (QgsProcessing,
+from qgis.core import (Qgis,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
                        QgsProcessingLayerPostProcessorInterface,
@@ -90,7 +90,7 @@ class ThematicSlope(QgsProcessingAlgorithm):
             QgsProcessingParameterRasterLayer(
                 self.INPUT,
                 self.tr('Input DEM', 'MDE de entrada'),
-                [QgsProcessing.TypeRaster]
+                [Qgis.ProcessingSourceType.TypeRaster]
             )
         )
 

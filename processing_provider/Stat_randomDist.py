@@ -16,9 +16,8 @@ __date__ = '2020-12-04'
 __copyright__ = '(C) 2020, Leandro França'
 
 from qgis.PyQt.QtCore import QMetaType
-from qgis.core import (QgsProcessing,
+from qgis.core import (Qgis,
                        QgsFeatureSink,
-                       QgsWkbTypes,
                        QgsFields,
                        QgsField,
                        QgsFeature,
@@ -28,20 +27,9 @@ from qgis.core import (QgsProcessing,
                        QgsProcessingAlgorithm,
                        QgsProcessingParameterPoint,
                        QgsProcessingParameterNumber,
-                       QgsProcessingParameterString,
-                       QgsProcessingParameterField,
-                       QgsProcessingParameterBoolean,
                        QgsProcessingParameterCrs,
-                       QgsProcessingParameterEnum,
-                       QgsFeatureRequest,
-                       QgsExpression,
-                       QgsProcessingParameterFeatureSource,
                        QgsProcessingParameterFeatureSink,
-                       QgsProcessingParameterFileDestination,
-                       QgsApplication,
-                       QgsProject,
-                       QgsCoordinateTransform,
-                       QgsCoordinateReferenceSystem)
+                       QgsApplication)
 import numpy as np
 from numpy import cos, sin
 from lftools.geocapt.imgs import Imgs
@@ -229,7 +217,7 @@ class RandomDist(QgsProcessingAlgorithm):
         y_rot = M2[1]+y0
 
         # OUTPUT
-        GeomType = QgsWkbTypes.Point
+        GeomType = Qgis.WkbType.Point
         Fields = QgsFields()
         itens  = {
              'id' : QMetaType.Type.Int,
@@ -256,7 +244,7 @@ class RandomDist(QgsProcessingAlgorithm):
             att = [k+1]
             feat.setGeometry(geom)
             feat.setAttributes(att)
-            sink.addFeature(feat, QgsFeatureSink.FastInsert)
+            sink.addFeature(feat, QgsFeatureSink.Flag.FastInsert)
             if feedback.isCanceled():
                 break
             feedback.setProgress(int((k+1) * total))

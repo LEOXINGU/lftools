@@ -17,7 +17,7 @@ __copyright__ = '(C) 2022, Leandro França'
 
 from qgis.core import (QgsApplication,
                        QgsProcessingParameterVectorLayer,
-                       QgsProcessing,
+                       Qgis,
                        QgsProcessingParameterField,
                        QgsProcessingParameterEnum,
                        QgsProcessingParameterNumber,
@@ -90,7 +90,7 @@ Obs.: Este algoritmo utiliza o centroide da feição para ordenar geograficament
             QgsProcessingParameterVectorLayer(
                 self.INPUT,
                 self.tr('Points', 'Pontos'),
-                [QgsProcessing.TypeVectorAnyGeometry]
+                [Qgis.ProcessingSourceType.TypeVectorAnyGeometry]
             )
         )
 
@@ -115,7 +115,7 @@ Obs.: Este algoritmo utiliza o centroide da feição para ordenar geograficament
                 self.GROUP,
                 self.tr('Group Field', 'Campo de Agrupamento'),
                 parentLayerParameterName=self.INPUT,
-                type=QgsProcessingParameterField.Any,
+                type=Qgis.ProcessingFieldParameterDataType.Any,
                 optional=True
             )
         )

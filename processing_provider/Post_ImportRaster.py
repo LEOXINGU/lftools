@@ -23,7 +23,8 @@ from qgis.core import (QgsProcessing,
                        QgsProcessingParameterEnum,
                        QgsProcessingParameterRasterLayer,
                        QgsApplication,
-                       QgsSettings
+                       QgsSettings,
+                       Qgis
                        )
 
 from lftools.geocapt.imgs import Imgs
@@ -102,7 +103,7 @@ class ImportRaster(QgsProcessingAlgorithm):
             QgsProcessingParameterRasterLayer(
                 self.RASTER,
                 self.tr('Raster layer', 'Camada Raster'),
-                [QgsProcessing.TypeRaster]
+                [Qgis.ProcessingSourceType.TypeRaster]
             )
         )
 

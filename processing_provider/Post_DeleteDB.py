@@ -20,7 +20,8 @@ from qgis.core import (QgsProcessingException,
                        QgsProcessingParameterString,
                        QgsProcessingParameterEnum,
                        QgsApplication,
-                       QgsSettings
+                       QgsSettings,
+                       Qgis
                        )
 
 from lftools.geocapt.imgs import Imgs

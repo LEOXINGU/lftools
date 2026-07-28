@@ -102,7 +102,7 @@ Saiba mais:'''
             QgsProcessingParameterFeatureSource(
                 self.TABLE,
                 self.tr('Table of coordinates', 'Tabela de coordenadas'),
-                [QgsProcessing.TypeVector]
+                [Qgis.ProcessingSourceType.TypeVector]
             )
         )
 
@@ -125,7 +125,7 @@ Saiba mais:'''
                 self.COORD1,
                 self.tr('Lon, X or E field', 'Campo Lon, X ou E'),
                 parentLayerParameterName=self.TABLE,
-                type=QgsProcessingParameterField.Numeric
+                type=Qgis.ProcessingFieldParameterDataType.Numeric
             )
         )
 
@@ -134,7 +134,7 @@ Saiba mais:'''
                 self.COORD2,
                 self.tr('Lat, Y or N field', 'Campo Lat, Y ou N'),
                 parentLayerParameterName=self.TABLE,
-                type=QgsProcessingParameterField.Numeric
+                type=Qgis.ProcessingFieldParameterDataType.Numeric
             )
         )
 
@@ -143,7 +143,7 @@ Saiba mais:'''
                 self.COORD3,
                 self.tr('h, Z or U field', 'Campo h, Z ou U'),
                 parentLayerParameterName=self.TABLE,
-                type=QgsProcessingParameterField.Numeric
+                type=Qgis.ProcessingFieldParameterDataType.Numeric
             )
         )
 
@@ -262,7 +262,7 @@ Saiba mais:'''
 
         # OUTPUT
         # Camada de Saída
-        GeomType = QgsWkbTypes.Point
+        GeomType = Qgis.WkbType.Point
         Fields = QgsFields()
         itens  = {
                      'lon' : QMetaType.Type.Double,
@@ -357,7 +357,7 @@ Saiba mais:'''
 
             geom = QgsGeometry.fromPointXY(QgsPointXY(lon, lat))
             feat.setGeometry(geom)
-            sink.addFeature(feat, QgsFeatureSink.FastInsert)
+            sink.addFeature(feat, QgsFeatureSink.Flag.FastInsert)
             if feedback.isCanceled():
                 break
             feedback.setProgress(int(current * total))

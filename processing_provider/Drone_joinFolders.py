@@ -16,19 +16,12 @@ __date__ = '2021-11-08'
 __copyright__ = '(C) 2021, Leandro França'
 
 from qgis.core import (QgsApplication,
-                       QgsProcessingParameterVectorLayer,
-                       QgsGeometry,
-                       QgsProcessing,
-                       QgsProcessingParameterField,
                        QgsProcessingParameterString,
-                       QgsProcessingParameterEnum,
                        QgsProcessingParameterBoolean,
                        QgsProcessingParameterFile,
-                       QgsFeatureSink,
+                       Qgis,
                        QgsProcessingException,
-                       QgsProcessingAlgorithm,
-                       QgsProcessingParameterFeatureSource,
-                       QgsProcessingParameterFeatureSink)
+                       QgsProcessingAlgorithm)
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
 import os, shutil
@@ -96,7 +89,7 @@ class JoinFolders(QgsProcessingAlgorithm):
             QgsProcessingParameterFile(
                 self.FOLDERS,
                 self.tr('Folders with files', 'Pastas com arquivos'),
-                behavior=QgsProcessingParameterFile.Folder,
+                behavior=Qgis.ProcessingFileParameterBehavior.Folder,
                 defaultValue=None
             )
         )
@@ -122,7 +115,7 @@ class JoinFolders(QgsProcessingAlgorithm):
             QgsProcessingParameterFile(
                 self.OUT_FOLDER,
                 self.tr('Destination folder', 'Pasta de destino'),
-                behavior=QgsProcessingParameterFile.Folder,
+                behavior=Qgis.ProcessingFileParameterBehavior.Folder,
                 defaultValue=None
             )
         )

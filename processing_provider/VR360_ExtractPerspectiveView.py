@@ -16,6 +16,7 @@ __date__ = '2026-01-27'
 __copyright__ = '(C) 2026, Leandro França'
 
 from qgis.core import (QgsApplication,
+                       Qgis,
                        QgsProcessingParameterFile,
                        QgsProcessingParameterNumber,
                        QgsProcessingException,
@@ -93,7 +94,7 @@ class ExtractPerspectiveView(QgsProcessingAlgorithm):
             QgsProcessingParameterFile(
                 self.INPUT,
                 self.tr('Equirectangular image (360°)', 'Imagem equiretangular (360°)'),
-                behavior=QgsProcessingParameterFile.File,
+                behavior=Qgis.ProcessingFileParameterBehavior.File,
                 fileFilter='Image (*.jpeg *.jpg *.JPG)'
             )
         )

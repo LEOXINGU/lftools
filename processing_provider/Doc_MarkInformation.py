@@ -21,7 +21,7 @@ __author__ = 'Leandro França'
 __date__ = 'Jul 10'
 __copyright__ = '(C) 2020, Leandro França'
 
-from qgis.core import (QgsProcessing,
+from qgis.core import (Qgis,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
                        QgsProcessingParameterFile,
@@ -103,7 +103,7 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.PONTOREF,
                 self.tr('Survey Landmark', 'Marco Geodésico'),
-                types=[QgsProcessing.TypeVectorPoint]
+                types=[Qgis.ProcessingSourceType.TypeVectorPoint]
             )
         )
 
@@ -118,7 +118,7 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
             QgsProcessingParameterFile(
                 self.LOGO,
                 self.tr('Logo (JPEG)', 'Logomarca (JPEG)'),
-                behavior = QgsProcessingParameterFile.File,
+                behavior = Qgis.ProcessingFileParameterBehavior.File,
                 defaultValue = None,
                 fileFilter = 'Image (*.jpeg *.jpg *.JPG)',
                 optional = True

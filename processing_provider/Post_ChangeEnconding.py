@@ -19,7 +19,8 @@ from qgis.core import (QgsProcessingException,
                        QgsProcessingAlgorithm,
                        QgsProcessingParameterString,
                        QgsProcessingParameterFile,
-                       QgsApplication
+                       QgsApplication,
+                       Qgis
                        )
 
 from lftools.geocapt.imgs import Imgs

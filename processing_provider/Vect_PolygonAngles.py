@@ -86,7 +86,7 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.POLYGONS,
                 self.tr('Polygon layer', 'Camada de Polígonos'),
-                [QgsProcessing.TypeVectorPolygon]
+                [Qgis.ProcessingSourceType.TypeVectorPolygon]
             )
         )
 
@@ -198,7 +198,7 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
             Distancia = meters2degrees(Distancia, (y_max + y_min)/2, CRS)
 
         # OUTPUT 1: Points
-        GeomType = QgsWkbTypes.Point
+        GeomType = Qgis.WkbType.Point
         Fields = QgsFields()
 
         itens  = {
@@ -225,7 +225,7 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
             raise QgsProcessingException(self.invalidSinkError(parameters, self.ANGLES))
 
         # OUTPUT 2: Linhas interiores
-        GeomType = QgsWkbTypes.LineString
+        GeomType = Qgis.WkbType.LineString
         Fields = QgsFields()
 
         itens  = {
@@ -318,7 +318,7 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
                                         feat.id() if columnIndex == -1 else feat[columnIndex],
                                         float(pntsDic[ponto]['azimute'])
                                             ])
-                    sink1.addFeature(fet, QgsFeatureSink.FastInsert)
+                    sink1.addFeature(fet, QgsFeatureSink.Flag.FastInsert)
 
                     # Geração das linhas internas e externas
                     buffer = geomPonto.buffer(Distancia, 6)
@@ -335,7 +335,7 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
                                             dd2dms(pntsDic[ponto]['alfa_int'],1),
                                             feat.id() if columnIndex == -1 else feat[columnIndex],
                                                 ])
-                        sink2.addFeature(fet, QgsFeatureSink.FastInsert)
+                        sink2.addFeature(fet, QgsFeatureSink.Flag.FastInsert)
 
                         # Alimentar camada de linhas externas
                         fet = QgsFeature()
@@ -345,7 +345,7 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
                                             dd2dms(pntsDic[ponto]['alfa_ext'],1),
                                             feat.id() if columnIndex == -1 else feat[columnIndex],
                                                 ])
-                        sink3.addFeature(fet, QgsFeatureSink.FastInsert)
+                        sink3.addFeature(fet, QgsFeatureSink.Flag.FastInsert)
 
                     except:
                         feedback.reportError(self.tr('Angle line outside polygon bounds! Reduce radius size (distance).', 'Linha de ângulo fora dos limites do polígono! Reduza o tamanho do raio (distância).') + ' ID: {}, vertex: {}'.format(feat.id(), ponto))

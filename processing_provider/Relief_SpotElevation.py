@@ -16,9 +16,8 @@ __date__ = '2021-12-18'
 __copyright__ = '(C) 2021, Leandro França'
 
 from qgis.PyQt.QtCore import QMetaType
-from qgis.core import (QgsProcessing,
+from qgis.core import (Qgis,
                        QgsFeatureSink,
-                       QgsWkbTypes,
                        QgsFields,
                        QgsField,
                        QgsFeature,
@@ -98,7 +97,7 @@ class SpotElevation(QgsProcessingAlgorithm):
             QgsProcessingParameterRasterLayer(
                 self.INPUT,
                 self.tr('Input Raster', 'Raster de Entrada'),
-                [QgsProcessing.TypeRaster]
+                [Qgis.ProcessingSourceType.TypeRaster]
             )
         )
 
@@ -106,7 +105,7 @@ class SpotElevation(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.CONTOURS,
                 self.tr('Contour Lines', 'Curvas de nível'),
-                [QgsProcessing.TypeVectorLine]
+                [Qgis.ProcessingSourceType.TypeVectorLine]
             )
         )
 
@@ -115,7 +114,7 @@ class SpotElevation(QgsProcessingAlgorithm):
                 self.FIELD,
                 self.tr('Elevation field', 'Campo com valor da cota'),
                 parentLayerParameterName=self.CONTOURS,
-                type=QgsProcessingParameterField.Numeric
+                type=Qgis.ProcessingFieldParameterDataType.Numeric
             )
         )
 
@@ -204,7 +203,7 @@ class SpotElevation(QgsProcessingAlgorithm):
             self.SPOTS,
             context,
             Fields,
-            QgsWkbTypes.Point,
+            Qgis.WkbType.Point,
             crsDest
         )
         if sink is None:
@@ -321,7 +320,7 @@ class SpotElevation(QgsProcessingAlgorithm):
                 feat = QgsFeature(Fields)
                 feat.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(X,Y)))
                 feat.setAttributes([cota, TIPO])
-                sink.addFeature(feat, QgsFeatureSink.FastInsert)
+                sink.addFeature(feat, QgsFeatureSink.Flag.FastInsert)
 
             if feedback.isCanceled():
                 break

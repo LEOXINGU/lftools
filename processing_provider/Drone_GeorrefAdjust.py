@@ -16,9 +16,8 @@ __date__ = '2021-11-04'
 __copyright__ = '(C) 2021, Leandro França'
 
 from qgis.PyQt.QtCore import QMetaType
-from qgis.core import (QgsProcessing,
+from qgis.core import (Qgis,
                        QgsFeatureSink,
-                       QgsWkbTypes,
                        QgsFields,
                        QgsField,
                        QgsFeature,
@@ -26,25 +25,15 @@ from qgis.core import (QgsProcessing,
                        QgsGeometry,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
-                       QgsProcessingParameterString,
-                       QgsProcessingParameterNumber,
-                       QgsProcessingParameterField,
                        QgsProcessingParameterBoolean,
-                       QgsProcessingParameterCrs,
                        QgsProcessingParameterEnum,
-                       QgsFeatureRequest,
-                       QgsExpression,
                        QgsProcessingParameterFeatureSource,
                        QgsProcessingParameterFeatureSink,
                        QgsProcessingParameterFileDestination,
-                       QgsProcessingParameterMultipleLayers,
-                       QgsProcessingParameterVectorLayer,
                        QgsProcessingParameterRasterLayer,
-                       QgsProcessingParameterRasterDestination,
                        QgsApplication,
                        QgsProject,
                        QgsRasterLayer,
-                       QgsCoordinateTransform,
                        QgsCoordinateReferenceSystem)
 
 from osgeo import osr, gdal_array, gdal #https://gdal.org/python/
@@ -129,7 +118,7 @@ class GeorrefAdjust(QgsProcessingAlgorithm):
             QgsProcessingParameterRasterLayer(
                 self.RASTER,
                 self.tr('Input Raster', 'Raster de Entrada'),
-                [QgsProcessing.TypeRaster]
+                [Qgis.ProcessingSourceType.TypeRaster]
             )
         )
 
@@ -137,7 +126,7 @@ class GeorrefAdjust(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.VECTORS,
                 self.tr('Vectors Lines (two vertices)', 'Linhas de vetores (dois vértices)'),
-                [QgsProcessing.TypeVectorLine]
+                [Qgis.ProcessingSourceType.TypeVectorLine]
             )
         )
 
@@ -267,7 +256,7 @@ class GeorrefAdjust(QgsProcessingAlgorithm):
         )
 
         # Coordenas ajustadas de saida
-        GeomType = QgsWkbTypes.Point
+        GeomType = Qgis.WkbType.Point
         Fields = QgsFields()
         CRS = deslc.sourceCrs()
         prj = CRS.toWkt()
@@ -418,7 +407,7 @@ class GeorrefAdjust(QgsProcessingAlgorithm):
             s_x = PREC[ind][0]
             s_y = PREC[ind][1]
             feat.setAttributes([ind+1, s_x, s_y])
-            sink.addFeature(feat, QgsFeatureSink.FastInsert)
+            sink.addFeature(feat, QgsFeatureSink.Flag.FastInsert)
             if feedback.isCanceled():
                 break
 

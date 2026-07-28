@@ -86,11 +86,11 @@ def DefinirUTM(iface):
         project.setCrs(crs)
 
         mensagem = tr('New CRS defined to zone {} and hemisphere {}.', 'Novo SRC definido para o Fuso {} e Hemisfério {}').format(fuso, hemisf)
-        iface.messageBar().pushMessage("Projeção", mensagem, level=Qgis.Info)
+        iface.messageBar().pushMessage("Projeção", mensagem, level=Qgis.MessageLevel.Info)
     except:
         # Verificar se a extensão do mapa é válida para UTM
         mensagem = tr('Make sure the canvas extent is valid for a UTM projection!', 'Verifique se a extensão da tela é válida para uma projeção UTM!')
-        iface.messageBar().pushMessage("Projeção", mensagem, level=Qgis.Warning)
+        iface.messageBar().pushMessage("Projeção", mensagem, level=Qgis.MessageLevel.Warning)
 
 
 def copiar_estilo_camada_ativa(iface):
@@ -101,10 +101,10 @@ def copiar_estilo_camada_ativa(iface):
     if camada_ativa is not None:
         # Copiar o estilo da camada ativa
         iface.actionCopyLayerStyle().trigger()
-        iface.messageBar().pushMessage("LFTools", tr('Active layer style successfully copied.', 'Estilo da camada ativa copiado com sucesso.'), level=Qgis.Info)
+        iface.messageBar().pushMessage("LFTools", tr('Active layer style successfully copied.', 'Estilo da camada ativa copiado com sucesso.'), level=Qgis.MessageLevel.Info)
         return camada_ativa
     else:
-        iface.messageBar().pushMessage("LFTools", tr("No active layer found!", "Nenhuma camada ativa encontrada!"), level=Qgis.Warning)
+        iface.messageBar().pushMessage("LFTools", tr("No active layer found!", "Nenhuma camada ativa encontrada!"), level=Qgis.MessageLevel.Warning)
         return
 
 
@@ -113,26 +113,26 @@ def colar_estilo_em_camada_destino(iface, camada_origem):
     camada_destino = iface.activeLayer()
 
     if camada_origem is None:
-        iface.messageBar().pushMessage("LFTools", tr("No style copied!", "Nenhum estilo copiado!"), level=Qgis.Warning)
+        iface.messageBar().pushMessage("LFTools", tr("No style copied!", "Nenhum estilo copiado!"), level=Qgis.MessageLevel.Warning)
         return
 
     if camada_destino is None:
-        iface.messageBar().pushMessage("LFTools", tr("No active layer found!", "Nenhuma camada ativa encontrada!"), level=Qgis.Warning)
+        iface.messageBar().pushMessage("LFTools", tr("No active layer found!", "Nenhuma camada ativa encontrada!"), level=Qgis.MessageLevel.Warning)
         return
 
     # Verificar se ambas as camadas são do mesmo tipo
     if camada_origem.type() != camada_destino.type():
-        iface.messageBar().pushMessage("LFTools", tr("The layers are of different types (raster and vector)!", "As camadas são de tipos diferentes (raster e vetor)!"), level=Qgis.Warning)
+        iface.messageBar().pushMessage("LFTools", tr("The layers are of different types (raster and vector)!", "As camadas são de tipos diferentes (raster e vetor)!"), level=Qgis.MessageLevel.Warning)
         return
 
     # Verificar se ambas as camadas são vetores e se possuem a mesma geometria
-    if camada_destino.type() == QgsMapLayer.VectorLayer:
+    if camada_destino.type() == Qgis.LayerType.Vector:
         if camada_origem.geometryType() != camada_destino.geometryType():
-            iface.messageBar().pushMessage("LFTools", tr("The vector layers have different geometry types!", "As camadas vetoriais têm tipos de geometria diferentes!"), level=Qgis.Warning)
+            iface.messageBar().pushMessage("LFTools", tr("The vector layers have different geometry types!", "As camadas vetoriais têm tipos de geometria diferentes!"), level=Qgis.MessageLevel.Warning)
             return
 
     # Colar o estilo se as camadas forem compatíveis
     iface.actionPasteLayerStyle().trigger()
     camada_destino.triggerRepaint()
     camada_destino.emitStyleChanged()
-    iface.messageBar().pushMessage("LFTools", tr('Style successfully pasted to the destination layer.', 'Estilo colado com sucesso na camada de destino.'), level=Qgis.Info)
+    iface.messageBar().pushMessage("LFTools", tr('Style successfully pasted to the destination layer.', 'Estilo colado com sucesso na camada de destino.'), level=Qgis.MessageLevel.Info)

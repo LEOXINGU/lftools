@@ -21,6 +21,7 @@ from qgis.core import (QgsProcessingException,
                        QgsProcessingParameterEnum,
                        QgsProcessingParameterFile,
                        QgsApplication,
+                       Qgis,
                        QgsSettings
                         )
 
@@ -94,7 +95,7 @@ class Backup(QgsProcessingAlgorithm):
             QgsProcessingParameterFile(
                 self.FOLDER,
                 self.tr('Folder to save the backup file', 'Pasta para salvar o arquivo de backup'),
-                behavior=QgsProcessingParameterFile.Folder,
+                behavior=Qgis.ProcessingFileParameterBehavior.Folder,
                 defaultValue=None
             )
         )

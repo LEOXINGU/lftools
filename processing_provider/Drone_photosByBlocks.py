@@ -17,18 +17,13 @@ __copyright__ = '(C) 2021, Leandro França'
 
 from qgis.core import (QgsApplication,
                        QgsProcessingParameterVectorLayer,
-                       QgsGeometry,
-                       QgsProcessing,
+                       Qgis,
                        QgsProcessingParameterField,
                        QgsProcessingParameterString,
-                       QgsProcessingParameterEnum,
-                       QgsProcessingParameterBoolean,
                        QgsProcessingParameterFile,
-                       QgsFeatureSink,
                        QgsProcessingException,
-                       QgsProcessingAlgorithm,
-                       QgsProcessingParameterFeatureSource,
-                       QgsProcessingParameterFeatureSink)
+                       QgsProcessingAlgorithm
+                       )
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
 import os, shutil
@@ -94,7 +89,7 @@ class PhotosByBlocks(QgsProcessingAlgorithm):
             QgsProcessingParameterVectorLayer(
                 self.POINTS,
                 self.tr('Points', 'Pontos'),
-                [QgsProcessing.TypeVectorPoint]
+                [Qgis.ProcessingSourceType.TypeVectorPoint]
             )
         )
 
@@ -103,7 +98,7 @@ class PhotosByBlocks(QgsProcessingAlgorithm):
                 self.FILEPATH,
                 self.tr('Field with file path', 'Campo com o caminho do arquivo'),
                 parentLayerParameterName=self.POINTS,
-                type=QgsProcessingParameterField.String
+                type=Qgis.ProcessingFieldParameterDataType.String
             )
         )
 
@@ -111,7 +106,7 @@ class PhotosByBlocks(QgsProcessingAlgorithm):
             QgsProcessingParameterVectorLayer(
                 self.BLOCKS,
                 self.tr('Blocks', 'Blocos'),
-                [QgsProcessing.TypeVectorPolygon]
+                [Qgis.ProcessingSourceType.TypeVectorPolygon]
             )
         )
 
@@ -127,7 +122,7 @@ class PhotosByBlocks(QgsProcessingAlgorithm):
             QgsProcessingParameterFile(
                 self.FOLDER,
                 self.tr('Folder with raster files', 'Pasta com arquivos raster'),
-                behavior=QgsProcessingParameterFile.Folder,
+                behavior=Qgis.ProcessingFileParameterBehavior.Folder,
                 defaultValue=None
             )
         )

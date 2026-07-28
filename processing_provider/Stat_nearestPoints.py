@@ -16,13 +16,11 @@ __date__ = '2023-06-28'
 __copyright__ = '(C) 2023, Leandro França'
 
 from qgis.PyQt.QtCore import QMetaType
-from qgis.core import (QgsProcessing,
+from qgis.core import (Qgis,
                        QgsFeatureSink,
-                       QgsWkbTypes,
                        QgsField,
                        QgsFeature,
                        QgsGeometry,
-                       QgsMultiPoint,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
                        QgsProcessingParameterNumber,
@@ -109,7 +107,7 @@ Saída: Camada de multipoint com precisões posicionais em metros e outras estat
             QgsProcessingParameterFeatureSource(
                 self.REF,
                 self.tr('Reference points', 'Pontos de referência'),
-                [QgsProcessing.TypeVectorPoint]
+                [Qgis.ProcessingSourceType.TypeVectorPoint]
             )
         )
 
@@ -117,7 +115,7 @@ Saída: Camada de multipoint com precisões posicionais em metros e outras estat
             QgsProcessingParameterFeatureSource(
                 self.PNTS,
                 self.tr('Points to be analyzed', 'Pontos a serem analisados'),
-                [QgsProcessing.TypeVectorPoint]
+                [Qgis.ProcessingSourceType.TypeVectorPoint]
             )
         )
 
@@ -157,7 +155,7 @@ Saída: Camada de multipoint com precisões posicionais em metros e outras estat
                 self.FIELD,
                 self.tr('Attribute stats', 'Estatísticas de atributo'),
                 parentLayerParameterName = self.PNTS,
-                type = QgsProcessingParameterField.Numeric,
+                type = Qgis.ProcessingFieldParameterDataType.Numeric,
                 optional = True
             )
         )
@@ -200,7 +198,7 @@ Saída: Camada de multipoint com precisões posicionais em metros e outras estat
         )
         if pnts is None:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.PNTS))
-        possuiZ = True if pnts.wkbType() == QgsWkbTypes.PointZ else False
+        possuiZ = True if pnts.wkbType() == Qgis.WkbType.PointZ else False
 
         campo = self.parameterAsFields(
             parameters,
@@ -259,7 +257,7 @@ Saída: Camada de multipoint com precisões posicionais em metros e outras estat
             self.OUTPUT,
             context,
             Fields,
-            QgsWkbTypes.MultiPointZ if possuiZ else QgsWkbTypes.MultiPoint,
+            Qgis.WkbType.MultiPointZ if possuiZ else Qgis.WkbType.MultiPoint,
             SRC
         )
         if sink is None:
@@ -398,7 +396,7 @@ Saída: Camada de multipoint com precisões posicionais em metros e outras estat
                 att = feat1.attributes() + [len(IDS), float(sigmaX), float(sigmaY)] + [float(sigmaZ)] if possuiZ else []
                 att += lista_stats
                 feat.setAttributes(att)
-                sink.addFeature(feat, QgsFeatureSink.FastInsert)
+                sink.addFeature(feat, QgsFeatureSink.Flag.FastInsert)
             if feedback.isCanceled():
                 break
             feedback.setProgress(int((cont+1) * total))

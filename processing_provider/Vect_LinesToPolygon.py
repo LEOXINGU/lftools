@@ -20,23 +20,14 @@ from qgis.core import (QgsApplication,
                        QgsProcessingParameterFeatureSource,
                        QgsGeometry,
                        QgsFeature,
-                       QgsProcessing,
-                       QgsProject,
+                       Qgis,
                        QgsFields,
                        QgsField,
-                       QgsWkbTypes,
                        QgsLineString,
                        QgsPolygon,
-                       QgsPoint,
-                       QgsPointXY,
-                       QgsProcessingParameterField,
-                       QgsProcessingParameterEnum,
-                       QgsProcessingParameterBoolean,
-                       QgsProcessingParameterNumber,
                        QgsFeatureSink,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
-                       QgsCoordinateTransform,
                        QgsProcessingParameterFeatureSink)
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
@@ -96,7 +87,7 @@ class LinesToPolygon(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.LINES,
                 self.tr('Line layer (connected)', 'Camada de linhas conectadas'),
-                [QgsProcessing.TypeVectorLine]
+                [Qgis.ProcessingSourceType.TypeVectorLine]
             )
         )
 
@@ -131,7 +122,7 @@ class LinesToPolygon(QgsProcessingAlgorithm):
             self.POLYGON,
             context,
             Fields,
-            QgsWkbTypes.PolygonZ if layer.wkbType() not in (2,5) else QgsWkbTypes.Polygon,
+            Qgis.WkbType.PolygonZ if layer.wkbType() not in (2,5) else Qgis.WkbType.Polygon,
             layer.sourceCrs()
         )
         if sink is None:
@@ -205,7 +196,7 @@ class LinesToPolygon(QgsProcessingAlgorithm):
         feature = QgsFeature()
         feature.setGeometry(Poligono)
         feature.setAttributes([1])
-        sink.addFeature(feature, QgsFeatureSink.FastInsert)
+        sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
 
         feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
         feedback.pushInfo(self.tr('Leandro Franca - Cartographic Engineer', 'Leandro França - Eng Cart'))

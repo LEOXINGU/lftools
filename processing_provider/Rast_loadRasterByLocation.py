@@ -15,31 +15,15 @@ __author__ = 'Leandro França'
 __date__ = '2020-12-11'
 __copyright__ = '(C) 2020, Leandro França'
 
-from qgis.core import (QgsProcessing,
-                       QgsFeatureSink,
-                       QgsWkbTypes,
-                       QgsFields,
-                       QgsField,
-                       QgsFeature,
+from qgis.core import (Qgis,
                        QgsPointXY,
                        QgsGeometry,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
                        QgsProcessingParameterString,
-                       QgsProcessingParameterNumber,
-                       QgsProcessingParameterField,
                        QgsProcessingParameterBoolean,
-                       QgsProcessingParameterCrs,
-                       QgsProcessingParameterEnum,
-                       QgsProcessingParameterMultipleLayers,
                        QgsProcessingParameterFeatureSource,
-                       QgsProcessingParameterRasterLayer,
                        QgsProcessingParameterFile,
-                       QgsFeatureRequest,
-                       QgsExpression,
-                       QgsProcessingParameterFeatureSink,
-                       QgsProcessingParameterFileDestination,
-                       QgsProcessingParameterRasterDestination,
                        QgsApplication,
                        QgsProject,
                        QgsRasterLayer,
@@ -118,7 +102,7 @@ class LoadRasterByLocation(QgsProcessingAlgorithm):
             QgsProcessingParameterFile(
                 self.FOLDER,
                 self.tr('Folder with raster files', 'Pasta com arquivos raster'),
-                behavior=QgsProcessingParameterFile.Folder,
+                behavior=Qgis.ProcessingFileParameterBehavior.Folder,
                 defaultValue=None
             )
         )
@@ -143,7 +127,7 @@ class LoadRasterByLocation(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.INPUT,
                 self.tr('Vector Layer', 'Camada Vetorial'),
-                [QgsProcessing.TypeVectorAnyGeometry]
+                [Qgis.ProcessingSourceType.TypeVectorAnyGeometry]
             )
         )
 
@@ -152,7 +136,7 @@ class LoadRasterByLocation(QgsProcessingAlgorithm):
             QgsProcessingParameterFile(
                 self.OUTPUTFOLDER,
                 self.tr('Destination folder', 'Pasta de destino'),
-                behavior = QgsProcessingParameterFile.Folder,
+                behavior = Qgis.ProcessingFileParameterBehavior.Folder,
                 defaultValue = None,
                 optional = True
             )

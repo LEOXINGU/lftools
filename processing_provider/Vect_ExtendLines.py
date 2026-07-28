@@ -17,13 +17,10 @@ __date__ = '2021-02-14'
 __copyright__ = '(C) 2021, Leandro França'
 
 from qgis.core import (QgsApplication,
-                       QgsProcessingParameterVectorLayer,
+                       Qgis,
                        QgsGeometry,
                        QgsPointXY,
                        QgsFeature,
-                       QgsProcessing,
-                       QgsProcessingParameterField,
-                       QgsProcessingParameterBoolean,
                        QgsProcessingParameterEnum,
                        QgsProcessingParameterNumber,
                        QgsFeatureSink,
@@ -96,7 +93,7 @@ class ExtendLines(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.LINES,
                 self.tr('Line Layer', 'Camada de Linhas'),
-                [QgsProcessing.TypeVectorLine]
+                [Qgis.ProcessingSourceType.TypeVectorLine]
             )
         )
 
@@ -213,7 +210,7 @@ class ExtendLines(QgsProcessingAlgorithm):
                         feature = QgsFeature(fields)
                         feature.setAttributes(att)
                         feature.setGeometry(new_geom)
-                        sink.addFeature(feature, QgsFeatureSink.FastInsert)
+                        sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
                 else:
                     line = geom.asPolyline()
                     P1 = line[0]
@@ -240,7 +237,7 @@ class ExtendLines(QgsProcessingAlgorithm):
                     feature = QgsFeature(fields)
                     feature.setAttributes(att)
                     feature.setGeometry(new_geom)
-                    sink.addFeature(feature, QgsFeatureSink.FastInsert)
+                    sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
             if feedback.isCanceled():
                 break
             feedback.setProgress(int((index+1) * Percent))

@@ -82,7 +82,7 @@ class SelectByKeyAtt(QgsProcessingAlgorithm):
             QgsProcessingParameterVectorLayer(
                 self.PRIMARY,
                 self.tr('Input Layer', 'Camada de entrada'),
-                [QgsProcessing.TypeVectorAnyGeometry]
+                [Qgis.ProcessingSourceType.TypeVectorAnyGeometry]
             )
         )
 
@@ -98,7 +98,7 @@ class SelectByKeyAtt(QgsProcessingAlgorithm):
             QgsProcessingParameterMultipleLayers(
                 self.FOREIGNS,
                 self.tr('Layers', 'Camadas'),
-                layerType = QgsProcessing.TypeVectorAnyGeometry
+                layerType = Qgis.ProcessingSourceType.TypeVectorAnyGeometry
             )
         )
 

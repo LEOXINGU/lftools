@@ -18,17 +18,12 @@ __copyright__ = '(C) 2023, Leandro França'
 from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (QgsApplication,
                        QgsGeometry,
-                       QgsWkbTypes,
+                       Qgis,
                        QgsFeature,
                        QgsField,
                        QgsFields,
-                       QgsProcessing,
                        QgsSpatialIndex,
                        QgsFeatureRequest,
-                       QgsProcessingParameterField,
-                       QgsProcessingParameterEnum,
-                       QgsProcessingParameterBoolean,
-                       QgsProcessingParameterNumber,
                        QgsFeatureSink,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
@@ -93,7 +88,7 @@ class Overlapping(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.INPUT,
                 self.tr('Polygon layer', 'Camada de polígonos'),
-                [QgsProcessing.TypeVectorPolygon]
+                [Qgis.ProcessingSourceType.TypeVectorPolygon]
             )
         )
 
@@ -129,7 +124,7 @@ class Overlapping(QgsProcessingAlgorithm):
             self.OUTPUT,
             context,
             Fields,
-            QgsWkbTypes.Polygon,
+            Qgis.WkbType.Polygon,
             layer.sourceCrs()
         )
         if sink is None:
@@ -170,12 +165,12 @@ class Overlapping(QgsProcessingAlgorithm):
                                         feature = QgsFeature(Fields)
                                         feature.setGeometry(QgsGeometry.fromPolygonXY(coord))
                                         feature.setAttributes([ID1, ID2])
-                                        sink.addFeature(feature, QgsFeatureSink.FastInsert)
+                                        sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
                                 else:
                                     feature = QgsFeature(Fields)
                                     feature.setGeometry(item)
                                     feature.setAttributes([ID1, ID2])
-                                    sink.addFeature(feature, QgsFeatureSink.FastInsert)
+                                    sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
             if feedback.isCanceled():
                 break
             feedback.setProgress(int((current+1) * total))

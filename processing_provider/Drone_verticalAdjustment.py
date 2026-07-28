@@ -16,35 +16,22 @@ __date__ = '2021-11-08'
 __copyright__ = '(C) 2021, Leandro França'
 
 from qgis.PyQt.QtCore import QMetaType
-from qgis.core import (QgsProcessing,
+from qgis.core import (Qgis,
                        QgsFeatureSink,
-                       QgsWkbTypes,
-                       QgsFields,
                        QgsField,
                        QgsFeature,
-                       QgsPointXY,
-                       QgsGeometry,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
-                       QgsProcessingParameterString,
-                       QgsProcessingParameterNumber,
                        QgsProcessingParameterField,
                        QgsProcessingParameterBoolean,
-                       QgsProcessingParameterCrs,
                        QgsProcessingParameterEnum,
-                       QgsFeatureRequest,
-                       QgsExpression,
                        QgsProcessingParameterFeatureSource,
                        QgsProcessingParameterFeatureSink,
                        QgsProcessingParameterFileDestination,
-                       QgsProcessingParameterMultipleLayers,
-                       QgsProcessingParameterVectorLayer,
                        QgsProcessingParameterRasterLayer,
-                       QgsProcessingParameterRasterDestination,
                        QgsApplication,
                        QgsProject,
                        QgsRasterLayer,
-                       QgsCoordinateTransform,
                        QgsCoordinateReferenceSystem)
 
 from osgeo import osr, gdal_array, gdal #https://gdal.org/python/
@@ -122,7 +109,7 @@ class VerticalAdjustment(QgsProcessingAlgorithm):
             QgsProcessingParameterRasterLayer(
                 self.DEM,
                 self.tr('Digital Elevation Model (DEM)', 'Modelo Digital de Elevação (MDE)'),
-                [QgsProcessing.TypeRaster]
+                [Qgis.ProcessingSourceType.TypeRaster]
             )
         )
 
@@ -130,7 +117,7 @@ class VerticalAdjustment(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.POINTS,
                 self.tr('Ground Control Points (GCP)', 'Pontos de Controle no Terrno (GCP)'),
-                [QgsProcessing.TypeVectorPoint]
+                [Qgis.ProcessingSourceType.TypeVectorPoint]
             )
         )
 
@@ -270,7 +257,7 @@ class VerticalAdjustment(QgsProcessingAlgorithm):
         )
 
         # Coordenas ajustadas de saida
-        GeomType = QgsWkbTypes.Point
+        GeomType = Qgis.WkbType.Point
         Fields = pontos.fields()
         CRS = pontos.sourceCrs()
         prj = CRS.toWkt()
@@ -399,7 +386,7 @@ class VerticalAdjustment(QgsProcessingAlgorithm):
             s_z = float(PREC[ind])
             d_z = float(DELTA[ind])
             feature.setAttributes(feat.attributes() + [d_z, z_aj, s_z])
-            sink.addFeature(feature, QgsFeatureSink.FastInsert)
+            sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
             if feedback.isCanceled():
                 break
 

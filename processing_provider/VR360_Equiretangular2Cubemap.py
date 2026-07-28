@@ -16,6 +16,7 @@ __date__ = '2025-12-25'
 __copyright__ = '(C) 2025, Leandro França'
 
 from qgis.core import (QgsApplication,
+                       Qgis,
                        QgsProcessingParameterFile,
                        QgsProcessingParameterNumber,
                        QgsProcessingException,
@@ -93,7 +94,7 @@ A resolução das faces pode ser definida pelo usuário, permitindo escolher ent
             QgsProcessingParameterFile(
                 self.FILE,
                 self.tr('Equirectangular image (360°)', 'Imagem equiretangular (360°)'),
-                behavior = QgsProcessingParameterFile.File,
+                behavior = Qgis.ProcessingFileParameterBehavior.File,
                 fileFilter = 'Image (*.jpeg *.jpg *.JPG)'
             )
         )

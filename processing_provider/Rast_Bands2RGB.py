@@ -15,33 +15,15 @@ __author__ = 'Leandro França'
 __date__ = '2020-08-23'
 __copyright__ = '(C) 2020, Leandro França'
 
-from qgis.core import (QgsProcessing,
-                       QgsFeatureSink,
-                       QgsWkbTypes,
-                       QgsFields,
-                       QgsField,
-                       QgsFeature,
-                       QgsPointXY,
-                       QgsGeometry,
+from qgis.core import (Qgis,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
-                       QgsProcessingParameterString,
-                       QgsProcessingParameterField,
                        QgsProcessingParameterBoolean,
-                       QgsProcessingParameterCrs,
-                       QgsProcessingParameterEnum,
-                       QgsFeatureRequest,
-                       QgsExpression,
-                       QgsProcessingParameterFeatureSource,
-                       QgsProcessingParameterFeatureSink,
                        QgsProcessingParameterFileDestination,
                        QgsProcessingParameterRasterLayer,
-                       QgsProcessingParameterRasterDestination,
                        QgsApplication,
                        QgsProject,
-                       QgsRasterLayer,
-                       QgsCoordinateTransform,
-                       QgsCoordinateReferenceSystem)
+                       QgsRasterLayer)
 
 from osgeo import osr, gdal_array, gdal
 from lftools.geocapt.imgs import Imgs
@@ -110,7 +92,7 @@ class Bands2RGB(QgsProcessingAlgorithm):
             QgsProcessingParameterRasterLayer(
                 self.R,
                 self.tr('Red Band', 'Banda Vermelha (R)'),
-                [QgsProcessing.TypeRaster]
+                [Qgis.ProcessingSourceType.TypeRaster]
             )
         )
 
@@ -118,7 +100,7 @@ class Bands2RGB(QgsProcessingAlgorithm):
             QgsProcessingParameterRasterLayer(
                 self.G,
                 self.tr('Green Band', 'Banda Verde (G)'),
-                [QgsProcessing.TypeRaster]
+                [Qgis.ProcessingSourceType.TypeRaster]
             )
         )
 
@@ -126,7 +108,7 @@ class Bands2RGB(QgsProcessingAlgorithm):
             QgsProcessingParameterRasterLayer(
                 self.B,
                 self.tr('Blue Band', 'Banda Azul (B)'),
-                [QgsProcessing.TypeRaster],
+                [Qgis.ProcessingSourceType.TypeRaster],
 
             )
         )

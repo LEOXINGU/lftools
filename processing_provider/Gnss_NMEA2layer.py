@@ -96,7 +96,7 @@ Modos:
             QgsProcessingParameterFile(
                 self.FILE,
                 self.tr('NMEA file .nmea', 'Arquivo NMEA .nmea'),
-                behavior = QgsProcessingParameterFile.File,
+                behavior = Qgis.ProcessingFileParameterBehavior.File,
                 fileFilter = 'NMEA (*.nmea)'
             )
         )
@@ -255,7 +255,7 @@ Modos:
         for item in itens:
             Fields.append(QgsField(item, itens[item]))
 
-        (sink, dest_id) = self.parameterAsSink( parameters, self.OUTPUT, context, Fields, QgsWkbTypes.PointZ, crs)
+        (sink, dest_id) = self.parameterAsSink( parameters, self.OUTPUT, context, Fields, Qgis.WkbType.PointZ, crs)
         if sink is None:
             raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT))
 
@@ -268,7 +268,7 @@ Modos:
                 except:
                     data_hora = None
                 feat.setAttributes(pnt[0:5] + [data_hora] + pnt[5:8] + pnt[-2:]  ) # lat, lon, h, H, N, HDOP, VDOP, PDOP, hora, min, seg, quality, num_sat
-                sink.addFeature(feat, QgsFeatureSink.FastInsert)
+                sink.addFeature(feat, QgsFeatureSink.Flag.FastInsert)
 
         elif tipo == 1: # Estático com solução fixa
             valores = valores[valores[:,-2] == nmea_quality[4] ] # eliminando observações de baixa qualidade
@@ -306,7 +306,7 @@ Modos:
                                 float(sigma_y),
                                 float(s_h),
                                 len(valores)])
-            sink.addFeature(feat, QgsFeatureSink.FastInsert)
+            sink.addFeature(feat, QgsFeatureSink.Flag.FastInsert)
 
         elif tipo == 2: # Estático com todos os valores
             # calculo de valores médios
@@ -341,7 +341,7 @@ Modos:
                                 float(sigma_y),
                                 float(s_h),
                                 len(valores)])
-            sink.addFeature(feat, QgsFeatureSink.FastInsert)
+            sink.addFeature(feat, QgsFeatureSink.Flag.FastInsert)
 
         feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
         feedback.pushInfo(self.tr('Leandro Franca - Cartographic Engineer', 'Leandro França - Eng Cart'))

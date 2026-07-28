@@ -80,7 +80,7 @@ class PolygonOrientation(QgsProcessingAlgorithm):
             QgsProcessingParameterVectorLayer(
                 self.POLYGONS,
                 self.tr('Polygon layer', 'Camada de Polígonos'),
-                [QgsProcessing.TypeVectorPolygon]
+                [Qgis.ProcessingSourceType.TypeVectorPolygon]
             )
         )
 

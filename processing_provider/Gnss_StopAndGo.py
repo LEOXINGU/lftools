@@ -16,9 +16,8 @@ __date__ = '2022-06-13'
 __copyright__ = '(C) 2022, Leandro França'
 
 from qgis.PyQt.QtCore import QMetaType
-from qgis.core import (QgsProcessing,
+from qgis.core import (Qgis,
                        QgsFeatureSink,
-                       QgsWkbTypes,
                        QgsField,
                        QgsPoint,
                        QgsGeometry,
@@ -112,7 +111,7 @@ Dados de entrada:
             QgsProcessingParameterFeatureSource(
                 self.INPUT,
                 self.tr('GNSS point Layer', 'Camada de Pontos GNSS'),
-                [QgsProcessing.TypeVectorPoint]
+                [Qgis.ProcessingSourceType.TypeVectorPoint]
             )
         )
 
@@ -181,7 +180,7 @@ Dados de entrada:
         for item in itens:
             Fields.append(QgsField(item, itens[item]))
 
-        (sink, dest_id) = self.parameterAsSink( parameters, self.OUTPUT, context, Fields, QgsWkbTypes.PointZ, layer.sourceCrs())
+        (sink, dest_id) = self.parameterAsSink( parameters, self.OUTPUT, context, Fields, Qgis.WkbType.PointZ, layer.sourceCrs())
         if sink is None:
             raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT))
 
@@ -277,7 +276,7 @@ Dados de entrada:
                 att += [grupos[grupo]['t_ini'], grupos[grupo]['t_fim'], len(x), str(grupo)]
                 feat.setGeometry(pnt)
                 feat.setAttributes(att)
-                sink.addFeature(feat, QgsFeatureSink.FastInsert)
+                sink.addFeature(feat, QgsFeatureSink.Flag.FastInsert)
                 if feedback.isCanceled():
                     break
 

@@ -114,7 +114,7 @@ class Accuracy_Vertical(QgsProcessingAlgorithm):
             QgsProcessingParameterRasterLayer(
                 self.DEM,
                 self.tr('DEM', 'MDE'),
-                [QgsProcessing.TypeRaster]
+                [Qgis.ProcessingSourceType.TypeRaster]
             )
         )
 
@@ -122,7 +122,7 @@ class Accuracy_Vertical(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.CHECKPOINTS,
                 self.tr('Reference points', 'Pontos de referência'),
-                [QgsProcessing.TypeVectorPoint]
+                [Qgis.ProcessingSourceType.TypeVectorPoint]
             )
         )
         
@@ -349,7 +349,7 @@ class Accuracy_Vertical(QgsProcessingAlgorithm):
                     feature = QgsFeature(Fields)
                     feature.setGeometry(geom)
                     feature.setAttributes(att + [float(discrep)])
-                    sink.addFeature(feature, QgsFeatureSink.FastInsert)
+                    sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
                 else:
                     total_nulos += 1
             else:

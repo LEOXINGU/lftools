@@ -15,36 +15,17 @@ __author__ = 'Leandro França'
 __date__ = '2022-03-07'
 __copyright__ = '(C) 2022, Leandro França'
 
-from qgis.core import (QgsProcessing,
-                       QgsFeatureSink,
-                       QgsWkbTypes,
-                       QgsFields,
-                       QgsField,
-                       QgsFeature,
-                       QgsPointXY,
-                       QgsGeometry,
+from qgis.core import (Qgis,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
-                       QgsProcessingParameterString,
-                       QgsProcessingParameterField,
                        QgsProcessingParameterBoolean,
-                       QgsProcessingParameterCrs,
-                       QgsProcessingParameterEnum,
-                       QgsFeatureRequest,
-                       QgsExpression,
-                       QgsProcessingParameterFeatureSource,
-                       QgsProcessingParameterFeatureSink,
                        QgsProcessingParameterFileDestination,
                        QgsProcessingParameterRasterLayer,
-                       QgsProcessingParameterBand,
-                       QgsProcessingParameterRasterDestination,
                        QgsApplication,
                        QgsProject,
-                       QgsRasterLayer,
-                       QgsCoordinateTransform,
-                       QgsCoordinateReferenceSystem)
+                       QgsRasterLayer)
 
-from osgeo import osr, gdal_array, gdal #https://gdal.org/python/
+from osgeo import gdal #https://gdal.org/python/
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
 from lftools.geocapt.dip import rgb2hsv
@@ -113,7 +94,7 @@ class RGB2HSV(QgsProcessingAlgorithm):
             QgsProcessingParameterRasterLayer(
                 self.RGB,
                 self.tr('RGB Raster', 'Raster RGB'),
-                [QgsProcessing.TypeRaster]
+                [Qgis.ProcessingSourceType.TypeRaster]
             )
         )
 

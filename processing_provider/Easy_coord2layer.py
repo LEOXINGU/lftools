@@ -80,7 +80,7 @@ class CoordinatesToLayer(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.TABLE,
                 self.tr('Table with coordinates', 'Tabela com coordenadas'),
-                [QgsProcessing.TypeVector]
+                [Qgis.ProcessingSourceType.TypeVector]
             )
         )
 
@@ -172,7 +172,7 @@ class CoordinatesToLayer(QgsProcessingAlgorithm):
             self.LAYER,
             context,
             Fields,
-            QgsWkbTypes.PointZ if Z_field else QgsWkbTypes.Point,
+            Qgis.WkbType.PointZ if Z_field else Qgis.WkbType.Point,
             CRS
         )
         if sink is None:
@@ -221,7 +221,7 @@ class CoordinatesToLayer(QgsProcessingAlgorithm):
                     geom = QgsGeometry.fromPointXY(QgsPointXY(float(X), float(Y)))
                 feature.setGeometry(geom)
                 feature.setAttributes(att)
-                sink.addFeature(feature, QgsFeatureSink.FastInsert)
+                sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
             else:
                 feedback.reportError(self.tr('Feature id {} has attributes X={} and Y={} incompatible for point geometry!'.format(feat.id(), att[X_id], att[Y_id]),
                                           'Feição de id {} tem atributos X={} e Y={} incompatíveis para geometria ponto!'.format(feat.id(), att[X_id], att[Y_id]) ))

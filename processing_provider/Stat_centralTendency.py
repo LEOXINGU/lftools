@@ -16,9 +16,8 @@ __date__ = '2022-06-05'
 __copyright__ = '(C) 2022, Leandro França'
 
 from qgis.PyQt.QtCore import QMetaType
-from qgis.core import (QgsProcessing,
+from qgis.core import (Qgis,
                        QgsFeatureSink,
-                       QgsWkbTypes,
                        QgsFields,
                        QgsField,
                        QgsFeature,
@@ -27,21 +26,12 @@ from qgis.core import (QgsProcessing,
                        QgsGeometry,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
-                       QgsProcessingParameterString,
                        QgsProcessingParameterField,
-                       QgsProcessingParameterBoolean,
-                       QgsProcessingParameterCrs,
                        QgsProcessingParameterEnum,
-                       QgsFeatureRequest,
-                       QgsExpression,
                        QgsProcessingParameterFeatureSource,
                        QgsProcessingParameterFeatureSink,
-                       QgsProcessingParameterFileDestination,
                        QgsProcessingLayerPostProcessorInterface,
-                       QgsApplication,
-                       QgsProject,
-                       QgsCoordinateTransform,
-                       QgsCoordinateReferenceSystem)
+                       QgsApplication)
 import processing
 import numpy as np
 from numpy import pi, cos, sin, sqrt
@@ -118,7 +108,7 @@ Observação: Camada em um SRC projetado obtém resultado mais acurados.'''
             QgsProcessingParameterFeatureSource(
                 self.INPUT,
                 self.tr('Point Layer', 'Camada de Pontos'),
-                [QgsProcessing.TypeVectorPoint]
+                [Qgis.ProcessingSourceType.TypeVectorPoint]
             )
         )
 
@@ -140,7 +130,7 @@ Observação: Camada em um SRC projetado obtém resultado mais acurados.'''
                 self.CAMPO_AGRUPAR,
                 self.tr('Group Field', 'Campo de Agrupamento'),
                 parentLayerParameterName = self.INPUT,
-                type = QgsProcessingParameterField.Any,
+                type = Qgis.ProcessingFieldParameterDataType.Any,
                 optional = True
             )
         )
@@ -150,7 +140,7 @@ Observação: Camada em um SRC projetado obtém resultado mais acurados.'''
                 self.CAMPO_PESO,
                 self.tr('Weight Field', 'Campo de Peso'),
                 parentLayerParameterName = self.INPUT,
-                type = QgsProcessingParameterField.Numeric,
+                type = Qgis.ProcessingFieldParameterDataType.Numeric,
                 optional = True
             )
         )
@@ -172,7 +162,7 @@ Observação: Camada em um SRC projetado obtém resultado mais acurados.'''
         )
         if layer is None:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.INPUT))
-        TemZ = layer.wkbType() == QgsWkbTypes.PointZ
+        TemZ = layer.wkbType() == Qgis.WkbType.PointZ
 
         estat = self.parameterAsEnum(
             parameters,
@@ -287,7 +277,7 @@ Observação: Camada em um SRC projetado obtém resultado mais acurados.'''
             self.OUTPUT,
             context,
             Fields,
-            QgsWkbTypes.PointZ if TemZ else QgsWkbTypes.Point,
+            Qgis.WkbType.PointZ if TemZ else Qgis.WkbType.Point,
             layer.sourceCrs()
         )
         if sink is None:
@@ -501,7 +491,7 @@ Observação: Camada em um SRC projetado obtém resultado mais acurados.'''
             feat.setGeometry(pnt)
             feat.setAttributes(att)
 
-            sink.addFeature(feat, QgsFeatureSink.FastInsert)
+            sink.addFeature(feat, QgsFeatureSink.Flag.FastInsert)
             if feedback.isCanceled():
                 break
             feedback.setProgress(int(current * total))

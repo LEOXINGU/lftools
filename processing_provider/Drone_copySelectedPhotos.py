@@ -82,7 +82,7 @@ class CopySelectedPhotos(QgsProcessingAlgorithm):
             QgsProcessingParameterVectorLayer(
                 self.POINTS,
                 self.tr('Points', 'Pontos'),
-                [QgsProcessing.TypeVectorPoint]
+                [Qgis.ProcessingSourceType.TypeVectorPoint]
             )
         )
 
@@ -91,7 +91,7 @@ class CopySelectedPhotos(QgsProcessingAlgorithm):
                 self.FILEPATH,
                 self.tr('Field with file path', 'Campo com o caminho do arquivo'),
                 parentLayerParameterName=self.POINTS,
-                type=QgsProcessingParameterField.String
+                type=Qgis.ProcessingFieldParameterDataType.String
             )
         )
 
@@ -112,7 +112,7 @@ class CopySelectedPhotos(QgsProcessingAlgorithm):
             QgsProcessingParameterFile(
                 self.FOLDER,
                 self.tr('Destination folder for photos', 'Pasta de destino para fotografias'),
-                behavior=QgsProcessingParameterFile.Folder,
+                behavior=Qgis.ProcessingFileParameterBehavior.Folder,
                 defaultValue=None
             )
         )

@@ -17,13 +17,7 @@ __copyright__ = '(C) 2022, Leandro França'
 
 from qgis.core import (QgsApplication,
                        QgsGeometry,
-                       QgsWkbTypes,
-                       QgsFeature,
-                       QgsField,
-                       QgsProcessing,
-                       QgsProcessingParameterField,
-                       QgsProcessingParameterEnum,
-                       QgsProcessingParameterBoolean,
+                       Qgis,
                        QgsProcessingParameterNumber,
                        QgsFeatureSink,
                        QgsProcessingException,
@@ -89,7 +83,7 @@ class ConnectFeatures(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.INPUT,
                 self.tr('Parcels', 'Lotes'),
-                [QgsProcessing.TypeVectorPolygon]
+                [Qgis.ProcessingSourceType.TypeVectorPolygon]
             )
         )
 
@@ -136,7 +130,7 @@ class ConnectFeatures(QgsProcessingAlgorithm):
             self.OUTPUT,
             context,
             Fields,
-            QgsWkbTypes.Polygon,
+            Qgis.WkbType.Polygon,
             lotes.sourceCrs()
         )
         if sink is None:
@@ -188,7 +182,7 @@ class ConnectFeatures(QgsProcessingAlgorithm):
         tam = len(feicoes)
         total = 100/tam if tam > 0 else 0
         for cont, feat in enumerate(feicoes):
-            sink.addFeature(feat, QgsFeatureSink.FastInsert)
+            sink.addFeature(feat, QgsFeatureSink.Flag.FastInsert)
             feedback.setProgress(int((cont+1) * total))
             if feedback.isCanceled():
                 break

@@ -15,35 +15,13 @@ __author__ = 'Leandro França'
 __date__ = '2023-06-17'
 __copyright__ = '(C) 2023, Leandro França'
 
-from qgis.core import (QgsProcessing,
-                       QgsFeatureSink,
-                       QgsWkbTypes,
-                       QgsFields,
-                       QgsField,
-                       QgsFeature,
-                       QgsPointXY,
-                       QgsGeometry,
+from qgis.core import (Qgis,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
-                       QgsProcessingParameterString,
-                       QgsProcessingParameterNumber,
-                       QgsProcessingParameterField,
-                       QgsProcessingParameterBoolean,
                        QgsProcessingParameterFile,
-                       QgsProcessingParameterEnum,
-                       QgsFeatureRequest,
-                       QgsExpression,
                        QgsProcessingParameterFeatureSource,
-                       QgsProcessingParameterFeatureSink,
-                       QgsProcessingParameterFileDestination,
-                       QgsProcessingParameterVectorLayer,
-                       QgsProcessingParameterRasterLayer,
-                       QgsProcessingParameterRasterDestination,
-                       QgsApplication,
-                       QgsProject,
-                       QgsRasterLayer,
-                       QgsCoordinateTransform,
-                       QgsCoordinateReferenceSystem)
+                       QgsApplication
+                       )
 
 import numpy as np
 from lftools.geocapt.imgs import Imgs
@@ -105,7 +83,7 @@ class PhotosHistogramMatch(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.INPUT,
                 self.tr('Input photo layer', 'Camada de fotos a serem ajustadas'),
-                [QgsProcessing.TypeVectorPoint]
+                [Qgis.ProcessingSourceType.TypeVectorPoint]
             )
         )
 
@@ -113,7 +91,7 @@ class PhotosHistogramMatch(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.REFERENCE,
                 self.tr('Layer of reference photos', 'Fotos de Referência'),
-                [QgsProcessing.TypeVectorPoint]
+                [Qgis.ProcessingSourceType.TypeVectorPoint]
             )
         )
 
@@ -122,7 +100,7 @@ class PhotosHistogramMatch(QgsProcessingAlgorithm):
             QgsProcessingParameterFile(
                 self.FOLDER,
                 self.tr('Destination folder', 'Pasta de destino'),
-                behavior = QgsProcessingParameterFile.Folder
+                behavior = Qgis.ProcessingFileParameterBehavior.Folder
             )
         )
 

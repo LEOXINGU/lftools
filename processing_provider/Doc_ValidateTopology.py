@@ -17,7 +17,7 @@ __date__ = '2023-08-22'
 __copyright__ = '(C) 2023, Leandro França'
 
 from qgis.PyQt.QtCore import QMetaType
-from qgis.core import (QgsProcessing,
+from qgis.core import (Qgis,
                        QgsApplication,
                        QgsFields,
                        QgsWkbTypes,
@@ -93,7 +93,7 @@ class ValidateTopology(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.POINT,
                 self.tr('Vertices (points)', 'Vértices (pontos)'),
-                [QgsProcessing.TypeVectorPoint]
+                [Qgis.ProcessingSourceType.TypeVectorPoint]
             )
         )
 
@@ -101,7 +101,7 @@ class ValidateTopology(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.LINE,
                 self.tr('Limits (lines)', 'Limites (linhas)'),
-                [QgsProcessing.TypeVectorLine]
+                [Qgis.ProcessingSourceType.TypeVectorLine]
             )
         )
 
@@ -109,7 +109,7 @@ class ValidateTopology(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.POLYGON,
                 self.tr('Area (polygon)', 'Área (polígono)'),
-                [QgsProcessing.TypeVectorPolygon]
+                [Qgis.ProcessingSourceType.TypeVectorPolygon]
             )
         )
 
@@ -125,7 +125,7 @@ class ValidateTopology(QgsProcessingAlgorithm):
 
         vertices = self.parameterAsSource(parameters, self.POINT, context)
         limites = self.parameterAsSource(parameters, self.LINE, context)
-        context.setInvalidGeometryCheck(QgsFeatureRequest.GeometryNoCheck)
+        context.setInvalidGeometryCheck(Qgis.InvalidGeometryCheck.GeometryNoCheck)
         area = self.parameterAsSource(parameters, self.POLYGON, context)
 
         # Verificar se as 3 camadas estão no mesmo SRC Geográfico
@@ -165,7 +165,7 @@ class ValidateTopology(QgsProcessingAlgorithm):
             self.OUTPUT,
             context,
             Fields,
-            QgsWkbTypes.Point,
+            Qgis.WkbType.Point,
             vertices.sourceCrs()
         )
         if sink is None:
@@ -260,7 +260,7 @@ class ValidateTopology(QgsProcessingAlgorithm):
                         fet = QgsFeature(Fields)
                         fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(X,Y)))
                         fet.setAttributes([cont, feat1.id(), erro])
-                        sink.addFeature(fet, QgsFeatureSink.FastInsert)
+                        sink.addFeature(fet, QgsFeatureSink.Flag.FastInsert)
 
         feedback.pushInfo(self.tr('Checking if each vertex of the Area layer (polygon) has the corresponding one of the Vertex layer (point)...', 'Verificando se cada vértice da camada Área (polígono) tem o correspondente da camada Vértice (ponto)...'))
         for feat1 in area.getFeatures():
@@ -289,7 +289,7 @@ class ValidateTopology(QgsProcessingAlgorithm):
                                 fet = QgsFeature(Fields)
                                 fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(X,Y)))
                                 fet.setAttributes([cont, feat1.id(), erro])
-                                sink.addFeature(fet, QgsFeatureSink.FastInsert)
+                                sink.addFeature(fet, QgsFeatureSink.Flag.FastInsert)
 
         feedback.pushInfo(self.tr('Checking if each vertex of the Vertex layer (point) has the corresponding one of the Area layer (polygon)...', 'Verificando se cada vértice da camada Vértice (ponto) tem o correspondente da camada Área (polígono)...'))
         for feat1 in vertices.getFeatures():
@@ -320,7 +320,7 @@ class ValidateTopology(QgsProcessingAlgorithm):
                     fet = QgsFeature(Fields)
                     fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(X,Y)))
                     fet.setAttributes([cont, feat1.id(), erro])
-                    sink.addFeature(fet, QgsFeatureSink.FastInsert)
+                    sink.addFeature(fet, QgsFeatureSink.Flag.FastInsert)
 
         feedback.pushInfo(self.tr('Checking if each vertex of the Vertex layer (point) has the corresponding one of the limit layer (line)...', 'Verificando se cada vértice da camada Vértice (ponto) tem o correspondente da camada Limite (linha)...'))
         for feat1 in vertices.getFeatures():
@@ -343,7 +343,7 @@ class ValidateTopology(QgsProcessingAlgorithm):
                     fet = QgsFeature(Fields)
                     fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(X,Y)))
                     fet.setAttributes([cont, feat1.id(), erro])
-                    sink.addFeature(fet, QgsFeatureSink.FastInsert)
+                    sink.addFeature(fet, QgsFeatureSink.Flag.FastInsert)
 
         feedback.pushInfo(self.tr('Checking for duplicate vertices inside the vertex (point) layer...', 'Verificando vértices duplicados dentro da camada vértice (ponto)...'))
         pontos = set()
@@ -362,7 +362,7 @@ class ValidateTopology(QgsProcessingAlgorithm):
                     fet = QgsFeature(Fields)
                     fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(X,Y)))
                     fet.setAttributes([cont, feat1.id(), erro])
-                    sink.addFeature(fet, QgsFeatureSink.FastInsert)
+                    sink.addFeature(fet, QgsFeatureSink.Flag.FastInsert)
 
         feedback.pushInfo(self.tr('Checking for duplicate vertices inside the limit (line) layer...', 'Verificando vértices duplicados dentro da camada limite (linha)...'))
         for feat1 in limites.getFeatures():
@@ -386,7 +386,7 @@ class ValidateTopology(QgsProcessingAlgorithm):
                             fet = QgsFeature(Fields)
                             fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(X,Y)))
                             fet.setAttributes([cont, feat1.id(), erro])
-                            sink.addFeature(fet, QgsFeatureSink.FastInsert)
+                            sink.addFeature(fet, QgsFeatureSink.Flag.FastInsert)
 
 
         feedback.pushInfo(self.tr('Checking for duplicate vertices inside the area (polygon) layer...', 'Verificando vértices duplicados dentro da camada área (polígono)...'))
@@ -412,7 +412,7 @@ class ValidateTopology(QgsProcessingAlgorithm):
                                 fet = QgsFeature(Fields)
                                 fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(X,Y)))
                                 fet.setAttributes([cont, feat1.id(), erro])
-                                sink.addFeature(fet, QgsFeatureSink.FastInsert)
+                                sink.addFeature(fet, QgsFeatureSink.Flag.FastInsert)
 
 
         feedback.pushInfo(self.tr('Checking line layer orientation...', 'Verificando orientação da camada linha...'))
@@ -444,7 +444,7 @@ class ValidateTopology(QgsProcessingAlgorithm):
                         fet = QgsFeature(Fields)
                         fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(X,Y)))
                         fet.setAttributes([cont, feat1.id(), erro])
-                        sink.addFeature(fet, QgsFeatureSink.FastInsert)
+                        sink.addFeature(fet, QgsFeatureSink.Flag.FastInsert)
 
         # Checar geometrias duplicadas para linhas
         feedback.pushInfo(self.tr('Checking for duplicate geometry line layer...', 'Verificando geometria duplicada na camada de linhas...'))
@@ -464,7 +464,7 @@ class ValidateTopology(QgsProcessingAlgorithm):
                     fet = QgsFeature(Fields)
                     fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(X,Y)))
                     fet.setAttributes([cont, feat1.id(), erro])
-                    sink.addFeature(fet, QgsFeatureSink.FastInsert)
+                    sink.addFeature(fet, QgsFeatureSink.Flag.FastInsert)
 
         # Checar geometrias duplicadas para polígono
         feedback.pushInfo(self.tr('Checking for duplicate geometry polygon layer...', 'Verificando geometria duplicada na camada de polígonos...'))
@@ -484,7 +484,7 @@ class ValidateTopology(QgsProcessingAlgorithm):
                     fet = QgsFeature(Fields)
                     fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(X,Y)))
                     fet.setAttributes([cont, feat1.id(), erro])
-                    sink.addFeature(fet, QgsFeatureSink.FastInsert)
+                    sink.addFeature(fet, QgsFeatureSink.Flag.FastInsert)
 
         # Verificar coordenada Z igual a Zero
         feedback.pushInfo(self.tr('Checking if any vertex has a dimension-Z equal to Zero...', 'Verificando se algum vértice tem cota Z igual a Zero...'))
@@ -504,7 +504,7 @@ class ValidateTopology(QgsProcessingAlgorithm):
                     fet = QgsFeature(Fields)
                     fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(X,Y)))
                     fet.setAttributes([cont, feat1.id(), erro])
-                    sink.addFeature(fet, QgsFeatureSink.FastInsert)
+                    sink.addFeature(fet, QgsFeatureSink.Flag.FastInsert)
 
         def avaliar_erros(cont):
             if cont == 0:

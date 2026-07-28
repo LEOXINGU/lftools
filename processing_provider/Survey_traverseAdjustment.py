@@ -16,11 +16,10 @@ __date__ = '2019-11-17'
 __copyright__ = '(C) 2019, Leandro França'
 
 from qgis.PyQt.QtCore import QMetaType
-from qgis.core import (QgsProcessing,
+from qgis.core import (Qgis,
                        QgsFeatureSink,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
-                       QgsProcessingParameterFeatureSource,
                        QgsProcessingParameterFeatureSink,
                        QgsProcessingParameterString,
                        QgsProcessingParameterPoint,
@@ -29,7 +28,6 @@ from qgis.core import (QgsProcessing,
                        QgsProcessingParameterFileDestination,
                        QgsFields,
                        QgsField,
-                       QgsWkbTypes,
                        QgsFeature,
                        QgsGeometry,
                        QgsPointXY,
@@ -363,7 +361,7 @@ class TraverseAdjustment(QgsProcessingAlgorithm):
         # OUTPUT
         Fields = QgsFields()
         Fields.append(QgsField('id', QMetaType.Type.Int))
-        GeomType = QgsWkbTypes.Point
+        GeomType = Qgis.WkbType.Point
         (sink, dest_id) = self.parameterAsSink(
             parameters,
             self.OUTPUT,
@@ -487,7 +485,7 @@ class TraverseAdjustment(QgsProcessingAlgorithm):
             geom = QgsGeometry(QgsPoint(float(pnt[0]), float(pnt[1])))
             feature.setGeometry(geom)
             feature.setAttributes([current+1])
-            sink.addFeature(feature, QgsFeatureSink.FastInsert)
+            sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
             if feedback.isCanceled():
                 break
             feedback.setProgress(int(current * total))
