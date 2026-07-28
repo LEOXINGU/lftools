@@ -176,6 +176,9 @@ Os valores das células do raster onde o centro do pixel se encontra exatamente 
         if layer is None:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.POLYGONS))
 
+        if layer.featureCount() == 0:
+            raise QgsProcessingException(self.tr('There is no feature in the layer!', 'Não há nenhuma feição na camada!'))
+
         stats = self.parameterAsEnums(
             parameters,
             self.STATISTICS,
@@ -332,8 +335,6 @@ Os valores das células do raster onde o centro do pixel se encontra exatamente 
                     # acumular
                     if vals.size:
                         valores.extend(vals.astype(float).tolist())
-
-                    print(feat['name'], len(valores))
                 
                 # Calcular estatísticas da lista de valores
                 valores = np.array(valores)
