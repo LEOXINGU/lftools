@@ -185,9 +185,8 @@ Observação: Camada em um SRC projetado obtém resultado mais acurados.'''
         # Field index
         if Campo_Peso:
             Campo_Peso = layer.fields().indexFromName(Campo_Peso[0])
-        print(Campo_Agrupar)
+
         if Campo_Agrupar:
-            print('teste', Campo_Agrupar)
             Campo_Agrupar = layer.fields().indexFromName(Campo_Agrupar[0])
 
         # OUTPUT
