@@ -3,7 +3,7 @@ name=LF Tools
 qgisMinimumVersion=3.44
 qgisMaximumVersion=4.99
 description=Comprehensive solutions for cartographic production, surveying, drone mapping, GNSS data import, geospatial database management, digital image processing, and spatial analysis.
-version=2.13.0
+version=2.13.1
 author=Leandro França
 email=suporte@geoone.com.br
 
@@ -13,8 +13,34 @@ tracker=https://github.com/LEOXINGU/lftools/issues
 repository=https://github.com/LEOXINGU/lftools
 
 hasProcessingProvider=yes
-# Uncomment the following line and add your changelog:
-# changelog=
+
+# Tags are comma separated with spaces allowed
+tags=cartography, surveying, topography, raster, vector, postgis, cadastre, processing, reambulation, geotag, expressions, document, memorial, description, drones, GNSS, NMEA, RTKLIB, magnetic, ellipses, lftools, DEM, brazil, GeoOne
+
+homepage=https://github.com/LEOXINGU/lftools/wiki/LF-Tools-for-QGIS
+
+icon=images/lftools_logo.png
+# experimental flag
+experimental=False
+server=False
+
+# deprecated flag (applies to the whole plugin, not just a single version)
+deprecated=False
+
+# Since QGIS 3.8, a comma separated list of plugins to be installed
+# (or upgraded) can be specified.
+# Check the documentation for more information.
+# plugin_dependencies=pillow
+
+# Support the continued development of LFTools plugin for QGIS — every coffee helps!
+donation=https://www.paypal.com/ncp/payment/8V3C6PEAMQAYG 
+
+## How to cite?
+# If you use LFTools plugin in your research or projects, please cite it as follows:
+# França, L. (YEAR). LFTools: Comprehensive solutions for cartographic production, surveying, drone mapping, GNSS data import, geospatial database management, digital image processing, and spatial analysis. (VERSION X.X.X) [QGIS plugin]. Retrieved from https://plugins.qgis.org/plugins/LFTools/
+
+changelog=
+  2.13.1 - Updated geometry category checks from Qgis.WkbType.PointGeometry, LineGeometry, and PolygonGeometry to Qgis.GeometryType.Point, Line, and Polygon, fixing processing failures in QGIS 3.44 and later versions.
   2.13.0 - Added the new Create TopoGeo Demo tool for one-click generation of a simplified TopoGeo GeoPackage.
   2.12.1 - Minor improvements to the topological validation tool.
   2.12.0 - Major overhaul of the Horizontal, Vertical and 3D Positional Accuracy tools, including robust statistics, normality tests, confidence ellipses, advanced graphical analyses, ASPRS-oriented reporting, and improved discrepancy classification and visualization.
@@ -98,27 +124,3 @@ hasProcessingProvider=yes
 	1.1.0 - Expressions added
 	1.0.1 - Improvement in tools' translation and description
 	1.0   - Initial version
-# Tags are comma separated with spaces allowed
-tags=cartography, surveying, topography, raster, vector, postgis, cadastre, processing, reambulation, geotag, expressions, document, memorial, description, drones, GNSS, NMEA, RTKLIB, magnetic, ellipses, lftools, DEM, brazil, GeoOne
-
-homepage=https://github.com/LEOXINGU/lftools/wiki/LF-Tools-for-QGIS
-category=cartography
-icon=images/lftools_logo.png
-# experimental flag
-experimental=False
-server=False
-
-# deprecated flag (applies to the whole plugin, not just a single version)
-deprecated=False
-
-# Since QGIS 3.8, a comma separated list of plugins to be installed
-# (or upgraded) can be specified.
-# Check the documentation for more information.
-# plugin_dependencies=pillow
-
-# Support the continued development of LFTools plugin for QGIS — every coffee helps!
-donation=https://www.paypal.com/ncp/payment/8V3C6PEAMQAYG 
-
-## How to cite?
-# If you use LFTools plugin in your research or projects, please cite it as follows:
-# França, L. (YEAR). LFTools: Comprehensive solutions for cartographic production, surveying, drone mapping, GNSS data import, geospatial database management, digital image processing, and spatial analysis. (VERSION X.X.X) [QGIS plugin]. Retrieved from https://plugins.qgis.org/plugins/LFTools/
