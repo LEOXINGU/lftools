@@ -228,7 +228,7 @@ class MeasureLayers(QgsProcessingAlgorithm):
 
                 if layer.geometryType() == Qgis.GeometryType.Line:
                     layer.addExpressionField(formula_length + '/' + str(unidade_dist), field_length)
-                if layer.geometryType() == Qgis.WkbType.PolygonGeometry:
+                if layer.geometryType() == Qgis.GeometryType.Polygon:
                     layer.addExpressionField(formula_perimeter + '/' + str(unidade_dist), field_perimeter)
                     layer.addExpressionField(formula_area + '/' + str(unidade_area), field_area)
 
