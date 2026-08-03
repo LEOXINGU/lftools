@@ -236,7 +236,7 @@ class RTKCorrection(QgsProcessingAlgorithm):
                             'WKT inválido para {}: {}'.format(descricao, wkt_texto))
                 )
 
-            if geom.isNull() or geom.type() != Qgis.WkbType.PointGeometry:
+            if geom.isNull() or geom.type() != Qgis.GeometryType.Point:
                 raise QgsProcessingException(
                     self.tr('Invalid {} WKT: {}'.format(descricao, wkt_texto),
                             'WKT inválido para {}: {}'.format(descricao, wkt_texto))
