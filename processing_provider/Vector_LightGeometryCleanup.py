@@ -328,7 +328,7 @@ Obs.: Geometrias inválidas não são corrigidas nem removidas por esta ferramen
         # 2) Remover vértices duplicados para linhas e polígonos
         # ------------------------------------------------------------------
         geom_type = layer.geometryType()
-        if geom_type in (Qgis.GeometryType.Line, Qgis.WkbType.PolygonGeometry) and remaining_ids:
+        if geom_type in (Qgis.GeometryType.Line, Qgis.GeometryType.Polygon) and remaining_ids:
 
             feedback.pushInfo(self.tr(
                 'Removing duplicate vertices...',
