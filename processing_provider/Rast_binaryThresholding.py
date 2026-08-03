@@ -267,7 +267,7 @@ Uma classe irá corresponder aos valores compreendidos dentro do intervalo dos l
                 coordinateTransformer.setDestinationCrs(SRC_rater)
                 coordinateTransformer.setSourceCrs(layer.sourceCrs())
 
-            try: #poligono if layer.wkbType() == Qgis.WkbType.PolygonGeometry:
+            try: #poligono if layer.wkbType() == Qgis.GeometryType.Polygon:
                 for feat in layer.getFeatures():
                     geom = feat.geometry() if mesmoSRC else reprojectPoints(feat.geometry(), coordinateTransformer)
                     if geom.isMultipart():
