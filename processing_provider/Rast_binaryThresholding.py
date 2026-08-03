@@ -316,7 +316,7 @@ Uma classe irá corresponder aos valores compreendidos dentro do intervalo dos l
                         for y in range(tam[1]):
                             if recorte[x][y]:
                                 valores += [float(recorte_img[x][y])]
-            except: #ponto elif layer.wkbType() == Qgis.WkbType.PointGeometry:
+            except: #ponto elif layer.wkbType() == Qgis.GeometryType.Point:
                 for feat in layer.getFeatures():
                     geom = feat.geometry() if mesmoSRC else reprojectPoints(feat.geometry(), coordinateTransformer)
                     if geom.isMultipart():
