@@ -140,6 +140,8 @@ from .processing_provider.Drone_CreateGCPfile_Agisoft import CreateGCPfileAgisof
 from .processing_provider.Vector_LightGeometryCleanup import LightGeometryCleanup
 from .processing_provider.Relief_ThematicSlope import ThematicSlope
 from .processing_provider.Doc_CreateTopoGeo import CreateTopoGeo
+from .processing_provider.Cad_NumberPolygonsByLines import NumberPolygonsByLines
+
 
 
 class LFToolsProvider(QgsProcessingProvider):
@@ -265,6 +267,7 @@ class LFToolsProvider(QgsProcessingProvider):
         self.addAlgorithm(LightGeometryCleanup())
         self.addAlgorithm(ThematicSlope())
         self.addAlgorithm(CreateTopoGeo())
+        self.addAlgorithm(NumberPolygonsByLines())
 
     def id(self):
         return 'lftools'
