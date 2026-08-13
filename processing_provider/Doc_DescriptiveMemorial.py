@@ -42,8 +42,8 @@ from lftools.geocapt.cartography import (FusoHemisf,
                                          geom2PointList,
                                          AzimuteDistanciaSGL,
                                          AzimuteDistanciaINCRA,
-                                         areaSGL,
-                                         perimetroSGL,
+                                         areaSGL, areaINCRA,
+                                         perimetroSGL, perimetroINCRA,
                                          azimuteTrucandoINCRA
                                          )
 from lftools.geocapt.topogeo import (str2HTML,
@@ -92,7 +92,7 @@ class DescriptiveMemorial(QgisAlgorithm):
         return 'documents'
 
     def tags(self):
-        return 'GeoOne,area,perimeter,deed,description,descriptive,memorial,3 cliques,property,topography,survey,real,estate,georreferencing,plan,cadastral,cadastre,document'.split(',')
+        return 'GeoOne,area,perimeter,deed,description,descriptive,memorial,3 cliques,property,topography,survey,real,estate,georreferencing,plan,cadastral,cadastre,document,INCRA,Sigef'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/document.png'))
@@ -926,6 +926,9 @@ class DescriptiveMemorial(QgisAlgorithm):
             geom1.transform(coordinateTransformer)
             area1 = geom1.area()
             perimeter1 = geom1.length()
+        elif calculo == 6: # INCRA/SIGEF
+            area1 = areaINCRA(geom1, crsGeo)
+            perimeter1 = perimetroINCRA(geom1, crsGeo)
         else: # SGL
             area1 = areaSGL(geom1, crsGeo)
             perimeter1 = perimetroSGL(geom1, crsGeo)
@@ -951,7 +954,7 @@ class DescriptiveMemorial(QgisAlgorithm):
             linha0 = texto_var1
             itens =    {'[Vn]': pnts[t[0]+1][2],
                         '[Coordn]': CoordN(pnts[t[0]+1][0].x(), pnts[t[0]+1][0].y(), pnts[t[0]+1][3][2]) if coordenadas in (0,1,2,3) else CoordN(pnts[t[0]+1][3][0], pnts[t[0]+1][3][1], pnts[t[0]+1][3][2]),
-                        '[Az_n]': str2HTML(self.tr(dd2dms(Az_lista[t[0]],decimal_azim), dd2dms(Az_lista[t[0]],decimal_azim).replace('.', ',')) if calculo != 3 else self.tr(azimuteTrucandoINCRA(Az_lista[t[0]],decimal_azim), azimuteTrucandoINCRA(Az_lista[t[0]],decimal_azim).replace('.', ','))),
+                        '[Az_n]': str2HTML(self.tr(dd2dms(Az_lista[t[0]],decimal_azim), dd2dms(Az_lista[t[0]],decimal_azim).replace('.', ',')) if calculo != 6 else self.tr(azimuteTrucandoINCRA(Az_lista[t[0]],decimal_azim), azimuteTrucandoINCRA(Az_lista[t[0]],decimal_azim).replace('.', ','))),
                         '[Dist_n]': self.tr(format_dist.format(Dist[t[0]]), format_dist.format(Dist[t[0]]).replace(',', 'X').replace('.', ',').replace('X', '.')),
                         '[Descr_k]': ListaDescr[w][0] + ', ' if ListaDescr[w][0] else '',
                         '[Confront_k]': ListaDescr[w][1]
@@ -964,7 +967,7 @@ class DescriptiveMemorial(QgisAlgorithm):
                 linha1 = texto_var2
                 itens = {'[Vn]': pnts[k+1][2],
                         '[Coordn]': CoordN(pnts[k+1][0].x(), pnts[k+1][0].y(), pnts[k+1][3][2]) if coordenadas in (0,1,2,3) else CoordN(pnts[k+1][3][0], pnts[k+1][3][1], pnts[k+1][3][2]),
-                        '[Az_n]': str2HTML(self.tr(dd2dms(Az_lista[k],decimal_azim), dd2dms(Az_lista[k],decimal_azim).replace('.', ',')) if calculo != 3 else self.tr(azimuteTrucandoINCRA(Az_lista[k],decimal_azim), azimuteTrucandoINCRA(Az_lista[k],decimal_azim).replace('.', ','))),
+                        '[Az_n]': str2HTML(self.tr(dd2dms(Az_lista[k],decimal_azim), dd2dms(Az_lista[k],decimal_azim).replace('.', ',')) if calculo != 6 else self.tr(azimuteTrucandoINCRA(Az_lista[k],decimal_azim), azimuteTrucandoINCRA(Az_lista[k],decimal_azim).replace('.', ','))),
                         '[Dist_n]': self.tr(format_dist.format(Dist[k]), format_dist.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'))
                         }
                 for item in itens:
