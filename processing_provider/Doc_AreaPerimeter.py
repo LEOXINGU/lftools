@@ -38,7 +38,14 @@ from math import atan, pi, sqrt, floor
 import math
 from lftools.geocapt.imgs import *
 from lftools.translations.translate import translate
-from lftools.geocapt.cartography import FusoHemisf, AzimuteDistanciaSGL, areaSGL, perimetroSGL
+from lftools.geocapt.cartography import (FusoHemisf,
+                                         geom2PointList,
+                                         AzimuteDistanciaSGL,
+                                         AzimuteDistanciaINCRA,
+                                         areaSGL, areaINCRA,
+                                         perimetroSGL, perimetroINCRA,
+                                         azimuteTrucandoINCRA
+                                         )
 from lftools.geocapt.topogeo import str2HTML, dd2dms, azimute, validar_precisoes
 import os
 from qgis.PyQt.QtGui import QIcon
@@ -75,7 +82,7 @@ class AreaPerimterReport(QgsProcessingAlgorithm):
         return 'documents'
 
     def tags(self):
-        return 'GeoOne,area,perimeter,descriptive,memorial,property,topography,survey,real,estate,georreferencing,plan,cadastral,cadastre,document'.split(',')
+        return 'GeoOne,area,perimeter,descriptive,memorial,property,topography,survey,real,estate,georreferencing,plan,cadastral,cadastre,document,INCRA,Sigef'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/document.png'))
@@ -123,6 +130,7 @@ class AreaPerimterReport(QgsProcessingAlgorithm):
         tipos = [self.tr('Project CRS', 'SRC do projeto'),
                  self.tr('Local Tangent Plane (LTP)', 'Sistema Geodésico Local (SGL)'),
                  self.tr('LTP, Puissant azimuth', 'SGL, azimute de Puissant'),
+                 self.tr('INCRA / SIGEF')
                ]
 
         self.addParameter(
@@ -217,6 +225,21 @@ class AreaPerimterReport(QgsProcessingAlgorithm):
         elif calculo == 2:
             calculo_texto = self.tr('Calculation of distances and area considering the Local Tangent Plane (LTP). Calculation of azimuths carried out according to the Inverse Geodetic Problem formulae according to Puissant.',
                                      str2HTML('Cálculo de distâncias e área no Sistema Geodésico Local (SGL). Cálculo dos azimutes realizado conforme formulário do Problema Geodésico Inverso segundo Puissant.'))
+        elif calculo == 3:
+            calculo_texto = self.tr(
+                'Calculation of azimuths, distances, area and perimeter according '
+                'to the INCRA/SIGEF method. Azimuths were calculated using the '
+                'Inverse Geodetic Problem according to Puissant and presented with '
+                'truncated minutes. Distances, area and perimeter were calculated '
+                'in the Local Geodetic System.',
+                str2HTML(
+                    'Cálculo de azimutes, distâncias, área e perímetro conforme o '
+                    'método do INCRA/SIGEF. Os azimutes foram calculados pelo '
+                    'Problema Geodésico Inverso segundo Puissant e apresentados '
+                    'com truncamento dos minutos. As distâncias, a área e o '
+                    'perímetro foram calculados no Sistema Geodésico Local.'
+                )
+            )
 
 
         logo = self.parameterAsFile(
@@ -276,6 +299,15 @@ class AreaPerimterReport(QgsProcessingAlgorithm):
 
         format_area_ha = '{:,.Xf}'.replace('X', str(decimal_area+2))
         format_area = '{:,.Xf}'.replace('X', str(decimal_area))
+
+        if calculo == 3:  # Formatação INCRA/SIGEF
+            format_utm = '{:,.2f}'
+            format_h = '{:,.2f}'
+            decimal_geo = 3
+            format_dist = '{:,.2f}'
+            format_perim = '{:,.2f}'
+            format_area = '{:,.2f}'       # área em m²
+            format_area_ha = '{:,.4f}'    # área em hectares
 
 
         projecao = self.parameterAsBool(
@@ -458,7 +490,10 @@ SIRGAS2000<br>
                 geom1.transform(coordinateTransformer)
                 area1 = geom1.area()
                 perimeter1 = geom1.length()
-            else: # SGL
+            elif calculo == 3:  # INCRA/SIGEF
+                area1 = areaINCRA(geom1, crsGeo)
+                perimeter1 = perimetroINCRA(geom1, crsGeo)
+            else:  # SGL
                 area1 = areaSGL(geom1, crsGeo)
                 perimeter1 = perimetroSGL(geom1, crsGeo)
 
@@ -516,15 +551,27 @@ SIRGAS2000<br>
                 Az, dist = AzimuteDistanciaSGL(pntA, pntB, geomGeo, crsGeo, 'puissant')
                 Az_lista += [Az]
                 Dist += [dist]
+        elif calculo == 3:  # INCRA/SIGEF
+            for k in range(tam):
+                pntA = QgsPoint(pnts[k+1][3][0], pnts[k+1][3][1], pnts[k+1][3][2])
+                ind = max((k+2) % (tam+1), 1)
+                pntB = QgsPoint(pnts[ind][3][0], pnts[ind][3][1], pnts[ind][3][2])
+                Az, dist = AzimuteDistanciaINCRA(pntA, pntB, geomGeo, crsGeo)
+                Az_lista.append(Az)
+                Dist.append(dist)
 
         for k in range(tam):
             linha0 = linha
+            if calculo == 3:
+                azimute_formatado = azimuteTrucandoINCRA(Az_lista[k])
+            else:
+                azimute_formatado = dd2dms(Az_lista[k], decimal_azim)
             itens = {
                   '[EST1]': pnts[k+1][2],
                   '[EST2]': pnts[1 if k+2 > tam else k+2][2],
                   '[E]': self.tr(format_utm.format(pnts[k+1][0].x()), format_utm.format(pnts[k+1][0].x()).replace(',', 'X').replace('.', ',').replace('X', '.')),
                   '[N]': self.tr(format_utm.format(pnts[k+1][0].y()), format_utm.format(pnts[k+1][0].y()).replace(',', 'X').replace('.', ',').replace('X', '.')),
-                  '[AZ]': str2HTML(self.tr(dd2dms(Az_lista[k],decimal_azim), dd2dms(Az_lista[k],decimal_azim).replace('.', ','))),
+                  '[AZ]': str2HTML(self.tr(azimute_formatado, azimute_formatado.replace('.', ','))),
                   '[D]': format_dist.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'),
                   '[LON]': str2HTML(self.tr(dd2dms(pnts[k+1][3][0],decimal_geo), dd2dms(pnts[k+1][3][0],decimal_geo).replace('.', ','))),
                   '[LAT]': str2HTML(self.tr(dd2dms(pnts[k+1][3][1],decimal_geo), dd2dms(pnts[k+1][3][1],decimal_geo).replace('.', ','))),
