@@ -66,14 +66,8 @@ class NumberPolygonsByLines(QgsProcessingAlgorithm):
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/cadastre.png'))
 
-    txt_en = '''This tool numbers polygons according to guide lines. Polygons intersected by each line are sorted following the geometric direction of the line. Lines can optionally be sorted by an attribute field and can also contain an attribute defining the first number of each sequence. If no first-number field is selected, the user defines a general initial value and chooses whether numbering restarts for every line or continues between lines.
-
-Geometry validation is performed before processing. Null, empty or invalid geometries interrupt the operation. When a polygon intersects more than one line, the first line in the processing order has priority.'''
-
-    txt_pt = '''Esta ferramenta numera polígonos de acordo com linhas diretrizes. Os polígonos interceptados por cada linha são ordenados seguindo o sentido geométrico da linha. As linhas podem opcionalmente ser ordenadas por um campo de atributo e também podem possuir um atributo que define o primeiro número de cada sequência. Se nenhum campo de primeiro número for selecionado, o usuário define um valor inicial geral e escolhe se a numeração reinicia a cada linha ou continua entre as linhas.
-
-Antes do processamento é realizada a validação das geometrias. Geometrias nulas, vazias ou inválidas interrompem a operação. Quando um polígono é interceptado por mais de uma linha, tem prioridade a primeira linha na ordem de processamento.'''
-
+    txt_en = 'This tool numbers polygons according to guide lines. Polygons intersected by each line are sorted following the geometric direction of the line. Lines can optionally be sorted by an attribute field and can also contain an attribute defining the first number of each sequence. If no first-number field is selected, the user defines a general initial value and chooses whether numbering restarts for every line or continues between lines.'
+    txt_pt = 'Esta ferramenta numera polígonos de acordo com linhas diretrizes. Os polígonos interceptados por cada linha são ordenados seguindo o sentido geométrico da linha. As linhas podem opcionalmente ser ordenadas por um campo de atributo e também podem possuir um atributo que define o primeiro número de cada sequência. Se nenhum campo de primeiro número for selecionado, o usuário define um valor inicial geral e escolhe se a numeração reinicia a cada linha ou continua entre as linhas.'
     figure = 'images/tutorial/cadastre_numberpolygonsbylines.jpg'
 
     def shortHelpString(self):
@@ -112,8 +106,7 @@ Antes do processamento é realizada a validação das geometrias. Geometrias nul
             QgsProcessingParameterField(
                 self.FIELD,
                 self.tr('Numbering field', 'Campo de numeração'),
-                parentLayerParameterName=self.POLYGONS,
-                type=Qgis.ProcessingFieldParameterDataType.Numeric
+                parentLayerParameterName=self.POLYGONS
             )
         )
 
@@ -446,7 +439,11 @@ Antes do processamento é realizada a validação das geometrias. Geometrias nul
         # ---------------------------------------------------------------
         feedback.pushInfo(self.tr('Building spatial index...', 'Construindo índice espacial...'))
         polygon_features = {feat.id(): feat for feat in polygons.getFeatures()}
-        spatial_index = QgsSpatialIndex(polygon_features.values())
+        
+        spatial_index = QgsSpatialIndex()
+
+        for feat in polygon_features.values():
+            spatial_index.addFeature(feat)
 
         transform_line_to_polygon = None
         if lines.crs() != polygons.crs():
