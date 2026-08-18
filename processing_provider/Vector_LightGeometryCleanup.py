@@ -27,7 +27,9 @@ from qgis.core import (
     QgsProcessingParameterBoolean,
     QgsProcessingParameterFeatureSink,
     QgsProcessingParameterVectorLayer,
-    QgsFeatureRequest)
+    QgsFeatureRequest,
+    QgsMemoryProviderUtils,
+    QgsWkbTypes)
 
 from qgis.PyQt.QtCore import QMetaType
 from qgis.PyQt.QtGui import QIcon
@@ -36,6 +38,7 @@ from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
 
 import os
+import json
 import processing
 
 
@@ -144,93 +147,135 @@ Obs.: Geometrias inválidas não são corrigidas nem removidas por esta ferramen
             )
         )
 
+    def _unique_field_name(self, fields, base_name):
+        """Retorna um nome de campo que ainda não exista."""
+        if fields.indexOf(base_name) == -1:
+            return base_name
+
+        i = 2
+        while fields.indexOf(f'{base_name}_{i}') != -1:
+            i += 1
+        return f'{base_name}_{i}'
+
     def _sink_fields(self, input_fields):
+        """
+        Mantém todos os atributos originais e acrescenta campos de auditoria.
+        lf_attributes guarda também uma cópia JSON dos atributos originais,
+        facilitando a recuperação mesmo que a estrutura da tabela mude.
+        """
         fields = QgsFields()
         for field in input_fields:
             fields.append(field)
 
-        # Campos auxiliares
-        if fields.indexOf('lf_orig_id') == -1:
-            fields.append(QgsField('lf_orig_id', QMetaType.Type.LongLong))
-        else:
-            fields.append(QgsField('lf_orig_id_2', QMetaType.Type.LongLong))
+        self._fld_orig_id = self._unique_field_name(fields, 'lf_orig_id')
+        fields.append(QgsField(self._fld_orig_id, QMetaType.Type.LongLong))
 
-        if fields.indexOf('lf_reason') == -1:
-            fields.append(QgsField('lf_reason', QMetaType.Type.QString, len=40))
-        else:
-            fields.append(QgsField('lf_reason_2', QMetaType.Type.QString, len=40))
+        self._fld_reason = self._unique_field_name(fields, 'lf_reason')
+        fields.append(QgsField(self._fld_reason, QMetaType.Type.QString, len=80))
+
+        self._fld_attributes = self._unique_field_name(fields, 'lf_attributes')
+        fields.append(QgsField(self._fld_attributes, QMetaType.Type.QString))
 
         return fields
 
-    def _append_removed_feature_to_sink(self, feat, sink, sink_fields, reason):
+    def _attributes_as_json(self, feat, input_fields):
+        """Serializa os atributos originais em JSON legível e recuperável."""
+        data = {}
+        attrs = feat.attributes()
+
+        for i, field in enumerate(input_fields):
+            value = attrs[i] if i < len(attrs) else None
+
+            # Datas, horários e outros QVariant/PyQt são convertidos
+            # para representação textual caso não sejam JSON nativos.
+            try:
+                json.dumps(value)
+                data[field.name()] = value
+            except (TypeError, ValueError):
+                data[field.name()] = str(value) if value is not None else None
+
+        return json.dumps(data, ensure_ascii=False, default=str)
+
+    def _append_removed_feature_to_sink(self, feat, sink, sink_fields,
+                                        input_fields, reason):
+        """Registra uma feição realmente excluída sem perder seus atributos."""
         new_feat = QgsFeature(sink_fields)
-        new_feat.setGeometry(QgsGeometry())  # sem geometria
+        new_feat.setGeometry(QgsGeometry())
 
         attrs = feat.attributes()[:]
-
-        if sink_fields.indexOf('lf_orig_id') != -1:
-            attrs += [feat.id(), reason]
-        else:
-            attrs += [feat.id(), reason]
+        attrs += [
+            int(feat.id()),
+            reason,
+            self._attributes_as_json(feat, input_fields)
+        ]
 
         new_feat.setAttributes(attrs)
         sink.addFeature(new_feat)
 
-    def _copy_target_features_to_temp_layer(self, layer, selected_only, context, feedback):
+    def _copy_target_features_to_temp_layer(self, layer, feature_ids):
         """
-        Cria uma camada temporária apenas com as feições alvo.
-        Adiciona um campo auxiliar __lf_id__ = $id para permitir
-        mapear geometrias processadas de volta à camada original.
+        Cria uma camada temporária em memória preservando explicitamente
+        o FID ORIGINAL em __lf_id__.
+
+        Importante: não usa $id depois de native:savefeatures, pois o FID
+        de uma camada temporária não deve ser usado como chave para alterar
+        a camada original.
         """
-        if selected_only:
-            temp = processing.run(
-                "native:saveselectedfeatures",
-                {
-                    'INPUT': layer,
-                    'OUTPUT': 'TEMPORARY_OUTPUT'
-                },
-                context=context,
-                feedback=feedback
-            )['OUTPUT']
-        else:
-            temp = processing.run(
-                "native:savefeatures",
-                {
-                    'INPUT': layer,
-                    'OUTPUT': 'TEMPORARY_OUTPUT'
-                },
-                context=context,
-                feedback=feedback
-            )['OUTPUT']
+        fields = QgsFields()
+        fields.append(QgsField('__lf_id__', QMetaType.Type.LongLong))
 
-        temp = processing.run(
-            "native:fieldcalculator",
-            {
-                'INPUT': temp,
-                'FIELD_NAME': '__lf_id__',
-                'FIELD_TYPE': 1,  # inteiro
-                'FIELD_LENGTH': 20,
-                'FIELD_PRECISION': 0,
-                'FORMULA': '$id',
-                'OUTPUT': 'TEMPORARY_OUTPUT'
-            },
-            context=context,
-            feedback=feedback
-        )['OUTPUT']
+        temp = QgsMemoryProviderUtils.createMemoryLayer(
+            'lf_light_geometry_cleanup',
+            fields,
+            layer.wkbType(),
+            layer.crs()
+        )
 
+        provider = temp.dataProvider()
+
+        req = QgsFeatureRequest().setFilterFids(list(feature_ids))
+        features = []
+
+        for feat in layer.getFeatures(req):
+            geom = feat.geometry()
+
+            # Somente geometrias utilizáveis entram na rotina de
+            # remoção de vértices duplicados.
+            if geom is None or geom.isNull() or geom.isEmpty():
+                continue
+
+            new_feat = QgsFeature(fields)
+            new_feat.setGeometry(QgsGeometry(geom))
+            new_feat.setAttributes([int(feat.id())])
+            features.append(new_feat)
+
+        if features:
+            provider.addFeatures(features)
+
+        temp.updateExtents()
         return temp
 
     def processAlgorithm(self, parameters, context, feedback):
 
         layer = self.parameterAsVectorLayer(parameters, self.INPUT, context)
         if layer is None:
-            raise QgsProcessingException(self.invalidSourceError(parameters, self.INPUT))
+            raise QgsProcessingException(
+                self.invalidSourceError(parameters, self.INPUT)
+            )
 
-        selected_only = self.parameterAsBool(parameters, self.SELECTED, context)
-        save_edits = self.parameterAsBool(parameters, self.SAVE, context)
+        selected_only = self.parameterAsBool(
+            parameters, self.SELECTED, context
+        )
+        save_edits = self.parameterAsBool(
+            parameters, self.SAVE, context
+        )
 
-        # Criar tabela de saída sem geometria
-        sink_fields = self._sink_fields(layer.fields())
+        input_fields = layer.fields()
+
+        # --------------------------------------------------------------
+        # Tabela de auditoria das feições efetivamente removidas
+        # --------------------------------------------------------------
+        sink_fields = self._sink_fields(input_fields)
         sink, sink_id = self.parameterAsSink(
             parameters,
             self.OUTPUT,
@@ -239,113 +284,116 @@ Obs.: Geometrias inválidas não são corrigidas nem removidas por esta ferramen
             Qgis.WkbType.NoGeometry,
             layer.sourceCrs()
         )
-        if sink is None:
-            raise QgsProcessingException(self.tr('Could not create output table.', 'Não foi possível criar a tabela de saída.'))
 
-        # Definir conjunto de feições alvo
+        if sink is None:
+            raise QgsProcessingException(
+                self.tr(
+                    'Could not create output table.',
+                    'Não foi possível criar a tabela de saída.'
+                )
+            )
+
+        # --------------------------------------------------------------
+        # Definir universo de processamento
+        # --------------------------------------------------------------
         if selected_only:
             target_features = list(layer.getSelectedFeatures())
-            target_ids = {feat.id() for feat in target_features}
-            total_target = len(target_features)
         else:
             target_features = list(layer.getFeatures())
-            target_ids = {feat.id() for feat in target_features}
-            total_target = len(target_features)
+
+        target_ids = {feat.id() for feat in target_features}
+        total_target = len(target_features)
 
         if total_target == 0:
-            feedback.pushInfo(self.tr('No features to process.', 'Nenhuma feição para processar.'))
+            feedback.pushInfo(
+                self.tr(
+                    'No features to process.',
+                    'Nenhuma feição para processar.'
+                )
+            )
             return {self.OUTPUT: sink_id}
 
-        feedback.pushInfo(self.tr(
-            'Starting light geometry cleanup...',
-            'Iniciando limpeza geométrica leve...'
-        ))
+        feedback.pushInfo(
+            self.tr(
+                'Starting light geometry cleanup...',
+                'Iniciando limpeza geométrica leve...'
+            )
+        )
 
-        # Entrar em edição
-        if not layer.isEditable():
-            layer.startEditing()
+        # --------------------------------------------------------------
+        # FASE 1 - DIAGNÓSTICO
+        # Nenhuma alteração na camada original é feita nesta fase.
+        # --------------------------------------------------------------
+        feedback.pushInfo(
+            self.tr(
+                'Checking for null or empty geometries...',
+                'Verificando geometrias nulas ou vazias...'
+            )
+        )
 
-        # ------------------------------------------------------------------
-        # 1) Identificar e remover geometrias nulas ou vazias
-        # ------------------------------------------------------------------
-        feedback.pushInfo(self.tr(
-            'Checking for null or empty geometries...',
-            'Verificando geometrias nulas ou vazias...'
-        ))
-
-        ids_to_delete = []
+        features_to_delete = []
         remaining_ids = set(target_ids)
 
         total = 100.0 / total_target if total_target else 0
 
         for current, feat in enumerate(target_features):
+
             if feedback.isCanceled():
-                break
+                feedback.pushInfo(
+                    self.tr(
+                        'Operation canceled. No changes were applied.',
+                        'Operação cancelada. Nenhuma alteração foi aplicada.'
+                    )
+                )
+                return {self.OUTPUT: sink_id}
 
             geom = feat.geometry()
             reason = None
 
-            if geom is None:
-                reason = self.tr('null geometry', 'geometria nula')
-            elif geom.isNull():
-                reason = self.tr('null geometry', 'geometria nula')
+            if geom is None or geom.isNull():
+                reason = self.tr(
+                    'null geometry',
+                    'geometria nula'
+                )
             elif geom.isEmpty():
-                reason = self.tr('empty geometry', 'geometria vazia')
+                reason = self.tr(
+                    'empty geometry',
+                    'geometria vazia'
+                )
 
             if reason is not None:
-                self._append_removed_feature_to_sink(feat, sink, sink_fields, reason)
-                ids_to_delete.append(feat.id())
-                if feat.id() in remaining_ids:
-                    remaining_ids.remove(feat.id())
+                features_to_delete.append((feat, reason))
+                remaining_ids.discard(feat.id())
 
-                feedback.pushInfo(
-                    self.tr(
-                        'Deleted feature ID {} ({})'.format(feat.id(), reason),
-                        'Feição ID {} apagada ({})'.format(feat.id(), reason)
-                    )
-                )
+            feedback.setProgress(int((current + 1) * total))
 
-            feedback.setProgress(int(current * total))
+        # --------------------------------------------------------------
+        # FASE 2 - Preparar alterações geométricas SEM aplicá-las ainda
+        # --------------------------------------------------------------
+        geometry_changes = {}
+        skipped_invalid = 0
+        skipped_unsafe = 0
 
-        if ids_to_delete:
-            ok = layer.deleteFeatures(ids_to_delete)
-            if not ok:
-                raise QgsProcessingException(
-                    self.tr(
-                        'Could not delete null/empty geometry features.',
-                        'Não foi possível apagar as feições com geometria nula/vazia.'
-                    )
-                )
-
-        feedback.pushInfo(
-            self.tr(
-                '{} feature(s) removed due to null or empty geometry.'.format(len(ids_to_delete)),
-                '{} feição(ões) removida(s) por geometria nula ou vazia.'.format(len(ids_to_delete))
-            )
-        )
-
-        # ------------------------------------------------------------------
-        # 2) Remover vértices duplicados para linhas e polígonos
-        # ------------------------------------------------------------------
         geom_type = layer.geometryType()
-        if geom_type in (Qgis.GeometryType.Line, Qgis.GeometryType.Polygon) and remaining_ids:
 
-            feedback.pushInfo(self.tr(
-                'Removing duplicate vertices...',
-                'Removendo vértices duplicados...'
-            ))
+        if (
+            geom_type in (
+                Qgis.GeometryType.Line,
+                Qgis.GeometryType.Polygon
+            )
+            and remaining_ids
+        ):
+            feedback.pushInfo(
+                self.tr(
+                    'Checking duplicate vertices...',
+                    'Verificando vértices duplicados...'
+                )
+            )
 
-            # Atualizar seleção temporariamente se necessário
-            old_selected_ids = layer.selectedFeatureIds()
-
-            if selected_only:
-                layer.selectByIds(list(remaining_ids))
-
+            # Preserva explicitamente o FID original em __lf_id__.
             temp_layer = self._copy_target_features_to_temp_layer(
                 layer,
-                selected_only,
-                context,
-                feedback
+                remaining_ids
             )
 
             cleaned = processing.run(
@@ -361,84 +409,279 @@ Obs.: Geometrias inválidas não são corrigidas nem removidas por esta ferramen
             )['OUTPUT']
 
             cleaned_dict = {}
-            for feat in cleaned.getFeatures():
-                cleaned_dict[int(feat['__lf_id__'])] = feat.geometry()
+            for cleaned_feat in cleaned.getFeatures():
+                try:
+                    original_fid = int(cleaned_feat['__lf_id__'])
+                except (TypeError, ValueError):
+                    continue
 
-            changed_count = 0
-            ids_sorted = sorted(list(remaining_ids))
-            total2 = 100.0 / len(ids_sorted) if ids_sorted else 0
+                cleaned_dict[original_fid] = cleaned_feat.geometry()
 
+            ids_sorted = sorted(remaining_ids)
             req = QgsFeatureRequest().setFilterFids(ids_sorted)
-            for current, feat in enumerate(layer.getFeatures(req)):
+            feats_remaining = list(layer.getFeatures(req))
+            total2 = 100.0 / len(feats_remaining) if feats_remaining else 0
+
+            for current, feat in enumerate(feats_remaining):
+
                 if feedback.isCanceled():
-                    break
+                    feedback.pushInfo(
+                        self.tr(
+                            'Operation canceled. No changes were applied.',
+                            'Operação cancelada. Nenhuma alteração foi aplicada.'
+                        )
+                    )
+                    return {self.OUTPUT: sink_id}
 
                 fid = feat.id()
                 old_geom = feat.geometry()
                 new_geom = cleaned_dict.get(fid)
 
-                if new_geom is None:
-                    feedback.setProgress(int(current * total2))
+                if (
+                    old_geom is None
+                    or old_geom.isNull()
+                    or old_geom.isEmpty()
+                    or new_geom is None
+                ):
+                    feedback.setProgress(int((current + 1) * total2))
                     continue
 
-                # compara WKB para detectar alteração real
-                old_wkb = old_geom.asWkb() if old_geom and not old_geom.isNull() else None
-                new_wkb = new_geom.asWkb() if new_geom and not new_geom.isNull() else None
+                # A ferramenta declara que não corrige geometrias inválidas.
+                # Por segurança, elas também não são alteradas nesta etapa.
+                if not old_geom.isGeosValid():
+                    skipped_invalid += 1
+                    feedback.pushInfo(
+                        self.tr(
+                            'Feature ID {} has invalid geometry and was not modified.'
+                            .format(fid),
+                            'A feição ID {} possui geometria inválida e não foi modificada.'
+                            .format(fid)
+                        )
+                    )
+                    feedback.setProgress(int((current + 1) * total2))
+                    continue
+
+                # REGRA DE SEGURANÇA:
+                # jamais substituir geometria válida por resultado nulo/vazio.
+                if new_geom.isNull() or new_geom.isEmpty():
+                    skipped_unsafe += 1
+                    feedback.pushWarning(
+                        self.tr(
+                            'Cleanup result for feature ID {} was null/empty. '
+                            'Original geometry was preserved.'.format(fid),
+                            'O resultado da limpeza da feição ID {} ficou nulo/vazio. '
+                            'A geometria original foi preservada.'.format(fid)
+                        )
+                    )
+                    feedback.setProgress(int((current + 1) * total2))
+                    continue
+
+                # A família geométrica deve continuar a mesma.
+                if new_geom.type() != old_geom.type():
+                    skipped_unsafe += 1
+                    feedback.pushWarning(
+                        self.tr(
+                            'Cleanup result for feature ID {} changed geometry type. '
+                            'Original geometry was preserved.'.format(fid),
+                            'O resultado da limpeza da feição ID {} alterou o tipo '
+                            'de geometria. A geometria original foi preservada.'.format(fid)
+                        )
+                    )
+                    feedback.setProgress(int((current + 1) * total2))
+                    continue
+
+                # Para geometria originalmente válida, não aceitar um
+                # resultado que passe a ser inválido.
+                if not new_geom.isGeosValid():
+                    skipped_unsafe += 1
+                    feedback.pushWarning(
+                        self.tr(
+                            'Cleanup result for feature ID {} became invalid. '
+                            'Original geometry was preserved.'.format(fid),
+                            'O resultado da limpeza da feição ID {} tornou-se inválido. '
+                            'A geometria original foi preservada.'.format(fid)
+                        )
+                    )
+                    feedback.setProgress(int((current + 1) * total2))
+                    continue
+
+                old_wkb = old_geom.asWkb()
+                new_wkb = new_geom.asWkb()
 
                 if old_wkb != new_wkb:
-                    ok = layer.changeGeometry(fid, new_geom)
-                    if ok:
-                        changed_count += 1
-                        feedback.pushInfo(
-                            self.tr(
-                                'Duplicate vertices removed from feature ID {}'.format(fid),
-                                'Vértices duplicados removidos da feição ID {}'.format(fid)
-                            )
-                        )
+                    geometry_changes[fid] = QgsGeometry(new_geom)
 
-                feedback.setProgress(int(current * total2))
+                feedback.setProgress(int((current + 1) * total2))
 
-            # Restaurar seleção original
-            if selected_only:
-                layer.selectByIds(old_selected_ids)
-
+        else:
             feedback.pushInfo(
                 self.tr(
-                    '{} feature(s) had duplicate vertices removed.'.format(changed_count),
-                    '{} feição(ões) tiveram vértices duplicados removidos.'.format(changed_count)
+                    'Duplicate vertex cleanup skipped '
+                    '(only applies to line and polygon layers).',
+                    'A remoção de vértices duplicados foi ignorada '
+                    '(aplica-se apenas a linhas e polígonos).'
                 )
             )
 
-        else:
-            feedback.pushInfo(self.tr(
-                'Duplicate vertex cleanup skipped (only applies to line and polygon layers).',
-                'A remoção de vértices duplicados foi ignorada (aplica-se apenas a linhas e polígonos).'
-            ))
+        # --------------------------------------------------------------
+        # FASE 3 - APLICAR ALTERAÇÕES
+        # Só chegamos aqui se toda a análise terminou sem cancelamento.
+        # --------------------------------------------------------------
+        layer_was_editable = layer.isEditable()
+        started_editing_here = False
 
-        # ------------------------------------------------------------------
-        # 3) Salvar edições
-        # ------------------------------------------------------------------
-        if save_edits:
+        if not layer_was_editable:
+            if not layer.startEditing():
+                raise QgsProcessingException(
+                    self.tr(
+                        'Could not start layer editing.',
+                        'Não foi possível iniciar a edição da camada.'
+                    )
+                )
+            started_editing_here = True
+
+        # 3A - apagar SOMENTE feições previamente diagnosticadas
+        ids_to_delete = [feat.id() for feat, reason in features_to_delete]
+
+        if ids_to_delete:
+            if not layer.deleteFeatures(ids_to_delete):
+                if started_editing_here:
+                    layer.rollBack()
+                raise QgsProcessingException(
+                    self.tr(
+                        'Could not delete null/empty geometry features.',
+                        'Não foi possível apagar as feições com geometria nula/vazia.'
+                    )
+                )
+
+        # Só registra na tabela depois que a exclusão foi aceita
+        for feat, reason in features_to_delete:
+            self._append_removed_feature_to_sink(
+                feat,
+                sink,
+                sink_fields,
+                input_fields,
+                reason
+            )
+
+            feedback.pushInfo(
+                self.tr(
+                    'Deleted feature ID {} ({})'.format(feat.id(), reason),
+                    'Feição ID {} apagada ({})'.format(feat.id(), reason)
+                )
+            )
+
+        # 3B - alterações geométricas seguras
+        changed_count = 0
+
+        for fid, new_geom in geometry_changes.items():
+            if not layer.changeGeometry(fid, new_geom):
+                if started_editing_here:
+                    layer.rollBack()
+                raise QgsProcessingException(
+                    self.tr(
+                        'Could not update geometry of feature ID {}.'
+                        .format(fid),
+                        'Não foi possível atualizar a geometria da feição ID {}.'
+                        .format(fid)
+                    )
+                )
+
+            changed_count += 1
+            feedback.pushInfo(
+                self.tr(
+                    'Duplicate vertices removed from feature ID {}'
+                    .format(fid),
+                    'Vértices duplicados removidos da feição ID {}'
+                    .format(fid)
+                )
+            )
+
+        feedback.pushInfo(
+            self.tr(
+                '{} feature(s) removed due to null or empty geometry.'
+                .format(len(ids_to_delete)),
+                '{} feição(ões) removida(s) por geometria nula ou vazia.'
+                .format(len(ids_to_delete))
+            )
+        )
+
+        feedback.pushInfo(
+            self.tr(
+                '{} feature(s) had duplicate vertices removed.'
+                .format(changed_count),
+                '{} feição(ões) tiveram vértices duplicados removidos.'
+                .format(changed_count)
+            )
+        )
+
+        if skipped_invalid:
+            feedback.pushInfo(
+                self.tr(
+                    '{} invalid feature(s) were preserved without modification.'
+                    .format(skipped_invalid),
+                    '{} feição(ões) inválida(s) foram preservadas sem modificação.'
+                    .format(skipped_invalid)
+                )
+            )
+
+        if skipped_unsafe:
+            feedback.pushWarning(
+                self.tr(
+                    '{} potentially unsafe geometry change(s) were blocked.'
+                    .format(skipped_unsafe),
+                    '{} alteração(ões) geométrica(s) potencialmente insegura(s) '
+                    'foram bloqueadas.'.format(skipped_unsafe)
+                )
+            )
+
+        # --------------------------------------------------------------
+        # FASE 4 - SALVAR
+        # Nunca faz commit automático de uma sessão de edição que já
+        # estava aberta antes da ferramenta, pois isso poderia salvar
+        # alterações não relacionadas feitas pelo usuário.
+        # --------------------------------------------------------------
+        if save_edits and started_editing_here:
             if not layer.commitChanges():
+                layer.rollBack()
                 raise QgsProcessingException(
                     self.tr(
                         'Could not save layer edits.',
                         'Não foi possível salvar as edições da camada.'
                     )
                 )
-        else:
-            feedback.pushInfo(self.tr(
-                'Edits were kept in edit mode and not committed.',
-                'As edições foram mantidas em modo de edição e não foram salvas.'
-            ))
 
-        feedback.pushInfo(self.tr(
-            'Operation completed successfully!',
-            'Operação finalizada com sucesso!'
-        ))
-        feedback.pushInfo(self.tr(
-            'Leandro Franca - Cartographic Engineer',
-            'Leandro França - Eng Cart'
-        ))
+        elif save_edits and layer_was_editable:
+            feedback.pushWarning(
+                self.tr(
+                    'The layer was already in edit mode. Cleanup changes were '
+                    'left in the current edit session and were not committed '
+                    'automatically, in order to avoid saving unrelated edits.',
+                    'A camada já estava em modo de edição. As alterações da limpeza '
+                    'foram mantidas na sessão de edição atual e não foram salvas '
+                    'automaticamente, para evitar salvar edições não relacionadas.'
+                )
+            )
+
+        else:
+            feedback.pushInfo(
+                self.tr(
+                    'Edits were kept in edit mode and not committed.',
+                    'As edições foram mantidas em modo de edição e não foram salvas.'
+                )
+            )
+
+        feedback.pushInfo(
+            self.tr(
+                'Operation completed successfully!',
+                'Operação finalizada com sucesso!'
+            )
+        )
+        feedback.pushInfo(
+            self.tr(
+                'Leandro Franca - Cartographic Engineer',
+                'Leandro França - Eng Cart'
+            )
+        )
 
         return {self.OUTPUT: sink_id}
