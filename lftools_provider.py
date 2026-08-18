@@ -98,7 +98,7 @@ from .processing_provider.Cad_GeoNumbering import GeoNumbering
 from .processing_provider.Cad_FrontLotLine import FrontLotLine
 from .processing_provider.Stat_centralTendency import CentralTendency
 from .processing_provider.Doc_PointsFromText import PointsFromText
-from .processing_provider.Cad_ConnectPolygons import ConnectFeatures
+from .processing_provider.Cad_ConnectPolygons import ConnectPolygons
 from .processing_provider.Gnss_pos2layer import Pos2layer
 from .processing_provider.Gnss_StopAndGo import StopAndGo
 from .processing_provider.Vect_LineSequence import LineSequence
@@ -225,7 +225,7 @@ class LFToolsProvider(QgsProcessingProvider):
         self.addAlgorithm(FrontLotLine())
         self.addAlgorithm(CentralTendency())
         self.addAlgorithm(PointsFromText())
-        self.addAlgorithm(ConnectFeatures())
+        self.addAlgorithm(ConnectPolygons())
         self.addAlgorithm(Pos2layer())
         self.addAlgorithm(StopAndGo())
         self.addAlgorithm(LineSequence())
