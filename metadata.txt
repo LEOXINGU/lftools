@@ -3,7 +3,7 @@ name=LF Tools
 qgisMinimumVersion=3.44
 qgisMaximumVersion=4.99
 description=Comprehensive solutions for cartographic production, surveying, drone mapping, GNSS data import, geospatial database management, digital image processing, and spatial analysis.
-version=2.14.0
+version=2.14.1
 author=Leandro França
 email=suporte@geoone.com.br
 
@@ -40,6 +40,7 @@ donation=https://www.paypal.com/ncp/payment/8V3C6PEAMQAYG
 # França, L. (YEAR). LFTools: Comprehensive solutions for cartographic production, surveying, drone mapping, GNSS data import, geospatial database management, digital image processing, and spatial analysis. (VERSION X.X.X) [QGIS plugin]. Retrieved from https://plugins.qgis.org/plugins/LFTools/
 
 changelog=
+  2.14.1 - Improved robustness and safety for Polygon Overlap, Light Geometry Cleanup, and Connect Polygons, with better handling of problematic and multipart geometries, change auditing, and enhanced detection of topological errors.
   2.14.0 - Added a new tool to number polygons sequentially along guiding lines. Added the INCRA/SIGEF option to Descriptive Memorial reports, with specific calculations for area, perimeter, distances, and azimuths according to the SIGEF standard.
   2.13.1 - Updated geometry category checks from Qgis.WkbType.PointGeometry, LineGeometry, and PolygonGeometry to Qgis.GeometryType.Point, Line, and Polygon, fixing processing failures in QGIS 3.44 and later versions.
   2.13.0 - Added the new Create TopoGeo Demo tool for one-click generation of a simplified TopoGeo GeoPackage.
