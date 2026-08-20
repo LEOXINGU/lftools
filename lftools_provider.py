@@ -141,7 +141,7 @@ from .processing_provider.Vector_LightGeometryCleanup import LightGeometryCleanu
 from .processing_provider.Relief_ThematicSlope import ThematicSlope
 from .processing_provider.Doc_CreateTopoGeo import CreateTopoGeo
 from .processing_provider.Cad_NumberPolygonsByLines import NumberPolygonsByLines
-
+from .processing_provider.Cad_ParcelTopologyCleanup import ParcelTopologyCleanup
 
 
 class LFToolsProvider(QgsProcessingProvider):
@@ -268,6 +268,7 @@ class LFToolsProvider(QgsProcessingProvider):
         self.addAlgorithm(ThematicSlope())
         self.addAlgorithm(CreateTopoGeo())
         self.addAlgorithm(NumberPolygonsByLines())
+        self.addAlgorithm(ParcelTopologyCleanup())
 
     def id(self):
         return 'lftools'
