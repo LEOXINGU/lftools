@@ -1741,5 +1741,18 @@ La base de datos generada contiene el conjunto mínimo de capas necesarias para 
 '{} feature(s) modified.' : {'es': '{} entidad(es) modificada(s).'},
 '{} feature(s) unchanged.' : {'es': '{} entidad(es) sin cambios.'},
 '{} potentially unsafe modification(s) were blocked and the original geometries were preserved.' : {'es': 'Se bloquearon {} modificación(es) potencialmente insegura(s) y se conservaron las geometrías originales.'},
+'Feature ID {} has null or empty geometry and was ignored.': {'es': 'La entidad ID {} tiene una geometría nula o vacía y fue ignorada.'},
+'Orientation result for feature ID {} was unsafe; original geometry was preserved.': {'es': 'El resultado de la orientación de la entidad ID {} no fue seguro; se conservó la geometría original.'},
+'Could not orient feature ID {}: {}': {'es': 'No se pudo orientar la entidad ID {}: {}'},
+'Feature ID {} is multipart; road-access first vertex was not changed.': {'es': 'La entidad ID {} es multiparte; no se modificó el primer vértice para el acceso vial.'},
+'Could not evaluate boundary between features {} and {}: {}': {'es': 'No se pudo evaluar el límite entre las entidades {} y {}: {}'},
+'Road-access adjustment for feature ID {} produced an unsafe geometry; original geometry was preserved.': {'es': 'El ajuste para el acceso vial de la entidad ID {} produjo una geometría no segura; se conservó la geometría original.'},
+'Could not save layer edits.': {'es': 'No se pudieron guardar las ediciones de la capa.'},
+'The layer was already in edit mode. Changes were left in the current edit session and were not committed automatically.': {'es': 'La capa ya estaba en modo de edición. Los cambios se mantuvieron en la sesión de edición actual y no se guardaron automáticamente.'},
+'{} feature(s) had polygon orientation adjusted.': {'es': 'Se ajustó la orientación del polígono de {} entidad(es).'},
+'{} feature(s) had the road-access first vertex adjusted.': {'es': 'Se ajustó el primer vértice para el acceso vial de {} entidad(es).'},
+'{} multipart feature(s) were not modified in the road-access step.': {'es': 'No se modificaron {} entidad(es) multiparte en la etapa de acceso vial.'},
+'{} null/empty feature(s) were ignored.': {'es': 'Se ignoraron {} entidad(es) con geometría nula o vacía.'},
+
 
  }
