@@ -712,81 +712,92 @@ def inv_vertex_order(geom):
     else:
         return None
 
+
 # Orientar polígono
 def OrientarPoligono(coords, primeiro, sentido):
     """
-    Reorganiza os vértices do polígono com base em um ponto inicial e sentido de orientação desejado.
+    Reorganiza os vértices do polígono com base no sentido de orientação
+    desejado e, por último, define explicitamente o primeiro vértice.
 
     Parâmetros:
-        coords   : lista de pontos (com métodos .x() e .y())
+        coords   : lista de pontos (QgsPoint/QgsPointXY), aberta ou fechada
         primeiro : int
-                   0 = não altera ponto inicial
-                   1 = começa pelo ponto mais ao norte (maior Y, depois menor X)
-                   2 = começa pelo ponto mais ao sul (menor Y, depois maior X)
-                   3 = começa pelo ponto mais ao leste (maior X)
-                   4 = começa pelo ponto mais ao oeste (menor X)
+                   0 = não altera o ponto inicial
+                   1 = mais ao norte (maior Y; empate: menor X)
+                   2 = mais ao sul   (menor Y; empate: maior X)
+                   3 = mais ao leste (maior X; empate: maior Y)
+                   4 = mais ao oeste (menor X; empate: menor Y)
         sentido  : int
                    0 = sentido horário
                    1 = sentido anti-horário
+                   2 = não alterar o sentido
 
     Retorna:
-        Lista de coordenadas reorganizada e fechada (primeiro ponto repetido no final).
+        Lista fechada de coordenadas, com o primeiro vértice solicitado
+        garantidamente na posição inicial.
     """
-    # definir primeiro vértice
-    if primeiro == 1: # Mais ao norte
-        ind = None
-        ymax = -1e10
-        x_ymax = 1e10
-        for k, pnt in enumerate(coords):
-            if pnt.y() > ymax:
-                ymax = pnt.y()
-                x_ymax = pnt.x()
-                ind = k
-            elif pnt.y() == ymax:
-                if pnt.x() < x_ymax:
-                    ymax = pnt.y()
-                    x_ymax = pnt.x()
-                    ind = k
-    elif primeiro == 2: # Mais ao sul
-        ind = None
-        ymin = 1e10
-        x_ymim = -1e10
-        for k, pnt in enumerate(coords):
-            if pnt.y() < ymin:
-                ymin = pnt.y()
-                x_ymim = pnt.x()
-                ind = k
-            elif pnt.y() == ymin:
-                if pnt.x() > x_ymim:
-                    ymin = pnt.y()
-                    x_ymim = pnt.x()
-                    ind = k
-    elif primeiro == 3: # Mais ao Leste
-        ind = None
-        xmax = -1e10
-        for k, pnt in enumerate(coords):
-            if pnt.x() > xmax:
-                xmax = pnt.x()
-                ind = k
-    elif primeiro == 4: # Mais ao Oeste
-        ind = None
-        xmin = 1e10
-        for k, pnt in enumerate(coords):
-            if pnt.x() < xmin:
-                xmin = pnt.x()
-                ind = k
+
+    if not coords:
+        return coords
+
+    # Trabalhar em uma cópia
+    pts = list(coords)
+
+    # Remover fechamento, caso venha repetido
+    if len(pts) > 1:
+        if pts[0].x() == pts[-1].x() and pts[0].y() == pts[-1].y():
+            pts = pts[:-1]
+
+    if len(pts) < 3:
+        return pts + ([pts[0]] if pts else [])
+
+    # --------------------------------------------------------------
+    # 1) PRIMEIRO ajustar o sentido do anel
+    # --------------------------------------------------------------
+    fechado = pts + [pts[0]]
+    areaG = areaGauss(fechado)
+
+    if sentido == 0 and areaG < 0:
+        pts = pts[::-1]
+    elif sentido == 1 and areaG > 0:
+        pts = pts[::-1]
+
+    # --------------------------------------------------------------
+    # 2) DEPOIS escolher o primeiro vértice
+    #    Esta deve ser a última alteração na sequência.
+    # --------------------------------------------------------------
+    if primeiro == 1:  # Mais ao Norte: maior Y; empate -> menor X
+        ind = max(
+            range(len(pts)),
+            key=lambda i: (pts[i].y(), -pts[i].x())
+        )
+
+    elif primeiro == 2:  # Mais ao Sul: menor Y; empate -> maior X
+        ind = min(
+            range(len(pts)),
+            key=lambda i: (pts[i].y(), -pts[i].x())
+        )
+
+    elif primeiro == 3:  # Mais ao Leste: maior X; empate -> maior Y
+        ind = max(
+            range(len(pts)),
+            key=lambda i: (pts[i].x(), pts[i].y())
+        )
+
+    elif primeiro == 4:  # Mais ao Oeste: menor X; empate -> menor Y
+        ind = min(
+            range(len(pts)),
+            key=lambda i: (pts[i].x(), pts[i].y())
+        )
+
+    else:
+        ind = 0
+
     if primeiro != 0:
-        coords = coords[ind :] + coords[0 : ind]
+        pts = pts[ind:] + pts[:ind]
 
-    #rotacionar
-    coords = coords +[coords[0]]
-    areaG = areaGauss(coords)
-    if areaG < 0 and sentido == 0:
-        coords = coords[::-1]
-    elif areaG > 0 and sentido == 1:
-        coords = coords[::-1]
-    return coords
-
+    # Fechar o anel APÓS todas as alterações
+    return pts + [pts[0]]
 
 
 # Azimute principal das feições
