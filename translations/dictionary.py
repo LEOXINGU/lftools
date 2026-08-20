@@ -1753,6 +1753,6 @@ La base de datos generada contiene el conjunto mínimo de capas necesarias para 
 '{} feature(s) had the road-access first vertex adjusted.': {'es': 'Se ajustó el primer vértice para el acceso vial de {} entidad(es).'},
 '{} multipart feature(s) were not modified in the road-access step.': {'es': 'No se modificaron {} entidad(es) multiparte en la etapa de acceso vial.'},
 '{} null/empty feature(s) were ignored.': {'es': 'Se ignoraron {} entidad(es) con geometría nula o vacía.'},
-
+'Road-access first vertex has priority over the selected geographic first vertex.' : {'es': 'El primer vértice para el acceso vial tiene prioridad sobre el primer vértice geográfico seleccionado.'},
 
  }
