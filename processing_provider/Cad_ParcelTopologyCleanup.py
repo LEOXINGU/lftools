@@ -101,18 +101,16 @@ Obs.: Correções automáticas somente são aceitas quando a geometria resultant
     figure = 'images/tutorial/cadastre_parcelTopologyCleanup.jpg'
 
     def shortHelpString(self):
-        social_BW = Imgs().social_BW
-        img = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)),
-            self.figure
-        )
-        footer = (
-            '<div align="center"><img src="' + img + '"></div>'
-            '<div align="right"><p align="right"><b>'
-            + self.tr('Author: Leandro Franca', 'Autor: Leandro França')
-            + '</b></p>' + social_BW + '</div></div>'
-        )
-        return self.tr(self.txt_en, self.txt_pt) + footer
+            social_BW = Imgs().social_BW
+            footer = '''<div align="center">
+                          <img src="''' + os.path.join(os.path.dirname(os.path.dirname(__file__)), self.figure) + '''">
+                          </div>
+                          <div align="right">
+                          <p align="right">
+                          <b>''' + self.tr('Author: Leandro Franca', 'Autor: Leandro França') + '''</b>
+                          </p>''' + social_BW + '''</div>
+                        </div>'''
+            return self.tr(self.txt_en, self.txt_pt) + footer
 
     INPUT = 'INPUT'
     REMOVE_NULL_EMPTY = 'REMOVE_NULL_EMPTY'
