@@ -18,7 +18,7 @@ __copyright__ = '(C) 2021, Leandro França'
 from qgis.core import *
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
-from lftools.geocapt.cartography import areaGauss, geom2PointList, OrientarPoligono
+from lftools.geocapt.cartography import geom2PointList, OrientarPoligono, Mesclar_Multilinhas
 import os
 from qgis.PyQt.QtGui import QIcon
 
@@ -140,6 +140,7 @@ class PolygonOrientation(QgsProcessingAlgorithm):
 
 
     def processAlgorithm(self, parameters, context, feedback):
+
         # INPUT
         camada = self.parameterAsVectorLayer(
             parameters,
@@ -147,7 +148,9 @@ class PolygonOrientation(QgsProcessingAlgorithm):
             context
         )
         if camada is None:
-            raise QgsProcessingException(self.invalidSourceError(parameters, self.POLYGONS))
+            raise QgsProcessingException(
+                self.invalidSourceError(parameters, self.POLYGONS)
+            )
 
         selecionados = self.parameterAsBool(
             parameters,
@@ -161,7 +164,9 @@ class PolygonOrientation(QgsProcessingAlgorithm):
             context
         )
         if sentido is None:
-            raise QgsProcessingException(self.invalidSourceError(parameters, self.ORIENTATION))
+            raise QgsProcessingException(
+                self.invalidSourceError(parameters, self.ORIENTATION)
+            )
 
         primeiro = self.parameterAsEnum(
             parameters,
@@ -174,47 +179,145 @@ class PolygonOrientation(QgsProcessingAlgorithm):
             self.STREET,
             context
         )
-        if rua is None:
-            raise QgsProcessingException(self.invalidSourceError(parameters, self.STREET))
 
         salvar = self.parameterAsBool(
             parameters,
             self.SAVE,
             context
         )
-        if salvar is None:
-            raise QgsProcessingException(self.invalidSourceError(parameters, self.SAVE))
 
-        camada.startEditing() # coloca no modo edição
+        # --------------------------------------------------------------
+        # Conjunto de feições alvo
+        # --------------------------------------------------------------
+        if selecionados:
+            target_ids = list(camada.selectedFeatureIds())
+        else:
+            target_ids = [feat.id() for feat in camada.getFeatures()]
 
-        feedback.pushInfo(self.tr('Orienting polygons...', 'Orientando polígonos...'))
+        if not target_ids:
+            feedback.pushInfo(
+                self.tr(
+                    'No features to process.',
+                    'Nenhuma feição para processar.'
+                )
+            )
+            return {}
 
-        total = 100.0 / camada.featureCount() if camada.featureCount() else 0
+        # --------------------------------------------------------------
+        # Controle seguro da sessão de edição
+        # --------------------------------------------------------------
+        layer_was_editable = camada.isEditable()
+        started_editing_here = False
 
-        for current, feat in enumerate(camada.getSelectedFeatures() if selecionados else camada.getFeatures()):
+        if not layer_was_editable:
+            if not camada.startEditing():
+                raise QgsProcessingException(
+                    self.tr(
+                        'Could not start layer editing.',
+                        'Não foi possível iniciar a edição da camada.'
+                    )
+                )
+            started_editing_here = True
+
+        # --------------------------------------------------------------
+        # 1) Orientar polígonos
+        # --------------------------------------------------------------
+        feedback.pushInfo(
+            self.tr(
+                'Orienting polygons...',
+                'Orientando polígonos...'
+            )
+        )
+
+        total = 100.0 / len(target_ids) if target_ids else 0.0
+
+        req = QgsFeatureRequest().setFilterFids(target_ids)
+
+        changed_orientation = 0
+        skipped_invalid = 0
+        skipped_null = 0
+
+        for current, feat in enumerate(camada.getFeatures(req)):
+
+            if feedback.isCanceled():
+                if started_editing_here:
+                    camada.rollBack()
+                raise QgsProcessingException(
+                    self.tr(
+                        'Operation canceled by the user.',
+                        'Operação cancelada pelo usuário.'
+                    )
+                )
 
             geom = feat.geometry()
-            if geom.isEmpty() or geom is None:
+
+            if geom is None or geom.isNull() or geom.isEmpty():
+                skipped_null += 1
+                feedback.pushWarning(
+                    self.tr(
+                        'Feature ID {} has null or empty geometry and was ignored.'
+                        .format(feat.id()),
+                        'A feição ID {} possui geometria nula ou vazia e foi ignorada.'
+                        .format(feat.id())
+                    )
+                )
+                feedback.setProgress(int((current + 1) * total))
                 continue
-            else:
+
+            # Esta ferramenta reorganiza vértices; não deve tentar reparar
+            # geometrias inválidas silenciosamente.
+            if not geom.isGeosValid():
+                skipped_invalid += 1
+                feedback.pushWarning(
+                    self.tr(
+                        'Feature ID {} has invalid geometry and was not modified.'
+                        .format(feat.id()),
+                        'A feição ID {} possui geometria inválida e não foi modificada.'
+                        .format(feat.id())
+                    )
+                )
+                feedback.setProgress(int((current + 1) * total))
+                continue
+
+            try:
                 if geom.isMultipart():
-                    multipol = geom2PointList(geom)  # lista de polígonos (com anéis)
+
+                    multipol = geom2PointList(geom)
                     mPol = QgsMultiPolygon()
 
                     for pol in multipol:
-                        if not pol:  # segurança contra geometria vazia
+                        if not pol or not pol[0]:
                             continue
 
                         # Anel exterior
                         ext_coords = pol[0][:-1]
-                        ext_coords = OrientarPoligono(ext_coords, primeiro, sentido)
+
+                        if len(ext_coords) < 3:
+                            continue
+
+                        ext_coords = OrientarPoligono(
+                            ext_coords,
+                            primeiro,
+                            sentido
+                        )
                         ext_ring = QgsLineString(ext_coords)
                         qgs_pol = QgsPolygon(ext_ring)
 
                         # Anéis internos
                         for ring in pol[1:]:
+                            if not ring:
+                                continue
+
                             int_coords = ring[:-1]
-                            int_coords = OrientarPoligono(int_coords, primeiro, sentido)
+
+                            if len(int_coords) < 3:
+                                continue
+
+                            int_coords = OrientarPoligono(
+                                int_coords,
+                                primeiro,
+                                sentido
+                            )
                             int_ring = QgsLineString(int_coords)
                             qgs_pol.addInteriorRing(int_ring)
 
@@ -224,95 +327,415 @@ class PolygonOrientation(QgsProcessingAlgorithm):
 
                 else:
                     pol = geom2PointList(geom)
-                    if not pol:
+
+                    if not pol or not pol[0]:
+                        feedback.setProgress(int((current + 1) * total))
                         continue
+
                     ext_coords = pol[0][:-1]
-                    ext_coords = OrientarPoligono(ext_coords, primeiro, sentido)
+
+                    if len(ext_coords) < 3:
+                        feedback.setProgress(int((current + 1) * total))
+                        continue
+
+                    ext_coords = OrientarPoligono(
+                        ext_coords,
+                        primeiro,
+                        sentido
+                    )
                     ext_ring = QgsLineString(ext_coords)
                     qgs_pol = QgsPolygon(ext_ring)
 
+                    # Preservar e orientar anéis internos
                     for ring in pol[1:]:
+                        if not ring:
+                            continue
+
                         int_coords = ring[:-1]
-                        int_coords = OrientarPoligono(int_coords, primeiro, sentido)
+
+                        if len(int_coords) < 3:
+                            continue
+
+                        int_coords = OrientarPoligono(
+                            int_coords,
+                            primeiro,
+                            sentido
+                        )
                         int_ring = QgsLineString(int_coords)
                         qgs_pol.addInteriorRing(int_ring)
 
                     newGeom = QgsGeometry(qgs_pol)
 
-                camada.changeGeometry(feat.id(), newGeom)
+                # Nunca substituir uma geometria válida por resultado
+                # nulo, vazio ou inválido.
+                if (
+                    newGeom is None
+                    or newGeom.isNull()
+                    or newGeom.isEmpty()
+                    or not newGeom.isGeosValid()
+                ):
+                    feedback.pushWarning(
+                        self.tr(
+                            'Orientation result for feature ID {} was unsafe; original geometry was preserved.'
+                            .format(feat.id()),
+                            'O resultado da orientação da feição ID {} foi inseguro; a geometria original foi preservada.'
+                            .format(feat.id())
+                        )
+                    )
+                    feedback.setProgress(int((current + 1) * total))
+                    continue
+
+                if geom.asWkb() != newGeom.asWkb():
+                    if camada.changeGeometry(feat.id(), newGeom):
+                        changed_orientation += 1
+
+            except Exception as e:
+                feedback.pushWarning(
+                    self.tr(
+                        'Could not orient feature ID {}: {}'
+                        .format(feat.id(), str(e)),
+                        'Não foi possível orientar a feição ID {}: {}'
+                        .format(feat.id(), str(e))
+                    )
+                )
+
+            feedback.setProgress(int((current + 1) * total))
+
+        # --------------------------------------------------------------
+        # 2) Identificar primeiro ponto com vante para acesso viário
+        # --------------------------------------------------------------
+        street_changed = 0
+        street_skipped_multipart = 0
+
+        if rua:
+
+            feedback.pushInfo(
+                self.tr(
+                    'Identifying the first forward point for road access...',
+                    'Identificando primeiro ponto com vante para o acesso viário...'
+                )
+            )
+
+            # Recarregar as feições, pois algumas geometrias podem ter sido
+            # alteradas na etapa anterior.
+            req = QgsFeatureRequest().setFilterFids(target_ids)
+
+            for feat1 in camada.getFeatures(req):
 
                 if feedback.isCanceled():
-                    break
-                feedback.setProgress(int((current+1) * total))
+                    if started_editing_here:
+                        camada.rollBack()
+                    raise QgsProcessingException(
+                        self.tr(
+                            'Operation canceled by the user.',
+                            'Operação cancelada pelo usuário.'
+                        )
+                    )
 
-            if rua:
-                feedback.pushInfo(self.tr('Identifying the first forward point for road access...', 'Identificando primeiro ponto com vante para o acesso viário...'))
-                for feat1 in camada.getSelectedFeatures() if selecionados else camada.getFeatures():
-                    # Pegar vizinhos
-                    geom1 = feat1.geometry()
-                    if not geom1.isMultipart():
-                        COORDS = geom2PointList(geom1)[0]
-                        COORDS  = COORDS[:-1]
-                        coords = geom1.asPolygon()[0]
-                        coords = coords[:-1]
-                        confront = {}
-                        for feat2 in camada.getSelectedFeatures() if selecionados else camada.getFeatures():
-                            geom2 = feat2.geometry()
-                            cd_lote2 = feat2.id()
-                            if feat1 != feat2:
-                                if geom1.intersects(geom2):
-                                    inters = geom1.intersection(geom2)
-                                    if inters.isMultipart():
-                                        partes = inters.asMultiPolyline()
-                                        parte1 = QgsGeometry.fromPolylineXY(partes[0])
-                                        k = 1
-                                        cont = 1
-                                        while len(partes) > 1:
-                                            # print(k, cont, len(partes), parte1)
-                                            parte2 = QgsGeometry.fromPolylineXY(partes[k])
-                                            if  parte1.intersects(parte2):
-                                                parte1 = parte1.combine(parte2)
-                                                del partes[k]
-                                            else:
-                                                k += 1
-                                            cont +=1
-                                            if cont > 10:
-                                                # print('erro no loop',cont)
-                                                break
-                                        inters = parte1
-                                    confront[feat2.id()] = [cd_lote2, inters]
+                geom_poly = feat1.geometry()
 
-                        lista = []
-                        # Fazer um teste para todos os pontos (sim ou não)
-                        vante = []
-                        for pnt in coords:
-                            geom1 = QgsGeometry.fromPointXY(pnt)
-                            for item in confront:
-                                geom2 = confront[item][1]
-                                if geom2.type() == 1 and geom1.intersects(geom2): #Line
-                                    coord_lin = geom2.asPolyline()
-                                    if pnt != coord_lin[-1]:
-                                        vante += [True]
-                                        break
-                            else:
-                                vante += [False]
+                if (
+                    geom_poly is None
+                    or geom_poly.isNull()
+                    or geom_poly.isEmpty()
+                    or not geom_poly.isGeosValid()
+                ):
+                    continue
 
-                        for k in range(len(vante)):
-                            anterior = vante[k-1 if k-1 > 0 else -1]
-                            posterior = vante[k]
-                            if anterior and not posterior:
-                                ind = k
-                                COORDS = COORDS[ind :] + COORDS[0 : ind]
+                # Para MultiPolygon, "primeiro vértice com vante" é ambíguo.
+                # Não alterar silenciosamente.
+                if geom_poly.isMultipart():
+                    street_skipped_multipart += 1
+                    feedback.pushWarning(
+                        self.tr(
+                            'Feature ID {} is multipart; road-access first vertex was not changed.'
+                            .format(feat1.id()),
+                            'A feição ID {} é multiparte; o primeiro vértice para acesso viário não foi alterado.'
+                            .format(feat1.id())
+                        )
+                    )
+                    continue
+
+                pol_parts = geom2PointList(geom_poly)
+
+                if not pol_parts or not pol_parts[0]:
+                    continue
+
+                # Coordenadas com QgsPoint para reconstrução e preservação de Z
+                COORDS = pol_parts[0][:-1]
+
+                # Coordenadas XY usadas nas interseções pontuais
+                coords_xy = geom_poly.asPolygon()[0][:-1]
+
+                if len(COORDS) < 3 or len(coords_xy) < 3:
+                    continue
+
+                confront = {}
+
+                # Procurar polígonos confrontantes
+                req2 = QgsFeatureRequest().setFilterFids(target_ids)
+
+                for feat2 in camada.getFeatures(req2):
+
+                    if feat1.id() == feat2.id():
+                        continue
+
+                    geom2 = feat2.geometry()
+
+                    if (
+                        geom2 is None
+                        or geom2.isNull()
+                        or geom2.isEmpty()
+                    ):
+                        continue
+
+                    try:
+                        if not geom_poly.intersects(geom2):
+                            continue
+
+                        inters = geom_poly.intersection(geom2)
+
+                        # A interseção entre polígonos pode ser:
+                        # Point/MultiPoint   -> contato apenas em vértices
+                        # Line/MultiLine    -> confrontação real
+                        # Polygon/MultiPoly -> sobreposição
+                        #
+                        # Para identificar confrontantes nesta rotina,
+                        # interessam apenas interseções LINEARES.
+                        if (
+                            inters is None
+                            or inters.isNull()
+                            or inters.isEmpty()
+                            or inters.type() != Qgis.GeometryType.Line
+                        ):
+                            continue
+
+                        # MultiLineString: mesclar somente partes conectadas.
+                        # Partes desconectadas permanecem multipartes.
+                        if inters.isMultipart():
+                            inters = Mesclar_Multilinhas(inters)
+
+                        confront[feat2.id()] = [
+                            feat2.id(),
+                            inters
+                        ]
+
+                    except Exception as e:
+                        feedback.pushWarning(
+                            self.tr(
+                                'Could not evaluate boundary between features {} and {}: {}'
+                                .format(feat1.id(), feat2.id(), str(e)),
+                                'Não foi possível avaliar a confrontação entre as feições {} e {}: {}'
+                                .format(feat1.id(), feat2.id(), str(e))
+                            )
+                        )
+
+                # ------------------------------------------------------
+                # Identificar, para cada vértice, se existe confrontação
+                # no segmento de vante.
+                # ------------------------------------------------------
+                vante = []
+
+                for pnt in coords_xy:
+
+                    geom_pnt = QgsGeometry.fromPointXY(pnt)
+                    tem_vante = False
+
+                    for item in confront:
+
+                        geom_confront = confront[item][1]
+
+                        if (
+                            geom_confront is None
+                            or geom_confront.isNull()
+                            or geom_confront.isEmpty()
+                            or geom_confront.type() != Qgis.GeometryType.Line
+                        ):
+                            continue
+
+                        if not geom_pnt.intersects(geom_confront):
+                            continue
+
+                        # Tratar LineString e MultiLineString sem assumir
+                        # conversão direta de multipartes.
+                        if geom_confront.isMultipart():
+                            linhas = geom_confront.asMultiPolyline()
+                        else:
+                            linhas = [geom_confront.asPolyline()]
+
+                        for coord_lin in linhas:
+
+                            if not coord_lin or len(coord_lin) < 2:
+                                continue
+
+                            linha_geom = QgsGeometry.fromPolylineXY(coord_lin)
+
+                            if not geom_pnt.intersects(linha_geom):
+                                continue
+
+                            # Se o ponto não for o último ponto desta parte,
+                            # há segmento de confrontação no sentido de vante.
+                            if pnt != coord_lin[-1]:
+                                tem_vante = True
                                 break
 
-                        anel = QgsLineString(COORDS)
-                        pol = QgsPolygon(anel)
-                        newGeom = QgsGeometry(pol)
-                        ok = camada.changeGeometry(feat1.id(), newGeom)
+                        if tem_vante:
+                            break
 
-        if salvar:
-            camada.commitChanges() # salva as edições
+                    vante.append(tem_vante)
 
-        feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
-        feedback.pushInfo(self.tr('Leandro França - Cartographic Engineer', 'Leandro França - Eng Cart'))
+                # Encontrar transição:
+                # segmento anterior confronta e o posterior não confronta.
+                ind = None
+                tam_vante = len(vante)
+
+                for k in range(tam_vante):
+                    anterior = vante[k - 1]
+                    posterior = vante[k]
+
+                    if anterior and not posterior:
+                        ind = k
+                        break
+
+                if ind is None:
+                    continue
+
+                # Rotacionar somente o anel exterior.
+                # Buracos são preservados integralmente.
+                new_ext = COORDS[ind:] + COORDS[:ind]
+
+                # QgsLineString/QgsPolygon precisam do anel fechado.
+                if new_ext:
+                    new_ext = new_ext + [new_ext[0]]
+
+                ext_ring = QgsLineString(new_ext)
+                new_pol = QgsPolygon(ext_ring)
+
+                # Preservar anéis interiores da geometria já orientada
+                for ring in pol_parts[1:]:
+                    if not ring or len(ring) < 4:
+                        continue
+                    new_pol.addInteriorRing(
+                        QgsLineString(ring)
+                    )
+
+                newGeom = QgsGeometry(new_pol)
+
+                if (
+                    newGeom is None
+                    or newGeom.isNull()
+                    or newGeom.isEmpty()
+                    or not newGeom.isGeosValid()
+                ):
+                    feedback.pushWarning(
+                        self.tr(
+                            'Road-access adjustment for feature ID {} produced an unsafe geometry; original geometry was preserved.'
+                            .format(feat1.id()),
+                            'O ajuste para acesso viário da feição ID {} produziu uma geometria insegura; a geometria original foi preservada.'
+                            .format(feat1.id())
+                        )
+                    )
+                    continue
+
+                if geom_poly.asWkb() != newGeom.asWkb():
+                    if camada.changeGeometry(feat1.id(), newGeom):
+                        street_changed += 1
+
+        # --------------------------------------------------------------
+        # Salvar edições
+        # --------------------------------------------------------------
+        if salvar and started_editing_here:
+
+            if not camada.commitChanges():
+                camada.rollBack()
+                raise QgsProcessingException(
+                    self.tr(
+                        'Could not save layer edits.',
+                        'Não foi possível salvar as edições da camada.'
+                    )
+                )
+
+        elif salvar and layer_was_editable:
+
+            feedback.pushWarning(
+                self.tr(
+                    'The layer was already in edit mode. Changes were left in the current edit session and were not committed automatically.',
+                    'A camada já estava em modo de edição. As alterações foram mantidas na sessão de edição atual e não foram salvas automaticamente.'
+                )
+            )
+
+        else:
+            feedback.pushInfo(
+                self.tr(
+                    'Edits were kept in edit mode and not committed.',
+                    'As edições foram mantidas em modo de edição e não foram salvas.'
+                )
+            )
+
+        # --------------------------------------------------------------
+        # Resumo
+        # --------------------------------------------------------------
+        feedback.pushInfo(
+            self.tr(
+                '{} feature(s) had polygon orientation adjusted.'
+                .format(changed_orientation),
+                '{} feição(ões) tiveram a orientação do polígono ajustada.'
+                .format(changed_orientation)
+            )
+        )
+
+        if rua:
+            feedback.pushInfo(
+                self.tr(
+                    '{} feature(s) had the road-access first vertex adjusted.'
+                    .format(street_changed),
+                    '{} feição(ões) tiveram o primeiro vértice para acesso viário ajustado.'
+                    .format(street_changed)
+                )
+            )
+
+            if street_skipped_multipart:
+                feedback.pushWarning(
+                    self.tr(
+                        '{} multipart feature(s) were not modified in the road-access step.'
+                        .format(street_skipped_multipart),
+                        '{} feição(ões) multiparte(s) não foram modificadas na etapa de acesso viário.'
+                        .format(street_skipped_multipart)
+                    )
+                )
+
+        if skipped_null:
+            feedback.pushWarning(
+                self.tr(
+                    '{} null/empty feature(s) were ignored.'
+                    .format(skipped_null),
+                    '{} feição(ões) nula(s)/vazia(s) foram ignoradas.'
+                    .format(skipped_null)
+                )
+            )
+
+        if skipped_invalid:
+            feedback.pushWarning(
+                self.tr(
+                    '{} invalid feature(s) were preserved without modification.'
+                    .format(skipped_invalid),
+                    '{} feição(ões) inválida(s) foram preservadas sem modificação.'
+                    .format(skipped_invalid)
+                )
+            )
+
+        feedback.pushInfo(
+            self.tr(
+                'Operation completed successfully!',
+                'Operação finalizada com sucesso!'
+            )
+        )
+
+        feedback.pushInfo(
+            self.tr(
+                'Leandro França - Cartographic Engineer',
+                'Leandro França - Eng Cart'
+            )
+        )
+
         return {}
