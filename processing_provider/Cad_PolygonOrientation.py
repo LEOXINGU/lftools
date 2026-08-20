@@ -186,6 +186,17 @@ class PolygonOrientation(QgsProcessingAlgorithm):
             context
         )
 
+        # A opção de acesso viário redefine o primeiro vértice ao final
+        # do processamento. Informar explicitamente quando houver conflito
+        # com uma escolha Norte/Sul/Leste/Oeste.
+        if rua and primeiro != 0:
+            feedback.pushInfo(
+                self.tr(
+                    'Road-access first vertex has priority over the selected geographic first vertex.',
+                    'O primeiro vértice para acesso viário tem prioridade sobre o primeiro vértice geográfico selecionado.'
+                )
+            )
+
         # --------------------------------------------------------------
         # Conjunto de feições alvo
         # --------------------------------------------------------------
