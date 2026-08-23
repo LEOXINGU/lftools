@@ -25,16 +25,14 @@ from qgis.core import (QgsApplication,
                        QgsSpatialIndex,
                        QgsProcessingUtils,
                        QgsFillSymbol,
-                       QgsUnitTypes,
                        QgsFeatureSink,
                        QgsProcessingException,
                        QgsProcessingAlgorithm,
                        QgsProcessingParameterFeatureSource,
-                       QgsProcessingParameterFeatureSink)
+                       QgsProcessingParameterFeatureSink,
+                       QgsProcessingParameterField)
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
-from lftools.geocapt.cartography import OrientarPoligono
-import numpy as np
 import os
 from qgis.PyQt.QtGui import QIcon
 
@@ -66,8 +64,10 @@ class Overlapping(QgsProcessingAlgorithm):
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/vetor.png'))
 
-    txt_en = '''Identifies the overlap between features of a polygon type layer.'''
-    txt_pt = '''Identifica a sobreposição entre feições de uma camada do tipo polígono.'''
+    txt_en = '''Identifies the overlap between features of a polygon type layer.
+The optional unique identifier field is used to populate ID1 and ID2 in the output. If no field is selected, the internal QGIS feature ID is used.'''
+    txt_pt = '''Identifica a sobreposição entre feições de uma camada do tipo polígono.
+O campo identificador único opcional é utilizado para preencher ID1 e ID2 na saída. Se nenhum campo for selecionado, é utilizado o ID interno da feição no QGIS.'''
     figure = 'images/tutorial/vect_overlapping.jpg'
 
     def shortHelpString(self):
@@ -83,6 +83,7 @@ class Overlapping(QgsProcessingAlgorithm):
         return self.tr(self.txt_en, self.txt_pt) + footer
 
     INPUT = 'INPUT'
+    ID_FIELD = 'ID_FIELD'
     OUTPUT = 'OUTPUT'
 
     def initAlgorithm(self, config = None):
@@ -91,6 +92,18 @@ class Overlapping(QgsProcessingAlgorithm):
                 self.INPUT,
                 self.tr('Polygon layer', 'Camada de polígonos'),
                 [Qgis.ProcessingSourceType.TypeVectorPolygon]
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterField(
+                self.ID_FIELD,
+                self.tr(
+                    'Original feature unique identifier field',
+                    'Campo identificador único da feição original'
+                ),
+                parentLayerParameterName=self.INPUT,
+                optional=True
             )
         )
 
@@ -112,14 +125,69 @@ class Overlapping(QgsProcessingAlgorithm):
         if layer is None:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.INPUT))
 
+        id_field = self.parameterAsString(
+            parameters,
+            self.ID_FIELD,
+            context
+        ) or ''
+        id_field = id_field.strip()
+
+        # O feat.id() continua sendo usado internamente pelo algoritmo e
+        # pelo índice espacial. O campo escolhido, quando informado, é
+        # usado somente para rastreabilidade na camada de saída.
+        identifiers = {}
+
+        if id_field:
+            field_index = layer.fields().indexOf(id_field)
+
+            if field_index < 0:
+                raise QgsProcessingException(self.tr(
+                    'The selected identifier field was not found in the input layer.',
+                    'O campo identificador selecionado não foi encontrado na camada de entrada.'
+                ))
+
+            seen_identifiers = set()
+
+            for feat in layer.getFeatures():
+                value = feat[id_field]
+
+                if value is None:
+                    raise QgsProcessingException(self.tr(
+                        'The selected identifier field contains null values. Choose a field with unique and non-null values.',
+                        'O campo identificador selecionado contém valores nulos. Escolha um campo com valores únicos e não nulos.'
+                    ))
+
+                # O tipo do campo já é homogêneo, então repr() é suficiente
+                # para construir uma chave estável para a validação.
+                key = repr(value)
+
+                if key in seen_identifiers:
+                    raise QgsProcessingException(self.tr(
+                        'The selected identifier field contains duplicate values. Choose a field with unique and non-null values.',
+                        'O campo identificador selecionado contém valores duplicados. Escolha um campo com valores únicos e não nulos.'
+                    ))
+
+                seen_identifiers.add(key)
+                identifiers[feat.id()] = value
+
         # Camada de Saída
         Fields = QgsFields()
-        itens = {
-            'ID1': QMetaType.Type.Int,
-            'ID2': QMetaType.Type.Int,
-        }
-        for item in itens:
-            Fields.append(QgsField(item, itens[item]))
+
+        if id_field:
+            source_id_field = layer.fields().field(id_field)
+
+            field_id1 = QgsField(source_id_field)
+            field_id1.setName('ID1')
+
+            field_id2 = QgsField(source_id_field)
+            field_id2.setName('ID2')
+
+            Fields.append(field_id1)
+            Fields.append(field_id2)
+        else:
+            # FIDs podem ultrapassar o limite de inteiro de 32 bits.
+            Fields.append(QgsField('ID1', QMetaType.Type.LongLong))
+            Fields.append(QgsField('ID2', QMetaType.Type.LongLong))
 
         (sink, dest_id) = self.parameterAsSink(
             parameters,
@@ -137,6 +205,17 @@ class Overlapping(QgsProcessingAlgorithm):
             'Verificando geometrias e criando índice espacial...'
         ))
 
+        if id_field:
+            feedback.pushInfo(self.tr(
+                'Using field "{}" as original feature identifier.',
+                'Utilizando o campo "{}" como identificador da feição original.'
+            ).format(id_field))
+        else:
+            feedback.pushInfo(self.tr(
+                'No identifier field selected. Internal QGIS feature IDs will be used.',
+                'Nenhum campo identificador selecionado. Serão utilizados os IDs internos das feições no QGIS.'
+            ))
+
         # Pré-processa as geometrias.
         # Geometrias nulas/vazias são ignoradas. Geometrias inválidas são
         # reparadas com makeValid(). Polygon e MultiPolygon são aceitos.
@@ -153,6 +232,10 @@ class Overlapping(QgsProcessingAlgorithm):
                 break
 
             fid = feat.id()
+
+            if not id_field:
+                identifiers[fid] = fid
+
             geom = feat.geometry()
 
             if geom is None or geom.isNull():
@@ -276,14 +359,14 @@ class Overlapping(QgsProcessingAlgorithm):
                                     continue
                                 feature = QgsFeature(Fields)
                                 feature.setGeometry(QgsGeometry.fromPolygonXY(coord))
-                                feature.setAttributes([ID1, ID2])
+                                feature.setAttributes([identifiers[ID1], identifiers[ID2]])
                                 sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
                                 n_output += 1
                                 pair_written = True
                         else:
                             feature = QgsFeature(Fields)
                             feature.setGeometry(item)
-                            feature.setAttributes([ID1, ID2])
+                            feature.setAttributes([identifiers[ID1], identifiers[ID2]])
                             sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
                             n_output += 1
                             pair_written = True
