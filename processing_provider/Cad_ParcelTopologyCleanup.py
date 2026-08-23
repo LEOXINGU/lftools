@@ -43,6 +43,7 @@ from lftools.translations.translate import translate
 
 import json
 import math
+import numpy as np
 import os
 import processing
 
@@ -87,13 +88,13 @@ class ParcelTopologyCleanup(QgsProcessingAlgorithm):
         ))
 
     txt_en = '''This tool performs a controlled geometric cleanup and topological correction workflow for parcel layers.
-The workflow can remove null or empty geometries, repair invalid geometries, convert multipart features to singleparts, remove duplicate geometries, remove holes, remove excessively narrow polygons (slivers), snap coordinates to a grid, remove duplicate vertices, and adjust connectivity between adjacent polygons.
+The workflow can remove null or empty geometries, repair invalid geometries, convert multipart features to singleparts, remove duplicate geometries, remove holes, remove polygons with abnormally small areas, remove excessively narrow polygons (slivers), snap coordinates to a grid, remove duplicate vertices, and adjust connectivity between adjacent polygons.
 Removed features are recorded in a separate table with their original attributes. Modified or blocked operations are recorded in an audit table.
 Note: Automatic corrections are accepted only when the resulting geometry passes safety checks. Remaining topological problems must be reviewed after processing.
 '''
 
     txt_pt = '''Esta ferramenta executa um fluxo controlado de limpeza geométrica e correção topológica para camadas de lotes.
-O fluxo pode remover geometrias nulas ou vazias, corrigir geometrias inválidas, converter multipartes em partes simples, remover geometrias duplicadas, remover buracos, remover polígonos excessivamente estreitos (filetes), aderir coordenadas à grade, remover vértices duplicados e ajustar a conectividade entre polígonos adjacentes.
+O fluxo pode remover geometrias nulas ou vazias, corrigir geometrias inválidas, converter multipartes em partes simples, remover geometrias duplicadas, remover buracos, remover polígonos com áreas anormalmente pequenas, remover polígonos excessivamente estreitos (filetes), aderir coordenadas à grade, remover vértices duplicados e ajustar a conectividade entre polígonos adjacentes.
 As feições removidas são registradas em uma tabela separada com seus atributos originais. As operações que modificaram feições ou foram bloqueadas são registradas em uma tabela de auditoria.
 Obs.: Correções automáticas somente são aceitas quando a geometria resultante passa pelas verificações de segurança. Problemas topológicos remanescentes devem ser revisados após o processamento.
 '''
@@ -118,6 +119,7 @@ Obs.: Correções automáticas somente são aceitas quando a geometria resultant
     SINGLEPARTS = 'SINGLEPARTS'
     REMOVE_DUPLICATES = 'REMOVE_DUPLICATES'
     REMOVE_HOLES = 'REMOVE_HOLES'
+    REMOVE_SMALL_AREAS = 'REMOVE_SMALL_AREAS'
     REMOVE_SLIVERS = 'REMOVE_SLIVERS'
     MIN_SHAPE_RATIO = 'MIN_SHAPE_RATIO'
     SNAP_GRID = 'SNAP_GRID'
@@ -168,6 +170,13 @@ Obs.: Correções automáticas somente são aceitas quando a geometria resultant
         self.addParameter(QgsProcessingParameterBoolean(
             self.REMOVE_HOLES,
             self.tr('Remove holes', 'Remover buracos'),
+            defaultValue=True
+        ))
+
+        self.addParameter(QgsProcessingParameterBoolean(
+            self.REMOVE_SMALL_AREAS,
+            self.tr('Remove polygons with abnormally small areas',
+                    'Remover polígonos com áreas anormalmente pequenas'),
             defaultValue=True
         ))
 
@@ -320,6 +329,87 @@ Obs.: Correções automáticas somente são aceitas quando a geometria resultant
         ratio = max(0.0, min(1.0, smaller / larger))
         return ratio, area, perimeter
 
+    def _small_area_statistics(self, records, distance_area):
+        """Calcula estatísticas robustas das áreas válidas em m²."""
+        areas = []
+
+        for rec in records:
+            geom = rec['geom']
+            if (
+                geom is None
+                or geom.isNull()
+                or geom.isEmpty()
+                or not geom.isGeosValid()
+            ):
+                continue
+
+            area, _ = self._metric_area_perimeter(geom, distance_area)
+
+            if area > 0.0 and math.isfinite(area):
+                areas.append(area)
+
+        if not areas:
+            return None, None, None, 0
+
+        areas_np = np.asarray(areas, dtype=float)
+
+        median_area = float(np.median(areas_np))
+
+        logs = np.log10(areas_np)
+
+        if logs.size == 0:
+            return median_area, None, None, len(areas)
+
+        median_log = float(np.median(logs))
+
+        mad_log = float(
+            np.median(
+                np.abs(logs - median_log)
+            )
+        )
+
+        return median_area, median_log, mad_log, len(areas)
+
+    def _small_area_test(
+        self, area, median_area, median_log, mad_log, sample_count
+    ):
+        """
+        Critérios:
+        - área <= 0: remover;
+        - área/mediana < 1e-6: remover como praticamente nula;
+        - se n >= 10 e MAD > 0:
+          z robusto < -6 E área/mediana < 0.001.
+        """
+        if not math.isfinite(area):
+            return False, None, None, 'non_finite'
+
+        if area <= 0.0:
+            return True, 0.0, None, 'zero_or_negative'
+
+        if median_area is None or median_area <= 0.0:
+            return False, None, None, 'no_reference'
+
+        area_ratio = area / median_area
+
+        if area_ratio < 1e-6:
+            return True, area_ratio, None, 'near_zero_relative'
+
+        robust_z = None
+        if (
+            sample_count >= 10
+            and median_log is not None
+            and mad_log is not None
+            and mad_log > 0.0
+        ):
+            robust_z = 0.6745 * (
+                float(np.log10(area)) - median_log
+            ) / mad_log
+
+            if robust_z < -6.0 and area_ratio < 0.001:
+                return True, area_ratio, robust_z, 'robust_lower_outlier'
+
+        return False, area_ratio, robust_z, 'keep'
+
     def _canonical_wkb(self, geom):
         if geom is None or geom.isNull() or geom.isEmpty():
             return None
@@ -381,6 +471,10 @@ Obs.: Correções automáticas somente são aceitas quando a geometria resultant
         fields.append(QgsField(self._rm_ratio, QMetaType.Type.Double))
         self._rm_area = self._unique_field_name(fields, 'lf_area_m2')
         fields.append(QgsField(self._rm_area, QMetaType.Type.Double))
+        self._rm_area_ratio = self._unique_field_name(fields, 'lf_area_ratio')
+        fields.append(QgsField(self._rm_area_ratio, QMetaType.Type.Double))
+        self._rm_area_z = self._unique_field_name(fields, 'lf_area_robust_z')
+        fields.append(QgsField(self._rm_area_z, QMetaType.Type.Double))
         self._rm_perim = self._unique_field_name(fields, 'lf_perim_m')
         fields.append(QgsField(self._rm_perim, QMetaType.Type.Double))
         self._rm_attrs = self._unique_field_name(fields, 'lf_attributes')
@@ -404,7 +498,8 @@ Obs.: Correções automáticas somente são aceitas quando a geometria resultant
         return fields
 
     def _write_removed(self, sink, sink_fields, record, input_fields,
-                       step, reason, distance_area, shape_ratio=None):
+                       step, reason, distance_area, shape_ratio=None,
+                       area_ratio=None, robust_z=None):
         ratio, area, perimeter = self._shape_ratio(
             record['geom'], distance_area
         )
@@ -421,6 +516,8 @@ Obs.: Correções automáticas somente são aceitas quando a geometria resultant
                 reason,
                 float(ratio),
                 float(area),
+                float(area_ratio) if area_ratio is not None else None,
+                float(robust_z) if robust_z is not None else None,
                 float(perimeter),
                 self._attributes_json(record['attrs'], input_fields)
             ]
@@ -615,6 +712,9 @@ Obs.: Correções automáticas somente são aceitas quando a geometria resultant
         remove_holes = self.parameterAsBool(
             parameters, self.REMOVE_HOLES, context
         )
+        remove_small_areas = self.parameterAsBool(
+            parameters, self.REMOVE_SMALL_AREAS, context
+        )
         remove_slivers = self.parameterAsBool(
             parameters, self.REMOVE_SLIVERS, context
         )
@@ -768,6 +868,7 @@ Obs.: Correções automáticas somente são aceitas quando a geometria resultant
             'multipart_split': 0,
             'duplicates_removed': 0,
             'holes_modified': 0,
+            'small_areas_removed': 0,
             'slivers_removed': 0,
             'grid_modified': 0,
             'grid_blocked': 0,
@@ -1011,7 +1112,108 @@ Obs.: Correções automáticas somente são aceitas quando a geometria resultant
                         old_geom, old_geom, distance_area
                     )
 
-        # 6) Filetes
+        # 6) Áreas anormalmente pequenas
+        if remove_small_areas:
+            feedback.pushInfo(self.tr(
+                'Identifying polygons with abnormally small areas...',
+                'Identificando polígonos com áreas anormalmente pequenas...'
+            ))
+
+            median_area, median_log, mad_log, area_sample_count = (
+                self._small_area_statistics(records, distance_area)
+            )
+
+            if median_area is not None:
+                feedback.pushInfo(self.tr(
+                    'Reference median parcel area: {:.6f} m² ({} valid geometries).'
+                    .format(median_area, area_sample_count),
+                    'Área mediana de referência dos lotes: {:.6f} m² ({} geometrias válidas).'
+                    .format(median_area, area_sample_count)
+                ))
+
+            kept = []
+
+            for rec in records:
+                geom = rec['geom']
+
+                if (
+                    geom is None
+                    or geom.isNull()
+                    or geom.isEmpty()
+                    or not geom.isGeosValid()
+                ):
+                    kept.append(rec)
+                    continue
+
+                area, _ = self._metric_area_perimeter(
+                    geom, distance_area
+                )
+
+                remove_area, area_ratio, robust_z, criterion = (
+                    self._small_area_test(
+                        area,
+                        median_area,
+                        median_log,
+                        mad_log,
+                        area_sample_count
+                    )
+                )
+
+                if not remove_area:
+                    kept.append(rec)
+                    continue
+
+                if criterion == 'zero_or_negative':
+                    reason = self.tr(
+                        'Polygon area is zero or negative ({:.12g} m²)'
+                        .format(area),
+                        'A área do polígono é zero ou negativa ({:.12g} m²)'
+                        .format(area)
+                    )
+                elif criterion == 'near_zero_relative':
+                    reason = self.tr(
+                        'Polygon area ({:.12g} m²) is practically zero relative to the median area ({:.6f} m²); ratio = {:.3e}'
+                        .format(area, median_area, area_ratio),
+                        'A área do polígono ({:.12g} m²) é praticamente nula em relação à área mediana ({:.6f} m²); razão = {:.3e}'
+                        .format(area, median_area, area_ratio)
+                    )
+                else:
+                    reason = self.tr(
+                        'Polygon area ({:.12g} m²) is an extreme lower outlier; median = {:.6f} m², ratio = {:.3e}, robust z = {:.3f}'
+                        .format(area, median_area, area_ratio, robust_z),
+                        'A área do polígono ({:.12g} m²) é um outlier inferior extremo; mediana = {:.6f} m², razão = {:.3e}, z robusto = {:.3f}'
+                        .format(area, median_area, area_ratio, robust_z)
+                    )
+
+                self._write_removed(
+                    removed_sink,
+                    removed_fields,
+                    rec,
+                    input_fields,
+                    'remove_abnormally_small_areas',
+                    reason,
+                    distance_area,
+                    area_ratio=area_ratio,
+                    robust_z=robust_z
+                )
+
+                self._write_report(
+                    report_sink,
+                    report_fields,
+                    rec,
+                    'remove_abnormally_small_areas',
+                    'removed',
+                    reason,
+                    geom,
+                    QgsGeometry(),
+                    distance_area
+                )
+
+                counters['small_areas_removed'] += 1
+
+            records = kept
+
+        # 7) Filetes
         if remove_slivers:
             feedback.pushInfo(self.tr(
                 'Identifying excessively narrow polygons...',
@@ -1069,7 +1271,7 @@ Obs.: Correções automáticas somente são aceitas quando a geometria resultant
                     kept.append(rec)
             records = kept
 
-        # 7) Aderir à grade
+        # 8) Aderir à grade
         if snap_grid:
             feedback.pushInfo(self.tr(
                 'Snapping coordinates to grid...',
@@ -1139,7 +1341,7 @@ Obs.: Correções automáticas somente são aceitas quando a geometria resultant
                         old_geom, old_geom, distance_area
                     )
 
-        # 8) Vértices duplicados
+        # 9) Vértices duplicados
         if remove_duplicate_vertices:
             feedback.pushInfo(self.tr(
                 'Removing duplicate vertices...',
@@ -1190,7 +1392,7 @@ Obs.: Correções automáticas somente são aceitas quando a geometria resultant
                         old_geom, old_geom, distance_area
                     )
 
-        # 9) Conectividade
+        # 10) Conectividade
         if connect and records:
             feedback.pushInfo(self.tr(
                 'Adjusting connectivity between adjacent polygons...',
@@ -1271,7 +1473,7 @@ Obs.: Correções automáticas somente são aceitas quando a geometria resultant
                         old_geom, old_geom, distance_area
                     )
 
-        # 10) Segunda limpeza
+        # 11) Segunda limpeza
         if remove_duplicate_vertices:
             for rec in records:
                 old_geom = rec['geom']
@@ -1318,9 +1520,9 @@ Obs.: Correções automáticas somente são aceitas quando a geometria resultant
             )
             counters['final_duplicates_removed'] += count
 
-        # 11) Validação final
+        # 12) Validação final
         final_null = final_empty = final_invalid = 0
-        final_multipart = final_slivers = 0
+        final_multipart = final_slivers = final_small_areas = 0
 
         for rec in records:
             geom = rec['geom']
@@ -1341,9 +1543,38 @@ Obs.: Correções automáticas somente são aceitas quando a geometria resultant
             if ratio < min_shape_ratio:
                 final_slivers += 1
 
+        final_median_area, final_median_log, final_mad_log, final_area_sample_count = (
+            self._small_area_statistics(records, distance_area)
+        )
+
+        for rec in records:
+            geom = rec['geom']
+            if (
+                geom is None
+                or geom.isNull()
+                or geom.isEmpty()
+                or not geom.isGeosValid()
+            ):
+                continue
+
+            area, _ = self._metric_area_perimeter(
+                geom, distance_area
+            )
+
+            remove_area, _, _, _ = self._small_area_test(
+                area,
+                final_median_area,
+                final_median_log,
+                final_mad_log,
+                final_area_sample_count
+            )
+
+            if remove_area:
+                final_small_areas += 1
+
         final_overlaps = self._count_overlaps(records)
 
-        # 12) Saída
+        # 13) Saída
         feedback.pushInfo(self.tr(
             'Writing corrected parcel layer...',
             'Gravando camada de lotes corrigidos...'
@@ -1399,6 +1630,12 @@ Obs.: Correções automáticas somente são aceitas quando a geometria resultant
             .format(counters['holes_modified'])
         ))
         feedback.pushInfo(self.tr(
+            'Polygons with abnormally small areas removed: {}'
+            .format(counters['small_areas_removed']),
+            'Polígonos com áreas anormalmente pequenas removidos: {}'
+            .format(counters['small_areas_removed'])
+        ))
+        feedback.pushInfo(self.tr(
             'Sliver polygons removed: {}'
             .format(counters['slivers_removed']),
             'Polígonos em forma de filete removidos: {}'
@@ -1442,6 +1679,12 @@ Obs.: Correções automáticas somente são aceitas quando a geometria resultant
                     final_invalid, final_multipart)
         ))
         feedback.pushInfo(self.tr(
+            'Remaining polygons with abnormally small areas: {}'
+            .format(final_small_areas),
+            'Polígonos com áreas anormalmente pequenas remanescentes: {}'
+            .format(final_small_areas)
+        ))
+        feedback.pushInfo(self.tr(
             'Remaining sliver polygons: {}'
             .format(final_slivers),
             'Polígonos em forma de filete remanescentes: {}'
@@ -1459,6 +1702,7 @@ Obs.: Correções automáticas somente são aceitas quando a geometria resultant
             or final_empty
             or final_invalid
             or (singleparts and final_multipart)
+            or final_small_areas
             or final_slivers
             or final_overlaps
         ):
