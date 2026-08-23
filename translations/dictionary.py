@@ -1035,7 +1035,6 @@ dic = {
 'This tool exports a Digital Elevation Model (DEM) as a text file (txt) for later transformation into a point cloud.' : {'es': 'Esta herramienta exporta un Modelo de Elevación Digital (DEM) como un archivo de texto (txt) para su posterior transformación en una nube de puntos.'},
 'Optionally, the associated Orthomosaic RGB colors can be taken to the text file.' : {'es': 'Opcionalmente, los colores RGB del Ortomosaico asociados se pueden llevar al archivo de texto.'},
 'Generates adjoiner lines from a polygon layer of parcels.' : {'es': 'Genera líneas adyacentes a partir de una capa poligonal de parcelas.'},
-'Identifies the overlap between features of a polygon type layer.' : {'es': 'Identifica la superposición entre entidades de una capa de tipo polígono.'},
 'This tool performs the difference between two Digital Elevation Models (DEM).' : {'es': 'Esta herramienta realiza la diferencia entre dos Modelos Digitales de Elevación (DEM).'},
 'Minuend is the raster to be subtracted.' : {'es': 'Minuendo es el ráster que se va a restar.'},
 'Subtrahend is the rastar that is subtracting.' : {'es': 'El sustraendo es el ráster que se está restando.'},
@@ -1766,12 +1765,19 @@ La base de datos generada contiene el conjunto mínimo de capas necesarias para 
 The workflow can remove null or empty geometries, repair invalid geometries, convert multipart features to singleparts, remove duplicate geometries, remove holes, remove polygons with abnormally small areas, remove excessively narrow polygons (slivers), snap coordinates to a grid, remove duplicate vertices, and adjust connectivity between adjacent polygons.
 Removed features are recorded in a separate table with their original attributes. Modified or blocked operations are recorded in an audit table.
 Note: Automatic corrections are accepted only when the resulting geometry passes safety checks. Remaining topological problems must be reviewed after processing.
-''' : {
-    'es': '''Esta herramienta ejecuta un flujo controlado de limpieza geométrica y corrección topológica para capas de parcelas.
+''' : { 'es': '''Esta herramienta ejecuta un flujo controlado de limpieza geométrica y corrección topológica para capas de parcelas.
 El flujo puede eliminar geometrías nulas o vacías, reparar geometrías no válidas, convertir entidades multiparte en partes simples, eliminar geometrías duplicadas, eliminar huecos, eliminar polígonos con áreas anormalmente pequeñas, eliminar polígonos excesivamente estrechos (slivers), ajustar las coordenadas a una cuadrícula, eliminar vértices duplicados y ajustar la conectividad entre polígonos adyacentes.
 Las entidades eliminadas se registran en una tabla separada con sus atributos originales. Las operaciones que modificaron entidades o que fueron bloqueadas se registran en una tabla de auditoría.
 Nota: Las correcciones automáticas solo se aceptan cuando la geometría resultante supera las comprobaciones de seguridad. Los problemas topológicos restantes deben revisarse después del procesamiento.
-'''
-},
+'''},
+'Original feature unique identifier field': {'es': 'Campo identificador único de la entidad original'},
+'The selected identifier field was not found in the input layer.': {'es': 'El campo identificador seleccionado no se encontró en la capa de entrada.'},
+'The selected identifier field contains null values. Choose a field with unique and non-null values.': {'es': 'El campo identificador seleccionado contiene valores nulos. Elija un campo con valores únicos y no nulos.'},
+'The selected identifier field contains duplicate values. Choose a field with unique and non-null values.': {'es': 'El campo identificador seleccionado contiene valores duplicados. Elija un campo con valores únicos y no nulos.'},
+'Using field "{}" as original feature identifier.': {'es': 'Utilizando el campo "{}" como identificador de la entidad original.'},
+'No identifier field selected. Internal QGIS feature IDs will be used.': {'es': 'No se seleccionó ningún campo identificador. Se utilizarán los ID internos de las entidades de QGIS.'},
+'''Identifies the overlap between features of a polygon type layer.
+The optional unique identifier field is used to populate ID1 and ID2 in the output. If no field is selected, the internal QGIS feature ID is used.''' : {'es': '''Identifica la superposición entre entidades de una capa de tipo polígono.
+El campo identificador único opcional se utiliza para completar ID1 e ID2 en la salida. Si no se selecciona ningún campo, se utiliza el ID interno de la entidad en QGIS.'''},
 
  }
