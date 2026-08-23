@@ -1754,5 +1754,24 @@ La base de datos generada contiene el conjunto mínimo de capas necesarias para 
 '{} multipart feature(s) were not modified in the road-access step.': {'es': 'No se modificaron {} entidad(es) multiparte en la etapa de acceso vial.'},
 '{} null/empty feature(s) were ignored.': {'es': 'Se ignoraron {} entidad(es) con geometría nula o vacía.'},
 'Road-access first vertex has priority over the selected geographic first vertex.' : {'es': 'El primer vértice para el acceso vial tiene prioridad sobre el primer vértice geográfico seleccionado.'},
+'Remove polygons with abnormally small areas': {'es': 'Eliminar polígonos con áreas anormalmente pequeñas'},
+'Identifying polygons with abnormally small areas...': {'es': 'Identificando polígonos con áreas anormalmente pequeñas...'},
+'Reference median parcel area: {:.6f} m² ({} valid geometries).': {'es': 'Área mediana de referencia de las parcelas: {:.6f} m² ({} geometrías válidas).'},
+'Polygon area is zero or negative ({:.12g} m²)': {'es': 'El área del polígono es cero o negativa ({:.12g} m²)'},
+'Polygon area ({:.12g} m²) is practically zero relative to the median area ({:.6f} m²); ratio = {:.3e}': {'es': 'El área del polígono ({:.12g} m²) es prácticamente nula en relación con el área mediana ({:.6f} m²); razón = {:.3e}'},
+'Polygon area ({:.12g} m²) is an extreme lower outlier; median = {:.6f} m², ratio = {:.3e}, robust z = {:.3f}': {'es': 'El área del polígono ({:.12g} m²) es un valor atípico inferior extremo; mediana = {:.6f} m², razón = {:.3e}, z robusto = {:.3f}'},
+'Polygons with abnormally small areas removed: {}': {'es': 'Polígonos con áreas anormalmente pequeñas eliminados: {}'},
+'Remaining polygons with abnormally small areas: {}': {'es': 'Polígonos con áreas anormalmente pequeñas restantes: {}'},
+'''This tool performs a controlled geometric cleanup and topological correction workflow for parcel layers.
+The workflow can remove null or empty geometries, repair invalid geometries, convert multipart features to singleparts, remove duplicate geometries, remove holes, remove polygons with abnormally small areas, remove excessively narrow polygons (slivers), snap coordinates to a grid, remove duplicate vertices, and adjust connectivity between adjacent polygons.
+Removed features are recorded in a separate table with their original attributes. Modified or blocked operations are recorded in an audit table.
+Note: Automatic corrections are accepted only when the resulting geometry passes safety checks. Remaining topological problems must be reviewed after processing.
+''' : {
+    'es': '''Esta herramienta ejecuta un flujo controlado de limpieza geométrica y corrección topológica para capas de parcelas.
+El flujo puede eliminar geometrías nulas o vacías, reparar geometrías no válidas, convertir entidades multiparte en partes simples, eliminar geometrías duplicadas, eliminar huecos, eliminar polígonos con áreas anormalmente pequeñas, eliminar polígonos excesivamente estrechos (slivers), ajustar las coordenadas a una cuadrícula, eliminar vértices duplicados y ajustar la conectividad entre polígonos adyacentes.
+Las entidades eliminadas se registran en una tabla separada con sus atributos originales. Las operaciones que modificaron entidades o que fueron bloqueadas se registran en una tabla de auditoría.
+Nota: Las correcciones automáticas solo se aceptan cuando la geometría resultante supera las comprobaciones de seguridad. Los problemas topológicos restantes deben revisarse después del procesamiento.
+'''
+},
 
  }
