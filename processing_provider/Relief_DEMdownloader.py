@@ -238,7 +238,7 @@ class DEMdownloader(QgsProcessingAlgorithm):
             if mde == 2:  # FABDEM
                 pasta = folder_10x10_for_tile(tile) + '_FABDEM_V1-2'
                 tile_name = f"{tile}_FABDEM_V1-2.tif"
-                url = f"https://huggingface.co/datasets/links-ads/fabdem-v12/resolve/main/tiles/{pasta}/{tile_name}?download=true"
+                url = f"https://huggingface.co/buckets/links-ads/fabdem/resolve/tiles/{pasta}/{tile_name}"
 
             elif mde == 3:  # ANADEM
                 pasta = folder_10x10_for_tile(tile) + '_ANADEM_V1'
