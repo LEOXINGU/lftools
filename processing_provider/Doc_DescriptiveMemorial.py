@@ -6,7 +6,7 @@
     ---------------------
     Date                 : Sept 22
     Copyright            : (C) 2019 by Leandro França
-    Email                : geoleandro.franca@gmail.com
+    Email                : contato@geoone.com.br
 ***************************************************************************
 *                                                                         *
 *   This program is free software; you can redistribute it and/or modify  *
