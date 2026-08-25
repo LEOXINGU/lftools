@@ -9,7 +9,7 @@
                               -------------------
         begin                : 2021-03-01
         copyright            : (C) 2021 by Leandro Franca
-        email                : geoleandro.franca@gmail.com
+        email                : contato@geoone.com.br
  ***************************************************************************/
 
 /***************************************************************************
@@ -143,6 +143,7 @@ from .processing_provider.Doc_CreateTopoGeo import CreateTopoGeo
 from .processing_provider.Cad_NumberPolygonsByLines import NumberPolygonsByLines
 from .processing_provider.Cad_ParcelTopologyCleanup import ParcelTopologyCleanup
 from .processing_provider.Cad_SplitPolygon import SplitPolygon
+from .processing_provider.Vect_ImportCAD import ImportCAD
 
 
 class LFToolsProvider(QgsProcessingProvider):
@@ -271,6 +272,7 @@ class LFToolsProvider(QgsProcessingProvider):
         self.addAlgorithm(NumberPolygonsByLines())
         self.addAlgorithm(ParcelTopologyCleanup())
         self.addAlgorithm(SplitPolygon())
+        self.addAlgorithm(ImportCAD())
 
     def id(self):
         return 'lftools'
