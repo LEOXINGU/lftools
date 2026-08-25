@@ -142,6 +142,7 @@ from .processing_provider.Relief_ThematicSlope import ThematicSlope
 from .processing_provider.Doc_CreateTopoGeo import CreateTopoGeo
 from .processing_provider.Cad_NumberPolygonsByLines import NumberPolygonsByLines
 from .processing_provider.Cad_ParcelTopologyCleanup import ParcelTopologyCleanup
+from .processing_provider.Cad_SplitPolygon import SplitPolygon
 
 
 class LFToolsProvider(QgsProcessingProvider):
@@ -269,6 +270,7 @@ class LFToolsProvider(QgsProcessingProvider):
         self.addAlgorithm(CreateTopoGeo())
         self.addAlgorithm(NumberPolygonsByLines())
         self.addAlgorithm(ParcelTopologyCleanup())
+        self.addAlgorithm(SplitPolygon())
 
     def id(self):
         return 'lftools'
