@@ -18,11 +18,14 @@ __copyright__ = '(C) 2026, Leandro França'
 import os
 import re
 import math
+import shutil
+import subprocess
+import tempfile
+from pathlib import Path
 from collections import defaultdict, Counter
 
 from osgeo import gdal, ogr, osr
 
-from qgis.PyQt.QtCore import QVariant
 from qgis.PyQt.QtGui import QIcon, QColor
 from qgis.core import (
     Qgis,
@@ -65,6 +68,7 @@ class ImportCAD(QgsProcessingAlgorithm):
     CURVES = 'CURVES'
     CLOSED_AS_POLYGONS = 'CLOSED_AS_POLYGONS'
     STYLE = 'STYLE'
+    ODA_FALLBACK = 'ODA_FALLBACK'
     OUTPUT = 'OUTPUT'
 
     # Drawing-unit options. Index zero means auto detection.
@@ -154,9 +158,9 @@ class ImportCAD(QgsProcessingAlgorithm):
         # Layers are loaded and styled directly in the current project.
         return super().flags() | Qgis.ProcessingAlgorithmFlag.FlagNoThreading
 
-    txt_en = '''Imports a CAD drawing (DXF or DWG, when supported by the current GDAL/OGR installation) into a GeoPackage. The tool automatically attempts to identify the coordinate reference system and drawing units, organizes the entities into points, lines, polygons and texts, and loads the resulting layers in a group with adapted symbology.'''
+    txt_en = '''Imports a CAD drawing (DXF or DWG) into a GeoPackage, automatically detecting the coordinate reference system and drawing units when possible. The entities are organized into points, lines, polygons and texts and loaded in a group with adapted symbology. For DWG versions not supported by GDAL/OGR, the tool can optionally use an installed ODA File Converter as a fallback.'''
 
-    txt_pt = '''Importa um desenho CAD (DXF ou DWG, quando suportado pela instalação atual do GDAL/OGR) para um GeoPackage. A ferramenta tenta identificar automaticamente o sistema de referência de coordenadas e as unidades do desenho, organiza as entidades em pontos, linhas, polígonos e textos e carrega as camadas resultantes em um grupo com simbologia adaptada.'''
+    txt_pt = '''Importa um desenho CAD (DXF ou DWG) para um GeoPackage, detectando automaticamente o sistema de referência de coordenadas e as unidades do desenho quando possível. As entidades são organizadas em pontos, linhas, polígonos e textos e carregadas em um grupo com simbologia adaptada. Para versões DWG não suportadas pelo GDAL/OGR, a ferramenta pode utilizar opcionalmente um ODA File Converter já instalado como alternativa.'''
 
     figure = 'images/tutorial/Vect_ImportCAD.jpg'
     
@@ -257,6 +261,17 @@ class ImportCAD(QgsProcessingAlgorithm):
                     self.tr('Simple GIS style', 'Simbologia GIS simples'),
                 ],
                 defaultValue=0
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterBoolean(
+                self.ODA_FALLBACK,
+                self.tr(
+                    'Use ODA File Converter as DWG fallback (if installed)',
+                    'Usar ODA File Converter como alternativa para DWG (se instalado)'
+                ),
+                defaultValue=True
             )
         )
 
@@ -485,10 +500,166 @@ class ImportCAD(QgsProcessingAlgorithm):
         previous = gdal.GetConfigOption('DXF_INLINE_BLOCKS')
         try:
             gdal.SetConfigOption('DXF_INLINE_BLOCKS', 'TRUE' if inline_blocks else 'FALSE')
-            ds = gdal.OpenEx(path, gdal.OF_VECTOR | gdal.OF_READONLY)
+            return gdal.OpenEx(path, gdal.OF_VECTOR | gdal.OF_READONLY)
         finally:
             gdal.SetConfigOption('DXF_INLINE_BLOCKS', previous)
-        return ds
+
+    @staticmethod
+    def _try_open_dataset(path, inline_blocks=True):
+        """Open a CAD dataset without exposing GDAL exceptions to Processing.
+
+        Returns ``(dataset, error_message)``.  The original GDAL message is kept
+        so a useful explanation can be shown when a DWG version is unsupported.
+        """
+        try:
+            ds = ImportCAD._open_dataset(path, inline_blocks)
+            return ds, '' if ds is not None else 'GDAL/OGR returned an empty dataset.'
+        except Exception as exc:
+            return None, str(exc).strip()
+
+    @staticmethod
+    def _find_oda_file_converter():
+        """Return an installed ODA File Converter executable, if found.
+
+        The application is never bundled, downloaded or installed by LFTools.
+        Detection is limited to PATH, an optional environment variable and common
+        installation folders on Windows/macOS/Linux.
+        """
+        candidates = []
+
+        env_path = os.environ.get('ODA_FILE_CONVERTER', '').strip()
+        if env_path:
+            candidates.append(env_path)
+
+        for name in ('ODAFileConverter', 'ODAFileConverter.exe'):
+            found = shutil.which(name)
+            if found:
+                candidates.append(found)
+
+        # Common Windows installation folders.  ODA version numbers are part of
+        # the directory name, therefore globbing is preferable to hard-coding one.
+        for root_var in ('PROGRAMFILES', 'PROGRAMFILES(X86)', 'LOCALAPPDATA'):
+            root = os.environ.get(root_var)
+            if not root or not os.path.isdir(root):
+                continue
+            base = Path(root)
+            patterns = (
+                'ODA/ODAFileConverter*/ODAFileConverter.exe',
+                'Open Design Alliance/ODAFileConverter*/ODAFileConverter.exe',
+                'ODAFileConverter*/ODAFileConverter.exe',
+            )
+            for pattern in patterns:
+                try:
+                    candidates.extend(str(p) for p in base.glob(pattern))
+                except Exception:
+                    pass
+
+        # Common standalone paths on macOS/Linux.
+        candidates.extend((
+            '/Applications/ODAFileConverter.app/Contents/MacOS/ODAFileConverter',
+            '/usr/local/bin/ODAFileConverter',
+            '/usr/bin/ODAFileConverter',
+            '/opt/ODAFileConverter/ODAFileConverter',
+        ))
+
+        seen = set()
+        for candidate in candidates:
+            if not candidate:
+                continue
+            path = os.path.abspath(os.path.expanduser(candidate))
+            key = os.path.normcase(path)
+            if key in seen:
+                continue
+            seen.add(key)
+            if os.path.isfile(path):
+                return path
+        return None
+
+    def _convert_dwg_with_oda(self, input_path, feedback, temp_root):
+        """Convert one DWG to a temporary DXF using an existing ODA install."""
+        executable = self._find_oda_file_converter()
+        if not executable:
+            return None, self.tr(
+                'ODA File Converter was not found on this computer.',
+                'O ODA File Converter não foi encontrado neste computador.'
+            )
+
+        input_dir = os.path.join(temp_root, 'input')
+        output_dir = os.path.join(temp_root, 'output')
+        os.makedirs(input_dir, exist_ok=True)
+        os.makedirs(output_dir, exist_ok=True)
+
+        local_dwg = os.path.join(input_dir, os.path.basename(input_path))
+        shutil.copy2(input_path, local_dwg)
+
+        feedback.pushInfo(
+            self.tr(
+                'ODA File Converter detected: {}',
+                'ODA File Converter detectado: {}'
+            ).format(executable)
+        )
+        feedback.pushInfo(
+            self.tr(
+                'Converting DWG to a temporary DXF...',
+                'Convertendo o DWG para um DXF temporário...'
+            )
+        )
+
+        # ODA File Converter command-line syntax:
+        # InputFolder OutputFolder OutputVersion OutputType Recurse Audit InputFilter
+        command = [
+            executable, input_dir, output_dir, 'ACAD2018', 'DXF',
+            '0', '1', '*.dwg'
+        ]
+
+        kwargs = {
+            'stdout': subprocess.PIPE,
+            'stderr': subprocess.PIPE,
+            'text': True,
+            'errors': 'replace',
+        }
+        if os.name == 'nt' and hasattr(subprocess, 'CREATE_NO_WINDOW'):
+            kwargs['creationflags'] = subprocess.CREATE_NO_WINDOW
+
+        try:
+            process = subprocess.run(command, **kwargs)
+        except Exception as exc:
+            return None, self.tr(
+                'Could not start ODA File Converter: {}',
+                'Não foi possível iniciar o ODA File Converter: {}'
+            ).format(str(exc))
+
+        if process.returncode != 0:
+            details = (process.stderr or process.stdout or '').strip()
+            return None, self.tr(
+                'ODA File Converter failed (code {}). {}',
+                'O ODA File Converter falhou (código {}). {}'
+            ).format(process.returncode, details)
+
+        generated = []
+        for root, _dirs, files in os.walk(output_dir):
+            for filename in files:
+                if filename.lower().endswith('.dxf'):
+                    generated.append(os.path.join(root, filename))
+
+        if not generated:
+            return None, self.tr(
+                'ODA File Converter finished but no DXF file was generated.',
+                'O ODA File Converter foi concluído, mas nenhum arquivo DXF foi gerado.'
+            )
+
+        # There is only one DWG in the isolated input directory. Prefer the
+        # matching basename, with the first generated DXF as a safe fallback.
+        stem = os.path.splitext(os.path.basename(input_path))[0].lower()
+        matching = [p for p in generated if os.path.splitext(os.path.basename(p))[0].lower() == stem]
+        result = matching[0] if matching else generated[0]
+        feedback.pushInfo(
+            self.tr(
+                'Temporary DXF created successfully.',
+                'DXF temporário criado com sucesso.'
+            )
+        )
+        return result, ''
 
     @staticmethod
     def _field_map(feature):
@@ -1102,6 +1273,7 @@ class ImportCAD(QgsProcessingAlgorithm):
         preserve_curves = self.parameterAsBool(parameters, self.CURVES, context)
         closed_as_polygons = self.parameterAsBool(parameters, self.CLOSED_AS_POLYGONS, context)
         style_mode = self.parameterAsEnum(parameters, self.STYLE, context)
+        use_oda_fallback = self.parameterAsBool(parameters, self.ODA_FALLBACK, context)
 
         if not input_path or not os.path.isfile(input_path):
             raise QgsProcessingException(
@@ -1136,24 +1308,72 @@ class ImportCAD(QgsProcessingAlgorithm):
         )
 
         # Metadata inspection uses an expanded-block view where possible.
-        inspect_ds = self._open_dataset(input_path, inline_blocks=True)
-        if inspect_ds is None:
-            if ext == '.dwg':
+        # ``working_path`` remains the original CAD file unless a DWG fallback is
+        # required, in which case it points to a temporary DXF created by ODA.
+        working_path = input_path
+        oda_temp = None
+        inspect_ds, open_error = self._try_open_dataset(working_path, inline_blocks=True)
+
+        if inspect_ds is None and ext == '.dwg' and use_oda_fallback:
+            feedback.reportError(
+                self.tr(
+                    'GDAL/OGR could not open the DWG directly: {}',
+                    'O GDAL/OGR não conseguiu abrir o DWG diretamente: {}'
+                ).format(open_error or self.tr('unknown error', 'erro desconhecido')),
+                fatalError=False
+            )
+
+            oda_temp = tempfile.TemporaryDirectory(prefix='lftools_oda_')
+            converted_path, oda_error = self._convert_dwg_with_oda(
+                input_path, feedback, oda_temp.name
+            )
+            if converted_path:
+                working_path = converted_path
+                inspect_ds, converted_open_error = self._try_open_dataset(
+                    working_path, inline_blocks=True
+                )
+                if inspect_ds is None:
+                    oda_temp.cleanup()
+                    oda_temp = None
+                    raise QgsProcessingException(
+                        self.tr(
+                            'The DWG was converted by ODA, but GDAL/OGR could not open the resulting DXF. {}',
+                            'O DWG foi convertido pelo ODA, mas o GDAL/OGR não conseguiu abrir o DXF resultante. {}'
+                        ).format(converted_open_error)
+                    )
+            else:
+                oda_temp.cleanup()
+                oda_temp = None
+                details = open_error or ''
+                if oda_error:
+                    details = (details + '\n' + oda_error).strip()
                 raise QgsProcessingException(
                     self.tr(
-                        'This QGIS/GDAL installation cannot read the selected DWG file. Convert it to DXF or install a compatible DWG driver.',
-                        'Esta instalação do QGIS/GDAL não consegue ler o arquivo DWG selecionado. Converta-o para DXF ou instale um driver DWG compatível.'
-                    )
+                        'This QGIS/GDAL installation cannot read the selected DWG file, and the optional ODA fallback was not available. Convert the drawing to DXF (or DWG R2000 when using libopencad) and try again. {}',
+                        'Esta instalação do QGIS/GDAL não consegue ler o arquivo DWG selecionado e a alternativa opcional pelo ODA não estava disponível. Converta o desenho para DXF (ou DWG R2000 quando estiver usando libopencad) e tente novamente. {}'
+                    ).format(details)
+                )
+
+        if inspect_ds is None:
+            if ext == '.dwg':
+                details = open_error or self.tr('Unknown GDAL/OGR error.', 'Erro desconhecido do GDAL/OGR.')
+                raise QgsProcessingException(
+                    self.tr(
+                        'This QGIS/GDAL installation cannot read the selected DWG file. Enable the ODA fallback, convert the drawing to DXF, or save it as DWG R2000 when using libopencad. GDAL/OGR message: {}',
+                        'Esta instalação do QGIS/GDAL não consegue ler o arquivo DWG selecionado. Ative a alternativa pelo ODA, converta o desenho para DXF ou salve-o como DWG R2000 quando estiver usando libopencad. Mensagem do GDAL/OGR: {}'
+                    ).format(details)
                 )
             raise QgsProcessingException(
                 self.tr(
-                    'The CAD file could not be opened by GDAL/OGR. Check whether the file is valid and the DXF driver is available.',
-                    'O arquivo CAD não pôde ser aberto pelo GDAL/OGR. Verifique se o arquivo é válido e se o driver DXF está disponível.'
-                )
+                    'The CAD file could not be opened by GDAL/OGR. Check whether the file is valid and the DXF driver is available. {}',
+                    'O arquivo CAD não pôde ser aberto pelo GDAL/OGR. Verifique se o arquivo é válido e se o driver DXF está disponível. {}'
+                ).format(open_error or '')
             )
 
+        # CRS sidecar lookup intentionally uses the original filename, while unit
+        # detection uses the actual file being imported (including ODA DXF).
         crs = self._resolve_crs(parameters, context, inspect_ds, input_path, feedback)
-        unit_key = self._resolve_units(parameters, context, input_path, inspect_ds, crs, feedback)
+        unit_key = self._resolve_units(parameters, context, working_path, inspect_ds, crs, feedback)
         scale_factor = self._unit_scale(unit_key, crs)
 
         if abs(scale_factor - 1.0) > 1e-12:
@@ -1184,13 +1404,13 @@ class ImportCAD(QgsProcessingAlgorithm):
             # 1 = expanded geometries + separate insertion-point pass
             # 2 = no expansion (insertion points retained by OGR when supported)
             if block_mode in (0, 1):
-                ds_main = self._open_dataset(input_path, inline_blocks=True)
+                ds_main, reopen_error = self._try_open_dataset(working_path, inline_blocks=True)
             else:
-                ds_main = self._open_dataset(input_path, inline_blocks=False)
+                ds_main, reopen_error = self._try_open_dataset(working_path, inline_blocks=False)
 
             if ds_main is None:
                 raise QgsProcessingException(
-                    self.tr('The CAD dataset could not be reopened for import.', 'O conjunto de dados CAD não pôde ser reaberto para importação.')
+                    self.tr('The CAD dataset could not be reopened for import. {}', 'O conjunto de dados CAD não pôde ser reaberto para importação. {}').format(reopen_error or '')
                 )
 
             self._import_pass(
@@ -1201,7 +1421,7 @@ class ImportCAD(QgsProcessingAlgorithm):
             ds_main = None
 
             if block_mode == 1 and not feedback.isCanceled():
-                ds_inserts = self._open_dataset(input_path, inline_blocks=False)
+                ds_inserts, insert_error = self._try_open_dataset(working_path, inline_blocks=False)
                 if ds_inserts is not None:
                     self._import_pass(
                         ds_inserts, output_layers, input_path, scale_factor,
@@ -1209,6 +1429,14 @@ class ImportCAD(QgsProcessingAlgorithm):
                         only_block_inserts=True
                     )
                     ds_inserts = None
+                elif insert_error:
+                    feedback.reportError(
+                        self.tr(
+                            'Block insertion points could not be read: {}',
+                            'Os pontos de inserção dos blocos não puderam ser lidos: {}'
+                        ).format(insert_error),
+                        fatalError=False
+                    )
 
             inspect_ds = None
             out_ds = None
@@ -1216,6 +1444,12 @@ class ImportCAD(QgsProcessingAlgorithm):
         except Exception:
             inspect_ds = None
             out_ds = None
+            if oda_temp is not None:
+                try:
+                    oda_temp.cleanup()
+                except Exception:
+                    pass
+                oda_temp = None
             # Remove incomplete output when processing fails.
             try:
                 if os.path.exists(output_gpkg):
@@ -1225,12 +1459,25 @@ class ImportCAD(QgsProcessingAlgorithm):
             raise
 
         if feedback.isCanceled():
+            if oda_temp is not None:
+                try:
+                    oda_temp.cleanup()
+                except Exception:
+                    pass
+                oda_temp = None
             try:
                 if os.path.exists(output_gpkg):
                     driver.DeleteDataSource(output_gpkg)
             except Exception:
                 pass
             return {}
+
+        if oda_temp is not None:
+            try:
+                oda_temp.cleanup()
+            except Exception:
+                pass
+            oda_temp = None
 
         total_imported = counts['points'] + counts['lines'] + counts['polygons'] + counts['texts']
         if total_imported == 0:
