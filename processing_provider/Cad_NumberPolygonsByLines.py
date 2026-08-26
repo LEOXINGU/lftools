@@ -27,9 +27,9 @@ from qgis.core import (
     QgsProcessingParameterVectorLayer,
     QgsProject,
     QgsSpatialIndex,
-    Qgis
+    Qgis,
+    NULL,
 )
-from qgis.PyQt.QtCore import QVariant
 from qgis.PyQt.QtGui import QIcon
 
 from lftools.geocapt.imgs import Imgs
@@ -274,7 +274,7 @@ class NumberPolygonsByLines(QgsProcessingAlgorithm):
 
             for feat in line_features:
                 value = feat[order_field]
-                if value is None or value == QVariant():
+                if value is None or value == NULL or str(value).upper() == 'NULL':
                     null_ids.append(feat.id())
                     continue
 
@@ -314,7 +314,7 @@ class NumberPolygonsByLines(QgsProcessingAlgorithm):
 
             for feat in line_features:
                 value = feat[first_field]
-                if value is None or value == QVariant() or str(value).upper() == 'NULL':
+                if value is None or value == NULL or str(value).upper() == 'NULL':
                     null_ids.append(feat.id())
                     continue
 
