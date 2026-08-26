@@ -1153,7 +1153,7 @@ class ImportCAD(QgsProcessingAlgorithm):
                 fill = QColor(color)
                 fill.setAlpha(70)
                 symbol = QgsFillSymbol.createSimple({
-                    'color': fill.name(QColor.HexArgb),
+                    'color': fill.name(QColor.NameFormat.HexArgb),
                     'outline_color': color.name(),
                     'outline_width': '0.25',
                 })
@@ -1189,7 +1189,7 @@ class ImportCAD(QgsProcessingAlgorithm):
             settings.placement = Qgis.LabelPlacement.OverPoint
         except Exception:
             try:
-                settings.placement = QgsPalLayerSettings.OverPoint
+                settings.placement = Qgis.LabelPredefinedPointPosition.OverPoint
             except Exception:
                 pass
 
@@ -1204,7 +1204,7 @@ class ImportCAD(QgsProcessingAlgorithm):
         try:
             ddp = settings.dataDefinedProperties()
             if hasattr(QgsPalLayerSettings, 'Rotation'):
-                ddp.setProperty(QgsPalLayerSettings.Rotation, QgsProperty.fromField('cad_rotation'))
+                ddp.setProperty(QgsPalLayerSettings.Property.Rotation, QgsProperty.fromField('cad_rotation'))
             settings.setDataDefinedProperties(ddp)
         except Exception:
             pass
