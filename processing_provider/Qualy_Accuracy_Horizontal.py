@@ -402,7 +402,7 @@ class Accuracy_Horizontal(QgsProcessingAlgorithm):
                 return None
             try:
                 fig, ax = plt.subplots(figsize=(7.6, 5.2))
-                bp = ax.boxplot([DISCREP_X, DISCREP_Y], labels=['ΔX', 'ΔY'], showmeans=True)
+                bp = ax.boxplot([DISCREP_X, DISCREP_Y], tick_labels=['ΔX', 'ΔY'], showmeans=True)
                 ax.axhline(0, linewidth=1, linestyle=':', color='black')
                 ax.set_title(self.tr('Horizontal Component Residual Distributions', 'Distribuições dos Resíduos por Componente Horizontal'))
                 ax.set_ylabel(self.tr('Residual (m)', 'Resíduo (m)'))

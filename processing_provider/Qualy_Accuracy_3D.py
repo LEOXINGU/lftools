@@ -507,7 +507,7 @@ class Accuracy_3D(QgsProcessingAlgorithm):
                 fig, ax = plt.subplots(figsize=(8.4, 5.2))
                 bp = ax.boxplot(
                     [DISCREP_X, DISCREP_Y, DISCREP_Z],
-                    labels=['ΔX', 'ΔY', 'ΔZ'],
+                    tick_labels=['ΔX', 'ΔY', 'ΔZ'],
                     showmeans=True)
                 ax.axhline(
                     0,
