@@ -38,6 +38,7 @@ from qgis.core import (
     QgsProcessingException,
     QgsProcessingParameterBoolean,
     QgsProcessingParameterFeatureSink,
+    QgsProcessingParameterFeatureSource,
     QgsProcessingParameterFileDestination,
     QgsProcessingParameterMultipleLayers,
     QgsProcessingParameterNumber,
@@ -60,6 +61,8 @@ from lftools.translations.translate import translate
 class ValidateIntraclassTopology(QgsProcessingAlgorithm):
 
     INPUTS = 'INPUTS'
+    MAPPING_AREA = 'MAPPING_AREA'
+    BOUNDARY_TOLERANCE = 'BOUNDARY_TOLERANCE'
     TOPOLOGY_TOLERANCE = 'TOPOLOGY_TOLERANCE'
     NEAR_TOLERANCE = 'NEAR_TOLERANCE'
     MIN_OVERLAP_LENGTH = 'MIN_OVERLAP_LENGTH'
@@ -69,7 +72,6 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
     MAX_GAP_AREA = 'MAX_GAP_AREA'
     CHECK_MISSING_VERTICES = 'CHECK_MISSING_VERTICES'
     ERRORS = 'ERRORS'
-    OCCURRENCES = 'OCCURRENCES'
     HTML = 'HTML'
 
     SETTINGS_PREFIX = 'LFTools/ValidateIntraclassTopology/'
@@ -125,11 +127,13 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
     txt_en = '''
 <p>This tool performs an <b>automated intraclass topological validation</b> of one or more point, line, or polygon layers. Each layer is evaluated independently.</p>
 <p><b>Checks:</b></p>
-▪️ Coincident points and duplicated geometries;
-▪️ Overlapping line segments and intersections without corresponding vertices;
-▪️ Dangle ends and near disconnected ends;
+▪️ Coincident points and duplicated geometries;<br>
+▪️ Overlapping line segments and intersections without corresponding vertices;<br>
+▪️ Dangle ends and near disconnected ends, except those located near the optional mapping boundary;<br>
 ▪️ Polygon overlaps, containment, small gaps, and missing vertices along shared borders.
-<p><b>Outputs:</b> a point layer of located errors, a complete occurrence table, and an HTML quality report.</p>
+<p><b>Outputs:</b> a point layer containing all located errors and their attributes, and an HTML quality report.</p>
+<p>An optional single-polygon mapping area can be used to accept otherwise disconnected line ends located within the defined boundary tolerance.</p>
+<p>Feature identifiers are obtained automatically from each layer provider's primary key. When no primary key is declared, the internal QGIS feature ID is used. Gaps receive an occurrence ID and list the adjacent polygons, but do not receive a feature ID of their own.</p>
 <p>Distance and area thresholds must consider the reference scale, input resolution, feature class, and intended use. Some occurrences may represent intentional spatial arrangements and must be technically reviewed.</p>
 <p style="color:#b00020;"><b>Important:</b> validate and correct individual geometries before running this tool. Null, empty, or invalid geometries are ignored and reported in the execution summary. Input layers are not modified or automatically corrected.</p>
 '''
@@ -139,26 +143,28 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
 <p><b>Verificações:</b></p>
 ▪️ Pontos coincidentes e geometrias duplicadas;
 ▪️ Segmentos de linha sobrepostos e interseções sem vértices correspondentes;
-▪️ Extremidades pendentes e extremidades próximas desconectadas;
+▪️ Extremidades pendentes e extremidades próximas desconectadas, exceto aquelas próximas ao limite opcional da área de mapeamento;
 ▪️ Sobreposições, contenções, pequenas lacunas e vértices ausentes em limites comuns de polígonos.
-<p><b>Saídas:</b> camada pontual de erros localizados, tabela completa de ocorrências e relatório de qualidade em HTML.</p>
+<p><b>Saídas:</b> camada pontual contendo todos os erros localizados e seus atributos, e relatório de qualidade em HTML.</p>
+<p>Uma área de mapeamento opcional, contendo uma única feição poligonal, pode ser utilizada para aceitar extremidades de linhas desconectadas situadas dentro da tolerância definida para a fronteira.</p>
+<p>Os identificadores das feições são obtidos automaticamente pela chave primária declarada pelo provedor de cada camada. Quando não existe uma chave primária declarada, utiliza-se o identificador interno da feição no QGIS. As lacunas recebem um identificador de ocorrência e apresentam os polígonos adjacentes, mas não recebem um identificador de feição próprio.</p>
 <p>As tolerâncias lineares e de área devem considerar a escala de referência, a resolução do insumo, a classe da feição e a finalidade de utilização. Algumas ocorrências podem representar configurações espaciais intencionais e devem ser analisadas tecnicamente.</p>
 <p style="color:#b00020;"><b>Importante:</b> valide e corrija as geometrias individuais antes de executar esta ferramenta. Geometrias nulas, vazias ou inválidas são ignoradas e contabilizadas no resumo da execução. As camadas de entrada não são modificadas nem corrigidas automaticamente.</p>
 '''
 
-    figure = 'images/tutorial/qualy_validate_geometries.jpg'
+    figure = 'images/tutorial/qualy_validate_intraclass_topology.jpg'
 
     def shortHelpString(self):
-        social_BW = Imgs().social_BW
-        footer = '''<div align="center">
-                      <img src="''' + os.path.join(
-            os.path.dirname(os.path.dirname(__file__)), self.figure
-        ) + '''">
-                      </div>
-                      <div align="right"><p align="right"><b>''' + self.tr(
-            'Author: Leandro Franca', 'Autor: Leandro França'
-        ) + '''</b></p>''' + social_BW + '''</div></div>'''
-        return self.tr(self.txt_en, self.txt_pt) + footer
+                social_BW = Imgs().social_BW
+                footer = '''<div align="center">
+                              <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), self.figure) +'''">
+                              </div>
+                              <div align="right">
+                              <p align="right">
+                              <b>'''+self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
+                              </p>'''+ social_BW + '''</div>
+                            </div>'''
+                return self.tr(self.txt_en, self.txt_pt) + footer
 
     def initAlgorithm(self, config=None):
         settings = QgsSettings()
@@ -186,11 +192,33 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
         check_missing_vertices = settings.value(
             self.SETTINGS_PREFIX + 'checkMissingVertices', True, type=bool
         )
+        boundary_tolerance = settings.value(
+            self.SETTINGS_PREFIX + 'boundaryTolerance', 1.20, type=float
+        )
 
         self.addParameter(QgsProcessingParameterMultipleLayers(
             self.INPUTS,
             self.tr('Vector layers', 'Camadas vetoriais'),
             QgsProcessing.TypeVectorAnyGeometry
+        ))
+        self.addParameter(QgsProcessingParameterFeatureSource(
+            self.MAPPING_AREA,
+            self.tr(
+                'Mapping area (optional single polygon)',
+                'Área de mapeamento (polígono único opcional)'
+            ),
+            types=[QgsProcessing.TypeVectorPolygon],
+            optional=True
+        ))
+        self.addParameter(QgsProcessingParameterNumber(
+            self.BOUNDARY_TOLERANCE,
+            self.tr(
+                'Mapping boundary tolerance for line ends (layer units)',
+                'Tolerância da fronteira da área de mapeamento para extremidades de linhas (unidades da camada)'
+            ),
+            type=QgsProcessingParameterNumber.Type.Double,
+            defaultValue=boundary_tolerance,
+            minValue=0.0
         ))
         self.addParameter(QgsProcessingParameterNumber(
             self.TOPOLOGY_TOLERANCE,
@@ -271,14 +299,6 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
             self.tr('Located topological errors', 'Erros topológicos localizados'),
             type=Qgis.ProcessingSourceType.TypeVectorPoint
         ))
-        self.addParameter(QgsProcessingParameterFeatureSink(
-            self.OCCURRENCES,
-            self.tr(
-                'Intraclass topology validation occurrences',
-                'Ocorrências da validação topológica intraclasse'
-            ),
-            type=Qgis.ProcessingSourceType.TypeVector
-        ))
         self.addParameter(QgsProcessingParameterFileDestination(
             self.HTML,
             self.tr(
@@ -290,6 +310,16 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
 
     def _rule_name(self, rule_id):
         return self.tr(*self.RULES[rule_id])
+
+    def _geometry_type_name(self, layer):
+        geometry_type = QgsWkbTypes.geometryType(layer.wkbType())
+        if geometry_type == QgsWkbTypes.PointGeometry:
+            return self.tr('Point', 'Ponto')
+        if geometry_type == QgsWkbTypes.LineGeometry:
+            return self.tr('Line', 'Linha')
+        if geometry_type == QgsWkbTypes.PolygonGeometry:
+            return self.tr('Polygon', 'Polígono')
+        return self.tr('Unknown', 'Desconhecida')
 
     @staticmethod
     def _point_geometry(point):
@@ -371,6 +401,21 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
         return vertices
 
     @staticmethod
+    def _polygon_boundary(geometry):
+        """Build a polygon boundary without relying on QgsGeometry.boundary()."""
+        polygons = geometry.asMultiPolygon() if geometry.isMultipart() else [
+            geometry.asPolygon()
+        ]
+        rings = []
+        for polygon in polygons:
+            for ring in polygon:
+                if ring:
+                    rings.append([QgsPointXY(point) for point in ring])
+        if not rings:
+            return QgsGeometry()
+        return QgsGeometry.fromMultiPolylineXY(rings)
+
+    @staticmethod
     def _has_vertex(vertices, point, tolerance):
         point_geometry = ValidateIntraclassTopology._point_geometry(point)
         return any(
@@ -409,6 +454,28 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
             valid.append(feature)
         return valid, skipped
 
+    @staticmethod
+    def _feature_identifier(layer, feature):
+        """Return the provider primary key, falling back to the QGIS feature id."""
+        try:
+            primary_key_indexes = list(
+                layer.dataProvider().pkAttributeIndexes()
+            )
+        except Exception:
+            primary_key_indexes = []
+        if primary_key_indexes:
+            key_parts = []
+            for field_index in primary_key_indexes:
+                field_name = layer.fields().at(field_index).name()
+                value = feature.attribute(field_index)
+                value_text = '' if value is None else str(value)
+                if len(primary_key_indexes) == 1:
+                    return value_text
+                key_parts.append('{}={}'.format(field_name, value_text))
+            if key_parts:
+                return '; '.join(key_parts)
+        return str(feature.id())
+
     def processAlgorithm(self, parameters, context, feedback):
         layers = self.parameterAsLayerList(parameters, self.INPUTS, context)
         if not layers:
@@ -430,11 +497,60 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
                 'Utilize um SRC projetado, pois os parâmetros da validação são expressos nas unidades da camada.'
             ))
 
+        mapping_source = self.parameterAsSource(
+            parameters, self.MAPPING_AREA, context
+        )
+        mapping_boundary = None
+        mapping_area_name = self.tr('Not provided', 'Não fornecida')
+        if mapping_source is not None:
+            if mapping_source.sourceCrs() != first_crs:
+                raise QgsProcessingException(self.tr(
+                    'The mapping area and all input layers must use the same CRS.',
+                    'A área de mapeamento e todas as camadas de entrada devem utilizar o mesmo SRC.'
+                ))
+            if mapping_source.featureCount() != 1:
+                raise QgsProcessingException(self.tr(
+                    'The mapping area must contain exactly one polygon feature.',
+                    'A área de mapeamento deve conter exatamente uma feição poligonal.'
+                ))
+            mapping_feature = next(mapping_source.getFeatures(), None)
+            mapping_geometry = (
+                mapping_feature.geometry() if mapping_feature is not None else None
+            )
+            if (
+                mapping_geometry is None
+                or mapping_geometry.isNull()
+                or mapping_geometry.isEmpty()
+            ):
+                raise QgsProcessingException(self.tr(
+                    'The mapping area has a null or empty geometry.',
+                    'A área de mapeamento possui geometria nula ou vazia.'
+                ))
+            try:
+                mapping_errors = mapping_geometry.validateGeometry()
+            except TypeError:
+                mapping_errors = []
+                mapping_geometry.validateGeometry(mapping_errors)
+            if mapping_errors:
+                raise QgsProcessingException(self.tr(
+                    'The mapping area geometry is invalid. Correct it before validation.',
+                    'A geometria da área de mapeamento é inválida. Corrija-a antes da validação.'
+                ))
+            mapping_boundary = self._polygon_boundary(mapping_geometry)
+            mapping_area_name = (
+                mapping_source.sourceName()
+                if hasattr(mapping_source, 'sourceName')
+                else self.tr('Provided', 'Fornecida')
+            )
+
         topology_tolerance = self.parameterAsDouble(
             parameters, self.TOPOLOGY_TOLERANCE, context
         )
         near_tolerance = self.parameterAsDouble(
             parameters, self.NEAR_TOLERANCE, context
+        )
+        boundary_tolerance = self.parameterAsDouble(
+            parameters, self.BOUNDARY_TOLERANCE, context
         )
         min_overlap_length = self.parameterAsDouble(
             parameters, self.MIN_OVERLAP_LENGTH, context
@@ -451,19 +567,17 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
         html_output = self.parameterAsFileOutput(parameters, self.HTML, context)
 
         error_fields = QgsFields()
+        error_fields.append(QgsField('occurrence_id', QMetaType.Type.LongLong))
         error_fields.append(QgsField('rule_id', QMetaType.Type.QString))
         error_fields.append(QgsField('rule', QMetaType.Type.QString))
         error_fields.append(QgsField('layer', QMetaType.Type.QString))
-        error_fields.append(QgsField('feature_id', QMetaType.Type.LongLong))
-        error_fields.append(QgsField('related_id', QMetaType.Type.LongLong))
+        error_fields.append(QgsField('geom_type', QMetaType.Type.QString))
+        error_fields.append(QgsField('feature_id', QMetaType.Type.QString))
+        error_fields.append(QgsField('related_id', QMetaType.Type.QString))
+        error_fields.append(QgsField('involved_ids', QMetaType.Type.QString))
         error_fields.append(QgsField('detail', QMetaType.Type.QString))
         error_fields.append(QgsField('value', QMetaType.Type.Double))
         error_fields.append(QgsField('tolerance', QMetaType.Type.Double))
-
-        occurrence_fields = QgsFields()
-        for field in error_fields:
-            occurrence_fields.append(field)
-        occurrence_fields.append(QgsField('located', QMetaType.Type.Bool))
 
         error_sink, error_dest = self.parameterAsSink(
             parameters, self.ERRORS, context, error_fields,
@@ -471,57 +585,56 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
         )
         if error_sink is None:
             raise QgsProcessingException(self.invalidSinkError(parameters, self.ERRORS))
-        occurrence_sink, occurrence_dest = self.parameterAsSink(
-            parameters, self.OCCURRENCES, context, occurrence_fields,
-            QgsWkbTypes.NoGeometry, first_crs
-        )
-        if occurrence_sink is None:
-            raise QgsProcessingException(
-                self.invalidSinkError(parameters, self.OCCURRENCES)
-            )
-
         occurrences = []
         layer_counts = Counter()
         rule_counts = Counter()
         skipped_counts = Counter()
         evaluated_counts = Counter()
+        boundary_exempt_counts = Counter()
         seen = set()
+        occurrence_sequence = 0
 
-        def register(rule_id, layer, feature_id, related_id=None, detail='',
-                     point=None, value=None, threshold=None):
+        def register(rule_id, layer, feature_id=None, related_id=None,
+                     detail='', point=None, value=None, threshold=None,
+                     involved_ids=''):
+            nonlocal occurrence_sequence
+            feature_text = str(feature_id) if feature_id is not None else None
+            related_text = str(related_id) if related_id is not None else None
             rounded_point = None
             if point is not None:
                 rounded_point = (round(point.x(), 8), round(point.y(), 8))
             key = (
-                rule_id, layer.name(), int(feature_id),
-                int(related_id) if related_id is not None else None,
+                rule_id, layer.name(), feature_text, related_text,
+                str(involved_ids or ''),
                 rounded_point
             )
             if key in seen:
                 return
             seen.add(key)
+            occurrence_sequence += 1
 
             rule_name = self._rule_name(rule_id)
+            geometry_name = self._geometry_type_name(layer)
             located = point is not None and self._finite_point(point)
             attributes = [
-                rule_id, rule_name, layer.name(), int(feature_id),
-                int(related_id) if related_id is not None else None,
+                occurrence_sequence, rule_id, rule_name, layer.name(),
+                geometry_name, feature_text, related_text, str(involved_ids or ''),
                 detail, value, threshold
             ]
-            occurrence = QgsFeature(occurrence_fields)
-            occurrence.setAttributes(attributes + [located])
-            occurrence_sink.addFeature(occurrence, QgsFeatureSink.Flag.FastInsert)
             if located:
                 error = QgsFeature(error_fields)
                 error.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(point)))
                 error.setAttributes(attributes)
                 error_sink.addFeature(error, QgsFeatureSink.Flag.FastInsert)
             occurrences.append({
+                'occurrence_id': occurrence_sequence,
                 'rule_id': rule_id,
                 'rule': rule_name,
                 'layer': layer.name(),
-                'feature_id': int(feature_id),
-                'related_id': int(related_id) if related_id is not None else None,
+                'geom_type': geometry_name,
+                'feature_id': feature_text,
+                'related_id': related_text,
+                'involved_ids': str(involved_ids or ''),
                 'detail': detail,
                 'value': value,
                 'threshold': threshold,
@@ -553,23 +666,33 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
 
             geometry_type = QgsWkbTypes.geometryType(layer.wkbType())
             feature_map = {feature.id(): feature for feature in features}
-            index = QgsSpatialIndex(features)
+            feature_ids = {
+                feature.id(): self._feature_identifier(layer, feature)
+                for feature in features
+            }
+            # Some PyQGIS versions do not accept a regular Python list in
+            # the QgsSpatialIndex constructor. Insert the features one by
+            # one to keep the algorithm compatible across QGIS versions.
+            index = QgsSpatialIndex()
+            for indexed_feature in features:
+                index.addFeature(indexed_feature)
 
             if geometry_type == QgsWkbTypes.PointGeometry:
                 self._validate_points(
-                    layer, features, feature_map, index,
+                    layer, features, feature_map, feature_ids, index,
                     topology_tolerance, register, feedback
                 )
             elif geometry_type == QgsWkbTypes.LineGeometry:
-                self._validate_lines(
-                    layer, features, feature_map, index,
+                boundary_exempt_counts[layer.name()] += self._validate_lines(
+                    layer, features, feature_map, feature_ids, index,
                     topology_tolerance, near_tolerance,
                     min_overlap_length, check_dangles,
+                    mapping_boundary, boundary_tolerance,
                     register, feedback
                 )
             elif geometry_type == QgsWkbTypes.PolygonGeometry:
                 self._validate_polygons(
-                    layer, features, feature_map, index,
+                    layer, features, feature_map, feature_ids, index,
                     topology_tolerance, min_overlap_area,
                     check_gaps, max_gap_area, check_missing_vertices,
                     register, context, feedback
@@ -582,13 +705,14 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
             topology_tolerance, near_tolerance,
             min_overlap_length, min_overlap_area,
             check_dangles, check_gaps, max_gap_area,
-            check_missing_vertices
+            check_missing_vertices, mapping_area_name,
+            boundary_tolerance, boundary_exempt_counts
         )
         self._save_settings(
             topology_tolerance, near_tolerance,
             min_overlap_length, min_overlap_area,
             check_dangles, check_gaps, max_gap_area,
-            check_missing_vertices
+            check_missing_vertices, boundary_tolerance
         )
 
         if occurrences:
@@ -610,11 +734,10 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
         self.ERROR_LAYER_DEST = error_dest
         return {
             self.ERRORS: error_dest,
-            self.OCCURRENCES: occurrence_dest,
             self.HTML: html_output,
         }
 
-    def _validate_points(self, layer, features, feature_map, index,
+    def _validate_points(self, layer, features, feature_map, feature_ids, index,
                          tolerance, register, feedback):
         for feature in features:
             if feedback.isCanceled():
@@ -630,7 +753,8 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
                 distance = feature.geometry().distance(candidate.geometry())
                 if distance <= tolerance:
                     register(
-                        'VTI001', layer, feature.id(), candidate.id(),
+                        'VTI001', layer, feature_ids[feature.id()],
+                        feature_ids[candidate.id()],
                         self.tr(
                             'Distance between points: {}',
                             'Distância entre os pontos: {}'
@@ -638,16 +762,18 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
                         point, distance, tolerance
                     )
 
-    def _validate_lines(self, layer, features, feature_map, index,
+    def _validate_lines(self, layer, features, feature_map, feature_ids, index,
                         tolerance, near_tolerance, min_overlap_length,
-                        check_dangles, register, feedback):
+                        check_dangles, mapping_boundary, boundary_tolerance,
+                        register, feedback):
+        boundary_exempt = 0
         vertices = {
             feature.id(): self._vertices(feature.geometry())
             for feature in features
         }
         for feature in features:
             if feedback.isCanceled():
-                return
+                return boundary_exempt
             geometry = feature.geometry()
             rectangle = geometry.boundingBox()
             rectangle.grow(max(tolerance, near_tolerance))
@@ -658,7 +784,8 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
                 candidate_geometry = candidate.geometry()
                 if geometry.equals(candidate_geometry):
                     register(
-                        'VTI002', layer, feature.id(), candidate.id(),
+                        'VTI002', layer, feature_ids[feature.id()],
+                        feature_ids[candidate.id()],
                         point=self._representative_point(geometry)
                     )
                     continue
@@ -670,7 +797,8 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
                     length = intersection.length()
                     if length >= min_overlap_length:
                         register(
-                            'VTI003', layer, feature.id(), candidate.id(),
+                            'VTI003', layer, feature_ids[feature.id()],
+                            feature_ids[candidate.id()],
                             point=self._representative_point(intersection),
                             value=length, threshold=min_overlap_length
                         )
@@ -685,11 +813,12 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
                         if not (has_first and has_second):
                             missing_ids = []
                             if not has_first:
-                                missing_ids.append(str(feature.id()))
+                                missing_ids.append(feature_ids[feature.id()])
                             if not has_second:
-                                missing_ids.append(str(candidate.id()))
+                                missing_ids.append(feature_ids[candidate.id()])
                             register(
-                                'VTI004', layer, feature.id(), candidate.id(),
+                                'VTI004', layer, feature_ids[feature.id()],
+                                feature_ids[candidate.id()],
                                 self.tr(
                                     'Missing corresponding vertex in feature(s): {}',
                                     'Vértice correspondente ausente na(s) feição(ões): {}'
@@ -698,10 +827,10 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
                             )
 
         if not check_dangles:
-            return
+            return boundary_exempt
         for feature in features:
             if feedback.isCanceled():
-                return
+                return boundary_exempt
             for endpoint in self._line_endpoints(feature.geometry()):
                 endpoint_geometry = self._point_geometry(endpoint)
                 near_rectangle = self._search_rectangle(endpoint, near_tolerance)
@@ -722,9 +851,17 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
                         nearest_id = candidate_id
                 if connected:
                     continue
+                if (
+                    mapping_boundary is not None
+                    and endpoint_geometry.distance(mapping_boundary)
+                    <= boundary_tolerance
+                ):
+                    boundary_exempt += 1
+                    continue
                 if nearest is not None and nearest <= near_tolerance:
                     register(
-                        'VTI006', layer, feature.id(), nearest_id,
+                        'VTI006', layer, feature_ids[feature.id()],
+                        feature_ids[nearest_id],
                         self.tr(
                             'Distance to the nearest line: {}',
                             'Distância até a linha mais próxima: {}'
@@ -733,20 +870,21 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
                     )
                 else:
                     register(
-                        'VTI005', layer, feature.id(),
+                        'VTI005', layer, feature_ids[feature.id()],
                         detail=self.tr(
                             'No connection with another line was found.',
                             'Não foi encontrada conexão com outra linha.'
                         ),
                         point=endpoint, threshold=tolerance
                     )
+        return boundary_exempt
 
-    def _validate_polygons(self, layer, features, feature_map, index,
+    def _validate_polygons(self, layer, features, feature_map, feature_ids, index,
                            tolerance, min_overlap_area, check_gaps,
                            max_gap_area, check_missing_vertices,
                            register, context, feedback):
         boundaries = {
-            feature.id(): feature.geometry().boundary()
+            feature.id(): self._polygon_boundary(feature.geometry())
             for feature in features
         }
         vertices = {
@@ -756,7 +894,8 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
         native_missing_vertices = False
         if check_missing_vertices:
             native_missing_vertices = self._check_missing_vertices_native(
-                layer, features, tolerance, register, context, feedback
+                layer, features, feature_ids, tolerance,
+                register, context, feedback
             )
         for feature in features:
             if feedback.isCanceled():
@@ -771,7 +910,8 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
                 candidate_geometry = candidate.geometry()
                 if geometry.equals(candidate_geometry):
                     register(
-                        'VTI002', layer, feature.id(), candidate.id(),
+                        'VTI002', layer, feature_ids[feature.id()],
+                        feature_ids[candidate.id()],
                         point=self._representative_point(geometry)
                     )
                     continue
@@ -780,13 +920,15 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
                 if geometry.within(candidate_geometry):
                     contained = True
                     register(
-                        'VTI008', layer, feature.id(), candidate.id(),
+                        'VTI008', layer, feature_ids[feature.id()],
+                        feature_ids[candidate.id()],
                         point=self._representative_point(geometry)
                     )
                 elif candidate_geometry.within(geometry):
                     contained = True
                     register(
-                        'VTI008', layer, candidate.id(), feature.id(),
+                        'VTI008', layer, feature_ids[candidate.id()],
+                        feature_ids[feature.id()],
                         point=self._representative_point(candidate_geometry)
                     )
 
@@ -795,7 +937,8 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
                     area = intersection.area()
                     if area >= min_overlap_area and area > 0:
                         register(
-                            'VTI007', layer, feature.id(), candidate.id(),
+                            'VTI007', layer, feature_ids[feature.id()],
+                            feature_ids[candidate.id()],
                             point=self._representative_point(intersection),
                             value=area, threshold=min_overlap_area
                         )
@@ -803,16 +946,18 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
                 if check_missing_vertices and not native_missing_vertices:
                     self._check_missing_vertices_pair(
                         layer, feature, candidate,
-                        boundaries, vertices, tolerance, register
+                        boundaries, vertices, feature_ids,
+                        tolerance, register
                     )
 
         if check_gaps:
             self._check_polygon_gaps(
-                layer, features, max_gap_area, register, feedback
+                layer, features, feature_map, feature_ids, index,
+                boundaries, tolerance, max_gap_area, register, feedback
             )
 
-    def _check_missing_vertices_native(self, layer, features, tolerance,
-                                       register, context, feedback):
+    def _check_missing_vertices_native(self, layer, features, feature_ids,
+                                       tolerance, register, context, feedback):
         """Use the native QGIS 3.42+ checker, retaining a legacy fallback."""
         algorithm_id = 'native:checkgeometrymissingvertex'
         if QgsApplication.processingRegistry().algorithmById(algorithm_id) is None:
@@ -868,8 +1013,10 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
             for error in errors.getFeatures():
                 feature_id = error['_lf_fid']
                 point = self._representative_point(error.geometry())
+                source_fid = int(feature_id)
                 register(
-                    'VTI010', layer, int(feature_id),
+                    'VTI010', layer,
+                    feature_ids.get(source_fid, str(source_fid)),
                     detail=self.tr(
                         'Vertex reported by the native QGIS missing-vertices checker.',
                         'Vértice reportado pelo verificador nativo de vértices ausentes do QGIS.'
@@ -890,8 +1037,8 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
             return False
 
     def _check_missing_vertices_pair(self, layer, first, second,
-                                     boundaries, vertices, tolerance,
-                                     register):
+                                     boundaries, vertices, feature_ids,
+                                     tolerance, register):
         first_boundary = boundaries[first.id()]
         second_boundary = boundaries[second.id()]
         if first_boundary.distance(second_boundary) > tolerance:
@@ -905,7 +1052,8 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
                     continue
                 if not self._has_vertex(target_vertices, vertex, tolerance):
                     register(
-                        'VTI010', layer, target.id(), source.id(),
+                        'VTI010', layer, feature_ids[target.id()],
+                        feature_ids[source.id()],
                         self.tr(
                             'A vertex from the related polygon is missing from this shared border.',
                             'Um vértice do polígono relacionado está ausente neste limite comum.'
@@ -913,7 +1061,8 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
                         vertex, None, tolerance
                     )
 
-    def _check_polygon_gaps(self, layer, features, max_gap_area,
+    def _check_polygon_gaps(self, layer, features, feature_map, feature_ids,
+                            index, boundaries, tolerance, max_gap_area,
                             register, feedback):
         try:
             union = QgsGeometry.unaryUnion([
@@ -928,7 +1077,6 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
         if union is None or union.isNull() or union.isEmpty():
             return
         polygons = union.asMultiPolygon() if union.isMultipart() else [union.asPolygon()]
-        gap_number = 0
         for polygon in polygons:
             for ring in polygon[1:]:
                 if len(ring) < 4:
@@ -937,21 +1085,35 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
                 area = gap.area()
                 if area <= 0 or (max_gap_area > 0 and area > max_gap_area):
                     continue
-                gap_number += 1
+                gap_boundary = self._polygon_boundary(gap)
+                rectangle = gap.boundingBox()
+                rectangle.grow(tolerance)
+                adjacent_ids = []
+                for candidate_id in index.intersects(rectangle):
+                    if candidate_id not in feature_map:
+                        continue
+                    if boundaries[candidate_id].distance(gap_boundary) <= tolerance:
+                        adjacent_ids.append(feature_ids[candidate_id])
+                adjacent_ids = sorted(set(adjacent_ids))
+
+                if len(adjacent_ids) < 2:
+                    continue
+
                 register(
-                    'VTI009', layer, -gap_number,
+                    'VTI009', layer,
                     detail=self.tr(
                         'Potential internal gap in the polygon coverage.',
                         'Lacuna interna potencial na cobertura de polígonos.'
                     ),
                     point=self._representative_point(gap),
-                    value=area, threshold=max_gap_area
+                    value=area, threshold=max_gap_area,
+                    involved_ids=', '.join(adjacent_ids)
                 )
 
     def _save_settings(self, topology_tolerance, near_tolerance,
                        min_overlap_length, min_overlap_area,
                        check_dangles, check_gaps, max_gap_area,
-                       check_missing_vertices):
+                       check_missing_vertices, boundary_tolerance):
         settings = QgsSettings()
         settings.setValue(
             self.SETTINGS_PREFIX + 'topologyTolerance', topology_tolerance
@@ -971,6 +1133,9 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
         settings.setValue(
             self.SETTINGS_PREFIX + 'checkMissingVertices',
             check_missing_vertices
+        )
+        settings.setValue(
+            self.SETTINGS_PREFIX + 'boundaryTolerance', boundary_tolerance
         )
 
     def postProcessAlgorithm(self, context, feedback):
@@ -996,12 +1161,16 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
         )
         label_settings = labeling.settings()
         label_settings.fieldName = (
+            '\'#\' || to_string("occurrence_id") || \' | \' || '
             'coalesce("rule_id", \'\') || \': \' || '
             'coalesce("rule", \'\') || \'\\n\' || '
-            'coalesce("layer", \'\') || \'\\n\' || '
-            'coalesce(to_string("feature_id"), \'\') || '
+            'coalesce("layer", \'\') || '
+            'CASE WHEN coalesce("feature_id", \'\') <> \'\' '
+            'THEN \'\\n\' || "feature_id" ELSE \'\' END || '
             'CASE WHEN "related_id" IS NOT NULL '
-            'THEN \' × \' || to_string("related_id") ELSE \'\' END || '
+            'THEN \' × \' || "related_id" ELSE \'\' END || '
+            'CASE WHEN coalesce("involved_ids", \'\') <> \'\' '
+            'THEN \'\\n\' || \'IDs: \' || "involved_ids" ELSE \'\' END || '
             'CASE WHEN coalesce("detail", \'\') <> \'\' '
             'THEN \'\\n\' || "detail" ELSE \'\' END'
         )
@@ -1015,13 +1184,16 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
                       skipped_counts, layer_counts, rule_counts,
                       occurrences, topology_tolerance, near_tolerance,
                       min_overlap_length, min_overlap_area, check_dangles,
-                      check_gaps, max_gap_area, check_missing_vertices):
+                      check_gaps, max_gap_area, check_missing_vertices,
+                      mapping_area_name, boundary_tolerance,
+                      boundary_exempt_counts):
         total_features = sum(evaluated_counts.values())
         total_skipped = sum(skipped_counts.values())
         total_occurrences = len(occurrences)
+        total_boundary_exempt = sum(boundary_exempt_counts.values())
         affected = len({
             (item['layer'], item['feature_id'])
-            for item in occurrences if item['feature_id'] >= 0
+            for item in occurrences if item['feature_id'] is not None
         })
         status = self.tr('NONCONFORMING', 'NÃO CONFORME') if occurrences else self.tr(
             'CONFORMING', 'CONFORME'
@@ -1030,11 +1202,12 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
 
         layer_rows = ''
         for layer in layers:
-            layer_rows += '<tr><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td></tr>'.format(
+            layer_rows += '<tr><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td></tr>'.format(
                 str2HTML(layer.name()),
                 str2HTML(QgsWkbTypes.displayString(layer.wkbType())),
                 evaluated_counts[layer.name()],
                 skipped_counts[layer.name()],
+                boundary_exempt_counts[layer.name()],
                 layer_counts[layer.name()],
                 str2HTML(layer.crs().authid())
             )
@@ -1046,6 +1219,7 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
             enabled_rules.append('VTI009')
         if check_missing_vertices:
             enabled_rules.append('VTI010')
+        enabled_rules.sort(key=lambda rule_id: int(rule_id[3:]))
         rule_rows = ''
         for rule_id in enabled_rules:
             count = rule_counts[rule_id]
@@ -1063,6 +1237,8 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
             for label, value in [
                 (self.tr('Topological coincidence tolerance', 'Tolerância de coincidência topológica'), topology_tolerance),
                 (self.tr('Near disconnected ends tolerance', 'Tolerância para extremidades próximas desconectadas'), near_tolerance),
+                (self.tr('Mapping area', 'Área de mapeamento'), str2HTML(mapping_area_name)),
+                (self.tr('Mapping boundary tolerance', 'Tolerância da fronteira da área de mapeamento'), boundary_tolerance if mapping_area_name != self.tr('Not provided', 'Não fornecida') else self.tr('Not evaluated', 'Não avaliada')),
                 (self.tr('Minimum line overlap length', 'Comprimento mínimo de sobreposição linear'), min_overlap_length),
                 (self.tr('Minimum polygon overlap area', 'Área mínima de sobreposição de polígonos'), min_overlap_area),
                 (self.tr('Maximum gap area', 'Área máxima das lacunas'), max_gap_area if check_gaps else self.tr('Not evaluated', 'Não avaliada')),
@@ -1070,11 +1246,11 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
         ])
 
         interpretation = self.tr(
-            'The automated intraclass validation evaluated {} valid feature(s) in {} layer(s), ignored {} null, empty, or invalid feature(s), and identified {} occurrence(s) affecting {} feature(s). The dataset is {} for the rules enabled in this execution. The input layers were not modified.',
-            'A validação intraclasse automatizada avaliou {} feição(ões) válida(s) em {} camada(s), ignorou {} feição(ões) nula(s), vazia(s) ou inválida(s) e identificou {} ocorrência(s) que afetam {} feição(ões). O conjunto de dados está {} para as regras habilitadas nesta execução. As camadas de entrada não foram modificadas.'
+            'The automated intraclass validation evaluated {} valid feature(s) in {} layer(s), ignored {} null, empty, or invalid feature(s), accepted {} disconnected line end(s) near the mapping boundary, and identified {} occurrence(s) affecting {} feature(s). The dataset is {} for the rules enabled in this execution. The input layers were not modified.',
+            'A validação intraclasse automatizada avaliou {} feição(ões) válida(s) em {} camada(s), ignorou {} feição(ões) nula(s), vazia(s) ou inválida(s), aceitou {} extremidade(s) de linha desconectada(s) próxima(s) à fronteira da área de mapeamento e identificou {} ocorrência(s) que afetam {} feição(ões). O conjunto de dados está {} para as regras habilitadas nesta execução. As camadas de entrada não foram modificadas.'
         ).format(
             total_features, len(layers), total_skipped,
-            total_occurrences, affected, status
+            total_boundary_exempt, total_occurrences, affected, status
         )
 
         report = '''<!DOCTYPE html>
@@ -1123,11 +1299,11 @@ td { border:1px solid #ddd; padding:8px; } tr:nth-child(even) { background:#f8f8
             'as geometrias individuais devem ser validadas e corrigidas antes da avaliação topológica intraclasse. Geometrias nulas, vazias ou inválidas foram ignoradas.'
         )) + '''</div>
 <h2>''' + str2HTML(self.tr('1. Evaluated Data', '1. Dados Avaliados')) + '''</h2>
-<table><tr><th>''' + str2HTML(self.tr('Layer', 'Camada')) + '''</th><th>''' + str2HTML(self.tr('Geometry', 'Geometria')) + '''</th><th>''' + str2HTML(self.tr('Evaluated', 'Avaliadas')) + '''</th><th>''' + str2HTML(self.tr('Ignored', 'Ignoradas')) + '''</th><th>''' + str2HTML(self.tr('Occurrences', 'Ocorrências')) + '''</th><th>''' + str2HTML(self.tr('CRS', 'SRC')) + '''</th></tr>''' + layer_rows + '''</table>
+<table><tr><th>''' + str2HTML(self.tr('Layer', 'Camada')) + '''</th><th>''' + str2HTML(self.tr('Geometry', 'Geometria')) + '''</th><th>''' + str2HTML(self.tr('Evaluated', 'Avaliadas')) + '''</th><th>''' + str2HTML(self.tr('Ignored', 'Ignoradas')) + '''</th><th>''' + str2HTML(self.tr('Boundary exceptions', 'Exceções na fronteira')) + '''</th><th>''' + str2HTML(self.tr('Occurrences', 'Ocorrências')) + '''</th><th>''' + str2HTML(self.tr('CRS', 'SRC')) + '''</th></tr>''' + layer_rows + '''</table>
 <h2>''' + str2HTML(self.tr('2. Methodology', '2. Metodologia')) + '''</h2>
 <p>''' + str2HTML(self.tr(
-            'Each layer was evaluated independently. Spatial relationships were compared using a spatial index and the enabled linear and area thresholds. The validation only identifies potential nonconformities; it does not edit the source data.',
-            'Cada camada foi avaliada de forma independente. As relações espaciais foram comparadas com índice espacial e as tolerâncias lineares e de área habilitadas. A validação apenas identifica não conformidades potenciais; ela não altera os dados de origem.'
+            'Each layer was evaluated independently. Spatial relationships were compared using a spatial index and the enabled linear and area thresholds. When a mapping area was provided, disconnected line ends within the boundary tolerance were accepted and counted separately. Identifiers were obtained automatically from provider-declared primary keys, with the internal QGIS feature ID used as a fallback. The validation only identifies potential nonconformities; it does not edit the source data.',
+            'Cada camada foi avaliada de forma independente. As relações espaciais foram comparadas com índice espacial e as tolerâncias lineares e de área habilitadas. Quando uma área de mapeamento foi fornecida, as extremidades de linhas desconectadas situadas dentro da tolerância da fronteira foram aceitas e contabilizadas separadamente. Os identificadores foram obtidos automaticamente pelas chaves primárias declaradas pelos provedores, com uso do identificador interno do QGIS como alternativa. A validação apenas identifica não conformidades potenciais; ela não altera os dados de origem.'
         )) + '''</p>
 <h2>''' + str2HTML(self.tr('3. Parameters', '3. Parâmetros')) + '''</h2>
 <table><tr><th>''' + str2HTML(self.tr('Parameter', 'Parâmetro')) + '''</th><th>''' + str2HTML(self.tr('Value', 'Valor')) + '''</th></tr>''' + parameter_rows + '''</table>
