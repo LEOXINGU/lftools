@@ -62,6 +62,8 @@ class ValidateGeometries(QgsProcessingAlgorithm):
     CHECK_MIN_SIZE = 'CHECK_MIN_SIZE'
     MIN_LENGTH = 'MIN_LENGTH'
     MIN_AREA = 'MIN_AREA'
+    CHECK_HOLES = 'CHECK_HOLES'
+    MIN_HOLE_AREA = 'MIN_HOLE_AREA'
     ERRORS = 'ERRORS'
     OCCURRENCES = 'OCCURRENCES'
     HTML = 'HTML'
@@ -79,6 +81,7 @@ class ValidateGeometries(QgsProcessingAlgorithm):
         'VGE006': ('Angle below tolerance', 'Ângulo inferior à tolerância'),
         'VGE007': ('Length below tolerance', 'Comprimento inferior à tolerância'),
         'VGE008': ('Area below tolerance', 'Área inferior à tolerância'),
+        'VGE009': ('Hole below minimum area', 'Buraco inferior à área mínima'),
     }
 
     def tr(self, *string):
@@ -104,7 +107,7 @@ class ValidateGeometries(QgsProcessingAlgorithm):
             'GeoOne,quality,qualidade,geometry,geometria,validation,validação,'
             'logical consistency,consistência lógica,topology,topologia,invalid,'
             'empty,null,degenerate,duplicate vertex,multipart,small angle,'
-            'minimum area,minimum length,QGIS,LFTools'
+            'minimum area,minimum length,hole,interior ring,anel interno,QGIS,LFTools'
         ).split(',')
 
     def icon(self):
@@ -116,32 +119,26 @@ class ValidateGeometries(QgsProcessingAlgorithm):
     txt_en = '''
 <p>This tool performs a <b>complete automated inspection</b> of individual geometries in one or more point, line, or polygon layers. This step should be completed before intraclass topological validation.</p>
 <p><b>Checks:</b></p>
-<p>
 ▪️ Null, empty, invalid, or degenerate geometries;
 ▪️ Duplicated consecutive vertices;
 ▪️ Multipart geometries and angles below the defined tolerance;
-▪️ Lines or polygons smaller than the defined thresholds.
-</p>
+▪️ Lines or polygons smaller than the defined thresholds;
+▪️ Polygon holes smaller than the minimum allowed area.
 <p><b>Outputs:</b> a point layer of located errors, a complete occurrence table, and an HTML quality report.</p>
-<p>Tolerances should consider the reference scale, input resolution, feature class, and intended use. Multipart or undersized geometries are not necessarily errors and should be technically reviewed.</p>
+<p>Tolerances should consider the reference scale, input resolution, feature class, and intended use. Multipart, undersized, or holed geometries are not necessarily errors and should be technically reviewed.</p>
 <p style="color:#b00020;"><b>Important:</b> the input layers are not modified or automatically corrected.</p>
 '''
 
     txt_pt = '''
 <p>Esta ferramenta realiza uma <b>inspeção completa automatizada</b> das geometrias individuais de uma ou mais camadas de pontos, linhas ou polígonos. Essa etapa deve ser concluída antes da validação topológica intraclasse.</p>
-
 <p><b>Verificações:</b></p>
-<p>
 ▪️ Geometrias nulas, vazias, inválidas ou degeneradas;
 ▪️ Vértices consecutivos duplicados;
 ▪️ Geometrias multipartes e ângulos inferiores à tolerância definida;
-▪️ Linhas ou polígonos inferiores às dimensões mínimas definidas.
-</p>
-
+▪️ Linhas ou polígonos inferiores às dimensões mínimas definidas;
+▪️ Buracos em polígonos inferiores à área mínima permitida.
 <p><b>Saídas:</b> camada pontual de erros localizados, tabela completa de ocorrências e relatório de qualidade em HTML.</p>
-
-<p>As tolerâncias devem considerar a escala de referência, a resolução do insumo, a classe da feição e a finalidade de utilização. Geometrias multipartes ou inferiores às dimensões mínimas não constituem necessariamente erros e devem ser analisadas tecnicamente.</p>
-
+<p>As tolerâncias devem considerar a escala de referência, a resolução do insumo, a classe da feição e a finalidade de utilização. Geometrias multipartes, inferiores às dimensões mínimas ou com buracos não constituem necessariamente erros e devem ser analisadas tecnicamente.</p>
 <p style="color:#b00020;"><b>Importante:</b> as camadas de entrada não são modificadas nem corrigidas automaticamente.</p>
 '''
 
@@ -181,6 +178,12 @@ class ValidateGeometries(QgsProcessingAlgorithm):
         )
         min_area = settings.value(
             self.SETTINGS_PREFIX + 'minArea', 0.04, type=float
+        )
+        check_holes = settings.value(
+            self.SETTINGS_PREFIX + 'checkHoles', True, type=bool
+        )
+        min_hole_area = settings.value(
+            self.SETTINGS_PREFIX + 'minHoleArea', 0.04, type=float
         )
 
         self.addParameter(QgsProcessingParameterMultipleLayers(
@@ -258,6 +261,26 @@ class ValidateGeometries(QgsProcessingAlgorithm):
             minValue=0.0
         ))
 
+        self.addParameter(QgsProcessingParameterBoolean(
+            self.CHECK_HOLES,
+            self.tr(
+                'Check polygon holes below the minimum area',
+                'Verificar buracos em polígonos inferiores à área mínima'
+            ),
+            defaultValue=check_holes
+        ))
+
+        self.addParameter(QgsProcessingParameterNumber(
+            self.MIN_HOLE_AREA,
+            self.tr(
+                'Minimum allowed hole area (square layer units)',
+                'Área mínima permitida para buracos (unidades quadradas da camada)'
+            ),
+            type=QgsProcessingParameterNumber.Type.Double,
+            defaultValue=min_hole_area,
+            minValue=0.0
+        ))
+
         self.addParameter(QgsProcessingParameterFeatureSink(
             self.ERRORS,
             self.tr('Located geometry errors', 'Erros geométricos localizados'),
@@ -319,6 +342,23 @@ class ValidateGeometries(QgsProcessingAlgorithm):
         return self.tr(*self.RULES[rule_id])
 
     @staticmethod
+    def _polygon_holes(geometry):
+        """Return each interior ring as a polygon geometry."""
+        polygons = geometry.asMultiPolygon() if geometry.isMultipart() else [
+            geometry.asPolygon()
+        ]
+        holes = []
+        for polygon_index, polygon in enumerate(polygons, 1):
+            for ring_index, ring in enumerate(polygon[1:], 1):
+                if len(ring) >= 4:
+                    holes.append((
+                        polygon_index,
+                        ring_index,
+                        QgsGeometry.fromPolygonXY([ring])
+                    ))
+        return holes
+
+    @staticmethod
     def _first_vertex(geometry):
         try:
             for vertex in geometry.vertices():
@@ -363,6 +403,12 @@ class ValidateGeometries(QgsProcessingAlgorithm):
             parameters, self.MIN_LENGTH, context
         )
         min_area = self.parameterAsDouble(parameters, self.MIN_AREA, context)
+        check_holes = self.parameterAsBool(
+            parameters, self.CHECK_HOLES, context
+        )
+        min_hole_area = self.parameterAsDouble(
+            parameters, self.MIN_HOLE_AREA, context
+        )
         html_output = self.parameterAsFileOutput(parameters, self.HTML, context)
 
         error_fields = QgsFields()
@@ -576,6 +622,36 @@ class ValidateGeometries(QgsProcessingAlgorithm):
                             value=geometry.area(), threshold=min_area
                         )
 
+                if check_holes and geometry_type == QgsWkbTypes.PolygonGeometry:
+                    try:
+                        for polygon_index, ring_index, hole in self._polygon_holes(geometry):
+                            hole_area = hole.area()
+                            if hole_area < min_hole_area:
+                                hole_point = None
+                                try:
+                                    point = hole.pointOnSurface().asPoint()
+                                    if isfinite(point.x()) and isfinite(point.y()):
+                                        hole_point = QgsPointXY(point.x(), point.y())
+                                except Exception:
+                                    hole_point = None
+                                register(
+                                    'VGE009',
+                                    layer,
+                                    feature_id,
+                                    self.tr(
+                                        'Interior ring {} of polygon part {}.',
+                                        'Anel interno {} da parte poligonal {}.'
+                                    ).format(ring_index, polygon_index),
+                                    point=hole_point,
+                                    value=hole_area,
+                                    threshold=min_hole_area
+                                )
+                    except Exception as error:
+                        feedback.pushWarning(self.tr(
+                            'Holes could not be inspected in feature {} of layer {}: {}',
+                            'Os buracos não puderam ser inspecionados na feição {} da camada {}: {}'
+                        ).format(feature_id, layer.name(), str(error)))
+
                 if total_features:
                     feedback.setProgress(int(processed * 100.0 / total_features))
 
@@ -595,7 +671,9 @@ class ValidateGeometries(QgsProcessingAlgorithm):
             min_angle,
             check_min_size,
             min_length,
-            min_area
+            min_area,
+            check_holes,
+            min_hole_area
         )
 
         settings = QgsSettings()
@@ -619,6 +697,12 @@ class ValidateGeometries(QgsProcessingAlgorithm):
         )
         settings.setValue(
             self.SETTINGS_PREFIX + 'minArea', min_area
+        )
+        settings.setValue(
+            self.SETTINGS_PREFIX + 'checkHoles', check_holes
+        )
+        settings.setValue(
+            self.SETTINGS_PREFIX + 'minHoleArea', min_hole_area
         )
 
         if occurrences:
@@ -699,7 +783,8 @@ class ValidateGeometries(QgsProcessingAlgorithm):
     def _write_report(self, html_output, layers, layer_feature_counts,
                       layer_counts, rule_counts, occurrences, tolerance,
                       check_multipart, check_small_angle, min_angle,
-                      check_min_size, min_length, min_area):
+                      check_min_size, min_length, min_area,
+                      check_holes, min_hole_area):
         total_features = sum(layer_feature_counts.values())
         total_occurrences = len(occurrences)
         affected = len({
@@ -729,6 +814,8 @@ class ValidateGeometries(QgsProcessingAlgorithm):
             enabled_rules.append('VGE006')
         if check_min_size:
             enabled_rules.extend(['VGE007', 'VGE008'])
+        if check_holes:
+            enabled_rules.append('VGE009')
 
         for rule_id in enabled_rules:
             count = rule_counts[rule_id]
@@ -750,6 +837,7 @@ class ValidateGeometries(QgsProcessingAlgorithm):
 <tr><td>{}</td><td>{}°</td></tr>
 <tr><td>{}</td><td>{}</td></tr>
 <tr><td>{}</td><td>{}</td></tr>
+<tr><td>{}</td><td>{}</td></tr>
 '''.format(
             str2HTML(self.tr('Duplicated vertex tolerance', 'Tolerância de vértice duplicado')),
             tolerance,
@@ -760,7 +848,9 @@ class ValidateGeometries(QgsProcessingAlgorithm):
             str2HTML(self.tr('Minimum line length', 'Comprimento mínimo das linhas')),
             min_length if check_min_size else self.tr('Not evaluated', 'Não avaliado'),
             str2HTML(self.tr('Minimum polygon area', 'Área mínima dos polígonos')),
-            min_area if check_min_size else self.tr('Not evaluated', 'Não avaliada')
+            min_area if check_min_size else self.tr('Not evaluated', 'Não avaliada'),
+            str2HTML(self.tr('Minimum allowed hole area', 'Área mínima permitida para buracos')),
+            min_hole_area if check_holes else self.tr('Not evaluated', 'Não avaliada')
         )
 
         interpretation = self.tr(
