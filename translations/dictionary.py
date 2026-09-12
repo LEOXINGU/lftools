@@ -1808,5 +1808,83 @@ El campo identificador único opcional se utiliza para completar ID1 e ID2 en la
 'The subdivision generated {} parts instead of {}. Check the geometry and the reference direction.': {'es': 'La división generó {} partes en lugar de {}. Verifique la geometría y la dirección de referencia.'},
 'Could not calculate the area of the generated parts.': {'es': 'No se pudo calcular el área de las partes generadas.'},
 'Subdivision completed successfully! {} part(s) generated.': {'es': '¡División completada correctamente! {} parte(s) generada(s).'},
+'''
+<p>This tool performs a <b>complete automated inspection</b> of individual geometries in one or more point, line, or polygon layers. This step should be completed before intraclass topological validation.</p>
+<p><b>Checks:</b></p>
+<p>
+▪️ Null, empty, invalid, or degenerate geometries;
+▪️ Duplicated consecutive vertices;
+▪️ Multipart geometries and angles below the defined tolerance;
+▪️ Lines or polygons smaller than the defined thresholds.
+</p>
+<p><b>Outputs:</b> a point layer of located errors, a complete occurrence table, and an HTML quality report.</p>
+<p>Tolerances should consider the reference scale, input resolution, feature class, and intended use. Multipart or undersized geometries are not necessarily errors and should be technically reviewed.</p>
+<p style="color:#b00020;"><b>Important:</b> the input layers are not modified or automatically corrected.</p>
+''': {'es': '''
+<p>Esta herramienta realiza una <b>inspección completa automatizada</b> de las geometrías individuales de una o más capas de puntos, líneas o polígonos. Esta etapa debe completarse antes de la validación topológica intraclase.</p>
+<p><b>Verificaciones:</b></p>
+<p>
+▪️ Geometrías nulas, vacías, no válidas o degeneradas;
+▪️ Vértices consecutivos duplicados;
+▪️ Geometrías multiparte y ángulos inferiores a la tolerancia definida;
+▪️ Líneas o polígonos inferiores a las dimensiones mínimas definidas.
+</p>
+<p><b>Salidas:</b> una capa de puntos con los errores localizados, una tabla completa de ocurrencias y un informe de calidad en HTML.</p>
+<p>Las tolerancias deben considerar la escala de referencia, la resolución de los datos de entrada, la clase de la entidad y la finalidad de uso. Las geometrías multiparte o inferiores a las dimensiones mínimas no constituyen necesariamente errores y deben revisarse técnicamente.</p>
+<p style="color:#b00020;"><b>Importante:</b> las capas de entrada no se modifican ni se corrigen automáticamente.</p>
+'''},
+'Validate Geometries': {'es': 'Validar geometrías'},
+'Vector layers': {'es': 'Capas vectoriales'},
+'Tolerance for duplicated consecutive vertices (layer units)': {'es': 'Tolerancia para vértices consecutivos duplicados (unidades de la capa)'},
+'Report multipart geometries': {'es': 'Reportar geometrías multiparte'},
+'Check angles below a tolerance': {'es': 'Verificar ángulos inferiores a una tolerancia'},
+'Minimum angle (degrees)': {'es': 'Ángulo mínimo (grados)'},
+'Check minimum length and area': {'es': 'Verificar longitud y área mínimas'},
+'Minimum line length (layer units)': {'es': 'Longitud mínima de las líneas (unidades de la capa)'},
+'Minimum polygon area (square layer units)': {'es': 'Área mínima de los polígonos (unidades cuadradas de la capa)'},
+'Located geometry errors': {'es': 'Errores geométricos localizados'},
+'Geometry validation occurrences': {'es': 'Ocurrencias de la validación geométrica'},
+'Geometry validation report': {'es': 'Informe de validación geométrica'},
+'Null or empty geometry': {'es': 'Geometría nula o vacía'},
+'Invalid geometry': {'es': 'Geometría no válida'},
+'Degenerate geometry': {'es': 'Geometría degenerada'},
+'Duplicated consecutive vertex': {'es': 'Vértice consecutivo duplicado'},
+'Multipart geometry': {'es': 'Geometría multiparte'},
+'Angle below tolerance': {'es': 'Ángulo inferior a la tolerancia'},
+'Length below tolerance': {'es': 'Longitud inferior a la tolerancia'},
+'Area below tolerance': {'es': 'Área inferior a la tolerancia'},
+'Select at least one vector layer!': {'es': '¡Seleccione al menos una capa vectorial!'},
+'All input layers must use the same CRS. Incompatible layers: {}': {'es': 'Todas las capas de entrada deben utilizar el mismo SRC. Capas incompatibles: {}'},
+'Validating layer: {}': {'es': 'Validando capa: {}'},
+'{} geometry validation occurrence(s) were found.': {'es': 'Se encontraron {} ocurrencia(s) en la validación geométrica.'},
+'No geometry validation occurrences were found.': {'es': 'No se encontraron ocurrencias en la validación geométrica.'},
+'GEOMETRY VALIDATION REPORT': {'es': 'INFORME DE VALIDACIÓN GEOMÉTRICA'},
+'Individual geometry inspection': {'es': 'Inspección de la geometría individual'},
+'Evaluated features': {'es': 'Entidades evaluadas'},
+'Affected features': {'es': 'Entidades afectadas'},
+'Occurrences': {'es': 'Ocurrencias'},
+'Result': {'es': 'Resultado'},
+'NONCONFORMING': {'es': 'NO CONFORME'},
+'CONFORMING': {'es': 'CONFORME'},
+'Nonconforming': {'es': 'No conforme'},
+'Conforming': {'es': 'Conforme'},
+'1. Evaluated Data': {'es': '1. Datos evaluados'},
+'Layer': {'es': 'Capa'},
+'Features': {'es': 'Entidades'},
+'CRS': {'es': 'SRC'},
+'2. Methodology': {'es': '2. Metodología'},
+'3. Parameters': {'es': '3. Parámetros'},
+'Parameter': {'es': 'Parámetro'},
+'4. Results by Rule': {'es': '4. Resultados por regla'},
+'Rule': {'es': 'Regla'},
+'5. Automatic Interpretation': {'es': '5. Interpretación automática'},
+'Duplicated vertex tolerance': {'es': 'Tolerancia para vértices duplicados'},
+'Minimum angle': {'es': 'Ángulo mínimo'},
+'Minimum line length': {'es': 'Longitud mínima de las líneas'},
+'Minimum polygon area': {'es': 'Área mínima de los polígonos'},
+'Not evaluated': {'es': 'No evaluado'},
+'No': {'es': 'No'},
+'A complete automated inspection was performed on every feature. Each geometry was evaluated independently, without changing the source data. Spatially identifiable problems were written to a point layer, while all occurrences, including those without a valid spatial location, were recorded in a non-spatial table.': {'es': 'Se realizó una inspección completa automatizada de todas las entidades. Cada geometría fue evaluada individualmente, sin modificar los datos de origen. Los problemas identificables espacialmente se registraron en una capa de puntos, mientras que todas las ocurrencias, incluidas aquellas sin una ubicación espacial válida, se almacenaron en una tabla no espacial.'},
+'The complete automated inspection evaluated {} feature(s) from {} vector layer(s). {} occurrence(s) were identified in {} feature(s). The dataset is classified as {} for the geometry rules enabled in this execution. The input layers were not modified.': {'es': 'La inspección completa automatizada evaluó {} entidad(es) de {} capa(s) vectorial(es). Se identificaron {} ocurrencia(s) en {} entidad(es). El conjunto de datos se clasifica como {} para las reglas geométricas habilitadas en esta ejecución. Las capas de entrada no fueron modificadas.'},
 
  }
