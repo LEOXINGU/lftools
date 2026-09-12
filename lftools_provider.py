@@ -144,6 +144,8 @@ from .processing_provider.Cad_NumberPolygonsByLines import NumberPolygonsByLines
 from .processing_provider.Cad_ParcelTopologyCleanup import ParcelTopologyCleanup
 from .processing_provider.Cad_SplitPolygon import SplitPolygon
 from .processing_provider.Vect_ImportCAD import ImportCAD
+from .processing_provider.Qualy_ValidateGeometries import ValidateGeometries
+from .processing_provider.Qualy_ValidateIntraclassTopology import ValidateIntraclassTopology
 
 
 class LFToolsProvider(QgsProcessingProvider):
@@ -273,6 +275,8 @@ class LFToolsProvider(QgsProcessingProvider):
         self.addAlgorithm(ParcelTopologyCleanup())
         self.addAlgorithm(SplitPolygon())
         self.addAlgorithm(ImportCAD())
+        self.addAlgorithm(ValidateGeometries())
+        self.addAlgorithm(ValidateIntraclassTopology())
 
     def id(self):
         return 'lftools'
