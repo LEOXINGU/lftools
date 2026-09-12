@@ -1811,26 +1811,24 @@ El campo identificador único opcional se utiliza para completar ID1 e ID2 en la
 '''
 <p>This tool performs a <b>complete automated inspection</b> of individual geometries in one or more point, line, or polygon layers. This step should be completed before intraclass topological validation.</p>
 <p><b>Checks:</b></p>
-<p>
 ▪️ Null, empty, invalid, or degenerate geometries;
 ▪️ Duplicated consecutive vertices;
 ▪️ Multipart geometries and angles below the defined tolerance;
-▪️ Lines or polygons smaller than the defined thresholds.
-</p>
+▪️ Lines or polygons smaller than the defined thresholds;
+▪️ Polygon holes smaller than the minimum allowed area.
 <p><b>Outputs:</b> a point layer of located errors, a complete occurrence table, and an HTML quality report.</p>
-<p>Tolerances should consider the reference scale, input resolution, feature class, and intended use. Multipart or undersized geometries are not necessarily errors and should be technically reviewed.</p>
+<p>Tolerances should consider the reference scale, input resolution, feature class, and intended use. Multipart, undersized, or holed geometries are not necessarily errors and should be technically reviewed.</p>
 <p style="color:#b00020;"><b>Important:</b> the input layers are not modified or automatically corrected.</p>
 ''': {'es': '''
-<p>Esta herramienta realiza una <b>inspección completa automatizada</b> de las geometrías individuales de una o más capas de puntos, líneas o polígonos. Esta etapa debe completarse antes de la validación topológica intraclase.</p>
-<p><b>Verificaciones:</b></p>
-<p>
+<p>Esta herramienta realiza una <b>inspección automatizada completa</b> de las geometrías individuales de una o varias capas de puntos, líneas o polígonos. Esta etapa debe completarse antes de la validación topológica intraclase.</p>
+<p><b>Comprobaciones:</b></p>
 ▪️ Geometrías nulas, vacías, no válidas o degeneradas;
 ▪️ Vértices consecutivos duplicados;
 ▪️ Geometrías multiparte y ángulos inferiores a la tolerancia definida;
-▪️ Líneas o polígonos inferiores a las dimensiones mínimas definidas.
-</p>
-<p><b>Salidas:</b> una capa de puntos con los errores localizados, una tabla completa de ocurrencias y un informe de calidad en HTML.</p>
-<p>Las tolerancias deben considerar la escala de referencia, la resolución de los datos de entrada, la clase de la entidad y la finalidad de uso. Las geometrías multiparte o inferiores a las dimensiones mínimas no constituyen necesariamente errores y deben revisarse técnicamente.</p>
+▪️ Líneas o polígonos inferiores a los límites definidos;
+▪️ Huecos de polígonos con área inferior a la mínima permitida.
+<p><b>Salidas:</b> una capa de puntos con los errores localizados, una tabla completa de incidencias y un informe de calidad en HTML.</p>
+<p>Las tolerancias deben considerar la escala de referencia, la resolución de los datos de entrada, la clase de entidad y el uso previsto. Las geometrías multiparte, de dimensiones reducidas o con huecos no constituyen necesariamente errores y deben revisarse técnicamente.</p>
 <p style="color:#b00020;"><b>Importante:</b> las capas de entrada no se modifican ni se corrigen automáticamente.</p>
 '''},
 'Validate Geometries': {'es': 'Validar geometrías'},
@@ -1886,5 +1884,119 @@ El campo identificador único opcional se utiliza para completar ID1 e ID2 en la
 'No': {'es': 'No'},
 'A complete automated inspection was performed on every feature. Each geometry was evaluated independently, without changing the source data. Spatially identifiable problems were written to a point layer, while all occurrences, including those without a valid spatial location, were recorded in a non-spatial table.': {'es': 'Se realizó una inspección completa automatizada de todas las entidades. Cada geometría fue evaluada individualmente, sin modificar los datos de origen. Los problemas identificables espacialmente se registraron en una capa de puntos, mientras que todas las ocurrencias, incluidas aquellas sin una ubicación espacial válida, se almacenaron en una tabla no espacial.'},
 'The complete automated inspection evaluated {} feature(s) from {} vector layer(s). {} occurrence(s) were identified in {} feature(s). The dataset is classified as {} for the geometry rules enabled in this execution. The input layers were not modified.': {'es': 'La inspección completa automatizada evaluó {} entidad(es) de {} capa(s) vectorial(es). Se identificaron {} ocurrencia(s) en {} entidad(es). El conjunto de datos se clasifica como {} para las reglas geométricas habilitadas en esta ejecución. Las capas de entrada no fueron modificadas.'},
+'Hole below minimum area': {'es': 'Hueco con área inferior a la mínima'},
+'Check polygon holes below the minimum area': {'es': 'Comprobar huecos de polígonos con área inferior a la mínima'},
+'Minimum allowed hole area (square layer units)': {'es': 'Área mínima permitida para los huecos (unidades cuadradas de la capa)'},
+'Interior ring {} of polygon part {}.': {'es': 'Anillo interior {} de la parte poligonal {}.'},
+'Holes could not be inspected in feature {} of layer {}: {}': {'es': 'No se pudieron inspeccionar los huecos de la entidad {} de la capa {}: {}'},
+'Minimum allowed hole area': {'es': 'Área mínima permitida para los huecos'},
+'''
+<p>This tool performs an <b>automated intraclass topological validation</b> of one or more point, line, or polygon layers. Each layer is evaluated independently.</p>
+<p><b>Checks:</b></p>
+▪️ Coincident points and duplicated geometries;<br>
+▪️ Overlapping line segments and intersections without corresponding vertices;<br>
+▪️ Dangle ends and near disconnected ends, except those located near the optional mapping boundary;<br>
+▪️ Polygon overlaps, containment, small gaps, and missing vertices along shared borders.
+<p><b>Outputs:</b> a point layer containing all located errors and their attributes, and an HTML quality report.</p>
+<p>An optional single-polygon mapping area can be used to accept otherwise disconnected line ends located within the defined boundary tolerance.</p>
+<p>Feature identifiers are obtained automatically from each layer provider's primary key. When no primary key is declared, the internal QGIS feature ID is used. Gaps receive an occurrence ID and list the adjacent polygons, but do not receive a feature ID of their own.</p>
+<p>Distance and area thresholds must consider the reference scale, input resolution, feature class, and intended use. Some occurrences may represent intentional spatial arrangements and must be technically reviewed.</p>
+<p style="color:#b00020;"><b>Important:</b> validate and correct individual geometries before running this tool. Null, empty, or invalid geometries are ignored and reported in the execution summary. Input layers are not modified or automatically corrected.</p>
+''': {'es': '''
+<p>Esta herramienta realiza una <b>validación topológica intraclase automatizada</b> de una o varias capas de puntos, líneas o polígonos. Cada capa se evalúa de forma independiente.</p>
+<p><b>Comprobaciones:</b></p>
+▪️ Puntos coincidentes y geometrías duplicadas;<br>
+▪️ Segmentos de línea superpuestos e intersecciones sin vértices correspondientes;<br>
+▪️ Extremos colgantes y extremos próximos desconectados,, excepto los situados cerca del límite opcional del área de mapeo;<br>
+▪️ Superposiciones, contenciones, pequeños huecos y vértices ausentes en límites compartidos de polígonos.
+<p><b>Salidas:</b> una capa de puntos con todos los errores localizados y sus atributos, y un informe de calidad en HTML.</p>
+<p>Puede utilizarse un área de mapeo opcional, formada por una única entidad poligonal, para aceptar extremos de líneas desconectados situados dentro de la tolerancia definida para el límite.</p>
+<p>Los identificadores de las entidades se obtienen automáticamente de la clave primaria declarada por el proveedor de cada capa. Cuando no existe una clave primaria declarada, se utiliza el identificador interno de la entidad de QGIS. Los huecos reciben un identificador de incidencia y enumeran los polígonos adyacentes, pero no reciben un identificador de entidad propio.</p>
+<p>Las tolerancias de distancia y área deben considerar la escala de referencia, la resolución de los datos de entrada, la clase de entidad y el uso previsto. Algunas incidencias pueden representar configuraciones espaciales intencionadas y deben revisarse técnicamente.</p>
+<p style="color:#b00020;"><b>Importante:</b> valide y corrija las geometrías individuales antes de ejecutar esta herramienta. Las geometrías nulas, vacías o no válidas se ignoran y se contabilizan en el resumen de la ejecución. Las capas de entrada no se modifican ni se corrigen automáticamente.</p>
+'''},
+'Coincident points': {'es': 'Puntos coincidentes'},
+'Duplicated geometries': {'es': 'Geometrías duplicadas'},
+'Overlapping line segments': {'es': 'Segmentos de línea superpuestos'},
+'Intersection without corresponding vertex': {'es': 'Intersección sin vértice correspondiente'},
+'Dangle end': {'es': 'Extremo colgante'},
+'Near disconnected ends': {'es': 'Extremos próximos y desconectados'},
+'Polygon inside polygon': {'es': 'Polígono dentro de otro polígono'},
+'Small gap between polygons': {'es': 'Pequeño hueco entre polígonos'},
+'Missing vertex along shared border': {'es': 'Vértice ausente en el límite compartido'},
+'Validate Intraclass Topology': {'es': 'Validar topología intraclase'},
+'Unknown': {'es': 'Desconocida'},
+'Not provided': {'es': 'No proporcionada'},
+'Line': {'es': 'Línea'},
+'NONCONFORMING': {'es': 'NO CONFORME'},
+'CONFORMING': {'es': 'CONFORME'},
+'Vector layers': {'es': 'Capas vectoriales'},
+'Mapping area (optional single polygon)': {'es': 'Área de mapeo (polígono único opcional)'},
+'Mapping boundary tolerance for line ends (layer units)': {'es': 'Tolerancia del límite del área de mapeo para extremos de líneas (unidades de la capa)'},
+'Topological coincidence tolerance (layer units)': {'es': 'Tolerancia de coincidencia topológica (unidades de la capa)'},
+'Maximum distance for near disconnected ends (layer units)': {'es': 'Distancia máxima para extremos próximos y desconectados (unidades de la capa)'},
+'Minimum line overlap length to report (layer units)': {'es': 'Longitud mínima de superposición lineal que se debe informar (unidades de la capa)'},
+'Minimum polygon overlap area to report (square layer units)': {'es': 'Área mínima de superposición de polígonos que se debe informar (unidades cuadradas de la capa)'},
+'Check dangle and near disconnected line ends': {'es': 'Comprobar extremos colgantes y extremos próximos desconectados'},
+'Check small gaps between polygons': {'es': 'Comprobar pequeños huecos entre polígonos'},
+'Maximum gap area to report (square layer units; 0 reports all)': {'es': 'Área máxima del hueco que se debe informar (unidades cuadradas de la capa; 0 informa todos)'},
+'Check missing vertices along shared polygon borders': {'es': 'Comprobar vértices ausentes en límites compartidos de polígonos'},
+'Located topological errors': {'es': 'Errores topológicos localizados'},
+'Intraclass topology validation report': {'es': 'Informe de validación topológica intraclase'},
+'Select at least one vector layer!': {'es': '¡Seleccione al menos una capa vectorial!'},
+'Use a projected CRS because the validation parameters are expressed in layer units.': {'es': 'Utilice un SRC proyectado porque los parámetros de validación se expresan en unidades de la capa.'},
+'Provided': {'es': 'Proporcionada'},
+'No intraclass topology occurrences were found.': {'es': 'No se encontraron incidencias topológicas intraclase.'},
+'The native missing-vertex checker is not available; the compatible LFTools method will be used.': {'es': 'El verificador nativo de vértices ausentes no está disponible; se utilizará el método compatible de LFTools.'},
+'Missing vertices along shared borders were checked with the native QGIS algorithm.': {'es': 'Los vértices ausentes en límites compartidos se comprobaron con el algoritmo nativo de QGIS.'},
+'Nonconforming': {'es': 'No conforme'},
+'Conforming': {'es': 'Conforme'},
+'The mapping area and all input layers must use the same CRS.': {'es': 'El área de mapeo y todas las capas de entrada deben utilizar el mismo SRC.'},
+'The mapping area must contain exactly one polygon feature.': {'es': 'El área de mapeo debe contener exactamente una entidad poligonal.'},
+'The mapping area has a null or empty geometry.': {'es': 'El área de mapeo tiene una geometría nula o vacía.'},
+'The mapping area geometry is invalid. Correct it before validation.': {'es': 'La geometría del área de mapeo no es válida. Corríjala antes de la validación.'},
+'All input layers must use the same CRS. Incompatible layers: {}': {'es': 'Todas las capas de entrada deben utilizar el mismo SRC. Capas incompatibles: {}'},
+'Validating intraclass topology: {}': {'es': 'Validando topología intraclase: {}'},
+'{} intraclass topology occurrence(s) were found.': {'es': 'Se encontraron {} incidencia(s) en la validación topológica intraclase.'},
+'Vertex reported by the native QGIS missing-vertices checker.': {'es': 'Vértice informado por el verificador nativo de vértices ausentes de QGIS.'},
+'A vertex from the related polygon is missing from this shared border.': {'es': 'Falta un vértice del polígono relacionado en este límite compartido.'},
+'Potential internal gap in the polygon coverage.': {'es': 'Posible hueco interno en la cobertura de polígonos.'},
+'{} null, empty, or invalid feature(s) were ignored in layer {}.': {'es': 'Se ignoraron {} entidad(es) nula(s), vacía(s) o no válida(s) en la capa {}.'},
+'No connection with another line was found.': {'es': 'No se encontró conexión con otra línea.'},
+'The native missing-vertex checker failed ({}); the compatible LFTools method will be used.': {'es': 'El verificador nativo de vértices ausentes falló ({}); se utilizará el método compatible de LFTools.'},
+'The gap check could not be completed: {}': {'es': 'No se pudo completar la comprobación de huecos: {}'},
+'Topological coincidence tolerance': {'es': 'Tolerancia de coincidencia topológica'},
+'Near disconnected ends tolerance': {'es': 'Tolerancia para extremos próximos y desconectados'},
+'Mapping area': {'es': 'Área de mapeo'},
+'Mapping boundary tolerance': {'es': 'Tolerancia del límite del área de mapeo'},
+'Minimum line overlap length': {'es': 'Longitud mínima de superposición lineal'},
+'Minimum polygon overlap area': {'es': 'Área mínima de superposición de polígonos'},
+'Maximum gap area': {'es': 'Área máxima de los huecos'},
+'5. Automatic Interpretation': {'es': '5. Interpretación automática'},
+'Distance between points: {}': {'es': 'Distancia entre los puntos: {}'},
+'Distance to the nearest line: {}': {'es': 'Distancia hasta la línea más próxima: {}'},
+'Not evaluated': {'es': 'No evaluada'},
+'Missing corresponding vertex in feature(s): {}': {'es': 'Falta el vértice correspondiente en la(s) entidad(es): {}'},
+'Result': {'es': 'Resultado'},
+'Occurrences': {'es': 'Incidencias'},
+'Rule': {'es': 'Regla'},
+'4. Results by Rule': {'es': '4. Resultados por regla'},
+'Parameter': {'es': 'Parámetro'},
+'3. Parameters': {'es': '3. Parámetros'},
+'2. Methodology': {'es': '2. Metodología'},
+'CRS': {'es': 'SRC'},
+'Boundary exceptions': {'es': 'Excepciones en el límite'},
+'Ignored': {'es': 'Ignoradas'},
+'Evaluated': {'es': 'Evaluadas'},
+'Layer': {'es': 'Capa'},
+'1. Evaluated Data': {'es': '1. Datos evaluados'},
+'individual geometries must be validated and corrected before intraclass topology is assessed. Null, empty, or invalid geometries were ignored.': {'es': 'las geometrías individuales deben validarse y corregirse antes de evaluar la topología intraclase. Se ignoraron las geometrías nulas, vacías o no válidas.'},
+'Prerequisite:': {'es': 'Requisito previo:'},
+'Ignored features': {'es': 'Entidades ignoradas'},
+'Evaluated features': {'es': 'Entidades evaluadas'},
+'Logical consistency — intraclass level': {'es': 'Consistencia lógica — nivel intraclase'},
+'INTRACLASS TOPOLOGY VALIDATION REPORT': {'es': 'INFORME DE VALIDACIÓN TOPOLÓGICA INTRACLASE'},
+'The automated intraclass validation evaluated {} valid feature(s) in {} layer(s), ignored {} null, empty, or invalid feature(s), accepted {} disconnected line end(s) near the mapping boundary, and identified {} occurrence(s) affecting {} feature(s). The dataset is {} for the rules enabled in this execution. The input layers were not modified.': {'es': 'La validación intraclase automatizada evaluó {} entidad(es) válida(s) en {} capa(s), ignoró {} entidad(es) nula(s), vacía(s) o no válida(s), aceptó {} extremo(s) de línea desconectado(s) próximo(s) al límite del área de mapeo e identificó {} incidencia(s) que afectan a {} entidad(es). El conjunto de datos está {} para las reglas habilitadas en esta ejecución. Las capas de entrada no fueron modificadas.'},
+'Each layer was evaluated independently. Spatial relationships were compared using a spatial index and the enabled linear and area thresholds. When a mapping area was provided, disconnected line ends within the boundary tolerance were accepted and counted separately. Identifiers were obtained automatically from provider-declared primary keys, with the internal QGIS feature ID used as a fallback. The validation only identifies potential nonconformities; it does not edit the source data.': {'es': 'Cada capa se evaluó de forma independiente. Las relaciones espaciales se compararon mediante un índice espacial y los límites lineales y de área habilitados. Cuando se proporcionó un área de mapeo, los extremos de líneas desconectados situados dentro de la tolerancia del límite fueron aceptados y contabilizados por separado. Los identificadores se obtuvieron automáticamente de las claves primarias declaradas por los proveedores, utilizando como alternativa el identificador interno de la entidad de QGIS. La validación únicamente identifica posibles no conformidades; no modifica los datos de origen.'},
 
  }
