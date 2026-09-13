@@ -3,7 +3,7 @@ name=LF Tools
 qgisMinimumVersion=3.44
 qgisMaximumVersion=4.99
 description=Comprehensive solutions for cartographic production, surveying, drone mapping, GNSS data import, geospatial database management, digital image processing, and spatial analysis.
-version=2.15.1
+version=2.16.0
 author=Leandro França
 email=suporte@geoone.com.br
 
@@ -40,6 +40,7 @@ donation=https://www.paypal.com/ncp/payment/8V3C6PEAMQAYG
 # França, L. (YEAR). LFTools: Comprehensive solutions for cartographic production, surveying, drone mapping, GNSS data import, geospatial database management, digital image processing, and spatial analysis. (VERSION X.X.X) [QGIS plugin]. Retrieved from https://plugins.qgis.org/plugins/LFTools/
 
 changelog=
+  2.16.0 - Added the Validate Geometries and Validate Intraclass Topology tools with issue detection and quality report generation.
   2.15.1 - Fixed Matplotlib compatibility in the Horizontal and 3D Positional Accuracy tools, ensuring Boxplot report generation works correctly with recent QGIS versions.
   2.15.0 - Added three new tools: Parcel Topology Cleanup, Split Polygon, and Import CAD.
   2.14.1 - Improved robustness and safety for Polygon Overlap, Light Geometry Cleanup, and Connect Polygons, with better handling of problematic and multipart geometries, change auditing, and enhanced detection of topological errors.
