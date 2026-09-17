@@ -146,6 +146,7 @@ from .processing_provider.Cad_SplitPolygon import SplitPolygon
 from .processing_provider.Vect_ImportCAD import ImportCAD
 from .processing_provider.Qualy_ValidateGeometries import ValidateGeometries
 from .processing_provider.Qualy_ValidateIntraclassTopology import ValidateIntraclassTopology
+from .processing_provider.Hydro_HAND import HANDModel
 
 
 class LFToolsProvider(QgsProcessingProvider):
@@ -277,6 +278,7 @@ class LFToolsProvider(QgsProcessingProvider):
         self.addAlgorithm(ImportCAD())
         self.addAlgorithm(ValidateGeometries())
         self.addAlgorithm(ValidateIntraclassTopology())
+        self.addAlgorithm(HANDModel())
 
     def id(self):
         return 'lftools'
