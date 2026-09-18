@@ -64,7 +64,7 @@ class MagicStyles(QgsProcessingAlgorithm):
         return 'easy'
 
     def tags(self):
-        return 'GeoOne,easy,estilos,qml,styles,cotagem,sld,azimute,azimuth,distância,distance,symbology,simbologia,cotas,dimensioning,drones,VR,RV,360,raster,MDE,DEM,elevation,temperature'.split(',')
+        return 'GeoOne,easy,estilos,qml,styles,cotagem,sld,azimute,azimuth,distância,distance,symbology,simbologia,cotas,dimensioning,drones,VR,RV,360,raster,MDE,DEM,elevation,temperature,HAND,hydrology,hidrologia,flood,inundação'.split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/easy.png'))
@@ -129,7 +129,8 @@ Transforme pontos, linhas, polígonos e rasters em representações visuais pron
                 self.tr('Slope USDA/NRCS (%)', 'Declividade USDA/NRCS (%)'), # 5
                 self.tr('Slope Embrapa - Brazil (%)', 'Declividade Embrapa(%)'), # 6
                 self.tr('Slope CAR - Brazil (°)', 'Declividade CAR (°)'), # 7
-                self.tr('Aspect - Flow Direction', 'Aspecto - Direção de escoamento') # 8
+                self.tr('Aspect - Flow Direction', 'Aspecto - Direção de escoamento'), # 8
+                self.tr('HAND - Flood susceptibility', 'HAND - Suscetibilidade à inundação') # 9
             ]
         }
 
@@ -211,7 +212,8 @@ Transforme pontos, linhas, polígonos e rasters em representações visuais pron
                 5: 'raster_slope_usda_nrcs_prof_leandro',
                 6: 'raster_slope_embrapa_prof_leandro',
                 7: 'raster_slope_car_degrees_prof_leandro',
-                8: 'raster_relief_aspect_prof_leandro'
+                8: 'raster_relief_aspect_prof_leandro',
+                9: 'raster_hand_model'
             }
         }
 
