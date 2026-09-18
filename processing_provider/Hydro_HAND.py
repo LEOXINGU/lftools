@@ -22,22 +22,25 @@ import os
 import numpy as np
 from osgeo import gdal, osr
 
-from qgis.PyQt.QtCore import QMetaType
-from qgis.PyQt.QtGui import QIcon
+from qgis.PyQt.QtCore import QMetaType, QTimer
+from qgis.PyQt.QtGui import QColor, QIcon
 from qgis.core import (
     Qgis,
     QgsApplication,
+    QgsCategorizedSymbolRenderer,
     QgsDistanceArea,
     QgsFeature,
     QgsFeatureSink,
     QgsField,
     QgsFields,
     QgsGeometry,
+    QgsLineSymbol,
     QgsPointXY,
     QgsProcessing,
     QgsProcessingAlgorithm,
     QgsProcessingException,
     QgsProcessingLayerPostProcessorInterface,
+    QgsProcessingUtils,
     QgsProcessingParameterBoolean,
     QgsProcessingParameterEnum,
     QgsProcessingParameterFeatureSink,
@@ -45,6 +48,7 @@ from qgis.core import (
     QgsProcessingParameterRasterDestination,
     QgsProcessingParameterRasterLayer,
     QgsProject,
+    QgsRendererCategory,
     QgsUnitTypes,
     QgsWkbTypes,
 )
@@ -57,6 +61,21 @@ from lftools.translations.translate import translate
 
 # QGIS requires layer post-processors to remain alive until the outputs load.
 _POST_PROCESSORS = []
+_OUTPUT_LAYER_IDS = {}
+_EXPECTED_OUTPUTS = set()
+_OUTPUT_GROUP = None
+_OUTPUT_GROUP_NAME = ''
+
+
+# Display order in the QGIS Layers panel (top to bottom).
+_OUTPUT_ORDER = (
+    'DRAINAGE_VECTOR',
+    'HAND',
+    'DRAINAGE_RASTER',
+    'FLOW_ACCUMULATION',
+    'FLOW_DIRECTION',
+    'CONDITIONED_DEM',
+)
 
 
 def _build_downstream(direction, valid):
@@ -254,78 +273,59 @@ class HANDModel(QgsProcessingAlgorithm):
         return QIcon(
             os.path.join(
                 os.path.dirname(os.path.dirname(__file__)),
-                'images/contours.png',
+                'images/hydrology.png',
             )
         )
 
-    txt_en = '''
-    <p>This tool generates a complete <b>Height Above Nearest Drainage (HAND)</b>
-    workflow from a Digital Elevation Model (DEM). The DEM can be hydrologically
-    conditioned with GRASS <i>r.fill.dir</i>; GRASS <i>r.watershed</i> then
-    calculates D8 flow direction and flow accumulation. The drainage network is
-    defined by a minimum contributing area and the HAND raster is calculated by
-    associating every terrain cell with the first drainage cell reached along
-    its D8 flow path.</p>
+    txt_en = '''Generates the <b>Height Above Nearest Drainage (HAND)</b> model from a Digital Elevation Model (DEM). HAND is the vertical difference between each terrain cell and the first drainage cell reached downstream along its D8 flow path.
+<b>Processing workflow</b>
+1. Optional hydrological conditioning of the DEM with GRASS <i>r.fill.dir</i>.
+2. D8 flow direction and flow accumulation with GRASS <i>r.watershed</i>.
+3. Drainage extraction using a minimum contributing-area threshold.
+4. HAND calculation and Strahler and Shreve stream ordering.
+<b>Outputs</b>
+Conditioned DEM; D8 flow direction; flow accumulation; drainage raster; ordered vector drainage network; and HAND raster.
+<b>Important information</b>
+&#8226; Both projected and geographic CRS are accepted, but DEM elevations must be expressed in metres.
+&#8226; The drainage threshold may be entered as number of cells, km&sup2; or hectares. For a geographic CRS, area conversions use the geodesic area of a cell at the centre of the DEM and are therefore approximate.
+&#8226; Flow paths leaving the valid DEM before reaching the extracted drainage can remain as NoData, use the outlet-cell elevation, or use a fixed reference level, such as mean sea level.
+&#8226; HAND is a terrain descriptor. By itself, it does not represent a hydraulic flood simulation.
+<b>References</b>
+Rennó, C. D. et al. (2008). <i>HAND, a new terrain descriptor using SRTM-DEM: Mapping terra-firme rainforest environments in Amazonia</i>. Remote Sensing of Environment, 112(9), 3469&ndash;3481. <a href="https://doi.org/10.1016/j.rse.2008.03.018">DOI: 10.1016/j.rse.2008.03.018</a>.
+Nobre, A. D. et al. (2011). <i>Height Above the Nearest Drainage &mdash; a hydrologically relevant new terrain model</i>. Journal of Hydrology, 404(1&ndash;2), 13&ndash;29. <a href="https://doi.org/10.1016/j.jhydrol.2011.03.051">DOI: 10.1016/j.jhydrol.2011.03.051</a>.
+GRASS GIS documentation: <a href="https://grass.osgeo.org/grass-stable/manuals/r.fill.dir.html"><i>r.fill.dir</i></a> and <a href="https://grass.osgeo.org/grass-stable/manuals/r.watershed.html"><i>r.watershed</i></a>.'''
 
-    <p>The tool outputs the conditioned DEM, D8 flow direction, flow accumulation,
-    drainage raster, vector drainage network with Strahler and Shreve ordering,
-    and the HAND raster.</p>
+    txt_pt = '''Gera o modelo <b>HAND (Height Above Nearest Drainage)</b>, ou Altura Acima da Drenagem mais Próxima, a partir de um Modelo Digital de Elevação (MDE). O HAND corresponde à diferença vertical entre cada célula do terreno e a primeira célula de drenagem alcançada a jusante pelo seu caminho de fluxo D8.
+<b>Fluxo de processamento</b>
+1. Condicionamento hidrológico opcional do MDE com o GRASS <i>r.fill.dir</i>.
+2. Direção de fluxo D8 e acumulação de fluxo com o GRASS <i>r.watershed</i>.
+3. Extração da drenagem pelo limiar de área mínima de contribuição.
+4. Cálculo do HAND e ordenamento da drenagem pelos métodos de Strahler e Shreve.
+<b>Produtos gerados</b>
+MDE condicionado; direção de fluxo D8; acumulação de fluxo; drenagem raster; rede de drenagem vetorial ordenada; e raster HAND.
+<b>Informações importantes</b>
+&#8226; São aceitos SRC projetado e SRC geográfico, mas as altitudes do MDE devem estar expressas em metros.
+&#8226; O limiar da drenagem pode ser informado em número de células, km&sup2; ou hectares. Em SRC geográfico, a conversão de área utiliza a área geodésica de uma célula no centro do MDE e, portanto, é aproximada.
+&#8226; Caminhos de fluxo que saem do MDE válido antes de alcançar a drenagem extraída podem permanecer como NoData, utilizar a cota da célula de saída ou utilizar um nível de referência fixo, como o nível médio do mar.
+&#8226; O HAND é um descritor do terreno. Isoladamente, ele não representa uma simulação hidráulica de inundação.
+<b>Referências</b>
+Rennó, C. D. et al. (2008). <i>HAND, a new terrain descriptor using SRTM-DEM: Mapping terra-firme rainforest environments in Amazonia</i>. Remote Sensing of Environment, 112(9), 3469&ndash;3481. <a href="https://doi.org/10.1016/j.rse.2008.03.018">DOI: 10.1016/j.rse.2008.03.018</a>.
+Nobre, A. D. et al. (2011). <i>Height Above the Nearest Drainage &mdash; a hydrologically relevant new terrain model</i>. Journal of Hydrology, 404(1&ndash;2), 13&ndash;29. <a href="https://doi.org/10.1016/j.jhydrol.2011.03.051">DOI: 10.1016/j.jhydrol.2011.03.051</a>.
+Documentação do GRASS GIS: <a href="https://grass.osgeo.org/grass-stable/manuals/r.fill.dir.html"><i>r.fill.dir</i></a>  e <a href="https://grass.osgeo.org/grass-stable/manuals/r.watershed.html"><i>r.watershed</i></a>.'''
 
-    <p><b>Important:</b> projected and geographic CRS are accepted. Elevations
-    should be in metres. The threshold represents the minimum upstream
-    contributing area and is expressed by default as a number of raster cells.
-    For geographic CRS, conversions to km²/ha use the geodesic area of a cell at
-    the centre of the DEM and are therefore approximate. Flow paths that leave
-    the valid DEM without reaching the extracted network can remain as NoData,
-    use the outlet-cell elevation, or use a fixed reference level such as mean
-    sea level. HAND is a terrain descriptor and is not, by itself, a hydraulic
-    flood simulation.</p>
-
-    <p><b>References:</b> Nobre et al. (2011),
-    <i>Height Above the Nearest Drainage — a hydrologically relevant new terrain
-    model</i>, DOI 10.1016/j.jhydrol.2011.03.051; GRASS GIS documentation for
-    <i>r.fill.dir</i> and <i>r.watershed</i>.</p>
-    '''
-
-    txt_pt = '''
-    <p>Esta ferramenta executa o fluxo completo do modelo <b>HAND — Altura Acima
-    da Drenagem mais Próxima</b> a partir de um Modelo Digital de Elevação (MDE).
-    O MDE pode ser condicionado hidrologicamente com o GRASS <i>r.fill.dir</i>;
-    em seguida, o GRASS <i>r.watershed</i> calcula a direção de fluxo D8 e a
-    acumulação de fluxo. A rede de drenagem é definida por uma área mínima de
-    contribuição e o raster HAND é calculado associando cada célula do terreno à
-    primeira célula de drenagem alcançada ao longo do seu caminho de fluxo D8.</p>
-
-    <p>A ferramenta gera o MDE condicionado, a direção de fluxo D8, a acumulação
-    de fluxo, a drenagem raster, a drenagem vetorial com ordenamento de Strahler
-    e Shreve e o raster HAND.</p>
-
-    <p><b>Importante:</b> são aceitos SRC projetado e SRC geográfico. As altitudes
-    devem estar em metros. O limiar representa a área mínima contribuinte a
-    montante e, por padrão, é expresso em número de células do raster. Para SRC
-    geográfico, as conversões para km²/ha utilizam a área geodésica de uma célula
-    no centro do MDE e, portanto, são aproximadas. Caminhos de fluxo que saem do
-    MDE válido sem alcançar a rede extraída podem permanecer como NoData, utilizar
-    a cota da célula de saída ou um nível de referência fixo, como o nível médio
-    do mar. O HAND é um descritor do terreno e não constitui, isoladamente, uma
-    simulação hidráulica de inundação.</p>
-
-    <p><b>Referências:</b> Nobre et al. (2011),
-    <i>Height Above the Nearest Drainage — a hydrologically relevant new terrain
-    model</i>, DOI 10.1016/j.jhydrol.2011.03.051; documentação do GRASS GIS dos
-    módulos <i>r.fill.dir</i> e <i>r.watershed</i>.</p>
-    '''
+    figure = 'images/tutorial/hydrology_hand.jpg'
 
     def shortHelpString(self):
-        social_BW = Imgs().social_BW
-        footer = '''
-        <div align="right">
-          <p align="right"><b>'''+self.tr(
-              'Author: Leandro Franca',
-              'Autor: Leandro França',
-          )+'''</b></p>'''+social_BW+'''</div>
-        '''
-        return self.tr(self.txt_en, self.txt_pt) + footer
+            social_BW = Imgs().social_BW
+            footer = '''<div align="center">
+                          <img src="'''+ os.path.join(os.path.dirname(os.path.dirname(__file__)), self.figure) +'''">
+                          </div>
+                          <div align="right">
+                          <p align="right">
+                          <b>'''+self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
+                          </p>'''+ social_BW + '''</div>
+                        </div>'''
+            return self.tr(self.txt_en, self.txt_pt) + footer
 
     INPUT = 'INPUT'
     CONDITION = 'CONDITION'
@@ -520,6 +520,7 @@ class HANDModel(QgsProcessingAlgorithm):
             parameters, self.DRAINAGE_RASTER, context
         )
         hand_path = self.parameterAsOutputLayer(parameters, self.HAND, context)
+        self.HAND_PATH = hand_path
 
         self._validate_input_raster(source_path)
         is_geographic = dem_layer.crs().isGeographic()
@@ -885,7 +886,11 @@ class HANDModel(QgsProcessingAlgorithm):
             self.HAND: hand_path,
         }
 
-        self._set_output_names(context, results)
+        group_name = self.tr(
+            'HAND Model — {}',
+            'Modelo HAND — {}',
+        ).format(dem_layer.name())
+        self._set_output_postprocessors(context, results, group_name)
         feedback.pushInfo(
             self.tr(
                 'Operation completed successfully!',
@@ -899,6 +904,51 @@ class HANDModel(QgsProcessingAlgorithm):
             )
         )
         return results
+
+    def postProcessAlgorithm(self, context, feedback):
+        """Apply the HAND QML through LFTools Magic Styles.
+
+        Layer naming, drainage symbology, visibility and panel order are
+        completed by the output post-processors after QGIS loads each layer.
+        """
+        feedback.pushInfo(
+            self.tr(
+                'Post-processing: applying the HAND raster style...',
+                'Pós-processamento: aplicando a simbologia do raster HAND...',
+            )
+        )
+        hand_layer = QgsProcessingUtils.mapLayerFromString(
+            self.HAND_PATH, context
+        )
+        if hand_layer is None:
+            feedback.pushWarning(
+                self.tr(
+                    'The HAND layer could not be loaded to apply its style.',
+                    'Não foi possível carregar a camada HAND para aplicar sua simbologia.',
+                )
+            )
+            return {}
+
+        processing.run(
+            'lftools:magicstyles',
+            {
+                'LAYER': hand_layer,
+                'STYLE_POINT': 0,
+                'STYLE_LINE': 0,
+                'STYLE_POLYGON': 0,
+                'STYLE_RASTER': 9,
+            },
+            context=context,
+            feedback=feedback,
+            is_child_algorithm=True,
+        )
+        feedback.pushInfo(
+            self.tr(
+                'Post-processing: HAND raster style applied.',
+                'Pós-processamento: simbologia do raster HAND aplicada.',
+            )
+        )
+        return {}
 
     def _grass_algorithm(self, module_name):
         registry = QgsApplication.processingRegistry()
@@ -1264,7 +1314,8 @@ class HANDModel(QgsProcessingAlgorithm):
         )
         return QgsPointXY(x, y)
 
-    def _set_output_names(self, context, results):
+    def _set_output_postprocessors(self, context, results, group_name):
+        global _OUTPUT_GROUP, _OUTPUT_GROUP_NAME
         names = {
             self.CONDITIONED_DEM: self.tr(
                 'Conditioned DEM', 'MDE condicionado'
@@ -1284,22 +1335,158 @@ class HANDModel(QgsProcessingAlgorithm):
             self.HAND: self.tr('HAND', 'HAND'),
         }
         _POST_PROCESSORS.clear()
+        _OUTPUT_LAYER_IDS.clear()
+        _EXPECTED_OUTPUTS.clear()
+        _OUTPUT_GROUP = None
+        _OUTPUT_GROUP_NAME = group_name
         for output_name, destination in results.items():
             if not destination or not context.willLoadLayerOnCompletion(destination):
                 continue
-            renamer = LayerRenamer(names[output_name])
-            _POST_PROCESSORS.append(renamer)
+            _EXPECTED_OUTPUTS.add(output_name)
+            postprocessor = HandOutputPostProcessor(
+                output_name=output_name,
+                layer_name=names[output_name],
+            )
+            _POST_PROCESSORS.append(postprocessor)
             context.layerToLoadOnCompletionDetails(
                 destination
-            ).setPostProcessor(renamer)
+            ).setPostProcessor(postprocessor)
 
 
-class LayerRenamer(QgsProcessingLayerPostProcessorInterface):
+class HandOutputPostProcessor(QgsProcessingLayerPostProcessorInterface):
 
-    def __init__(self, layer_name):
+    def __init__(self, output_name, layer_name):
+        self.output_name = output_name
         self.name = layer_name
         super().__init__()
 
     def postProcessLayer(self, layer, context, feedback):
-        del context, feedback
+        del context
         layer.setName(self.name)
+        _OUTPUT_LAYER_IDS[self.output_name] = layer.id()
+        feedback.pushInfo(
+            self._tr(
+                'Post-processing output: {}.',
+                'Pós-processando a saída: {}.',
+            ).format(self.name)
+        )
+
+        if self.output_name == 'DRAINAGE_VECTOR':
+            self._apply_drainage_style(layer, feedback)
+
+        self._organize_output_layers()
+        QTimer.singleShot(0, self._organize_output_layers)
+        if _EXPECTED_OUTPUTS.issubset(_OUTPUT_LAYER_IDS):
+            feedback.pushInfo(
+                self._tr(
+                    'Post-processing completed: output group, layer order and visibility configured.',
+                    'Pós-processamento concluído: grupo de saída, ordem e visibilidade das camadas configurados.',
+                )
+            )
+
+    @staticmethod
+    def _tr(*strings):
+        return translate(strings, QgsApplication.locale()[:2])
+
+    @staticmethod
+    def _apply_drainage_style(layer, feedback):
+        field_index = layer.fields().indexFromName('strahler')
+        if field_index < 0:
+            feedback.pushWarning(
+                'The strahler field was not found; the drainage style was not applied.'
+            )
+            return
+
+        widths = {
+            1: 0.25,
+            2: 0.40,
+            3: 0.60,
+            4: 0.85,
+        }
+        values = sorted(
+            int(value)
+            for value in layer.uniqueValues(field_index)
+            if value is not None
+        )
+        categories = []
+        for order in values:
+            width = widths.get(order, 1.10)
+            symbol = QgsLineSymbol.createSimple(
+                {
+                    'color': QColor('#1565c0').name(),
+                    'width': str(width),
+                    'line_style': 'solid',
+                    'capstyle': 'round',
+                    'joinstyle': 'round',
+                }
+            )
+            label = 'Strahler {}'.format(order)
+            categories.append(QgsRendererCategory(order, symbol, label))
+
+        if not categories:
+            feedback.pushWarning(
+                'No valid Strahler values were found; the drainage style was not applied.'
+            )
+            return
+
+        layer.setRenderer(
+            QgsCategorizedSymbolRenderer('strahler', categories)
+        )
+        layer.triggerRepaint()
+        feedback.pushInfo(
+            HandOutputPostProcessor._tr(
+                'Drainage symbology applied using the Strahler order.',
+                'Simbologia da drenagem aplicada pela ordem de Strahler.',
+            )
+        )
+
+    @staticmethod
+    def _organize_output_layers():
+        root = QgsProject.instance().layerTreeRoot()
+        group = HandOutputPostProcessor._output_group(root)
+        ordered_nodes = []
+
+        for output_name in _OUTPUT_ORDER:
+            layer_id = _OUTPUT_LAYER_IDS.get(output_name)
+            node = root.findLayer(layer_id) if layer_id else None
+            if node is not None:
+                ordered_nodes.append((output_name, node))
+
+        if not ordered_nodes:
+            return
+
+        clones = [
+            (output_name, node.clone())
+            for output_name, node in ordered_nodes
+        ]
+        # Insert the clones first. Removing all original nodes before insertion
+        # makes QGIS interpret the temporary absence as removal of the layers
+        # from the project.
+        for index, (output_name, clone) in enumerate(clones):
+            group.insertChildNode(index, clone)
+            clone.setItemVisibilityChecked(
+                output_name in ('DRAINAGE_VECTOR', 'HAND')
+            )
+
+        for output_name, node in ordered_nodes:
+            parent = node.parent()
+            if parent is not None:
+                parent.removeChildNode(node)
+
+    @staticmethod
+    def _output_group(root):
+        global _OUTPUT_GROUP
+
+        if _OUTPUT_GROUP is not None and _OUTPUT_GROUP.parent() is not None:
+            return _OUTPUT_GROUP
+
+        base_name = _OUTPUT_GROUP_NAME or 'Modelo HAND'
+        group_name = base_name
+        suffix = 2
+        while root.findGroup(group_name) is not None:
+            group_name = '{} ({})'.format(base_name, suffix)
+            suffix += 1
+
+        _OUTPUT_GROUP = root.insertGroup(0, group_name)
+        _OUTPUT_GROUP.setExpanded(True)
+        return _OUTPUT_GROUP
