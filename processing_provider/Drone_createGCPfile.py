@@ -16,7 +16,7 @@ __date__ = '2021-11-08'
 __copyright__ = '(C) 2021, Leandro França'
 
 from qgis.core import (QgsApplication,
-                       QgsProcessingParameterVectorLayer,
+                       QgsProcessingParameterFeatureSource,
                        Qgis,
                        QgsProcessingParameterField,
                        QgsProcessingParameterCrs,
@@ -91,7 +91,7 @@ class CreateGCPfile(QgsProcessingAlgorithm):
 
     def initAlgorithm(self, config=None):
         self.addParameter(
-            QgsProcessingParameterVectorLayer(
+            QgsProcessingParameterFeatureSource(
                 self.POINTS,
                 self.tr('Point Layer', 'Camada de Pontos'),
                 [Qgis.ProcessingSourceType.TypeVectorPoint]
@@ -153,7 +153,7 @@ class CreateGCPfile(QgsProcessingAlgorithm):
 
     def processAlgorithm(self, parameters, context, feedback):
 
-        pontos = self.parameterAsVectorLayer(
+        pontos = self.parameterAsSource(
             parameters,
             self.POINTS,
             context
@@ -184,7 +184,7 @@ class CreateGCPfile(QgsProcessingAlgorithm):
 
         if out_CRS.isValid():
             # Transformação de coordenadas
-            coordinateTransformer = QgsCoordinateTransform(pontos.crs(), out_CRS, QgsProject.instance())
+            coordinateTransformer = QgsCoordinateTransform(pontos.sourceCrs(), out_CRS, QgsProject.instance())
 
         decimal = self.parameterAsInt(
             parameters,
