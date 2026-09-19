@@ -17,7 +17,7 @@ __copyright__ = '(C) 2025, Leandro França'
 
 from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (QgsApplication,
-                       QgsProcessingParameterVectorLayer,
+                       QgsProcessingParameterFeatureSource,
                        Qgis,
                        QgsFields,
                        QgsField,
@@ -96,7 +96,7 @@ class ExportToCloudCompare(QgsProcessingAlgorithm):
 
     def initAlgorithm(self, config=None):
         self.addParameter(
-            QgsProcessingParameterVectorLayer(
+            QgsProcessingParameterFeatureSource(
                 self.POINTS,
                 self.tr('Point Layer', 'Camada de Pontos'),
                 [Qgis.ProcessingSourceType.TypeVectorPoint]
@@ -138,7 +138,7 @@ class ExportToCloudCompare(QgsProcessingAlgorithm):
 
     def processAlgorithm(self, parameters, context, feedback):
 
-        pontos = self.parameterAsVectorLayer(
+        pontos = self.parameterAsSource(
             parameters,
             self.POINTS,
             context
@@ -169,7 +169,7 @@ class ExportToCloudCompare(QgsProcessingAlgorithm):
 
         if out_CRS.isValid():
             # Transformação de coordenadas
-            coordinateTransformer = QgsCoordinateTransform(pontos.crs(), out_CRS, QgsProject.instance())
+            coordinateTransformer = QgsCoordinateTransform(pontos.sourceCrs(), out_CRS, QgsProject.instance())
 
         filepath = self.parameterAsFile(
             parameters,
@@ -206,7 +206,7 @@ class ExportToCloudCompare(QgsProcessingAlgorithm):
             out_CRS if out_CRS.isValid() else pontos.sourceCrs()
         )
         if sink is None:
-            raise QgsProcessingException(self.invalidSinkError(parameters, self.ANGLES))
+            raise QgsProcessingException(self.invalidSinkError(parameters, self.LAYER))
 
         # Lista de Cores
         if pontos.featureCount() > 0:
