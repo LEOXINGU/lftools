@@ -147,6 +147,8 @@ from .processing_provider.Vect_ImportCAD import ImportCAD
 from .processing_provider.Qualy_ValidateGeometries import ValidateGeometries
 from .processing_provider.Qualy_ValidateIntraclassTopology import ValidateIntraclassTopology
 from .processing_provider.Hydro_HAND import HANDModel
+from .processing_provider.Hydro_Drainage import DrainageNetwork
+from .processing_provider.Hydro_Watershed import WatershedDelineation
 
 
 class LFToolsProvider(QgsProcessingProvider):
@@ -279,6 +281,9 @@ class LFToolsProvider(QgsProcessingProvider):
         self.addAlgorithm(ValidateGeometries())
         self.addAlgorithm(ValidateIntraclassTopology())
         self.addAlgorithm(HANDModel())
+        self.addAlgorithm(DrainageNetwork())
+        self.addAlgorithm(WatershedDelineation())
+        
 
     def id(self):
         return 'lftools'
