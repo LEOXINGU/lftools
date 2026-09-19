@@ -18,13 +18,15 @@ __copyright__ = '(C) 2026, Leandro França'
 
 from collections import Counter
 from datetime import datetime
-from math import acos, degrees, hypot, isfinite
+from math import acos, degrees, floor, hypot, isfinite
 import os
 
 from qgis.PyQt.QtCore import QMetaType
 from qgis.PyQt.QtGui import QIcon, QColor
 from qgis.core import (
     QgsApplication,
+    QgsCoordinateReferenceSystem,
+    QgsCoordinateTransform,
     QgsFeature,
     QgsFeatureSink,
     QgsField,
@@ -40,6 +42,7 @@ from qgis.core import (
     QgsProcessingParameterNumber,
     QgsProcessingUtils,
     QgsPointXY,
+    QgsRectangle,
     QgsSettings,
     QgsVectorLayerSimpleLabeling,
     QgsWkbTypes,
@@ -125,6 +128,7 @@ class ValidateGeometries(QgsProcessingAlgorithm):
 ▪️ Lines or polygons smaller than the defined thresholds;
 ▪️ Polygon holes smaller than the minimum allowed area.
 <p><b>Outputs:</b> a point layer of located errors, a complete occurrence table, and an HTML quality report.</p>
+<p>Linear tolerances are expressed in <b>metres</b>, area thresholds in <b>square metres</b>, and angles in degrees. Geographic and projected CRS are accepted; when necessary, the tool creates an internal local metric CRS for the measurements.</p>
 <p>Tolerances should consider the reference scale, input resolution, feature class, and intended use. Multipart, undersized, or holed geometries are not necessarily errors and should be technically reviewed.</p>
 <p style="color:#b00020;"><b>Important:</b> the input layers are not modified or automatically corrected.</p>
 '''
@@ -138,6 +142,7 @@ class ValidateGeometries(QgsProcessingAlgorithm):
 ▪️ Linhas ou polígonos inferiores às dimensões mínimas definidas;
 ▪️ Buracos em polígonos inferiores à área mínima permitida.
 <p><b>Saídas:</b> camada pontual de erros localizados, tabela completa de ocorrências e relatório de qualidade em HTML.</p>
+<p>As tolerâncias lineares são expressas em <b>metros</b>, os limites de área em <b>metros quadrados</b> e os ângulos em graus. São aceitos SRC geográficos e projetados; quando necessário, a ferramenta cria internamente um SRC métrico local para realizar as medições.</p>
 <p>As tolerâncias devem considerar a escala de referência, a resolução do insumo, a classe da feição e a finalidade de utilização. Geometrias multipartes, inferiores às dimensões mínimas ou com buracos não constituem necessariamente erros e devem ser analisadas tecnicamente.</p>
 <p style="color:#b00020;"><b>Importante:</b> as camadas de entrada não são modificadas nem corrigidas automaticamente.</p>
 '''
@@ -195,8 +200,8 @@ class ValidateGeometries(QgsProcessingAlgorithm):
         self.addParameter(QgsProcessingParameterNumber(
             self.DUPLICATE_TOLERANCE,
             self.tr(
-                'Tolerance for duplicated consecutive vertices (layer units)',
-                'Tolerância para vértices consecutivos duplicados (unidades da camada)'
+                'Tolerance for duplicated consecutive vertices (m)',
+                'Tolerância para vértices consecutivos duplicados (m)'
             ),
             type=QgsProcessingParameterNumber.Type.Double,
             defaultValue=duplicate_tolerance,
@@ -242,8 +247,8 @@ class ValidateGeometries(QgsProcessingAlgorithm):
         self.addParameter(QgsProcessingParameterNumber(
             self.MIN_LENGTH,
             self.tr(
-                'Minimum line length (layer units)',
-                'Comprimento mínimo das linhas (unidades da camada)'
+                'Minimum line length (m)',
+                'Comprimento mínimo das linhas (m)'
             ),
             type=QgsProcessingParameterNumber.Type.Double,
             defaultValue=min_length,
@@ -253,8 +258,8 @@ class ValidateGeometries(QgsProcessingAlgorithm):
         self.addParameter(QgsProcessingParameterNumber(
             self.MIN_AREA,
             self.tr(
-                'Minimum polygon area (square layer units)',
-                'Área mínima dos polígonos (unidades quadradas da camada)'
+                'Minimum polygon area (m²)',
+                'Área mínima dos polígonos (m²)'
             ),
             type=QgsProcessingParameterNumber.Type.Double,
             defaultValue=min_area,
@@ -273,8 +278,8 @@ class ValidateGeometries(QgsProcessingAlgorithm):
         self.addParameter(QgsProcessingParameterNumber(
             self.MIN_HOLE_AREA,
             self.tr(
-                'Minimum allowed hole area (square layer units)',
-                'Área mínima permitida para buracos (unidades quadradas da camada)'
+                'Minimum allowed hole area (m²)',
+                'Área mínima permitida para buracos (m²)'
             ),
             type=QgsProcessingParameterNumber.Type.Double,
             defaultValue=min_hole_area,
@@ -304,6 +309,86 @@ class ValidateGeometries(QgsProcessingAlgorithm):
             ),
             self.tr('HTML files (*.html)')
         ))
+
+    def _metric_working_context(self, layers, context):
+        """Return a metric working CRS and optional forward/back transforms."""
+        source_crs = layers[0].crs()
+        if not source_crs.isValid():
+            raise QgsProcessingException(self.tr(
+                'The input CRS is invalid or undefined.',
+                'O SRC de entrada é inválido ou não está definido.'
+            ))
+
+        if (
+            not source_crs.isGeographic()
+            and source_crs.mapUnits() == Qgis.DistanceUnit.Meters
+        ):
+            return source_crs, None, None
+
+        extent = QgsRectangle(layers[0].extent())
+        for layer in layers[1:]:
+            extent.combineExtentWith(layer.extent())
+        if extent.isNull():
+            raise QgsProcessingException(self.tr(
+                'A local metric CRS could not be determined from the invalid input extent.',
+                'Não foi possível determinar um SRC métrico local a partir da extensão inválida das entradas.'
+            ))
+
+        geographic_crs = QgsCoordinateReferenceSystem.fromEpsgId(4326)
+        center = extent.center()
+        try:
+            if source_crs != geographic_crs:
+                center = QgsCoordinateTransform(
+                    source_crs, geographic_crs, context.transformContext()
+                ).transform(center)
+        except Exception as error:
+            raise QgsProcessingException(self.tr(
+                'The input extent could not be transformed to determine a local metric CRS: {}',
+                'A extensão de entrada não pôde ser transformada para determinar um SRC métrico local: {}'
+            ).format(str(error)))
+
+        longitude = center.x()
+        latitude = center.y()
+        if not (-180.0 <= longitude <= 180.0 and -80.0 <= latitude <= 84.0):
+            raise QgsProcessingException(self.tr(
+                'The input centre is outside the area supported by the temporary UTM CRS.',
+                'O centro das entradas está fora da área suportada pelo SRC UTM temporário.'
+            ))
+        zone = max(1, min(60, int(floor((longitude + 180.0) / 6.0)) + 1))
+        epsg = (32600 if latitude >= 0 else 32700) + zone
+        working_crs = QgsCoordinateReferenceSystem.fromEpsgId(epsg)
+        if not working_crs.isValid():
+            raise QgsProcessingException(self.tr(
+                'The local metric CRS EPSG:{} could not be created.',
+                'Não foi possível criar o SRC métrico local EPSG:{}.'
+            ).format(epsg))
+
+        return (
+            working_crs,
+            QgsCoordinateTransform(
+                source_crs, working_crs, context.transformContext()
+            ),
+            QgsCoordinateTransform(
+                working_crs, source_crs, context.transformContext()
+            )
+        )
+
+    def _metric_geometry(self, geometry, transform):
+        metric_geometry = QgsGeometry(geometry)
+        if transform is not None:
+            try:
+                result = metric_geometry.transform(transform)
+                if result != Qgis.GeometryOperationResult.Success:
+                    raise ValueError(self.tr(
+                        'geometry transformation returned status {}',
+                        'a transformação da geometria retornou o estado {}'
+                    ).format(result))
+            except Exception as error:
+                raise QgsProcessingException(self.tr(
+                    'A geometry could not be transformed to the metric working CRS: {}',
+                    'Uma geometria não pôde ser transformada para o SRC métrico de trabalho: {}'
+                ).format(str(error)))
+        return metric_geometry
 
     @staticmethod
     def _same_point(point_a, point_b, tolerance):
@@ -385,6 +470,20 @@ class ValidateGeometries(QgsProcessingAlgorithm):
                 'All input layers must use the same CRS. Incompatible layers: {}',
                 'Todas as camadas de entrada devem utilizar o mesmo SRC. Camadas incompatíveis: {}'
             ).format(', '.join(incompatible_layers)))
+
+        working_crs, to_metric, _from_metric = self._metric_working_context(
+            layers, context
+        )
+        if to_metric is None:
+            feedback.pushInfo(self.tr(
+                'Measurements will use the input CRS in metres ({}).',
+                'As medições utilizarão o SRC de entrada em metros ({}).'
+            ).format(working_crs.authid()))
+        else:
+            feedback.pushInfo(self.tr(
+                'Measurements will use the local metric working CRS {}. Output locations remain in the input CRS.',
+                'As medições utilizarão o SRC métrico local de trabalho {}. As localizações de saída permanecem no SRC de entrada.'
+            ).format(working_crs.authid()))
 
         tolerance = self.parameterAsDouble(
             parameters, self.DUPLICATE_TOLERANCE, context
@@ -514,6 +613,8 @@ class ValidateGeometries(QgsProcessingAlgorithm):
                         feedback.setProgress(int(processed * 100.0 / total_features))
                     continue
 
+                metric_geometry = self._metric_geometry(geometry, to_metric)
+
                 # In current PyQGIS bindings validateGeometry() returns the
                 # error list directly. Some older bindings exposed the C++
                 # output-argument form, so retain a compatibility fallback.
@@ -548,58 +649,82 @@ class ValidateGeometries(QgsProcessingAlgorithm):
                 geometry_type = QgsWkbTypes.geometryType(geometry.wkbType())
                 anchor = self._first_vertex(geometry)
 
-                if geometry_type == QgsWkbTypes.LineGeometry and geometry.length() == 0:
+                if (
+                    geometry_type == QgsWkbTypes.LineGeometry
+                    and metric_geometry.length() == 0
+                ):
                     register('VGE003', layer, feature_id, point=anchor, value=0.0)
-                elif geometry_type == QgsWkbTypes.PolygonGeometry and geometry.area() == 0:
+                elif (
+                    geometry_type == QgsWkbTypes.PolygonGeometry
+                    and metric_geometry.area() == 0
+                ):
                     register('VGE003', layer, feature_id, point=anchor, value=0.0)
 
                 if check_multipart and geometry.isMultipart():
                     register('VGE005', layer, feature_id, point=anchor)
 
-                sequences = self._geometry_sequences(geometry)
-                for sequence in sequences:
-                    for index in range(1, len(sequence)):
+                source_sequences = self._geometry_sequences(geometry)
+                metric_sequences = self._geometry_sequences(metric_geometry)
+                for source_sequence, metric_sequence in zip(
+                    source_sequences, metric_sequences
+                ):
+                    for index in range(1, len(metric_sequence)):
                         if self._same_point(
-                            sequence[index - 1], sequence[index], tolerance
+                            metric_sequence[index - 1],
+                            metric_sequence[index],
+                            tolerance
                         ):
                             register(
                                 'VGE004',
                                 layer,
                                 feature_id,
-                                point=sequence[index],
+                                point=source_sequence[index],
                                 value=hypot(
-                                    sequence[index].x() - sequence[index - 1].x(),
-                                    sequence[index].y() - sequence[index - 1].y()
+                                    metric_sequence[index].x()
+                                    - metric_sequence[index - 1].x(),
+                                    metric_sequence[index].y()
+                                    - metric_sequence[index - 1].y()
                                 ),
                                 threshold=tolerance
                             )
 
-                    if check_small_angle and len(sequence) >= 3:
-                        closed = self._same_point(sequence[0], sequence[-1], 0.0)
-                        vertices = sequence[:-1] if closed else sequence
+                    if check_small_angle and len(metric_sequence) >= 3:
+                        closed = self._same_point(
+                            metric_sequence[0], metric_sequence[-1], 0.0
+                        )
+                        vertices = (
+                            metric_sequence[:-1] if closed else metric_sequence
+                        )
+                        source_vertices = (
+                            source_sequence[:-1] if closed else source_sequence
+                        )
                         if closed:
                             triples = [
                                 (
                                     vertices[index - 1],
                                     vertices[index],
-                                    vertices[(index + 1) % len(vertices)]
+                                    vertices[(index + 1) % len(vertices)],
+                                    source_vertices[index]
                                 )
                                 for index in range(len(vertices))
                             ]
                         else:
                             triples = [
-                                (vertices[index - 1], vertices[index], vertices[index + 1])
+                                (
+                                    vertices[index - 1], vertices[index],
+                                    vertices[index + 1], source_vertices[index]
+                                )
                                 for index in range(1, len(vertices) - 1)
                             ]
 
-                        for point_a, vertex, point_b in triples:
+                        for point_a, vertex, point_b, source_vertex in triples:
                             angle = self._angle(point_a, vertex, point_b)
                             if angle is not None and angle < min_angle:
                                 register(
                                     'VGE006',
                                     layer,
                                     feature_id,
-                                    point=vertex,
+                                    point=source_vertex,
                                     value=angle,
                                     threshold=min_angle
                                 )
@@ -607,25 +732,30 @@ class ValidateGeometries(QgsProcessingAlgorithm):
                 if check_min_size:
                     if (
                         geometry_type == QgsWkbTypes.LineGeometry
-                        and geometry.length() < min_length
+                        and metric_geometry.length() < min_length
                     ):
                         register(
                             'VGE007', layer, feature_id, point=anchor,
-                            value=geometry.length(), threshold=min_length
+                            value=metric_geometry.length(), threshold=min_length
                         )
                     elif (
                         geometry_type == QgsWkbTypes.PolygonGeometry
-                        and geometry.area() < min_area
+                        and metric_geometry.area() < min_area
                     ):
                         register(
                             'VGE008', layer, feature_id, point=anchor,
-                            value=geometry.area(), threshold=min_area
+                            value=metric_geometry.area(), threshold=min_area
                         )
 
                 if check_holes and geometry_type == QgsWkbTypes.PolygonGeometry:
                     try:
-                        for polygon_index, ring_index, hole in self._polygon_holes(geometry):
-                            hole_area = hole.area()
+                        source_holes = self._polygon_holes(geometry)
+                        metric_holes = self._polygon_holes(metric_geometry)
+                        for source_hole, metric_hole in zip(
+                            source_holes, metric_holes
+                        ):
+                            polygon_index, ring_index, hole = source_hole
+                            hole_area = metric_hole[2].area()
                             if hole_area < min_hole_area:
                                 hole_point = None
                                 try:
@@ -834,23 +964,23 @@ class ValidateGeometries(QgsProcessingAlgorithm):
         parameters_rows = '''
 <tr><td>{}</td><td>{}</td></tr>
 <tr><td>{}</td><td>{}</td></tr>
-<tr><td>{}</td><td>{}°</td></tr>
+<tr><td>{}</td><td>{}</td></tr>
 <tr><td>{}</td><td>{}</td></tr>
 <tr><td>{}</td><td>{}</td></tr>
 <tr><td>{}</td><td>{}</td></tr>
 '''.format(
             str2HTML(self.tr('Duplicated vertex tolerance', 'Tolerância de vértice duplicado')),
-            tolerance,
+            '{} m'.format(tolerance),
             str2HTML(self.tr('Report multipart geometries', 'Reportar geometrias multipartes')),
             self.tr('Yes', 'Sim') if check_multipart else self.tr('No', 'Não'),
             str2HTML(self.tr('Minimum angle', 'Ângulo mínimo')),
-            min_angle if check_small_angle else self.tr('Not evaluated', 'Não avaliado'),
+            '{}°'.format(min_angle) if check_small_angle else self.tr('Not evaluated', 'Não avaliado'),
             str2HTML(self.tr('Minimum line length', 'Comprimento mínimo das linhas')),
-            min_length if check_min_size else self.tr('Not evaluated', 'Não avaliado'),
+            '{} m'.format(min_length) if check_min_size else self.tr('Not evaluated', 'Não avaliado'),
             str2HTML(self.tr('Minimum polygon area', 'Área mínima dos polígonos')),
-            min_area if check_min_size else self.tr('Not evaluated', 'Não avaliada'),
+            '{} m²'.format(min_area) if check_min_size else self.tr('Not evaluated', 'Não avaliada'),
             str2HTML(self.tr('Minimum allowed hole area', 'Área mínima permitida para buracos')),
-            min_hole_area if check_holes else self.tr('Not evaluated', 'Não avaliada')
+            '{} m²'.format(min_hole_area) if check_holes else self.tr('Not evaluated', 'Não avaliada')
         )
 
         interpretation = self.tr(
