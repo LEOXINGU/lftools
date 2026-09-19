@@ -1999,4 +1999,204 @@ El campo identificador único opcional se utiliza para completar ID1 e ID2 en la
 'The automated intraclass validation evaluated {} valid feature(s) in {} layer(s), ignored {} null, empty, or invalid feature(s), accepted {} disconnected line end(s) near the mapping boundary, and identified {} occurrence(s) affecting {} feature(s). The dataset is {} for the rules enabled in this execution. The input layers were not modified.': {'es': 'La validación intraclase automatizada evaluó {} entidad(es) válida(s) en {} capa(s), ignoró {} entidad(es) nula(s), vacía(s) o no válida(s), aceptó {} extremo(s) de línea desconectado(s) próximo(s) al límite del área de mapeo e identificó {} incidencia(s) que afectan a {} entidad(es). El conjunto de datos está {} para las reglas habilitadas en esta ejecución. Las capas de entrada no fueron modificadas.'},
 'Each layer was evaluated independently. Spatial relationships were compared using a spatial index and the enabled linear and area thresholds. When a mapping area was provided, disconnected line ends within the boundary tolerance were accepted and counted separately. Identifiers were obtained automatically from provider-declared primary keys, with the internal QGIS feature ID used as a fallback. The validation only identifies potential nonconformities; it does not edit the source data.': {'es': 'Cada capa se evaluó de forma independiente. Las relaciones espaciales se compararon mediante un índice espacial y los límites lineales y de área habilitados. Cuando se proporcionó un área de mapeo, los extremos de líneas desconectados situados dentro de la tolerancia del límite fueron aceptados y contabilizados por separado. Los identificadores se obtuvieron automáticamente de las claves primarias declaradas por los proveedores, utilizando como alternativa el identificador interno de la entidad de QGIS. La validación únicamente identifica posibles no conformidades; no modifica los datos de origen.'},
 
- }
+'HAND model': {'es': 'Modelo HAND'},
+'Hydrology': {'es': 'Hidrología'},
+'Number of cells (pixels)': {'es': 'Número de celdas (píxeles)'},
+'Square kilometres (km²)': {'es': 'Kilómetros cuadrados (km²)'},
+'Keep as NoData (strict drainage network)': {'es': 'Mantener como NoData (red de drenaje estricta)'},
+'Use elevation of the outlet cell': {'es': 'Usar la elevación de la celda de salida'},
+'Use a fixed reference level (sea/lake)': {'es': 'Usar un nivel de referencia fijo (mar/lago)'},
+'Preparing the elevation model...': {'es': 'Preparando el modelo de elevación...'},
+'Calculating D8 flow direction and flow accumulation...': {'es': 'Calculando la dirección de flujo D8 y la acumulación de flujo...'},
+'Calculating HAND...': {'es': 'Calculando el HAND...'},
+'Conditioned DEM': {'es': 'MDE acondicionado'},
+'D8 flow direction': {'es': 'Dirección de flujo D8'},
+'Flow accumulation': {'es': 'Acumulación de flujo'},
+'Drainage network (raster)': {'es': 'Red de drenaje (ráster)'},
+'Ordered drainage network': {'es': 'Red de drenaje ordenada'},
+'Post-processing: applying the HAND raster style...': {'es': 'Posprocesamiento: aplicando la simbología del ráster HAND...'},
+'Post-processing: HAND raster style applied.': {'es': 'Posprocesamiento: simbología del ráster HAND aplicada.'},
+'Input DEM': {'es': 'MDE de entrada'},
+'Hydrologically condition the DEM (fill depressions)': {'es': 'Acondicionar hidrológicamente el MDE (rellenar depresiones)'},
+'Drainage initiation threshold': {'es': 'Umbral de inicio del drenaje'},
+'Threshold unit': {'es': 'Unidad del umbral'},
+'Flow paths leaving the valid DEM': {'es': 'Trayectorias de flujo que salen del MDE válido'},
+'Fixed reference level (m)': {'es': 'Nivel de referencia fijo (m)'},
+'Memory available to GRASS (MB)': {'es': 'Memoria disponible para GRASS (MB)'},
+'HAND raster': {'es': 'Ráster HAND'},
+'The linear unit of the DEM CRS could not be converted to metres.': {'es': 'No se pudo convertir a metros la unidad lineal del SRC del MDE.'},
+'The DEM uses a geographic CRS. Cell areas and vector lengths will be measured geodesically.': {'es': 'El MDE utiliza un SRC geográfico. Las áreas de las celdas y las longitudes vectoriales se medirán geodésicamente.'},
+'The DEM has an invalid pixel area.': {'es': 'El MDE tiene un área de píxel no válida.'},
+'The selected threshold did not generate any drainage cells. Reduce the minimum contributing area.': {'es': 'El umbral seleccionado no generó ninguna celda de drenaje. Reduzca el área mínima de aporte.'},
+'The HAND layer could not be loaded to apply its style.': {'es': 'No se pudo cargar la capa HAND para aplicar su simbología.'},
+'Drainage threshold: {:.0f} cells (approximately {:.6f} km²).': {'es': 'Umbral de drenaje: {:.0f} celdas (aproximadamente {:.6f} km²).'},
+'Drainage network generated with {:,} raster cells.': {'es': 'Red de drenaje generada con {:,} celdas ráster.'},
+'{} drainage reaches created. Maximum Strahler order: {}.': {'es': 'Se crearon {} tramos de drenaje. Orden máximo de Strahler: {}.'},
+'{} HAND cells have negative values. Check DEM conditioning and vertical units.': {'es': '{} celdas del HAND tienen valores negativos. Compruebe el acondicionamiento del MDE y las unidades verticales.'},
+'{} valid terrain cells reach neither the extracted drainage nor an identifiable external outlet and were written as NoData.': {'es': '{} celdas válidas del terreno no alcanzan ni la red de drenaje extraída ni una salida externa identificable y se guardaron como NoData.'},
+'HAND Model — {}': {'es': 'Modelo HAND — {}'},
+'{} terrain cells were referenced to the elevation of their external outlet cell.': {'es': '{} celdas del terreno se referenciaron a la elevación de su celda de salida externa.'},
+'{} terrain cells were referenced to the fixed level of {:.3f} m.': {'es': '{} celdas del terreno se referenciaron al nivel fijo de {:.3f} m.'},
+'Extract drainage network': {'es': 'Extraer red de drenaje'},
+'Drainage network — {}': {'es': 'Red de drenaje — {}'},
+'Delineate watershed': {'es': 'Delimitar cuenca hidrográfica'},
+'Nearest extracted drainage cell (recommended)': {'es': 'Celda de drenaje extraída más cercana (recomendado)'},
+'Cell with greatest flow accumulation': {'es': 'Celda con mayor acumulación de flujo'},
+'Do not adjust': {'es': 'No ajustar'},
+'Delineating the upstream watershed...': {'es': 'Delimitando la cuenca aportante aguas arriba...'},
+'Finalizing output rasters...': {'es': 'Finalizando los rásteres de salida...'},
+'Watershed': {'es': 'Cuenca hidrográfica'},
+'Outlet points': {'es': 'Puntos de salida'},
+'Watershed (raster)': {'es': 'Cuenca hidrográfica (ráster)'},
+'Outlet point': {'es': 'Punto de salida'},
+'Outlet adjustment': {'es': 'Ajuste del punto de salida'},
+'Maximum adjustment distance (m)': {'es': 'Distancia máxima de ajuste (m)'},
+'Ordered drainage network inside the watershed': {'es': 'Red de drenaje ordenada dentro de la cuenca'},
+'Watershed raster': {'es': 'Ráster de la cuenca hidrográfica'},
+'Drainage network inside the watershed (raster)': {'es': 'Red de drenaje dentro de la cuenca (ráster)'},
+'The DEM uses a geographic CRS. Cell areas, adjustment distances and vector measurements will be calculated geodesically.': {'es': 'El MDE utiliza un SRC geográfico. Las áreas de las celdas, las distancias de ajuste y las mediciones vectoriales se calcularán geodésicamente.'},
+'The informed outlet is outside the valid DEM area.': {'es': 'El punto de salida indicado está fuera del área válida del MDE.'},
+'The watershed raster generated by GRASS could not be opened.': {'es': 'No se pudo abrir el ráster de la cuenca generado por GRASS.'},
+'The selected outlet did not generate a watershed.': {'es': 'El punto de salida seleccionado no generó una cuenca hidrográfica.'},
+'The input DEM could not be opened for parameter validation.': {'es': 'No se pudo abrir el MDE de entrada para validar los parámetros.'},
+'The informed outlet is outside the DEM extent. Processing was not started.': {'es': 'El punto de salida indicado está fuera de la extensión del MDE. El procesamiento no se inició.'},
+'The informed outlet falls on a NoData cell of the DEM. Move the point to valid terrain. Processing was not started.': {'es': 'El punto de salida indicado se encuentra sobre una celda NoData del MDE. Mueva el punto a un terreno válido. El procesamiento no se inició.'},
+'No suitable outlet cell was found within the maximum adjustment distance.': {'es': 'No se encontró ninguna celda adecuada para el punto de salida dentro de la distancia máxima de ajuste.'},
+'The watershed raster could not be vectorized.': {'es': 'No se pudo vectorizar el ráster de la cuenca.'},
+'No watershed polygon was generated.': {'es': 'No se generó ningún polígono de cuenca.'},
+'The watershed geometry is empty.': {'es': 'La geometría de la cuenca está vacía.'},
+'Outlet adjusted by {:.3f} m to a cell with accumulation of {:.0f} cells.': {'es': 'Punto de salida ajustado {:.3f} m a una celda con una acumulación de {:.0f} celdas.'},
+'Watershed area: approximately {:.6f} km². {} drainage reaches created.': {'es': 'Área de la cuenca: aproximadamente {:.6f} km². Se crearon {} tramos de drenaje.'},
+'Pre-processing validation: pixel approximately {:.3f} × {:.3f} m; drainage threshold {:.0f} cells ({:.6f} km²); outlet adjustment distance {:.3f} m.': {'es': 'Validación previa: píxel de aproximadamente {:.3f} × {:.3f} m; umbral de drenaje de {:.0f} celdas ({:.6f} km²); distancia de ajuste del punto de salida de {:.3f} m.'},
+'Watershed — {}': {'es': 'Cuenca hidrográfica — {}'},
+'The drainage threshold ({:.0f} cells) is greater than the total number of DEM cells ({:,}). Reduce the threshold. Processing was not started.': {'es': 'El umbral de drenaje ({:.0f} celdas) es mayor que el número total de celdas del MDE ({:,}). Reduzca el umbral. El procesamiento no se inició.'},
+'The maximum outlet adjustment distance ({:.3f} m) is smaller than the DEM pixel diagonal (approximately {:.3f} m). A drainage cell is represented by its centre, so the selected distance may contain no candidate cell. Use at least {} m; approximately {} m (three pixels) is recommended for this DEM. Processing was not started and no output layer was created.': {'es': 'La distancia máxima de ajuste del punto de salida ({:.3f} m) es menor que la diagonal del píxel del MDE (aproximadamente {:.3f} m). Como una celda de drenaje se representa por su centro, la distancia seleccionada puede no contener ninguna celda candidata. Utilice al menos {} m; para este MDE se recomiendan aproximadamente {} m (tres píxeles). El procesamiento no se inició y no se creó ninguna capa de salida.'},
+'Could not finalize output raster: {}': {'es': 'No se pudo finalizar el ráster de salida: {}'},
+'No suitable outlet cell was found within {:.3f} m. Increase the maximum distance or reduce the drainage threshold.': {'es': 'No se encontró ninguna celda adecuada para el punto de salida dentro de {:.3f} m. Aumente la distancia máxima o reduzca el umbral de drenaje.'},
+'The input DEM could not be opened.': {'es': 'No se pudo abrir el MDE de entrada.'},
+'The input DEM must have exactly one band.': {'es': 'El MDE de entrada debe tener exactamente una banda.'},
+'The input DEM has an invalid geotransform.': {'es': 'El MDE de entrada tiene una geotransformación no válida.'},
+'One or more hydrological rasters could not be opened.': {'es': 'No se pudieron abrir uno o más rásteres hidrológicos.'},
+'The raster has more than 100 million cells. Clip the DEM to the study area or use a coarser resolution.': {'es': 'El ráster tiene más de 100 millones de celdas. Recorte el MDE al área de estudio o utilice una resolución más gruesa.'},
+'This raster has more than 25 million cells. The HAND calculation may require substantial RAM.': {'es': 'Este ráster tiene más de 25 millones de celdas. El cálculo del HAND puede requerir una cantidad considerable de memoria RAM.'},
+'The GRASS Processing provider or the {} module is not available. Install/enable GRASS in QGIS and try again.': {'es': 'El proveedor de Procesos GRASS o el módulo {} no está disponible. Instale o habilite GRASS en QGIS e inténtelo de nuevo.'},
+'The hydrological rasters have different dimensions.': {'es': 'Los rásteres hidrológicos tienen dimensiones diferentes.'},
+'The hydrological rasters are not aligned.': {'es': 'Los rásteres hidrológicos no están alineados.'},
+'The hydrological rasters have different coordinate reference systems.': {'es': 'Los rásteres hidrológicos tienen sistemas de referencia de coordenadas diferentes.'},
+'Post-processing completed: output group, layer order and visibility configured.': {'es': 'Posprocesamiento finalizado: se configuraron el grupo de salida, el orden y la visibilidad de las capas.'},
+'The strahler field was not found; the drainage style was not applied.': {'es': 'No se encontró el campo strahler; no se aplicó la simbología de drenaje.'},
+'The point_type field was not found; the outlet style was not applied.': {'es': 'No se encontró el campo point_type; no se aplicó la simbología de los puntos de salida.'},
+'Original point': {'es': 'Punto original'},
+'Adjusted outlet': {'es': 'Punto de salida ajustado'},
+'{} drainage cells could not be topologically ordered. Check the D8 raster for cycles.': {'es': '{} celdas de drenaje no pudieron ordenarse topológicamente. Compruebe si hay ciclos en el ráster D8.'},
+'A cycle was found in the D8 drainage raster; the affected reach was truncated.': {'es': 'Se encontró un ciclo en el ráster de drenaje D8; el tramo afectado fue truncado.'},
+
+'''Generates the <b>Height Above Nearest Drainage (HAND)</b> model from a Digital Elevation Model (DEM). HAND is the vertical difference between each terrain cell and the first drainage cell reached downstream along its D8 flow path.
+<b>Processing workflow</b>
+1. Optional hydrological conditioning of the DEM with GRASS <i>r.fill.dir</i>.
+2. D8 flow direction and flow accumulation with GRASS <i>r.watershed</i>.
+3. Drainage extraction using a minimum contributing-area threshold.
+4. HAND calculation and Strahler and Shreve stream ordering.
+<b>Outputs</b>
+Conditioned DEM; D8 flow direction; flow accumulation; drainage raster; ordered vector drainage network; and HAND raster.
+<b>Important information</b>
+&#8226; Both projected and geographic CRS are accepted, but DEM elevations must be expressed in metres.
+&#8226; The drainage threshold may be entered as number of cells, km&sup2; or hectares. For a geographic CRS, area conversions use the geodesic area of a cell at the centre of the DEM and are therefore approximate.
+&#8226; Flow paths leaving the valid DEM before reaching the extracted drainage can remain as NoData, use the outlet-cell elevation, or use a fixed reference level, such as mean sea level.
+&#8226; HAND is a terrain descriptor. By itself, it does not represent a hydraulic flood simulation.
+<b>References</b>
+Rennó, C. D. et al. (2008). <i>HAND, a new terrain descriptor using SRTM-DEM: Mapping terra-firme rainforest environments in Amazonia</i>. Remote Sensing of Environment, 112(9), 3469&ndash;3481. <a href="https://doi.org/10.1016/j.rse.2008.03.018">DOI: 10.1016/j.rse.2008.03.018</a>.
+Nobre, A. D. et al. (2011). <i>Height Above the Nearest Drainage &mdash; a hydrologically relevant new terrain model</i>. Journal of Hydrology, 404(1&ndash;2), 13&ndash;29. <a href="https://doi.org/10.1016/j.jhydrol.2011.03.051">DOI: 10.1016/j.jhydrol.2011.03.051</a>.
+GRASS GIS documentation: <a href="https://grass.osgeo.org/grass-stable/manuals/r.fill.dir.html"><i>r.fill.dir</i></a> and <a href="https://grass.osgeo.org/grass-stable/manuals/r.watershed.html"><i>r.watershed</i></a>.''': {'es': '''Genera el modelo <b>HAND (Height Above Nearest Drainage)</b>, o altura sobre el drenaje más cercano, a partir de un Modelo Digital de Elevación (MDE). HAND es la diferencia vertical entre cada celda del terreno y la primera celda de drenaje alcanzada aguas abajo a lo largo de su trayectoria de flujo D8.
+<b>Flujo de procesamiento</b>
+1. Acondicionamiento hidrológico opcional del MDE con GRASS <i>r.fill.dir</i>.
+2. Dirección de flujo D8 y acumulación de flujo con GRASS <i>r.watershed</i>.
+3. Extracción del drenaje mediante un umbral de área mínima de aporte.
+4. Cálculo del HAND y ordenación de la red según los métodos de Strahler y Shreve.
+<b>Resultados</b>
+MDE acondicionado; dirección de flujo D8; acumulación de flujo; ráster de drenaje; red de drenaje vectorial ordenada; y ráster HAND.
+<b>Información importante</b>
+&#8226; Se admiten SRC proyectados y geográficos, pero las elevaciones del MDE deben estar expresadas en metros.
+&#8226; El umbral de drenaje puede introducirse como número de celdas, km&sup2; o hectáreas. Para un SRC geográfico, las conversiones de área utilizan el área geodésica de una celda en el centro del MDE y, por tanto, son aproximadas.
+&#8226; Las trayectorias de flujo que salen del MDE válido antes de alcanzar el drenaje extraído pueden permanecer como NoData, utilizar la elevación de la celda de salida o utilizar un nivel de referencia fijo, como el nivel medio del mar.
+&#8226; HAND es un descriptor del terreno. Por sí solo, no representa una simulación hidráulica de inundación.
+<b>Referencias</b>
+Rennó, C. D. et al. (2008). <i>HAND, a new terrain descriptor using SRTM-DEM: Mapping terra-firme rainforest environments in Amazonia</i>. Remote Sensing of Environment, 112(9), 3469&ndash;3481. <a href="https://doi.org/10.1016/j.rse.2008.03.018">DOI: 10.1016/j.rse.2008.03.018</a>.
+Nobre, A. D. et al. (2011). <i>Height Above the Nearest Drainage &mdash; a hydrologically relevant new terrain model</i>. Journal of Hydrology, 404(1&ndash;2), 13&ndash;29. <a href="https://doi.org/10.1016/j.jhydrol.2011.03.051">DOI: 10.1016/j.jhydrol.2011.03.051</a>.
+Documentación de GRASS GIS: <a href="https://grass.osgeo.org/grass-stable/manuals/r.fill.dir.html"><i>r.fill.dir</i></a> y <a href="https://grass.osgeo.org/grass-stable/manuals/r.watershed.html"><i>r.watershed</i></a>.'''},
+
+'''Extracts a drainage network from a <b>Digital Elevation Model (DEM)</b>. The algorithm calculates D8 flow direction and flow accumulation, applies a minimum contributing-area threshold and generates raster and ordered vector drainage networks.
+<b>Processing workflow</b>
+1. Optional hydrological conditioning of the DEM with GRASS <i>r.fill.dir</i>.
+2. D8 flow direction and flow accumulation with GRASS <i>r.watershed</i>.
+3. Drainage extraction using a minimum contributing-area threshold.
+4. Vectorization and stream ordering using the Strahler and Shreve methods.
+<b>Outputs</b>
+Conditioned DEM; D8 flow direction; flow accumulation; drainage raster; and ordered vector drainage network.
+<b>Important information</b>
+&#8226; Both projected and geographic CRS are accepted, but DEM elevations must be expressed in metres.
+&#8226; The drainage threshold may be entered as number of cells, km&sup2; or hectares. A smaller threshold generates a denser network; a larger threshold retains only the main channels.
+&#8226; For a geographic CRS, area conversions use the geodesic area of a cell at the centre of the DEM and are therefore approximate.
+&#8226; The vector network contains Strahler and Shreve order, length, upstream area, initial and final elevation, and slope.
+<b>References</b>
+Strahler, A. N. (1957). <i>Quantitative analysis of watershed geomorphology</i>. Transactions, American Geophysical Union, 38(6), 913&ndash;920.
+Shreve, R. L. (1966). <i>Statistical law of stream numbers</i>. Journal of Geology, 74(1), 17&ndash;37.
+GRASS GIS documentation: <a href="https://grass.osgeo.org/grass-stable/manuals/r.fill.dir.html"><i>r.fill.dir</i></a> and <a href="https://grass.osgeo.org/grass-stable/manuals/r.watershed.html"><i>r.watershed</i></a>.''': {'es': '''Extrae una red de drenaje a partir de un <b>Modelo Digital de Elevación (MDE)</b>. El algoritmo calcula la dirección de flujo D8 y la acumulación de flujo, aplica un umbral de área mínima de aporte y genera redes de drenaje en formato ráster y vectorial ordenado.
+<b>Flujo de procesamiento</b>
+1. Acondicionamiento hidrológico opcional del MDE con GRASS <i>r.fill.dir</i>.
+2. Dirección de flujo D8 y acumulación de flujo con GRASS <i>r.watershed</i>.
+3. Extracción del drenaje mediante un umbral de área mínima de aporte.
+4. Vectorización y ordenación de la red según los métodos de Strahler y Shreve.
+<b>Resultados</b>
+MDE acondicionado; dirección de flujo D8; acumulación de flujo; ráster de drenaje; y red de drenaje vectorial ordenada.
+<b>Información importante</b>
+&#8226; Se admiten SRC proyectados y geográficos, pero las elevaciones del MDE deben estar expresadas en metros.
+&#8226; El umbral de drenaje puede introducirse como número de celdas, km&sup2; o hectáreas. Un umbral menor genera una red más densa; un umbral mayor conserva solo los cauces principales.
+&#8226; Para un SRC geográfico, las conversiones de área utilizan el área geodésica de una celda en el centro del MDE y, por tanto, son aproximadas.
+&#8226; La red vectorial contiene el orden de Strahler y Shreve, la longitud, el área aguas arriba, las elevaciones inicial y final y la pendiente.
+<b>Referencias</b>
+Strahler, A. N. (1957). <i>Quantitative analysis of watershed geomorphology</i>. Transactions, American Geophysical Union, 38(6), 913&ndash;920.
+Shreve, R. L. (1966). <i>Statistical law of stream numbers</i>. Journal of Geology, 74(1), 17&ndash;37.
+Documentación de GRASS GIS: <a href="https://grass.osgeo.org/grass-stable/manuals/r.fill.dir.html"><i>r.fill.dir</i></a> y <a href="https://grass.osgeo.org/grass-stable/manuals/r.watershed.html"><i>r.watershed</i></a>.'''},
+
+'''Delineates the <b>upstream contributing watershed</b> from a Digital Elevation Model (DEM) and an outlet point. The point can be adjusted to the extracted drainage network or to the cell with the greatest flow accumulation within a search distance.
+<b>Processing workflow</b>
+1. Optional hydrological conditioning of the DEM with GRASS <i>r.fill.dir</i>.
+2. D8 flow direction and flow accumulation with GRASS <i>r.watershed</i>.
+3. Drainage extraction using a minimum contributing-area threshold.
+4. Outlet adjustment and watershed delineation with GRASS <i>r.water.outlet</i>.
+5. Basin vectorization and generation of the ordered drainage network inside the basin.
+<b>Outlet adjustment</b>
+&#8226; <b>Nearest drainage cell:</b> moves the point to the closest extracted drainage cell within the maximum distance. This is the recommended option when the user clicks close to a known stream.
+&#8226; <b>Greatest flow accumulation:</b> selects, within the search distance, the cell receiving the largest upstream contribution.
+&#8226; <b>Do not adjust:</b> uses the DEM cell containing the informed coordinate. If it is on a hillslope, the resulting basin may be very small or narrow.
+<b>Outputs</b>
+Watershed polygon and raster; original and adjusted outlet points; ordered drainage network and drainage raster inside the basin; conditioned DEM; D8 flow direction; and flow accumulation.
+<b>Important information</b>
+&#8226; The maximum adjustment distance is expressed in metres, including when the DEM uses a geographic CRS.
+&#8226; Before running GRASS, the algorithm checks the outlet position, DEM resolution, drainage threshold and adjustment distance. Incompatible parameters are reported before any output is created.
+&#8226; The drainage threshold controls both the density of the network and the cells available for the nearest-drainage adjustment.
+&#8226; Check the adjusted outlet before using the basin in engineering analyses, especially near confluences.
+<b>Reference</b>
+GRASS GIS documentation: <a href="https://grass.osgeo.org/grass-stable/manuals/r.water.outlet.html"><i>r.water.outlet</i></a>, <a href="https://grass.osgeo.org/grass-stable/manuals/r.watershed.html"><i>r.watershed</i></a> and <a href="https://grass.osgeo.org/grass-stable/manuals/r.fill.dir.html"><i>r.fill.dir</i></a>.''': {'es': '''Delimita la <b>cuenca hidrográfica aportante aguas arriba</b> a partir de un Modelo Digital de Elevación (MDE) y de un punto de salida. El punto puede ajustarse a la red de drenaje extraída o a la celda con mayor acumulación de flujo dentro de una distancia de búsqueda.
+<b>Flujo de procesamiento</b>
+1. Acondicionamiento hidrológico opcional del MDE con GRASS <i>r.fill.dir</i>.
+2. Dirección de flujo D8 y acumulación de flujo con GRASS <i>r.watershed</i>.
+3. Extracción del drenaje mediante un umbral de área mínima de aporte.
+4. Ajuste del punto de salida y delimitación de la cuenca con GRASS <i>r.water.outlet</i>.
+5. Vectorización de la cuenca y generación de la red de drenaje ordenada dentro de ella.
+<b>Ajuste del punto de salida</b>
+&#8226; <b>Celda de drenaje más cercana:</b> mueve el punto a la celda de drenaje extraída más cercana dentro de la distancia máxima. Es la opción recomendada cuando el usuario hace clic cerca de un curso de agua conocido.
+&#8226; <b>Mayor acumulación de flujo:</b> selecciona, dentro de la distancia de búsqueda, la celda que recibe el mayor aporte aguas arriba.
+&#8226; <b>No ajustar:</b> utiliza la celda del MDE que contiene la coordenada indicada. Si se encuentra en una ladera, la cuenca resultante puede ser muy pequeña o estrecha.
+<b>Resultados</b>
+Polígono y ráster de la cuenca; puntos de salida original y ajustado; red de drenaje ordenada y ráster de drenaje dentro de la cuenca; MDE acondicionado; dirección de flujo D8; y acumulación de flujo.
+<b>Información importante</b>
+&#8226; La distancia máxima de ajuste se expresa en metros, incluso cuando el MDE utiliza un SRC geográfico.
+&#8226; Antes de ejecutar GRASS, el algoritmo comprueba la posición del punto de salida, la resolución del MDE, el umbral de drenaje y la distancia de ajuste. Los parámetros incompatibles se notifican antes de crear cualquier resultado.
+&#8226; El umbral de drenaje controla tanto la densidad de la red como las celdas disponibles para el ajuste al drenaje más cercano.
+&#8226; Compruebe el punto de salida ajustado antes de utilizar la cuenca en análisis de ingeniería, especialmente cerca de confluencias.
+<b>Referencia</b>
+Documentación de GRASS GIS: <a href="https://grass.osgeo.org/grass-stable/manuals/r.water.outlet.html"><i>r.water.outlet</i></a>, <a href="https://grass.osgeo.org/grass-stable/manuals/r.watershed.html"><i>r.watershed</i></a> y <a href="https://grass.osgeo.org/grass-stable/manuals/r.fill.dir.html"><i>r.fill.dir</i></a>.'''},
+
+}
