@@ -1733,12 +1733,26 @@ La base de datos generada contiene el conjunto mínimo de capas necesarias para 
 '''This tool performs a controlled geometric cleanup and topological correction workflow for parcel layers.
 The workflow can remove null or empty geometries, repair invalid geometries, convert multipart features to singleparts, remove duplicate geometries, remove holes, remove polygons with abnormally small areas, remove excessively narrow polygons (slivers), snap coordinates to a grid, remove duplicate vertices, and adjust connectivity between adjacent polygons.
 Removed features are recorded in a separate table with their original attributes. Modified or blocked operations are recorded in an audit table.
+Linear tolerances are always entered in meters. For geographic CRS, grid snapping and connectivity correction are performed in a temporary local metric CRS and the results are transformed back to the original CRS.
 Note: Automatic corrections are accepted only when the resulting geometry passes safety checks. Remaining topological problems must be reviewed after processing.
 ''' : { 'es': '''Esta herramienta ejecuta un flujo controlado de limpieza geométrica y corrección topológica para capas de parcelas.
 El flujo puede eliminar geometrías nulas o vacías, reparar geometrías no válidas, convertir entidades multiparte en partes simples, eliminar geometrías duplicadas, eliminar huecos, eliminar polígonos con áreas anormalmente pequeñas, eliminar polígonos excesivamente estrechos (slivers), ajustar las coordenadas a una cuadrícula, eliminar vértices duplicados y ajustar la conectividad entre polígonos adyacentes.
 Las entidades eliminadas se registran en una tabla separada con sus atributos originales. Las operaciones que modificaron entidades o que fueron bloqueadas se registran en una tabla de auditoría.
+Las tolerancias lineales se introducen siempre en metros. Para los SRC geográficos, el ajuste a la cuadrícula y la corrección de conectividad se realizan en un SRC métrico local temporal y los resultados se transforman de nuevo al SRC original.
 Nota: Las correcciones automáticas solo se aceptan cuando la geometría resultante supera las comprobaciones de seguridad. Los problemas topológicos restantes deben revisarse después del procesamiento.
 '''},
+'Grid and connectivity operations will use the temporary local metric CRS {}. Results will be transformed back to the original CRS.': {'es': 'Las operaciones de cuadrícula y conectividad utilizarán el SRC métrico local temporal {}. Los resultados se transformarán de nuevo al SRC original.'},
+'The linear unit of the input CRS could not be converted to meters.': {'es': 'No se pudo convertir a metros la unidad lineal del SRC de entrada.'},
+'Grid snapping was skipped because the geometry could not be transformed to the metric working CRS': {'es': 'El ajuste a la cuadrícula se omitió porque la geometría no pudo transformarse al SRC métrico de trabajo'},
+'The input layer has an invalid CRS.': {'es': 'La capa de entrada tiene un SRC no válido.'},
+'Could not determine the centre of the layer in WGS84: {}': {'es': 'No se pudo determinar el centro de la capa en WGS84: {}'},
+'Could not configure metric area and perimeter measurements: {}': {'es': 'No se pudieron configurar las mediciones métricas de área y perímetro: {}'},
+'Could not create the temporary metric CRS EPSG:{}.': {'es': 'No se pudo crear el SRC métrico temporal EPSG:{}.'},
+'Could not create the transformations for the temporary metric CRS: {}': {'es': 'No se pudieron crear las transformaciones para el SRC métrico temporal: {}'},
+'Metric tolerances were converted to the linear unit of the projected input CRS.': {'es': 'Las tolerancias métricas se convirtieron a la unidad lineal del SRC proyectado de entrada.'},
+'The layer centre is outside the area supported by the temporary UTM CRS.': {'es': 'El centro de la capa está fuera del área admitida por el SRC UTM temporal.'},
+'Could not calculate area and perimeter in metric units: {}': {'es': 'No se pudieron calcular el área y el perímetro en unidades métricas: {}'},
+'The input layer extent is invalid; a local metric CRS could not be created.': {'es': 'La extensión de la capa de entrada no es válida; no se pudo crear un SRC métrico local.'},
 'Original feature unique identifier field': {'es': 'Campo identificador único de la entidad original'},
 'The selected identifier field was not found in the input layer.': {'es': 'El campo identificador seleccionado no se encontró en la capa de entrada.'},
 'The selected identifier field contains null values. Choose a field with unique and non-null values.': {'es': 'El campo identificador seleccionado contiene valores nulos. Elija un campo con valores únicos y no nulos.'},
@@ -1998,6 +2012,60 @@ El campo identificador único opcional se utiliza para completar ID1 e ID2 en la
 'INTRACLASS TOPOLOGY VALIDATION REPORT': {'es': 'INFORME DE VALIDACIÓN TOPOLÓGICA INTRACLASE'},
 'The automated intraclass validation evaluated {} valid feature(s) in {} layer(s), ignored {} null, empty, or invalid feature(s), accepted {} disconnected line end(s) near the mapping boundary, and identified {} occurrence(s) affecting {} feature(s). The dataset is {} for the rules enabled in this execution. The input layers were not modified.': {'es': 'La validación intraclase automatizada evaluó {} entidad(es) válida(s) en {} capa(s), ignoró {} entidad(es) nula(s), vacía(s) o no válida(s), aceptó {} extremo(s) de línea desconectado(s) próximo(s) al límite del área de mapeo e identificó {} incidencia(s) que afectan a {} entidad(es). El conjunto de datos está {} para las reglas habilitadas en esta ejecución. Las capas de entrada no fueron modificadas.'},
 'Each layer was evaluated independently. Spatial relationships were compared using a spatial index and the enabled linear and area thresholds. When a mapping area was provided, disconnected line ends within the boundary tolerance were accepted and counted separately. Identifiers were obtained automatically from provider-declared primary keys, with the internal QGIS feature ID used as a fallback. The validation only identifies potential nonconformities; it does not edit the source data.': {'es': 'Cada capa se evaluó de forma independiente. Las relaciones espaciales se compararon mediante un índice espacial y los límites lineales y de área habilitados. Cuando se proporcionó un área de mapeo, los extremos de líneas desconectados situados dentro de la tolerancia del límite fueron aceptados y contabilizados por separado. Los identificadores se obtuvieron automáticamente de las claves primarias declaradas por los proveedores, utilizando como alternativa el identificador interno de la entidad de QGIS. La validación únicamente identifica posibles no conformidades; no modifica los datos de origen.'},
+'Parcel Topology Cleanup and Correction': {'es': 'Limpieza y corrección topológica de parcelas'},
+'Starting parcel topology cleanup and correction...': {'es': 'Iniciando la limpieza y corrección topológica de parcelas...'},
+'Writing corrected parcel layer...': {'es': 'Escribiendo la capa de parcelas corregidas...'},
+'PARCEL TOPOLOGY CLEANUP SUMMARY': {'es': 'RESUMEN DE LA LIMPIEZA Y CORRECCIÓN TOPOLÓGICA DE PARCELAS'},
+'FINAL VALIDATION': {'es': 'VALIDACIÓN FINAL'},
+'Remove null or empty geometries': {'es': 'Eliminar geometrías nulas o vacías'},
+'Repair invalid geometries': {'es': 'Reparar geometrías no válidas'},
+'Convert multipart features to singleparts': {'es': 'Convertir entidades multiparte en partes simples'},
+'Remove duplicate geometries': {'es': 'Eliminar geometrías duplicadas'},
+'Remove holes': {'es': 'Eliminar huecos'},
+'Remove excessively narrow polygons (slivers)': {'es': 'Eliminar polígonos excesivamente estrechos (slivers)'},
+'Minimum equivalent-rectangle width/length ratio': {'es': 'Relación mínima anchura/longitud del rectángulo equivalente'},
+'Snap coordinates to grid': {'es': 'Ajustar las coordenadas a la cuadrícula'},
+'Grid spacing (meters)': {'es': 'Espaciado de la cuadrícula (metros)'},
+'Remove duplicate vertices': {'es': 'Eliminar vértices duplicados'},
+'Adjust connectivity between adjacent polygons': {'es': 'Ajustar la conectividad entre polígonos adyacentes'},
+'Connectivity tolerance (meters)': {'es': 'Tolerancia de conectividad (metros)'},
+'Connectivity snapping behavior': {'es': 'Comportamiento del ajuste de conectividad'},
+'Corrected parcels': {'es': 'Parcelas corregidas'},
+'Removed features table': {'es': 'Tabla de entidades eliminadas'},
+'Topology correction audit': {'es': 'Auditoría de la corrección topológica'},
+'Invalid shape ratio.': {'es': 'Relación de forma no válida.'},
+'Invalid grid spacing.': {'es': 'Espaciado de cuadrícula no válido.'},
+'Invalid connectivity tolerance.': {'es': 'Tolerancia de conectividad no válida.'},
+'Removing null or empty geometries...': {'es': 'Eliminando geometrías nulas o vacías...'},
+'Repairing invalid geometries...': {'es': 'Reparando geometrías no válidas...'},
+'Converting multipart features to singleparts...': {'es': 'Convirtiendo entidades multiparte en partes simples...'},
+'Removing duplicate geometries...': {'es': 'Eliminando geometrías duplicadas...'},
+'Removing holes...': {'es': 'Eliminando huecos...'},
+'Identifying excessively narrow polygons...': {'es': 'Identificando polígonos excesivamente estrechos...'},
+'Snapping coordinates to grid...': {'es': 'Ajustando las coordenadas a la cuadrícula...'},
+'Removing duplicate vertices...': {'es': 'Eliminando vértices duplicados...'},
+'Adjusting connectivity between adjacent polygons...': {'es': 'Ajustando la conectividad entre polígonos adyacentes...'},
+'Remaining problems were detected. Review the final validation results and the audit table.': {'es': 'Se detectaron problemas restantes. Revise los resultados de la validación final y la tabla de auditoría.'},
+'No problems covered by the final validation were detected.': {'es': 'No se detectaron problemas contemplados por la validación final.'},
+'Null geometry': {'es': 'Geometría nula'},
+'Empty geometry': {'es': 'Geometría vacía'},
+'Invalid geometry repaired': {'es': 'Geometría no válida reparada'},
+'Invalid geometry could not be safely repaired; original geometry preserved': {'es': 'La geometría no válida no pudo repararse de forma segura; se conservó la geometría original'},
+'Invalid multipart geometry was preserved for manual review': {'es': 'La geometría multiparte no válida se conservó para su revisión manual'},
+'Multipart geometry could not be split safely': {'es': 'La geometría multiparte no pudo dividirse de forma segura'},
+'Multipart feature converted to singlepart': {'es': 'Entidad multiparte convertida en parte simple'},
+'Interior rings removed': {'es': 'Anillos interiores eliminados'},
+'Hole removal produced an unsafe geometry; original geometry preserved': {'es': 'La eliminación de huecos produjo una geometría no segura; se conservó la geometría original'},
+'Grid snapping was skipped because the geometry is invalid': {'es': 'El ajuste a la cuadrícula se omitió porque la geometría no es válida'},
+'Coordinates snapped to grid': {'es': 'Coordenadas ajustadas a la cuadrícula'},
+'Grid snapping produced an unsafe geometry; original geometry preserved': {'es': 'El ajuste a la cuadrícula produjo una geometría no segura; se conservó la geometría original'},
+'Duplicate vertices removed': {'es': 'Vértices duplicados eliminados'},
+'Duplicate-vertex removal produced an unsafe geometry; original geometry preserved': {'es': 'La eliminación de vértices duplicados produjo una geometría no segura; se conservó la geometría original'},
+'Connectivity result was not found; original geometry preserved': {'es': 'No se encontró el resultado de conectividad; se conservó la geometría original'},
+'Connectivity adjusted within tolerance': {'es': 'Conectividad ajustada dentro de la tolerancia'},
+'Connectivity adjustment produced an unsafe geometry; original geometry preserved': {'es': 'El ajuste de conectividad produjo una geometría no segura; se conservó la geometría original'},
+'Duplicate vertices removed after topological corrections': {'es': 'Vértices duplicados eliminados después de las correcciones topológicas'},
+'Sliver test was skipped because the geometry is invalid': {'es': 'La prueba de polígonos estrechos se omitió porque la geometría no es válida'},
 
 'HAND model': {'es': 'Modelo HAND'},
 'Hydrology': {'es': 'Hidrología'},
@@ -2090,7 +2158,6 @@ El campo identificador único opcional se utiliza para completar ID1 e ID2 en la
 'Adjusted outlet': {'es': 'Punto de salida ajustado'},
 '{} drainage cells could not be topologically ordered. Check the D8 raster for cycles.': {'es': '{} celdas de drenaje no pudieron ordenarse topológicamente. Compruebe si hay ciclos en el ráster D8.'},
 'A cycle was found in the D8 drainage raster; the affected reach was truncated.': {'es': 'Se encontró un ciclo en el ráster de drenaje D8; el tramo afectado fue truncado.'},
-
 '''Generates the <b>Height Above Nearest Drainage (HAND)</b> model from a Digital Elevation Model (DEM). HAND is the vertical difference between each terrain cell and the first drainage cell reached downstream along its D8 flow path.
 <b>Processing workflow</b>
 1. Optional hydrological conditioning of the DEM with GRASS <i>r.fill.dir</i>.
@@ -2124,7 +2191,6 @@ MDE acondicionado; dirección de flujo D8; acumulación de flujo; ráster de dre
 Rennó, C. D. et al. (2008). <i>HAND, a new terrain descriptor using SRTM-DEM: Mapping terra-firme rainforest environments in Amazonia</i>. Remote Sensing of Environment, 112(9), 3469&ndash;3481. <a href="https://doi.org/10.1016/j.rse.2008.03.018">DOI: 10.1016/j.rse.2008.03.018</a>.
 Nobre, A. D. et al. (2011). <i>Height Above the Nearest Drainage &mdash; a hydrologically relevant new terrain model</i>. Journal of Hydrology, 404(1&ndash;2), 13&ndash;29. <a href="https://doi.org/10.1016/j.jhydrol.2011.03.051">DOI: 10.1016/j.jhydrol.2011.03.051</a>.
 Documentación de GRASS GIS: <a href="https://grass.osgeo.org/grass-stable/manuals/r.fill.dir.html"><i>r.fill.dir</i></a> y <a href="https://grass.osgeo.org/grass-stable/manuals/r.watershed.html"><i>r.watershed</i></a>.'''},
-
 '''Extracts a drainage network from a <b>Digital Elevation Model (DEM)</b>. The algorithm calculates D8 flow direction and flow accumulation, applies a minimum contributing-area threshold and generates raster and ordered vector drainage networks.
 <b>Processing workflow</b>
 1. Optional hydrological conditioning of the DEM with GRASS <i>r.fill.dir</i>.
@@ -2158,7 +2224,6 @@ MDE acondicionado; dirección de flujo D8; acumulación de flujo; ráster de dre
 Strahler, A. N. (1957). <i>Quantitative analysis of watershed geomorphology</i>. Transactions, American Geophysical Union, 38(6), 913&ndash;920.
 Shreve, R. L. (1966). <i>Statistical law of stream numbers</i>. Journal of Geology, 74(1), 17&ndash;37.
 Documentación de GRASS GIS: <a href="https://grass.osgeo.org/grass-stable/manuals/r.fill.dir.html"><i>r.fill.dir</i></a> y <a href="https://grass.osgeo.org/grass-stable/manuals/r.watershed.html"><i>r.watershed</i></a>.'''},
-
 '''Delineates the <b>upstream contributing watershed</b> from a Digital Elevation Model (DEM) and an outlet point. The point can be adjusted to the extracted drainage network or to the cell with the greatest flow accumulation within a search distance.
 <b>Processing workflow</b>
 1. Optional hydrological conditioning of the DEM with GRASS <i>r.fill.dir</i>.
