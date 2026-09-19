@@ -17,7 +17,7 @@ __copyright__ = '(C) 2026, Leandro França'
 
 from qgis.core import (
     QgsApplication,
-    QgsProcessingParameterVectorLayer,
+    QgsProcessingParameterFeatureSource,
     Qgis,
     QgsProcessingParameterField,
     QgsProcessingParameterCrs,
@@ -138,7 +138,7 @@ class CreateGCPfileAgisoft(QgsProcessingAlgorithm):
     def initAlgorithm(self, config=None):
 
         self.addParameter(
-            QgsProcessingParameterVectorLayer(
+            QgsProcessingParameterFeatureSource(
                 self.INPUT_LAYER,
                 self.tr('Point Layer', 'Camada de Pontos'),
                 [Qgis.ProcessingSourceType.TypeVectorPoint]
@@ -251,7 +251,7 @@ class CreateGCPfileAgisoft(QgsProcessingAlgorithm):
 
     def processAlgorithm(self, parameters, context, feedback):
 
-        layer = self.parameterAsVectorLayer(parameters, self.INPUT_LAYER, context)
+        layer = self.parameterAsSource(parameters, self.INPUT_LAYER, context)
         if layer is None:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.INPUT_LAYER))
 
@@ -316,7 +316,7 @@ class CreateGCPfileAgisoft(QgsProcessingAlgorithm):
 
         if target_crs.isValid():
             coordinate_transformer = QgsCoordinateTransform(
-                layer.crs(), target_crs, QgsProject.instance()
+                layer.sourceCrs(), target_crs, QgsProject.instance()
             )
             if target_crs.isGeographic():
                 feedback.reportError(
@@ -327,7 +327,7 @@ class CreateGCPfileAgisoft(QgsProcessingAlgorithm):
                 )
         else:
             coordinate_transformer = None
-            if layer.crs().isGeographic():
+            if layer.sourceCrs().isGeographic():
                 feedback.reportError(
                     self.tr(
                         'Warning: layer CRS is geographic. Agisoft Metashape works best with projected coordinates.',
