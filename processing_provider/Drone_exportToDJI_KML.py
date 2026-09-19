@@ -17,7 +17,7 @@ __copyright__ = '(C) 2026, Leandro França'
 
 from qgis.core import (
     QgsApplication,
-    QgsProcessingParameterVectorLayer,
+    QgsProcessingParameterFeatureSource,
     Qgis,
     QgsCoordinateReferenceSystem,
     QgsCoordinateTransform,
@@ -97,7 +97,7 @@ class ExportToDJI_KML(QgsProcessingAlgorithm):
 
     def initAlgorithm(self, config=None):
         self.addParameter(
-            QgsProcessingParameterVectorLayer(
+            QgsProcessingParameterFeatureSource(
                 self.POLYGON,
                 self.tr('Polygon Layer', 'Camada de Polígono'),
                 [Qgis.ProcessingSourceType.TypeVectorPolygon]
@@ -114,7 +114,7 @@ class ExportToDJI_KML(QgsProcessingAlgorithm):
 
     def processAlgorithm(self, parameters, context, feedback):
 
-        layer = self.parameterAsVectorLayer(
+        layer = self.parameterAsSource(
             parameters,
             self.POLYGON,
             context
@@ -197,9 +197,9 @@ class ExportToDJI_KML(QgsProcessingAlgorithm):
         crs_dest = QgsCoordinateReferenceSystem('EPSG:4326')
         transform = None
 
-        if layer.crs() != crs_dest:
+        if layer.sourceCrs() != crs_dest:
             transform = QgsCoordinateTransform(
-                layer.crs(),
+                layer.sourceCrs(),
                 crs_dest,
                 QgsProject.instance()
             )
@@ -214,7 +214,7 @@ class ExportToDJI_KML(QgsProcessingAlgorithm):
         kml.append('<?xml version="1.0" encoding="UTF-8"?>')
         kml.append('<kml xmlns="http://www.opengis.net/kml/2.2">')
         kml.append('<Document>')
-        kml.append(f'  <name>{escape(layer.name())}</name>')
+        kml.append(f'  <name>{escape(layer.sourceName())}</name>')
 
         total = layer.featureCount()
         exported = 0
