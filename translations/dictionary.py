@@ -2264,4 +2264,81 @@ Polígono y ráster de la cuenca; puntos de salida original y ajustado; red de d
 <b>Referencia</b>
 Documentación de GRASS GIS: <a href="https://grass.osgeo.org/grass-stable/manuals/r.water.outlet.html"><i>r.water.outlet</i></a>, <a href="https://grass.osgeo.org/grass-stable/manuals/r.watershed.html"><i>r.watershed</i></a> y <a href="https://grass.osgeo.org/grass-stable/manuals/r.fill.dir.html"><i>r.fill.dir</i></a>.'''},
 
+# Metric support for geometry and intraclass topology validation
+'Tolerance for duplicated consecutive vertices (m)': {'es': 'Tolerancia para vértices consecutivos duplicados (m)'},
+'Minimum line length (m)': {'es': 'Longitud mínima de las líneas (m)'},
+'Minimum polygon area (m²)': {'es': 'Área mínima de los polígonos (m²)'},
+'Minimum allowed hole area (m²)': {'es': 'Área mínima permitida para huecos (m²)'},
+'Mapping boundary tolerance for line ends (m)': {'es': 'Tolerancia del límite del área de mapeo para extremos de líneas (m)'},
+'Topological coincidence tolerance (m)': {'es': 'Tolerancia de coincidencia topológica (m)'},
+'Maximum distance for near disconnected ends (m)': {'es': 'Distancia máxima para extremos próximos desconectados (m)'},
+'Minimum line overlap length to report (m)': {'es': 'Longitud mínima de superposición lineal que se debe informar (m)'},
+'Minimum polygon overlap area to report (m²)': {'es': 'Área mínima de superposición de polígonos que se debe informar (m²)'},
+'Maximum gap area to report (m²; 0 reports all)': {'es': 'Área máxima del hueco que se debe informar (m²; 0 informa todos)'},
+'The input CRS is invalid or undefined.': {'es': 'El SRC de entrada no es válido o no está definido.'},
+'A local metric CRS could not be determined from the invalid input extent.': {'es': 'No se pudo determinar un SRC métrico local a partir de la extensión de entrada no válida.'},
+'The input centre is outside the area supported by the temporary UTM CRS.': {'es': 'El centro de las entradas está fuera del área admitida por el SRC UTM temporal.'},
+'The local metric CRS EPSG:{} could not be created.': {'es': 'No se pudo crear el SRC métrico local EPSG:{}.'},
+'The input extent could not be transformed to determine a local metric CRS: {}': {'es': 'No se pudo transformar la extensión de entrada para determinar un SRC métrico local: {}'},
+'geometry transformation returned status {}': {'es': 'la transformación de la geometría devolvió el estado {}'},
+'A geometry could not be transformed to the metric working CRS: {}': {'es': 'No se pudo transformar una geometría al SRC métrico de trabajo: {}'},
+'Measurements will use the input CRS in metres ({}).': {'es': 'Las mediciones utilizarán el SRC de entrada en metros ({}).'},
+'Measurements will use the local metric working CRS {}. Output locations remain in the input CRS.': {'es': 'Las mediciones utilizarán el SRC métrico local de trabajo {}. Las ubicaciones de salida permanecerán en el SRC de entrada.'},
+'Validation will use the input CRS in metres ({}).': {'es': 'La validación utilizará el SRC de entrada en metros ({}).'},
+'Validation will use the local metric working CRS {}. Error locations will be returned in the input CRS.': {'es': 'La validación utilizará el SRC métrico local de trabajo {}. Las ubicaciones de los errores se devolverán en el SRC de entrada.'},
+'An error location could not be transformed back to the input CRS: {}': {'es': 'No se pudo transformar una ubicación de error de vuelta al SRC de entrada: {}'},
+'Each layer was evaluated independently in a metric working CRS. Spatial relationships were compared using a spatial index, linear thresholds in metres, and area thresholds in square metres. When a mapping area was provided, disconnected line ends within the boundary tolerance were accepted and counted separately. Identifiers were obtained automatically from provider-declared primary keys, with the internal QGIS feature ID used as a fallback. The validation only identifies potential nonconformities; it does not edit the source data.': {'es': 'Cada capa se evaluó de forma independiente en un SRC métrico de trabajo. Las relaciones espaciales se compararon mediante un índice espacial, tolerancias lineales en metros y límites de área en metros cuadrados. Cuando se proporcionó un área de mapeo, los extremos de líneas desconectados situados dentro de la tolerancia del límite fueron aceptados y contabilizados por separado. Los identificadores se obtuvieron automáticamente de las claves primarias declaradas por los proveedores, utilizando como alternativa el identificador interno de la entidad de QGIS. La validación únicamente identifica posibles no conformidades; no modifica los datos de origen.'},
+'''
+<p>This tool performs a <b>complete automated inspection</b> of individual geometries in one or more point, line, or polygon layers. This step should be completed before intraclass topological validation.</p>
+<p><b>Checks:</b></p>
+▪️ Null, empty, invalid, or degenerate geometries;
+▪️ Duplicated consecutive vertices;
+▪️ Multipart geometries and angles below the defined tolerance;
+▪️ Lines or polygons smaller than the defined thresholds;
+▪️ Polygon holes smaller than the minimum allowed area.
+<p><b>Outputs:</b> a point layer of located errors, a complete occurrence table, and an HTML quality report.</p>
+<p>Linear tolerances are expressed in <b>metres</b>, area thresholds in <b>square metres</b>, and angles in degrees. Geographic and projected CRS are accepted; when necessary, the tool creates an internal local metric CRS for the measurements.</p>
+<p>Tolerances should consider the reference scale, input resolution, feature class, and intended use. Multipart, undersized, or holed geometries are not necessarily errors and should be technically reviewed.</p>
+<p style="color:#b00020;"><b>Important:</b> the input layers are not modified or automatically corrected.</p>
+''': {'es': '''
+<p>Esta herramienta realiza una <b>inspección automatizada completa</b> de las geometrías individuales de una o varias capas de puntos, líneas o polígonos. Esta etapa debe completarse antes de la validación topológica intraclase.</p>
+<p><b>Comprobaciones:</b></p>
+▪️ Geometrías nulas, vacías, no válidas o degeneradas;
+▪️ Vértices consecutivos duplicados;
+▪️ Geometrías multiparte y ángulos inferiores a la tolerancia definida;
+▪️ Líneas o polígonos inferiores a los límites definidos;
+▪️ Huecos de polígonos con área inferior a la mínima permitida.
+<p><b>Salidas:</b> una capa de puntos con los errores localizados, una tabla completa de incidencias y un informe de calidad en HTML.</p>
+<p>Las tolerancias lineales se expresan en <b>metros</b>, los límites de área en <b>metros cuadrados</b> y los ángulos en grados. Se admiten SRC geográficos y proyectados; cuando es necesario, la herramienta crea internamente un SRC métrico local para realizar las mediciones.</p>
+<p>Las tolerancias deben considerar la escala de referencia, la resolución de los datos de entrada, la clase de entidad y el uso previsto. Las geometrías multiparte, de dimensiones reducidas o con huecos no constituyen necesariamente errores y deben revisarse técnicamente.</p>
+<p style="color:#b00020;"><b>Importante:</b> las capas de entrada no se modifican ni se corrigen automáticamente.</p>
+'''},
+'''
+<p>This tool performs an <b>automated intraclass topological validation</b> of one or more point, line, or polygon layers. Each layer is evaluated independently.</p>
+<p><b>Checks:</b></p>
+▪️ Coincident points and duplicated geometries;<br>
+▪️ Overlapping line segments and intersections without corresponding vertices;<br>
+▪️ Dangle ends and near disconnected ends, except those located near the optional mapping boundary;<br>
+▪️ Polygon overlaps, containment, small gaps, and missing vertices along shared borders.
+<p><b>Outputs:</b> a point layer containing all located errors and their attributes, and an HTML quality report.</p>
+<p>An optional single-polygon mapping area can be used to accept otherwise disconnected line ends located within the defined boundary tolerance.</p>
+<p>Feature identifiers are obtained automatically from each layer provider's primary key. When no primary key is declared, the internal QGIS feature ID is used. Gaps receive an occurrence ID and list the adjacent polygons, but do not receive a feature ID of their own.</p>
+<p>Linear tolerances are expressed in <b>metres</b> and area thresholds in <b>square metres</b>. Geographic and projected CRS are accepted; when necessary, the tool creates an internal local metric CRS for the validation.</p>
+<p>Distance and area thresholds must consider the reference scale, input resolution, feature class, and intended use. Some occurrences may represent intentional spatial arrangements and must be technically reviewed.</p>
+<p style="color:#b00020;"><b>Important:</b> validate and correct individual geometries before running this tool. Null, empty, or invalid geometries are ignored and reported in the execution summary. Input layers are not modified or automatically corrected.</p>
+''': {'es': '''
+<p>Esta herramienta realiza una <b>validación topológica intraclase automatizada</b> de una o varias capas de puntos, líneas o polígonos. Cada capa se evalúa de forma independiente.</p>
+<p><b>Comprobaciones:</b></p>
+▪️ Puntos coincidentes y geometrías duplicadas;<br>
+▪️ Segmentos de línea superpuestos e intersecciones sin vértices correspondientes;<br>
+▪️ Extremos colgantes y extremos próximos desconectados, excepto los situados cerca del límite opcional del área de mapeo;<br>
+▪️ Superposiciones, contenciones, pequeños huecos y vértices ausentes en límites compartidos de polígonos.
+<p><b>Salidas:</b> una capa de puntos con todos los errores localizados y sus atributos, y un informe de calidad en HTML.</p>
+<p>Puede utilizarse un área de mapeo opcional, formada por una única entidad poligonal, para aceptar extremos de líneas desconectados situados dentro de la tolerancia definida para el límite.</p>
+<p>Los identificadores de las entidades se obtienen automáticamente de la clave primaria declarada por el proveedor de cada capa. Cuando no existe una clave primaria declarada, se utiliza el identificador interno de la entidad de QGIS. Los huecos reciben un identificador de incidencia y enumeran los polígonos adyacentes, pero no reciben un identificador de entidad propio.</p>
+<p>Las tolerancias lineales se expresan en <b>metros</b> y los límites de área en <b>metros cuadrados</b>. Se admiten SRC geográficos y proyectados; cuando es necesario, la herramienta crea internamente un SRC métrico local para realizar la validación.</p>
+<p>Las tolerancias de distancia y área deben considerar la escala de referencia, la resolución de los datos de entrada, la clase de entidad y el uso previsto. Algunas incidencias pueden representar configuraciones espaciales intencionadas y deben revisarse técnicamente.</p>
+<p style="color:#b00020;"><b>Importante:</b> valide y corrija las geometrías individuales antes de ejecutar esta herramienta. Las geometrías nulas, vacías o no válidas se ignoran y se contabilizan en el resumen de la ejecución. Las capas de entrada no se modifican ni se corrigen automáticamente.</p>
+'''},
+
 }
