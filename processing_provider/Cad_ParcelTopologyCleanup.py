@@ -18,6 +18,8 @@ from qgis.PyQt.QtGui import QIcon
 
 from qgis.core import (
     QgsApplication,
+    QgsCoordinateReferenceSystem,
+    QgsCoordinateTransform,
     QgsDistanceArea,
     QgsFeature,
     QgsFeatureSink,
@@ -32,13 +34,14 @@ from qgis.core import (
     QgsProcessingParameterFeatureSink,
     QgsProcessingParameterFeatureSource,
     QgsProcessingParameterNumber,
+    QgsPointXY,
     QgsSpatialIndex,
+    QgsUnitTypes,
     QgsWkbTypes,
     Qgis
 )
 
 from lftools.geocapt.imgs import Imgs
-from lftools.geocapt.topogeo import meters2degrees
 from lftools.translations.translate import translate
 
 import json
@@ -90,12 +93,14 @@ class ParcelTopologyCleanup(QgsProcessingAlgorithm):
     txt_en = '''This tool performs a controlled geometric cleanup and topological correction workflow for parcel layers.
 The workflow can remove null or empty geometries, repair invalid geometries, convert multipart features to singleparts, remove duplicate geometries, remove holes, remove polygons with abnormally small areas, remove excessively narrow polygons (slivers), snap coordinates to a grid, remove duplicate vertices, and adjust connectivity between adjacent polygons.
 Removed features are recorded in a separate table with their original attributes. Modified or blocked operations are recorded in an audit table.
+Linear tolerances are always entered in meters. For geographic CRS, grid snapping and connectivity correction are performed in a temporary local metric CRS and the results are transformed back to the original CRS.
 Note: Automatic corrections are accepted only when the resulting geometry passes safety checks. Remaining topological problems must be reviewed after processing.
 '''
 
     txt_pt = '''Esta ferramenta executa um fluxo controlado de limpeza geométrica e correção topológica para camadas de lotes.
 O fluxo pode remover geometrias nulas ou vazias, corrigir geometrias inválidas, converter multipartes em partes simples, remover geometrias duplicadas, remover buracos, remover polígonos com áreas anormalmente pequenas, remover polígonos excessivamente estreitos (filetes), aderir coordenadas à grade, remover vértices duplicados e ajustar a conectividade entre polígonos adjacentes.
 As feições removidas são registradas em uma tabela separada com seus atributos originais. As operações que modificaram feições ou foram bloqueadas são registradas em uma tabela de auditoria.
+As tolerâncias lineares são sempre informadas em metros. Para SRC geográfico, a aderência à grade e a correção de conectividade são executadas em um SRC métrico local temporário e os resultados são transformados de volta para o SRC original.
 Obs.: Correções automáticas somente são aceitas quando a geometria resultante passa pelas verificações de segurança. Problemas topológicos remanescentes devem ser revisados após o processamento.
 '''
 
@@ -306,9 +311,18 @@ Obs.: Correções automáticas somente são aceitas quando a geometria resultant
         try:
             area = float(distance_area.measureArea(geom))
             perimeter = float(distance_area.measurePerimeter(geom))
+            area = float(distance_area.convertAreaMeasurement(
+                area, Qgis.AreaUnit.SquareMeters
+            ))
+            perimeter = float(distance_area.convertLengthMeasurement(
+                perimeter, Qgis.DistanceUnit.Meters
+            ))
             return abs(area), abs(perimeter)
-        except Exception:
-            return abs(float(geom.area())), abs(float(geom.length()))
+        except Exception as exc:
+            raise QgsProcessingException(self.tr(
+                'Could not calculate area and perimeter in metric units: {}',
+                'Não foi possível calcular área e perímetro em unidades métricas: {}'
+            ).format(str(exc)))
 
     def _shape_ratio(self, geom, distance_area):
         area, perimeter = self._metric_area_perimeter(geom, distance_area)
@@ -586,10 +600,97 @@ Obs.: Correções automáticas somente são aceitas quando a geometria resultant
         layer.updateExtents()
         return layer, uid_field
 
-    def _effective_distance(self, meters, crs, mean_latitude):
-        if crs.isGeographic():
-            return meters2degrees(meters, mean_latitude, crs)
-        return meters
+    def _metric_operation_context(self, crs, extent, transform_context):
+        """Return CRS, transformations and scale for metric geometry operations."""
+        if not crs.isValid():
+            raise QgsProcessingException(self.tr(
+                'The input layer has an invalid CRS.',
+                'A camada de entrada possui um SRC inválido.'
+            ))
+
+        if not crs.isGeographic():
+            try:
+                meters_per_unit = QgsUnitTypes.fromUnitToUnitFactor(
+                    crs.mapUnits(), Qgis.DistanceUnit.Meters
+                )
+            except Exception:
+                meters_per_unit = 0.0
+
+            if not math.isfinite(meters_per_unit) or meters_per_unit <= 0.0:
+                raise QgsProcessingException(self.tr(
+                    'The linear unit of the input CRS could not be converted to meters.',
+                    'Não foi possível converter para metros a unidade linear do SRC de entrada.'
+                ))
+
+            # The geometries remain in the projected input CRS. Convert the
+            # user-entered meters to the map unit (e.g. feet when required).
+            return crs, None, None, 1.0 / meters_per_unit
+
+        if extent is None or extent.isNull():
+            raise QgsProcessingException(self.tr(
+                'The input layer extent is invalid; a local metric CRS could not be created.',
+                'A extensão da camada de entrada é inválida; não foi possível criar um SRC métrico local.'
+            ))
+
+        wgs84 = QgsCoordinateReferenceSystem('EPSG:4326')
+        center = QgsPointXY(extent.center())
+        try:
+            if crs != wgs84:
+                to_wgs84 = QgsCoordinateTransform(
+                    crs, wgs84, transform_context
+                )
+                center = to_wgs84.transform(center)
+        except Exception as exc:
+            raise QgsProcessingException(self.tr(
+                'Could not determine the centre of the layer in WGS84: {}',
+                'Não foi possível determinar o centro da camada em WGS84: {}'
+            ).format(str(exc)))
+
+        longitude = float(center.x())
+        latitude = float(center.y())
+        if not (-180.0 <= longitude <= 180.0 and -80.0 <= latitude <= 84.0):
+            raise QgsProcessingException(self.tr(
+                'The layer centre is outside the area supported by the temporary UTM CRS.',
+                'O centro da camada está fora da área suportada pelo SRC UTM temporário.'
+            ))
+
+        zone = max(1, min(60, int(math.floor((longitude + 180.0) / 6.0)) + 1))
+        epsg = (32600 if latitude >= 0.0 else 32700) + zone
+        metric_crs = QgsCoordinateReferenceSystem(f'EPSG:{epsg}')
+        if not metric_crs.isValid():
+            raise QgsProcessingException(self.tr(
+                'Could not create the temporary metric CRS EPSG:{}.',
+                'Não foi possível criar o SRC métrico temporário EPSG:{}.'
+            ).format(epsg))
+
+        try:
+            to_metric = QgsCoordinateTransform(
+                crs, metric_crs, transform_context
+            )
+            from_metric = QgsCoordinateTransform(
+                metric_crs, crs, transform_context
+            )
+        except Exception as exc:
+            raise QgsProcessingException(self.tr(
+                'Could not create the transformations for the temporary metric CRS: {}',
+                'Não foi possível criar as transformações para o SRC métrico temporário: {}'
+            ).format(str(exc)))
+
+        return metric_crs, to_metric, from_metric, 1.0
+
+    def _transformed_geometry(self, geom, transformer):
+        if geom is None or geom.isNull() or geom.isEmpty():
+            return QgsGeometry()
+        transformed = QgsGeometry(geom)
+        if transformer is None:
+            return transformed
+        try:
+            result = transformed.transform(transformer)
+            if result != Qgis.GeometryOperationResult.Success:
+                return QgsGeometry()
+        except Exception:
+            return QgsGeometry()
+        return transformed
 
     def _safe_geometry(self, old_geom, new_geom, allow_multi=True):
         if new_geom is None or new_geom.isNull() or new_geom.isEmpty():
@@ -756,17 +857,24 @@ Obs.: Correções automáticas somente são aceitas quando a geometria resultant
             )
 
         extent = source.sourceExtent()
-        mean_latitude = (
-            (extent.yMaximum() + extent.yMinimum()) / 2.0
-            if not extent.isNull() else 0.0
-        )
+        work_crs = crs
+        to_metric = None
+        from_metric = None
+        meters_to_work_units = 1.0
 
-        grid_spacing = self._effective_distance(
-            grid_spacing_m, crs, mean_latitude
-        )
-        connect_tolerance = self._effective_distance(
-            connect_tolerance_m, crs, mean_latitude
-        )
+        if snap_grid or connect:
+            (
+                work_crs,
+                to_metric,
+                from_metric,
+                meters_to_work_units
+            ) = self._metric_operation_context(
+                crs, extent, context.transformContext()
+            )
+
+        grid_spacing = grid_spacing_m * meters_to_work_units
+        connect_tolerance = connect_tolerance_m * meters_to_work_units
+
         distance_area = QgsDistanceArea()
         try:
             distance_area.setSourceCrs(
@@ -775,13 +883,24 @@ Obs.: Correções automáticas somente são aceitas quando a geometria resultant
             ellipsoid = crs.ellipsoidAcronym()
             if ellipsoid:
                 distance_area.setEllipsoid(ellipsoid)
-        except Exception:
-            pass
+        except Exception as exc:
+            raise QgsProcessingException(self.tr(
+                'Could not configure metric area and perimeter measurements: {}',
+                'Não foi possível configurar as medições métricas de área e perímetro: {}'
+            ).format(str(exc)))
 
-        if crs.isGeographic():
+        if crs.isGeographic() and (snap_grid or connect):
             feedback.pushInfo(self.tr(
-                'Metric tolerances were converted to angular values using the mean latitude of the layer extent.',
-                'As tolerâncias métricas foram convertidas para valores angulares utilizando a latitude média da extensão da camada.'
+                'Grid and connectivity operations will use the temporary local metric CRS {}. Results will be transformed back to the original CRS.',
+                'As operações de grade e conectividade utilizarão o SRC métrico local temporário {}. Os resultados serão transformados de volta para o SRC original.'
+            ).format(work_crs.authid()))
+        elif (
+            (snap_grid or connect)
+            and abs(meters_to_work_units - 1.0) > 1e-12
+        ):
+            feedback.pushInfo(self.tr(
+                'Metric tolerances were converted to the linear unit of the projected input CRS.',
+                'As tolerâncias métricas foram convertidas para a unidade linear do SRC projetado de entrada.'
             ))
 
         output_wkb = (
@@ -1299,20 +1418,40 @@ Obs.: Correções automáticas somente são aceitas quando a geometria resultant
                     )
                     continue
 
+                work_geom = self._transformed_geometry(
+                    old_geom, to_metric
+                )
+                if work_geom.isNull() or work_geom.isEmpty():
+                    counters['grid_blocked'] += 1
+                    self._write_report(
+                        report_sink, report_fields, rec,
+                        'snap_to_grid', 'blocked',
+                        self.tr(
+                            'Grid snapping was skipped because the geometry could not be transformed to the metric working CRS',
+                            'A aderência à grade foi ignorada porque a geometria não pôde ser transformada para o SRC métrico de trabalho'
+                        ),
+                        old_geom, old_geom, distance_area
+                    )
+                    continue
+
                 try:
-                    new_geom = old_geom.snappedToGrid(
+                    snapped_work_geom = work_geom.snappedToGrid(
                         grid_spacing, grid_spacing, 0.0, 0.0
                     )
                 except Exception:
-                    new_geom = QgsGeometry()
+                    snapped_work_geom = QgsGeometry()
 
                 if (
-                    new_geom is not None
-                    and not new_geom.isNull()
-                    and not new_geom.isEmpty()
-                    and old_geom.asWkb() == new_geom.asWkb()
+                    snapped_work_geom is not None
+                    and not snapped_work_geom.isNull()
+                    and not snapped_work_geom.isEmpty()
+                    and work_geom.asWkb() == snapped_work_geom.asWkb()
                 ):
                     continue
+
+                new_geom = self._transformed_geometry(
+                    snapped_work_geom, from_metric
+                )
 
                 safe, _ = self._safe_geometry(
                     old_geom, new_geom,
@@ -1399,8 +1538,21 @@ Obs.: Correções automáticas somente são aceitas quando a geometria resultant
                 'Ajustando conectividade entre polígonos adjacentes...'
             ))
 
+            metric_records = []
+            metric_by_uid = {}
+            for rec in records:
+                metric_geom = self._transformed_geometry(
+                    rec['geom'], to_metric
+                )
+                if metric_geom.isNull() or metric_geom.isEmpty():
+                    continue
+                metric_rec = dict(rec)
+                metric_rec['geom'] = metric_geom
+                metric_records.append(metric_rec)
+                metric_by_uid[rec['uid']] = metric_geom
+
             work, uid_field = self._work_layer(
-                records, input_fields, crs, source.wkbType()
+                metric_records, input_fields, work_crs, source.wkbType()
             )
 
             snapped = processing.run(
@@ -1426,9 +1578,10 @@ Obs.: Correções automáticas somente são aceitas quando a geometria resultant
 
             for rec in records:
                 old_geom = rec['geom']
-                new_geom = result_by_uid.get(rec['uid'])
+                old_metric_geom = metric_by_uid.get(rec['uid'])
+                new_metric_geom = result_by_uid.get(rec['uid'])
 
-                if new_geom is None:
+                if old_metric_geom is None or new_metric_geom is None:
                     counters['connect_blocked'] += 1
                     self._write_report(
                         report_sink, report_fields, rec,
@@ -1441,8 +1594,12 @@ Obs.: Correções automáticas somente são aceitas quando a geometria resultant
                     )
                     continue
 
-                if old_geom.asWkb() == new_geom.asWkb():
+                if old_metric_geom.asWkb() == new_metric_geom.asWkb():
                     continue
+
+                new_geom = self._transformed_geometry(
+                    new_metric_geom, from_metric
+                )
 
                 safe, _ = self._safe_geometry(
                     old_geom, new_geom,
