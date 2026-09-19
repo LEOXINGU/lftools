@@ -18,7 +18,7 @@ __copyright__ = '(C) 2026, Leandro França'
 
 from collections import Counter
 from datetime import datetime
-from math import ceil, isfinite, log10
+from math import ceil, floor, isfinite, log10
 import os
 
 import processing
@@ -27,6 +27,8 @@ from qgis.PyQt.QtCore import QMetaType
 from qgis.PyQt.QtGui import QColor, QIcon
 from qgis.core import (
     QgsApplication,
+    QgsCoordinateReferenceSystem,
+    QgsCoordinateTransform,
     QgsFeature,
     QgsFeatureSink,
     QgsField,
@@ -134,6 +136,7 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
 <p><b>Outputs:</b> a point layer containing all located errors and their attributes, and an HTML quality report.</p>
 <p>An optional single-polygon mapping area can be used to accept otherwise disconnected line ends located within the defined boundary tolerance.</p>
 <p>Feature identifiers are obtained automatically from each layer provider's primary key. When no primary key is declared, the internal QGIS feature ID is used. Gaps receive an occurrence ID and list the adjacent polygons, but do not receive a feature ID of their own.</p>
+<p>Linear tolerances are expressed in <b>metres</b> and area thresholds in <b>square metres</b>. Geographic and projected CRS are accepted; when necessary, the tool creates an internal local metric CRS for the validation.</p>
 <p>Distance and area thresholds must consider the reference scale, input resolution, feature class, and intended use. Some occurrences may represent intentional spatial arrangements and must be technically reviewed.</p>
 <p style="color:#b00020;"><b>Important:</b> validate and correct individual geometries before running this tool. Null, empty, or invalid geometries are ignored and reported in the execution summary. Input layers are not modified or automatically corrected.</p>
 '''
@@ -148,6 +151,7 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
 <p><b>Saídas:</b> camada pontual contendo todos os erros localizados e seus atributos, e relatório de qualidade em HTML.</p>
 <p>Uma área de mapeamento opcional, contendo uma única feição poligonal, pode ser utilizada para aceitar extremidades de linhas desconectadas situadas dentro da tolerância definida para a fronteira.</p>
 <p>Os identificadores das feições são obtidos automaticamente pela chave primária declarada pelo provedor de cada camada. Quando não existe uma chave primária declarada, utiliza-se o identificador interno da feição no QGIS. As lacunas recebem um identificador de ocorrência e apresentam os polígonos adjacentes, mas não recebem um identificador de feição próprio.</p>
+<p>As tolerâncias lineares são expressas em <b>metros</b> e os limites de área em <b>metros quadrados</b>. São aceitos SRC geográficos e projetados; quando necessário, a ferramenta cria internamente um SRC métrico local para realizar a validação.</p>
 <p>As tolerâncias lineares e de área devem considerar a escala de referência, a resolução do insumo, a classe da feição e a finalidade de utilização. Algumas ocorrências podem representar configurações espaciais intencionais e devem ser analisadas tecnicamente.</p>
 <p style="color:#b00020;"><b>Importante:</b> valide e corrija as geometrias individuais antes de executar esta ferramenta. Geometrias nulas, vazias ou inválidas são ignoradas e contabilizadas no resumo da execução. As camadas de entrada não são modificadas nem corrigidas automaticamente.</p>
 '''
@@ -213,8 +217,8 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
         self.addParameter(QgsProcessingParameterNumber(
             self.BOUNDARY_TOLERANCE,
             self.tr(
-                'Mapping boundary tolerance for line ends (layer units)',
-                'Tolerância da fronteira da área de mapeamento para extremidades de linhas (unidades da camada)'
+                'Mapping boundary tolerance for line ends (m)',
+                'Tolerância da fronteira da área de mapeamento para extremidades de linhas (m)'
             ),
             type=QgsProcessingParameterNumber.Type.Double,
             defaultValue=boundary_tolerance,
@@ -223,8 +227,8 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
         self.addParameter(QgsProcessingParameterNumber(
             self.TOPOLOGY_TOLERANCE,
             self.tr(
-                'Topological coincidence tolerance (layer units)',
-                'Tolerância de coincidência topológica (unidades da camada)'
+                'Topological coincidence tolerance (m)',
+                'Tolerância de coincidência topológica (m)'
             ),
             type=QgsProcessingParameterNumber.Type.Double,
             defaultValue=topology_tolerance,
@@ -233,8 +237,8 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
         self.addParameter(QgsProcessingParameterNumber(
             self.NEAR_TOLERANCE,
             self.tr(
-                'Maximum distance for near disconnected ends (layer units)',
-                'Distância máxima para extremidades próximas desconectadas (unidades da camada)'
+                'Maximum distance for near disconnected ends (m)',
+                'Distância máxima para extremidades próximas desconectadas (m)'
             ),
             type=QgsProcessingParameterNumber.Type.Double,
             defaultValue=near_tolerance,
@@ -243,8 +247,8 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
         self.addParameter(QgsProcessingParameterNumber(
             self.MIN_OVERLAP_LENGTH,
             self.tr(
-                'Minimum line overlap length to report (layer units)',
-                'Comprimento mínimo de sobreposição linear a reportar (unidades da camada)'
+                'Minimum line overlap length to report (m)',
+                'Comprimento mínimo de sobreposição linear a reportar (m)'
             ),
             type=QgsProcessingParameterNumber.Type.Double,
             defaultValue=min_overlap_length,
@@ -253,8 +257,8 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
         self.addParameter(QgsProcessingParameterNumber(
             self.MIN_OVERLAP_AREA,
             self.tr(
-                'Minimum polygon overlap area to report (square layer units)',
-                'Área mínima de sobreposição de polígonos a reportar (unidades quadradas da camada)'
+                'Minimum polygon overlap area to report (m²)',
+                'Área mínima de sobreposição de polígonos a reportar (m²)'
             ),
             type=QgsProcessingParameterNumber.Type.Double,
             defaultValue=min_overlap_area,
@@ -279,8 +283,8 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
         self.addParameter(QgsProcessingParameterNumber(
             self.MAX_GAP_AREA,
             self.tr(
-                'Maximum gap area to report (square layer units; 0 reports all)',
-                'Área máxima da lacuna a reportar (unidades quadradas da camada; 0 reporta todas)'
+                'Maximum gap area to report (m²; 0 reports all)',
+                'Área máxima da lacuna a reportar (m²; 0 reporta todas)'
             ),
             type=QgsProcessingParameterNumber.Type.Double,
             defaultValue=max_gap_area,
@@ -476,6 +480,111 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
                 return '; '.join(key_parts)
         return str(feature.id())
 
+    def _metric_working_context(self, layers, context):
+        """Return a metric working CRS and optional forward/back transforms."""
+        source_crs = layers[0].crs()
+        if not source_crs.isValid():
+            raise QgsProcessingException(self.tr(
+                'The input CRS is invalid or undefined.',
+                'O SRC de entrada é inválido ou não está definido.'
+            ))
+
+        if (
+            not source_crs.isGeographic()
+            and source_crs.mapUnits() == Qgis.DistanceUnit.Meters
+        ):
+            return source_crs, None, None
+
+        extent = QgsRectangle(layers[0].extent())
+        for layer in layers[1:]:
+            extent.combineExtentWith(layer.extent())
+        if extent.isNull():
+            raise QgsProcessingException(self.tr(
+                'A local metric CRS could not be determined from the invalid input extent.',
+                'Não foi possível determinar um SRC métrico local a partir da extensão inválida das entradas.'
+            ))
+
+        geographic_crs = QgsCoordinateReferenceSystem.fromEpsgId(4326)
+        center = extent.center()
+        try:
+            if source_crs != geographic_crs:
+                center = QgsCoordinateTransform(
+                    source_crs, geographic_crs, context.transformContext()
+                ).transform(center)
+        except Exception as error:
+            raise QgsProcessingException(self.tr(
+                'The input extent could not be transformed to determine a local metric CRS: {}',
+                'A extensão de entrada não pôde ser transformada para determinar um SRC métrico local: {}'
+            ).format(str(error)))
+
+        longitude = center.x()
+        latitude = center.y()
+        if not (-180.0 <= longitude <= 180.0 and -80.0 <= latitude <= 84.0):
+            raise QgsProcessingException(self.tr(
+                'The input centre is outside the area supported by the temporary UTM CRS.',
+                'O centro das entradas está fora da área suportada pelo SRC UTM temporário.'
+            ))
+        zone = max(1, min(60, int(floor((longitude + 180.0) / 6.0)) + 1))
+        epsg = (32600 if latitude >= 0 else 32700) + zone
+        working_crs = QgsCoordinateReferenceSystem.fromEpsgId(epsg)
+        if not working_crs.isValid():
+            raise QgsProcessingException(self.tr(
+                'The local metric CRS EPSG:{} could not be created.',
+                'Não foi possível criar o SRC métrico local EPSG:{}.'
+            ).format(epsg))
+
+        return (
+            working_crs,
+            QgsCoordinateTransform(
+                source_crs, working_crs, context.transformContext()
+            ),
+            QgsCoordinateTransform(
+                working_crs, source_crs, context.transformContext()
+            )
+        )
+
+    def _metric_geometry(self, geometry, transform):
+        metric_geometry = QgsGeometry(geometry)
+        if transform is not None:
+            try:
+                result = metric_geometry.transform(transform)
+                if result != Qgis.GeometryOperationResult.Success:
+                    raise ValueError(self.tr(
+                        'geometry transformation returned status {}',
+                        'a transformação da geometria retornou o estado {}'
+                    ).format(result))
+            except Exception as error:
+                raise QgsProcessingException(self.tr(
+                    'A geometry could not be transformed to the metric working CRS: {}',
+                    'Uma geometria não pôde ser transformada para o SRC métrico de trabalho: {}'
+                ).format(str(error)))
+        return metric_geometry
+
+    def _metric_features(self, features, transform):
+        if transform is None:
+            return features
+        metric_features = []
+        for feature in features:
+            metric_feature = QgsFeature(feature)
+            metric_feature.setId(feature.id())
+            metric_feature.setGeometry(
+                self._metric_geometry(feature.geometry(), transform)
+            )
+            metric_features.append(metric_feature)
+        return metric_features
+
+    def _source_point(self, point, transform):
+        source_point = QgsPointXY(point)
+        if transform is not None:
+            try:
+                source_point = transform.transform(source_point)
+            except Exception as error:
+                raise QgsProcessingException(self.tr(
+                    'An error location could not be transformed back to the input CRS: {}',
+                    'Uma localização de erro não pôde ser transformada de volta para o SRC de entrada: {}'
+                ).format(str(error)))
+        return source_point
+
     def processAlgorithm(self, parameters, context, feedback):
         layers = self.parameterAsLayerList(parameters, self.INPUTS, context)
         if not layers:
@@ -491,11 +600,20 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
                 'All input layers must use the same CRS. Incompatible layers: {}',
                 'Todas as camadas de entrada devem utilizar o mesmo SRC. Camadas incompatíveis: {}'
             ).format(', '.join(incompatible)))
-        if first_crs.isGeographic():
-            raise QgsProcessingException(self.tr(
-                'Use a projected CRS because the validation parameters are expressed in layer units.',
-                'Utilize um SRC projetado, pois os parâmetros da validação são expressos nas unidades da camada.'
-            ))
+
+        working_crs, to_metric, from_metric = self._metric_working_context(
+            layers, context
+        )
+        if to_metric is None:
+            feedback.pushInfo(self.tr(
+                'Validation will use the input CRS in metres ({}).',
+                'A validação utilizará o SRC de entrada em metros ({}).'
+            ).format(working_crs.authid()))
+        else:
+            feedback.pushInfo(self.tr(
+                'Validation will use the local metric working CRS {}. Error locations will be returned in the input CRS.',
+                'A validação utilizará o SRC métrico local de trabalho {}. As localizações dos erros serão retornadas no SRC de entrada.'
+            ).format(working_crs.authid()))
 
         mapping_source = self.parameterAsSource(
             parameters, self.MAPPING_AREA, context
@@ -536,7 +654,10 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
                     'The mapping area geometry is invalid. Correct it before validation.',
                     'A geometria da área de mapeamento é inválida. Corrija-a antes da validação.'
                 ))
-            mapping_boundary = self._polygon_boundary(mapping_geometry)
+            metric_mapping_geometry = self._metric_geometry(
+                mapping_geometry, to_metric
+            )
+            mapping_boundary = self._polygon_boundary(metric_mapping_geometry)
             mapping_area_name = (
                 mapping_source.sourceName()
                 if hasattr(mapping_source, 'sourceName')
@@ -616,6 +737,9 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
             rule_name = self._rule_name(rule_id)
             geometry_name = self._geometry_type_name(layer)
             located = point is not None and self._finite_point(point)
+            output_point = (
+                self._source_point(point, from_metric) if located else None
+            )
             attributes = [
                 occurrence_sequence, rule_id, rule_name, layer.name(),
                 geometry_name, feature_text, related_text, str(involved_ids or ''),
@@ -623,7 +747,7 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
             ]
             if located:
                 error = QgsFeature(error_fields)
-                error.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(point)))
+                error.setGeometry(QgsGeometry.fromPointXY(output_point))
                 error.setAttributes(attributes)
                 error_sink.addFeature(error, QgsFeatureSink.Flag.FastInsert)
             occurrences.append({
@@ -652,23 +776,24 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
                 'Validando topologia intraclasse: {}'
             ).format(layer.name()))
 
-            features, skipped = self._valid_features(layer)
+            source_features, skipped = self._valid_features(layer)
             skipped_counts[layer.name()] = skipped
-            evaluated_counts[layer.name()] = len(features)
+            evaluated_counts[layer.name()] = len(source_features)
             if skipped:
                 feedback.pushWarning(self.tr(
                     '{} null, empty, or invalid feature(s) were ignored in layer {}.',
                     '{} feição(ões) nula(s), vazia(s) ou inválida(s) foram ignoradas na camada {}.'
                 ).format(skipped, layer.name()))
-            if not features:
+            if not source_features:
                 feedback.setProgress(int(layer_number * 100.0 / total_layers))
                 continue
 
             geometry_type = QgsWkbTypes.geometryType(layer.wkbType())
+            features = self._metric_features(source_features, to_metric)
             feature_map = {feature.id(): feature for feature in features}
             feature_ids = {
                 feature.id(): self._feature_identifier(layer, feature)
-                for feature in features
+                for feature in source_features
             }
             # Some PyQGIS versions do not accept a regular Python list in
             # the QgsSpatialIndex constructor. Insert the features one by
@@ -695,7 +820,7 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
                     layer, features, feature_map, feature_ids, index,
                     topology_tolerance, min_overlap_area,
                     check_gaps, max_gap_area, check_missing_vertices,
-                    register, context, feedback
+                    working_crs, register, context, feedback
                 )
             feedback.setProgress(int(layer_number * 100.0 / total_layers))
 
@@ -882,7 +1007,7 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
     def _validate_polygons(self, layer, features, feature_map, feature_ids, index,
                            tolerance, min_overlap_area, check_gaps,
                            max_gap_area, check_missing_vertices,
-                           register, context, feedback):
+                           working_crs, register, context, feedback):
         boundaries = {
             feature.id(): self._polygon_boundary(feature.geometry())
             for feature in features
@@ -895,7 +1020,7 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
         if check_missing_vertices:
             native_missing_vertices = self._check_missing_vertices_native(
                 layer, features, feature_ids, tolerance,
-                register, context, feedback
+                working_crs, register, context, feedback
             )
         for feature in features:
             if feedback.isCanceled():
@@ -957,7 +1082,8 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
             )
 
     def _check_missing_vertices_native(self, layer, features, feature_ids,
-                                       tolerance, register, context, feedback):
+                                       tolerance, working_crs, register,
+                                       context, feedback):
         """Use the native QGIS 3.42+ checker, retaining a legacy fallback."""
         algorithm_id = 'native:checkgeometrymissingvertex'
         if QgsApplication.processingRegistry().algorithmById(algorithm_id) is None:
@@ -969,7 +1095,7 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
 
         geometry_name = QgsWkbTypes.displayString(layer.wkbType())
         temporary = QgsVectorLayer(
-            '{}?crs={}'.format(geometry_name, layer.crs().authid()),
+            '{}?crs={}'.format(geometry_name, working_crs.authid()),
             '_lftools_valid_polygons',
             'memory'
         )
@@ -1235,13 +1361,13 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
         parameter_rows = ''.join([
             '<tr><td>{}</td><td>{}</td></tr>'.format(str2HTML(label), value)
             for label, value in [
-                (self.tr('Topological coincidence tolerance', 'Tolerância de coincidência topológica'), topology_tolerance),
-                (self.tr('Near disconnected ends tolerance', 'Tolerância para extremidades próximas desconectadas'), near_tolerance),
+                (self.tr('Topological coincidence tolerance', 'Tolerância de coincidência topológica'), '{} m'.format(topology_tolerance)),
+                (self.tr('Near disconnected ends tolerance', 'Tolerância para extremidades próximas desconectadas'), '{} m'.format(near_tolerance)),
                 (self.tr('Mapping area', 'Área de mapeamento'), str2HTML(mapping_area_name)),
-                (self.tr('Mapping boundary tolerance', 'Tolerância da fronteira da área de mapeamento'), boundary_tolerance if mapping_area_name != self.tr('Not provided', 'Não fornecida') else self.tr('Not evaluated', 'Não avaliada')),
-                (self.tr('Minimum line overlap length', 'Comprimento mínimo de sobreposição linear'), min_overlap_length),
-                (self.tr('Minimum polygon overlap area', 'Área mínima de sobreposição de polígonos'), min_overlap_area),
-                (self.tr('Maximum gap area', 'Área máxima das lacunas'), max_gap_area if check_gaps else self.tr('Not evaluated', 'Não avaliada')),
+                (self.tr('Mapping boundary tolerance', 'Tolerância da fronteira da área de mapeamento'), '{} m'.format(boundary_tolerance) if mapping_area_name != self.tr('Not provided', 'Não fornecida') else self.tr('Not evaluated', 'Não avaliada')),
+                (self.tr('Minimum line overlap length', 'Comprimento mínimo de sobreposição linear'), '{} m'.format(min_overlap_length)),
+                (self.tr('Minimum polygon overlap area', 'Área mínima de sobreposição de polígonos'), '{} m²'.format(min_overlap_area)),
+                (self.tr('Maximum gap area', 'Área máxima das lacunas'), '{} m²'.format(max_gap_area) if check_gaps else self.tr('Not evaluated', 'Não avaliada')),
             ]
         ])
 
@@ -1302,8 +1428,8 @@ td { border:1px solid #ddd; padding:8px; } tr:nth-child(even) { background:#f8f8
 <table><tr><th>''' + str2HTML(self.tr('Layer', 'Camada')) + '''</th><th>''' + str2HTML(self.tr('Geometry', 'Geometria')) + '''</th><th>''' + str2HTML(self.tr('Evaluated', 'Avaliadas')) + '''</th><th>''' + str2HTML(self.tr('Ignored', 'Ignoradas')) + '''</th><th>''' + str2HTML(self.tr('Boundary exceptions', 'Exceções na fronteira')) + '''</th><th>''' + str2HTML(self.tr('Occurrences', 'Ocorrências')) + '''</th><th>''' + str2HTML(self.tr('CRS', 'SRC')) + '''</th></tr>''' + layer_rows + '''</table>
 <h2>''' + str2HTML(self.tr('2. Methodology', '2. Metodologia')) + '''</h2>
 <p>''' + str2HTML(self.tr(
-            'Each layer was evaluated independently. Spatial relationships were compared using a spatial index and the enabled linear and area thresholds. When a mapping area was provided, disconnected line ends within the boundary tolerance were accepted and counted separately. Identifiers were obtained automatically from provider-declared primary keys, with the internal QGIS feature ID used as a fallback. The validation only identifies potential nonconformities; it does not edit the source data.',
-            'Cada camada foi avaliada de forma independente. As relações espaciais foram comparadas com índice espacial e as tolerâncias lineares e de área habilitadas. Quando uma área de mapeamento foi fornecida, as extremidades de linhas desconectadas situadas dentro da tolerância da fronteira foram aceitas e contabilizadas separadamente. Os identificadores foram obtidos automaticamente pelas chaves primárias declaradas pelos provedores, com uso do identificador interno do QGIS como alternativa. A validação apenas identifica não conformidades potenciais; ela não altera os dados de origem.'
+            'Each layer was evaluated independently in a metric working CRS. Spatial relationships were compared using a spatial index, linear thresholds in metres, and area thresholds in square metres. When a mapping area was provided, disconnected line ends within the boundary tolerance were accepted and counted separately. Identifiers were obtained automatically from provider-declared primary keys, with the internal QGIS feature ID used as a fallback. The validation only identifies potential nonconformities; it does not edit the source data.',
+            'Cada camada foi avaliada de forma independente em um SRC métrico de trabalho. As relações espaciais foram comparadas com índice espacial, tolerâncias lineares em metros e limites de área em metros quadrados. Quando uma área de mapeamento foi fornecida, as extremidades de linhas desconectadas situadas dentro da tolerância da fronteira foram aceitas e contabilizadas separadamente. Os identificadores foram obtidos automaticamente pelas chaves primárias declaradas pelos provedores, com uso do identificador interno do QGIS como alternativa. A validação apenas identifica não conformidades potenciais; ela não altera os dados de origem.'
         )) + '''</p>
 <h2>''' + str2HTML(self.tr('3. Parameters', '3. Parâmetros')) + '''</h2>
 <table><tr><th>''' + str2HTML(self.tr('Parameter', 'Parâmetro')) + '''</th><th>''' + str2HTML(self.tr('Value', 'Valor')) + '''</th></tr>''' + parameter_rows + '''</table>
