@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 """
 Relief_DEMdifference.py
 ***************************************************************************
@@ -15,28 +14,24 @@ __author__ = 'Leandro França'
 __date__ = '2023-05-30'
 __copyright__ = '(C) 2023, Leandro França'
 
-from qgis.core import (Qgis,
-                       QgsPointXY,
-                       QgsGeometry,
+from qgis.core import (QgsProcessingAlgorithm,
                        QgsProcessingException,
-                       QgsProcessingAlgorithm,
                        QgsProcessingParameterBoolean,
                        QgsProcessingParameterEnum,
                        QgsProcessingParameterFileDestination,
                        QgsProcessingParameterRasterLayer,
                        QgsApplication,
                        QgsProject,
-                       QgsRasterLayer,
-                       QgsCoordinateTransform,
-                       QgsCoordinateReferenceSystem)
+                       QgsRasterLayer)
 
-from osgeo import osr, gdal_array, gdal #https://gdal.org/python/
+from osgeo import gdal
 import numpy as np
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
-from lftools.geocapt.dip import Interpolar
 import os
+import tempfile
 from qgis.PyQt.QtGui import QIcon
+
 
 class DEMdifference(QgsProcessingAlgorithm):
 
@@ -67,11 +62,17 @@ class DEMdifference(QgsProcessingAlgorithm):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/contours.png'))
 
     txt_en = '''This tool performs the difference between two Digital Elevation Models (DEM).
-Minuend is the raster to be subtracted.
-Subtrahend is the rastar that is subtracting.'''
+Minuend is the raster from which elevations are subtracted.
+Subtrahend is the raster whose elevations are subtracted.
+The selected reference grid determines the output extent, resolution and CRS.
+The other raster is resampled to this grid, and cells without valid values in both models become NoData.
+Optionally, multiply the result by -1.'''
     txt_pt = '''Esta ferramenta executa a diferença entre dois Modelos Digitais de Elevação (MDE).
-Minuendo é o raster a ser subtraído.
-Subtraendo é o rastar que está subtraindo.'''
+Minuendo é o raster do qual as cotas são subtraídas.
+Subtraendo é o raster cujas cotas são subtraídas.
+A grade de referência define a extensão, resolução e SRC da saída.
+O outro raster é reamostrado para essa grade, e células sem valores válidos nos dois modelos tornam-se NoData.
+Opcionalmente, multiplique o resultado por -1.'''
     figure = 'images/tutorial/relief_difference.jpg'
 
     def shortHelpString(self):
@@ -87,7 +88,7 @@ Subtraendo é o rastar que está subtraindo.'''
         return self.tr(self.txt_en, self.txt_pt) + footer
 
     MINUEND = 'MINUEND'
-    SUBTRAHEND ='SUBTRAHEND'
+    SUBTRAHEND = 'SUBTRAHEND'
     REF = 'REF'
     RESAMPLING = 'RESAMPLING'
     NEGATIVE = 'NEGATIVE'
@@ -99,42 +100,39 @@ Subtraendo é o rastar que está subtraindo.'''
         self.addParameter(
             QgsProcessingParameterRasterLayer(
                 self.MINUEND,
-                self.tr('Minuend', 'Minuendo'),
-                [Qgis.ProcessingSourceType.TypeRaster]
+                self.tr('Minuend', 'Minuendo')
             )
         )
 
         self.addParameter(
             QgsProcessingParameterRasterLayer(
                 self.SUBTRAHEND,
-                self.tr('Subtrahend', 'Subtraendo'),
-                [Qgis.ProcessingSourceType.TypeRaster]
+                self.tr('Subtrahend', 'Subtraendo')
             )
         )
 
-        ref = [self.tr('Minuend','Minuendo'),
-               self.tr('Subtrahend','Subtraendo')
-               ]
+        ref = [self.tr('Minuend', 'Minuendo'),
+               self.tr('Subtrahend', 'Subtraendo')]
 
         self.addParameter(
             QgsProcessingParameterEnum(
                 self.REF,
                 self.tr('Reference grid', 'Grade de Referência'),
-				options = ref,
-                defaultValue = 0
+                options=ref,
+                defaultValue=0
             )
         )
 
         interp = [self.tr('Nearest neighbor', 'Vizinho mais próximo'),
-                 self.tr('Bilinear'),
-                 self.tr('Bicubic', 'Bicúbica')]
+                  self.tr('Bilinear'),
+                  self.tr('Bicubic', 'Bicúbica')]
 
         self.addParameter(
             QgsProcessingParameterEnum(
                 self.RESAMPLING,
                 self.tr('Interpolation', 'Interpolação'),
-				options = interp,
-                defaultValue = 0
+                options=interp,
+                defaultValue=0
             )
         )
 
@@ -142,7 +140,7 @@ Subtraendo é o rastar que está subtraindo.'''
             QgsProcessingParameterBoolean(
                 self.NEGATIVE,
                 self.tr('Multiply the result by -1', 'Multiplicar o resultado por -1'),
-                defaultValue = False
+                defaultValue=False
             )
         )
 
@@ -151,7 +149,7 @@ Subtraendo é o rastar que está subtraindo.'''
             QgsProcessingParameterFileDestination(
                 self.OUTPUT,
                 self.tr('Difference', 'Diferença'),
-                fileFilter = 'GeoTIFF (*.tif)'
+                fileFilter='GeoTIFF (*.tif)'
             )
         )
 
@@ -159,191 +157,157 @@ Subtraendo é o rastar que está subtraindo.'''
             QgsProcessingParameterBoolean(
                 self.OPEN,
                 self.tr('Load raster', 'Carregar raster'),
-                defaultValue= True
+                defaultValue=True
             )
         )
 
     def processAlgorithm(self, parameters, context, feedback):
-
         # inputs
-
-        minuendo = self.parameterAsRasterLayer(
-            parameters,
-            self.MINUEND,
-            context
-        )
-        if minuendo is None:
+        a_layer = self.parameterAsRasterLayer(parameters, self.MINUEND, context)
+        b_layer = self.parameterAsRasterLayer(parameters, self.SUBTRAHEND, context)
+        if a_layer is None:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.MINUEND))
-        minuendo = minuendo.dataProvider().dataSourceUri()
-
-
-        subtraendo = self.parameterAsRasterLayer(
-            parameters,
-            self.SUBTRAHEND,
-            context
-        )
-        if subtraendo is None:
+        if b_layer is None:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.SUBTRAHEND))
-        subtraendo = subtraendo.dataProvider().dataSourceUri()
-
-        interpolacao = self.parameterAsEnum(
-            parameters,
-            self.RESAMPLING,
-            context
-        )
-        interpolacao = ['nearest','bilinear','bicubic'][interpolacao]
-
-        negativo = self.parameterAsBool(
-            parameters,
-            self.NEGATIVE,
-            context
-        )
-
-        grade_ref = self.parameterAsEnum(
-            parameters,
-            self.REF,
-            context
-        )
-
         # output
-        Output = self.parameterAsFileOutput(
-            parameters,
-            self.OUTPUT,
-            context
-        )
+        output = self.parameterAsFileOutput(parameters, self.OUTPUT, context)
+        if not output:
+            raise QgsProcessingException(self.tr('Invalid output path.', 'Caminho de saída inválido.'))
+        a_path = a_layer.dataProvider().dataSourceUri()
+        b_path = b_layer.dataProvider().dataSourceUri()
+        if any(os.path.abspath(output) == os.path.abspath(path)
+               for path in (a_path, b_path)):
+            raise QgsProcessingException(self.tr(
+                'The output must differ from both inputs.',
+                'A saída deve ser diferente das duas entradas.'))
 
-        Carregar = self.parameterAsBool(
-            parameters,
-            self.OPEN,
-            context
-        )
+        ref_choice = self.parameterAsEnum(parameters, self.REF, context)
+        method = self.parameterAsEnum(parameters, self.RESAMPLING, context)
+        if ref_choice not in (0, 1) or method not in (0, 1, 2):
+            raise QgsProcessingException(self.tr(
+                'Invalid processing option.', 'Opção de processamento inválida.'))
+        resampling = ('near', 'bilinear', 'cubic')[method]
+        sign = -1 if self.parameterAsBool(parameters, self.NEGATIVE, context) else 1
+        load_output = self.parameterAsBool(parameters, self.OPEN, context)
 
-        # Minuendo
-        feedback.pushInfo(self.tr('Opening minuend raster file...', 'Abrindo arquivo raster Minuendo...'))
-        image = gdal.Open(minuendo)
-        prj = image.GetProjection()
-        banda = image.GetRasterBand(1).ReadAsArray()
-        nulo = image.GetRasterBand(1).GetNoDataValue()
-        if nulo == None:
-            nulo =-9999
-        # Number of rows and columns
-        cols = image.RasterXSize
-        rows = image.RasterYSize
-        # Origem e resolucao da imagem
-        geotransform = image.GetGeoTransform()
-        ulx, xres, xskew, uly, yskew, yres  = geotransform
-        origem = (ulx, uly)
-        resol_X = abs(xres)
-        resol_Y = abs(yres)
-        lrx = ulx + (cols * xres)
-        lry = uly + (rows * yres)
-        bbox = [ulx, lrx, lry, uly]
-        image = None # Fechar imagem
+        # Minuendo e subtraendo
+        a = gdal.Open(a_path, gdal.GA_ReadOnly)
+        b = gdal.Open(b_path, gdal.GA_ReadOnly)
+        if a is None or b is None:
+            raise QgsProcessingException(self.tr(
+                'Could not open the input rasters.', 'Não foi possível abrir os rasters de entrada.'))
+        if a.RasterCount < 1 or b.RasterCount < 1:
+            raise QgsProcessingException(self.tr(
+                'Both inputs must have at least one band.',
+                'As entradas devem ter pelo menos uma banda.'))
+        if any(gdal.DataTypeIsComplex(ds.GetRasterBand(1).DataType) for ds in (a, b)):
+            raise QgsProcessingException(self.tr(
+                'Complex raster bands are not supported.',
+                'Bandas raster complexas não são aceitas.'))
 
-        # Subtraendo
-        feedback.pushInfo(self.tr('Opening subtrahend raster file...', 'Abrindo arquivo raster Subtraendo...'))
-        image = gdal.Open(subtraendo)
-        prjRef = image.GetProjection()
-        bandRef = image.GetRasterBand(1).ReadAsArray()
-        nuloRef = image.GetRasterBand(1).GetNoDataValue()
-        if nuloRef == None:
-            nuloRef =-9999
-        # Number of rows and columns
-        colsRef = image.RasterXSize
-        rowsRef = image.RasterYSize
-        # Origem e resolucao da imagem
-        geotransformRef = image.GetGeoTransform()
-        ulx, xres, xskew, uly, yskew, yres  = geotransformRef
-        origemRef = (ulx, uly)
-        resol_XRef = abs(xres)
-        resol_YRef = abs(yres)
-        image = None # Fechar imagem
+        # Grade de referência
+        reference, other = (a, b) if ref_choice == 0 else (b, a)
+        gt = reference.GetGeoTransform()
+        if gt[2] != 0 or gt[4] != 0 or gt[1] <= 0 or gt[5] >= 0:
+            raise QgsProcessingException(self.tr(
+                'The reference raster must have a north-up, non-rotated grid.',
+                'O raster de referência deve ter grade orientada ao norte, sem rotação.'))
+        projection = reference.GetProjection()
+        same_grid = (reference.RasterXSize == other.RasterXSize and
+                     reference.RasterYSize == other.RasterYSize and
+                     gt == other.GetGeoTransform() and projection == other.GetProjection())
+        if not same_grid and (not projection or not other.GetProjection()):
+            raise QgsProcessingException(self.tr(
+                'Both rasters need a CRS when their grids differ.',
+                'Os dois rasters precisam de SRC quando as grades diferem.'))
 
-        # Transformação de coordenadas
-        crsSrc = QgsCoordinateReferenceSystem(prj)
-        crsDest = QgsCoordinateReferenceSystem(prjRef)
-        if crsSrc != crsDest:
-            transf_SRC = True
-            coordTransf = QgsCoordinateTransform(crsSrc, crsDest, QgsProject.instance())
-            InvCoordTransf = QgsCoordinateTransform(crsDest, crsSrc, QgsProject.instance())
-        else:
-            transf_SRC = False
+        aligned = other
+        if not same_grid:
+            feedback.pushInfo(self.tr('Aligning DEMs...', 'Alinhando os MDEs...'))
+            bounds = (gt[0], gt[3] + reference.RasterYSize * gt[5],
+                      gt[0] + reference.RasterXSize * gt[1], gt[3])
+            aligned = gdal.Warp('', other, format='VRT', dstSRS=projection,
+                                outputBounds=bounds, width=reference.RasterXSize,
+                                height=reference.RasterYSize, resampleAlg=resampling,
+                                dstNodata='nan', outputType=gdal.GDT_Float64,
+                                warpOptions=['INIT_DEST=NO_DATA'])
+            if aligned is None:
+                raise QgsProcessingException(self.tr(
+                    'Could not align the DEMs.', 'Não foi possível alinhar os MDEs.'))
 
-        # Diferença
-        feedback.pushInfo(self.tr('Calculating the difference...', 'Calculando a diferença...'))
-        if grade_ref == 0: # Referencia é o minuendo
-            DIFER = -9999.*np.ones([rows,cols])
-            Percent = 100./rows
-            for current, lin in enumerate(range(rows)):
-                for col in range(cols):
-                    X = origem[0] + resol_X*(col + 0.5)
-                    Y = origem[1] - resol_Y*(lin + 0.5)
-                    Z = banda[lin, col]
-                    if transf_SRC:
-                        geom = QgsGeometry.fromPointXY(QgsPointXY(X,Y))
-                        geom.transform(coordTransf)
-                        pnt = geom.asPoint()
-                        X, Y = pnt.x(), pnt.y()
-                    Z_ref = Interpolar(X, Y, bandRef, origemRef, resol_XRef, resol_YRef, metodo = 'nearest', nulo = nuloRef)
-                    if Z != -9999 and Z_ref != -9999:
-                        DIFER[lin,col] = (Z - Z_ref)*(-1 if negativo else 1)
+        # Diferença (processamento por blocos)
+        fd, temporary_path = tempfile.mkstemp(
+            suffix='.tif', prefix='.dem_difference_',
+            dir=os.path.dirname(os.path.abspath(output)))
+        os.close(fd)
+        os.unlink(temporary_path)
+        result = None
+        try:
+            result = gdal.GetDriverByName('GTiff').Create(
+                temporary_path, reference.RasterXSize, reference.RasterYSize, 1,
+                gdal.GDT_Float64, options=['TILED=YES', 'COMPRESS=DEFLATE',
+                                          'PREDICTOR=3', 'BIGTIFF=IF_SAFER'])
+            if result is None:
+                raise QgsProcessingException(self.tr(
+                    'Could not create output GeoTIFF.',
+                    'Não foi possível criar o GeoTIFF de saída.'))
+            result.SetGeoTransform(gt)
+            result.SetProjection(projection)
+            band_ref = reference.GetRasterBand(1)
+            band_other = aligned.GetRasterBand(1)
+            mask_ref = band_ref.GetMaskBand()
+            mask_other = band_other.GetMaskBand()
+            result_band = result.GetRasterBand(1)
+            result_band.SetNoDataValue(float('nan'))
+            valid = 0
+            block = 512
+            for y in range(0, reference.RasterYSize, block):
                 if feedback.isCanceled():
-                    break
-                feedback.setProgress(int((current+1) * Percent))
+                    raise QgsProcessingException(self.tr('Canceled.', 'Cancelado.'))
+                h = min(block, reference.RasterYSize - y)
+                for x in range(0, reference.RasterXSize, block):
+                    w = min(block, reference.RasterXSize - x)
+                    first = band_ref.ReadAsArray(x, y, w, h).astype(np.float64)
+                    second = band_other.ReadAsArray(x, y, w, h).astype(np.float64)
+                    ok = (mask_ref.ReadAsArray(x, y, w, h) != 0) & (
+                        mask_other.ReadAsArray(x, y, w, h) != 0)
+                    ok &= np.isfinite(first) & np.isfinite(second)
+                    valid += int(np.count_nonzero(ok))
+                    values = np.full((h, w), np.nan, dtype=np.float64)
+                    if ref_choice == 0:
+                        values[ok] = sign * (first[ok] - second[ok])
+                    else:
+                        values[ok] = sign * (second[ok] - first[ok])
+                    result_band.WriteArray(values, x, y)
+                feedback.setProgress(round(100 * (y + h) / reference.RasterYSize))
+            if feedback.isCanceled():
+                raise QgsProcessingException(self.tr('Canceled.', 'Cancelado.'))
+            if valid == 0:
+                raise QgsProcessingException(self.tr(
+                    'No cells have valid values in both rasters.',
+                    'Nenhuma célula possui valores válidos nos dois rasters.'))
+            result.FlushCache()
+            result_band = None
+            result = None
+            aligned = None
+            a = b = None
+            os.replace(temporary_path, output)
+        finally:
+            result = None
+            aligned = None
+            a = b = None
+            if os.path.exists(temporary_path):
+                os.unlink(temporary_path)
 
-            # Verificar novos valores de número de linhas e colunas
-            # Verificar nova extensão
-
-            new_img = gdal.GetDriverByName('GTiff').Create(Output, cols, rows, 1, gdal.GDT_Float32)
-            new_img.SetGeoTransform(geotransform)
-            new_img.SetProjection(prj)
-            new_band = new_img.GetRasterBand(1)
-            new_band.SetNoDataValue(nulo)
-            new_band.WriteArray(DIFER)
-            new_img.FlushCache()
-            new_img = None
-
-        elif grade_ref == 1: # Referência é o subtraendo
-            DIFER = -9999.*np.ones([rowsRef,colsRef])
-            Percent = 100./rowsRef
-            for current, lin in enumerate(range(rowsRef)):
-                for col in range(colsRef):
-                    X = origemRef[0] + resol_XRef*(col + 0.5)
-                    Y = origemRef[1] - resol_YRef*(lin + 0.5)
-                    Z = bandRef[lin, col]
-                    if transf_SRC:
-                        geom = QgsGeometry.fromPointXY(QgsPointXY(X,Y))
-                        geom.transform(InvCoordTransf)
-                        pnt = geom.asPoint()
-                        X, Y = pnt.x(), pnt.y()
-                    Z_ref = Interpolar(X, Y, banda, origem, resol_X, resol_Y, metodo = 'nearest', nulo = nulo)
-                    if Z != -9999 and Z_ref != -9999:
-                        DIFER[lin,col] = (Z_ref - Z) * (-1 if negativo else 1)
-                if feedback.isCanceled():
-                    break
-                feedback.setProgress(int((current+1) * Percent))
-
-            # Verificar novos valores de número de linhas e colunas
-            # Verificar nova extensão
-
-            new_img = gdal.GetDriverByName('GTiff').Create(Output, colsRef, rowsRef, 1, gdal.GDT_Float32)
-            new_img.SetGeoTransform(geotransformRef)
-            new_img.SetProjection(prjRef)
-            new_band = new_img.GetRasterBand(1)
-            new_band.SetNoDataValue(nuloRef)
-            new_band.WriteArray(DIFER)
-            new_img.FlushCache()
-            new_img = None
-
-        feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
-        feedback.pushInfo(self.tr('Leandro Franca - Cartographic Engineer', 'Leandro França - Eng Cart'))
-        self.CAMINHO = Output
-        self.CARREGAR = Carregar
-        return {self.OUTPUT: Output}
+        feedback.pushInfo(self.tr('Valid cells: {}.', 'Células válidas: {}.').format(valid))
+        self.CAMINHO = output
+        self.CARREGAR = load_output
+        return {self.OUTPUT: output}
 
     # Carregamento de arquivo de saída
     def postProcessAlgorithm(self, context, feedback):
         if self.CARREGAR:
-            rlayer = QgsRasterLayer(self.CAMINHO, self.tr('Difference', 'Diferença'))
-            QgsProject.instance().addMapLayer(rlayer)
+            layer = QgsRasterLayer(self.CAMINHO, self.tr('Difference', 'Diferença'))
+            if layer.isValid():
+                QgsProject.instance().addMapLayer(layer)
         return {}
