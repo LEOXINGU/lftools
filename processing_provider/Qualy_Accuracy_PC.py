@@ -12,7 +12,7 @@ Qualy_Accuracy_PC.py
 ***************************************************************************
 """
 __author__ = 'Leandro França'
-__date__ = '2026-06-09'
+__date__ = '2026-09-26'
 __copyright__ = '(C) 2026, Leandro França'
 
 from qgis.PyQt.QtCore import QMetaType
@@ -27,7 +27,9 @@ from lftools.translations.translate import translate
 from lftools.geocapt.topogeo import str2HTML
 from lftools.geocapt.cartography import PEC
 import os
+from itertools import combinations
 from qgis.PyQt.QtGui import QIcon, QColor, QFont
+import processing
 from lftools.dependencies import (
                                     ensure_scipy,
                                     ensure_pyplot
@@ -40,6 +42,8 @@ class Accuracy_PC(QgsProcessingAlgorithm):
     FIELD = 'FIELD'
     CLOUD = 'CLOUD'
     DISTFILTER = 'DISTFILTER'
+    METHOD = 'METHOD'
+    IDW_POWER = 'IDW_POWER'
     CRS = 'CRS'
     DECIMAL = 'DECIMAL'
     OUTPUT = 'OUTPUT'
@@ -73,23 +77,37 @@ class Accuracy_PC(QgsProcessingAlgorithm):
 
     txt_en = '''This tool can be used to evaluate the <b>altimetric (Z) positional accuracy</b> of point clouds.
 
+<b>Elevation extraction methods</b>
+1. Nearest point in 3D distance (default).
+2. IDW using the three nearest points in horizontal distance.
+3. Local plane/TIN formed by three non-collinear points surrounding the checkpoint.
+
 <b>Outputs</b>
-1. <b>Discrepancy calculations</b> in Z for the point in the cloud closest to the reference point.
+1. <b>Vertical discrepancies</b> between the elevation estimated from the point cloud and the reference elevation.
 2. <b>Accuracy report</b>: Cartographic Accuracy Standard report containing RMSE results and classification according to the PEC-PCD.
 
 <b>Input Requirements:</b>
- - Point cloud in <b>.txt</b> format
- - Point layer with an altitude (Z) field'''
+ - Indexed LAS/LAZ point cloud with a valid projected CRS
+ - Point layer with an altitude (Z) field
+
+The optional CRS parameter is used to define the projected calculation CRS when the reference point layer is not projected. It must match the point-cloud CRS.'''
     
     txt_pt = '''Esta ferramenta pode ser utilizada para avaliar a acurácia posicional altimétrica (Z) de nuvem de pontos.
 
+<b>Métodos de extração da altitude:</b>
+1. Ponto mais próximo em distância 3D (padrão).
+2. IDW com os três pontos mais próximos em distância horizontal.
+3. Plano local/TIN formado por três pontos não colineares envolvendo o checkpoint.
+
 <b>Saídas:</b>
-1. Cálculo das discrepâncias em Z para o ponto da nuvem mais próximo do ponto de referência.
+1. Discrepâncias verticais entre a altitude estimada na nuvem e a altitude de referência.
 2. Relatório do Padrão de Exatidão Cartográfica com resultado da REMQ e classificação do PEC-PCD.
 
 <b>Requisitos de Entrada:</b>
-- Nuvem de pontos no formato .txt
-- Camada de pontos com campo de altitude (Z)'''
+- Nuvem LAS/LAZ indexada, com SRC projetado válido
+- Camada de pontos com campo de altitude (Z)
+
+O parâmetro SRC opcional é utilizado para definir o SRC projetado dos cálculos quando a camada de pontos de referência não estiver projetada. Ele deve coincidir com o SRC da nuvem.'''
     
     figure = 'images/tutorial/qualy_pc.jpg'
 
@@ -109,11 +127,9 @@ class Accuracy_PC(QgsProcessingAlgorithm):
     def initAlgorithm(self, config=None):
 
         self.addParameter(
-            QgsProcessingParameterFile(
+            QgsProcessingParameterPointCloudLayer(
                 self.CLOUD,
-                self.tr('Point Cloud', 'Nuvem de pontos') + ' .TXT',
-                behavior = Qgis.ProcessingFileParameterBehavior.File,
-                fileFilter = 'Texto (*.txt)'
+                self.tr('Point cloud (LAS/LAZ)', 'Nuvem de pontos (LAS/LAZ)')
             )
         )
 
@@ -137,12 +153,35 @@ class Accuracy_PC(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterNumber(
                 self.DISTFILTER,
-                self.tr('Distance to filter nearest points (m)', 'Distância para filtrar pontos mais próximos (m)'),
+                self.tr('Maximum horizontal search radius (m)', 'Raio máximo de busca horizontal (m)'),
                 QgsProcessingParameterNumber.Type.Double,
                 defaultValue = 1.2,
                 minValue = 0
                 )
             )
+
+        self.addParameter(
+            QgsProcessingParameterEnum(
+                self.METHOD,
+                self.tr('Cloud elevation extraction method', 'Método de extração da altitude da nuvem'),
+                options=[
+                    self.tr('Nearest point — 3D distance', 'Ponto mais próximo — distância 3D'),
+                    self.tr('Three nearest points — horizontal IDW', 'Três pontos mais próximos — IDW horizontal'),
+                    self.tr('Local plane/TIN — three non-collinear points', 'Plano local/TIN — três pontos não colineares')
+                ],
+                defaultValue=0
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterNumber(
+                self.IDW_POWER,
+                self.tr('IDW power', 'Potência do IDW'),
+                QgsProcessingParameterNumber.Type.Double,
+                defaultValue=2.0,
+                minValue=0.1
+            )
+        )
         
         self.addParameter(
             QgsProcessingParameterCrs(
@@ -202,12 +241,12 @@ class Accuracy_PC(QgsProcessingAlgorithm):
         
         columnIndex = source.fields().indexFromName(campo[0])
         
-        caminho = self.parameterAsFile(
+        cloud_layer = self.parameterAsPointCloudLayer(
             parameters,
             self.CLOUD,
             context
         )
-        if not caminho:
+        if cloud_layer is None or not cloud_layer.isValid():
             raise QgsProcessingException(self.invalidSourceError(parameters, self.CLOUD))
         
         distProx = self.parameterAsDouble(
@@ -217,6 +256,56 @@ class Accuracy_PC(QgsProcessingAlgorithm):
         )
         if distProx is None or distProx<=0:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.DISTFILTER))
+
+        method = self.parameterAsEnum(parameters, self.METHOD, context)
+        idw_power = self.parameterAsDouble(parameters, self.IDW_POWER, context)
+
+        method_names = [
+            self.tr('Nearest point — 3D distance', 'Ponto mais próximo — distância 3D'),
+            self.tr('Three nearest points — horizontal IDW', 'Três pontos mais próximos — IDW horizontal'),
+            self.tr('Local plane/TIN — three non-collinear points', 'Plano local/TIN — três pontos não colineares')
+        ]
+        method_name = method_names[method]
+
+        method_descriptions = [
+            self.tr(
+                'For each checkpoint, the point with the shortest three-dimensional distance is selected among the point-cloud points contained in the horizontal search radius. This method preserves the discrete three-dimensional character of the point cloud and is the default method.',
+                'Para cada checkpoint, seleciona-se o ponto de menor distância tridimensional entre os pontos da nuvem contidos no raio horizontal de busca. Este método preserva o caráter tridimensional discreto da nuvem de pontos e constitui o método padrão.'
+            ),
+            self.tr(
+                'For each checkpoint, the three nearest point-cloud points are selected by horizontal distance within the search radius. Elevation is estimated by inverse distance weighting (IDW) at the checkpoint XY position. Checkpoints with fewer than three candidates are not included in the statistics.',
+                'Para cada checkpoint, os três pontos da nuvem mais próximos são selecionados pela distância horizontal dentro do raio de busca. A altitude é estimada por ponderação pelo inverso da distância (IDW), na posição XY do checkpoint. Checkpoints com menos de três candidatos não são incluídos nas estatísticas.'
+            ),
+            self.tr(
+                'For each checkpoint, candidate points are selected exclusively by horizontal distance within the search radius. Among the 12 nearest candidates, the algorithm selects the smallest valid triangle that contains the checkpoint and is formed by three non-collinear points. The point-cloud elevation is linearly interpolated on the local plane at the checkpoint XY position. Checkpoints without a valid surrounding triangle are not included in the statistics.',
+                'Para cada checkpoint, os pontos candidatos são selecionados exclusivamente pela distância horizontal dentro do raio de busca. Entre os 12 candidatos mais próximos, o algoritmo seleciona o menor triângulo válido que contém o checkpoint e é formado por três pontos não colineares. A altitude da nuvem é interpolada linearmente no plano local, na posição XY do checkpoint. Checkpoints sem um triângulo envolvente válido não são incluídos nas estatísticas.'
+            )
+        ]
+        method_description = method_descriptions[method]
+        method_formulas = [
+            '$$d_{3D}=\\sqrt{(X_i-X_c)^2+(Y_i-Y_c)^2+(Z_i-Z_c)^2}$$',
+            '$$\\widehat{Z}_c=\\frac{\\sum_{i=1}^{3} Z_i/d_{XY,i}^{p}}{\\sum_{i=1}^{3}1/d_{XY,i}^{p}}$$',
+            '$$\\widehat{Z}_c = w_1Z_1+w_2Z_2+w_3Z_3, \\qquad w_1+w_2+w_3=1$$'
+        ]
+        method_formula = method_formulas[method]
+        selection_note = self.tr(
+            'The vertical discrepancy is calculated as the point-cloud elevation obtained by the selected method minus the reference elevation. In the 3D-distance method, the reference elevation participates in the selection of the nearest point; in the IDW and local-plane methods, support points are selected by horizontal distance.',
+            'A discrepância vertical é calculada como a altitude da nuvem obtida pelo método selecionado menos a altitude de referência. No método da distância 3D, a altitude de referência participa da seleção do ponto mais próximo; nos métodos IDW e plano local, os pontos de suporte são selecionados pela distância horizontal.'
+        )
+        idw_row = ''
+        if method == 1:
+            idw_row = '<tr><td>{}</td><td>{}</td></tr>'.format(
+                str2HTML(self.tr('IDW power', 'Potência do IDW')),
+                idw_power
+            )
+
+        support_metric = self.tr(
+            'Three-dimensional distance to the selected point',
+            'Distância tridimensional ao ponto selecionado'
+        ) if method == 0 else self.tr(
+            'Maximum horizontal distance to the three supporting points',
+            'Maior distância horizontal aos três pontos de suporte'
+        )
         
         decimal = self.parameterAsInt(
             parameters,
@@ -242,6 +331,8 @@ class Accuracy_PC(QgsProcessingAlgorithm):
         
         itens  = {
                      'pc_distance' : QMetaType.Type.Double,
+                     'pc_npts' : QMetaType.Type.Int,
+                     'pc_method' : QMetaType.Type.QString,
                      'pc_h' : QMetaType.Type.Double,
                      'pc_discrep_z' : QMetaType.Type.Double
                      }
@@ -261,22 +352,54 @@ class Accuracy_PC(QgsProcessingAlgorithm):
         if num_teste < 4:
             raise QgsProcessingException(self.tr('Insufficient number of features for quality evaluation!', 'Número de feições insuficiente para avaliação de qualidade!'))
           
-        # SRC definido deve ser projetado
-        msg = self.tr('Define a projected CRS for the calculations!', 'Defina um SRC projetado para os cálculos!')
+        # A nuvem define obrigatoriamente o SRC dos cálculos.
+        cloud_crs = cloud_layer.crs()
+        if not cloud_crs.isValid():
+            raise QgsProcessingException(self.tr(
+                'The point cloud has no valid CRS. Assign the correct CRS or reproject the cloud using the native QGIS point-cloud tools before running this algorithm.',
+                'A nuvem de pontos não possui SRC válido. Defina o SRC correto ou reprojete a nuvem com as ferramentas nativas de nuvem de pontos do QGIS antes de executar este algoritmo.'
+            ))
+        if cloud_crs.isGeographic():
+            raise QgsProcessingException(self.tr(
+                'The point cloud CRS must be projected. Reproject the cloud using the native QGIS point-cloud tools before running this algorithm.',
+                'O SRC da nuvem de pontos deve ser projetado. Reprojete a nuvem com as ferramentas nativas de nuvem de pontos do QGIS antes de executar este algoritmo.'
+            ))
+
+        ref_crs = source.sourceCrs()
+        SRC = cloud_crs
         coordTransf = False
-        crs = source.sourceCrs()
-        if out_CRS.isValid():
-            if out_CRS.isGeographic():
-                raise QgsProcessingException(msg)
-            else:
-                # Transformação de coordenadas
-                coordinateTransf = QgsCoordinateTransform(crs, out_CRS, QgsProject.instance())
-                coordTransf = True
-                SRC = out_CRS
-        elif crs.isGeographic():
-            raise QgsProcessingException(msg)
-        else:
-            SRC = crs
+        coordinateTransf = None
+
+        # O parâmetro SRC é mantido para pontos de referência sem SRC projetado.
+        if not ref_crs.isValid():
+            if not out_CRS.isValid() or out_CRS.isGeographic():
+                raise QgsProcessingException(self.tr(
+                    'The reference point layer has no valid projected CRS. Define its projected CRS in the CRS parameter.',
+                    'A camada de pontos de referência não possui SRC projetado válido. Defina seu SRC projetado no parâmetro SRC.'
+                ))
+            if out_CRS != cloud_crs:
+                raise QgsProcessingException(self.tr(
+                    'The CRS selected for the reference points must match the point-cloud CRS ({}).',
+                    'O SRC selecionado para os pontos de referência deve coincidir com o SRC da nuvem de pontos ({}).'
+                ).format(cloud_crs.authid()))
+            # Sem SRC de origem não há transformação: as coordenadas são interpretadas no SRC informado.
+            ref_crs = out_CRS
+        elif ref_crs.isGeographic():
+            if not out_CRS.isValid() or out_CRS.isGeographic():
+                raise QgsProcessingException(self.tr(
+                    'The reference point layer is geographic. Select a projected CRS matching the point-cloud CRS in the CRS parameter.',
+                    'A camada de pontos de referência está em SRC geográfico. Selecione no parâmetro SRC um SRC projetado coincidente com o da nuvem de pontos.'
+                ))
+            if out_CRS != cloud_crs:
+                raise QgsProcessingException(self.tr(
+                    'The CRS selected for the calculations must match the point-cloud CRS ({}).',
+                    'O SRC selecionado para os cálculos deve coincidir com o SRC da nuvem de pontos ({}).'
+                ).format(cloud_crs.authid()))
+            coordinateTransf = QgsCoordinateTransform(ref_crs, cloud_crs, QgsProject.instance())
+            coordTransf = ref_crs != cloud_crs
+        elif ref_crs != cloud_crs:
+            coordinateTransf = QgsCoordinateTransform(ref_crs, cloud_crs, QgsProject.instance())
+            coordTransf = True
 
         (sink, dest_id) = self.parameterAsSink(
             parameters,
@@ -295,77 +418,218 @@ class Accuracy_PC(QgsProcessingAlgorithm):
         
         Escalas = [ esc for esc in dicionario]
         
-        # função cálculo das distâncias
-        def QuadDist3D (pnt1, pnt2):
-            return (pnt1.x() - pnt2.x())**2 + (pnt1.y() - pnt2.y())**2 + (pnt1.z() - pnt2.z())**2
+        def horizontal_candidates(x_ref, y_ref):
+            radius2 = distProx * distProx
+            candidates = []
+            for x, y, z in pontos_teste:
+                d2 = (x - x_ref)**2 + (y - y_ref)**2
+                if d2 <= radius2:
+                    candidates.append((d2, x, y, z))
+            candidates.sort(key=lambda item: item[0])
+            return candidates
+
+        def point_in_triangle(px, py, triangle, tolerance=1e-12):
+            (_, x1, y1, _), (_, x2, y2, _), (_, x3, y3, _) = triangle
+            denominator = (y2 - y3)*(x1 - x3) + (x3 - x2)*(y1 - y3)
+            if abs(denominator) <= tolerance:
+                return None
+            w1 = ((y2 - y3)*(px - x3) + (x3 - x2)*(py - y3)) / denominator
+            w2 = ((y3 - y1)*(px - x3) + (x1 - x3)*(py - y3)) / denominator
+            w3 = 1.0 - w1 - w2
+            if min(w1, w2, w3) < -1e-10:
+                return None
+            return w1, w2, w3
+
+        def local_tin_elevation(x_ref, y_ref, candidates):
+            # Limita a busca combinatória aos 12 vizinhos horizontais mais próximos.
+            nearby = candidates[:12]
+            best = None
+            for triangle in combinations(nearby, 3):
+                weights = point_in_triangle(x_ref, y_ref, triangle)
+                if weights is None:
+                    continue
+                support = max(np.sqrt(item[0]) for item in triangle)
+                if best is None or support < best[0]:
+                    z_est = sum(weight * item[3] for weight, item in zip(weights, triangle))
+                    best = (support, z_est)
+            return best
         
         
-        # Número de pontos
-        with open(caminho) as myfile:
-            total_pnts = sum(1 for line in myfile)
+        # Número de pontos da nuvem de entrada
+        total_pnts = cloud_layer.pointCount()
         feedback.pushInfo(self.tr('Total number of points: ', 'Número total de pontos: ') + '{}'.format(total_pnts))
-    
-        
-        # Filtrando os pontos mais próximos
-        feedback.pushInfo(self.tr('Filtering nearest points...', 'Filtrando os pontos mais próximos...'))
+
+        # Prepara os pontos de referência e uma única cobertura de recorte formada
+        # pela união dos buffers correspondentes ao raio de busca.
+        feedback.pushInfo(self.tr('Extracting local point-cloud neighborhoods...', 'Extraindo vizinhanças locais da nuvem de pontos...'))
         pontos_ref = []
+        buffer_geometries = []
         for feat in source.getFeatures():
             geom = feat.geometry()
-            if coordTransf and crs != SRC:
+            if geom is None or geom.isNull() or geom.isEmpty():
+                continue
+            if coordTransf:
                 geom.transform(coordinateTransf)
             pnt = geom.asPoint()
             x_ref, y_ref = pnt.x(), pnt.y()
-            pontos_ref += [[x_ref, y_ref]]
-        
-        arquivo = open(caminho, 'r')
+            pontos_ref.append([x_ref, y_ref])
+            buffer_geometries.append(
+                QgsGeometry.fromPointXY(QgsPointXY(x_ref, y_ref)).buffer(distProx, 16)
+            )
+
+        if not buffer_geometries:
+            raise QgsProcessingException(self.tr(
+                'No valid reference point geometry was found.',
+                'Nenhuma geometria válida de ponto de referência foi encontrada.'
+            ))
+
+        if QgsApplication.processingRegistry().algorithmById('pdal:clip') is None or \
+           QgsApplication.processingRegistry().algorithmById('pdal:exportvector') is None:
+            raise QgsProcessingException(self.tr(
+                'The native QGIS PDAL algorithms are unavailable. Install a QGIS build with PDAL support and enable the PDAL provider.',
+                'Os algoritmos PDAL nativos do QGIS não estão disponíveis. Instale uma distribuição do QGIS com suporte ao PDAL e habilite o provedor PDAL.'
+            ))
+
+        overlay = QgsVectorLayer('MultiPolygon?crs={}'.format(cloud_crs.authid()), 'search_neighborhoods', 'memory')
+        overlay_feature = QgsFeature()
+        overlay_feature.setGeometry(QgsGeometry.unaryUnion(buffer_geometries))
+        overlay.dataProvider().addFeature(overlay_feature)
+        overlay.updateExtents()
+
+        try:
+            clipped_result = processing.run(
+                'pdal:clip',
+                {
+                    'INPUT': cloud_layer,
+                    'OVERLAY': overlay,
+                    'FILTER_EXPRESSION': '',
+                    'FILTER_EXTENT': None,
+                    'OUTPUT': QgsProcessing.TEMPORARY_OUTPUT
+                },
+                context=context,
+                feedback=feedback,
+                is_child_algorithm=True
+            )
+            vector_result = processing.run(
+                'pdal:exportvector',
+                {
+                    'INPUT': clipped_result['OUTPUT'],
+                    'ATTRIBUTE': [],
+                    'FILTER_EXPRESSION': '',
+                    'FILTER_EXTENT': None,
+                    'OUTPUT': QgsProcessing.TEMPORARY_OUTPUT
+                },
+                context=context,
+                feedback=feedback,
+                is_child_algorithm=True
+            )
+        except QgsProcessingException:
+            raise
+        except Exception as e:
+            raise QgsProcessingException(self.tr(
+                'Could not extract points from the LAS/LAZ cloud: {}',
+                'Não foi possível extrair os pontos da nuvem LAS/LAZ: {}'
+            ).format(str(e)))
+
+        extracted_layer = QgsProcessingUtils.mapLayerFromString(vector_result['OUTPUT'], context)
+        if extracted_layer is None or not extracted_layer.isValid():
+            raise QgsProcessingException(self.tr(
+                'The temporary point-cloud extraction could not be loaded.',
+                'Não foi possível carregar a extração temporária da nuvem de pontos.'
+            ))
+
         pontos_teste = []
-        total = 100.0/total_pnts if total_pnts else 0
-        cont = 0
-        for linha in arquivo:
-            lista = linha.replace('\n', '').split(' ')
-            x = float(lista[0])
-            y = float(lista[1])
-            z = float(lista[2])
-            for pnt in pontos_ref:
-                x_ref, y_ref = pnt
-                if abs(x - x_ref) < distProx and abs(y - y_ref) < distProx:
-                    pontos_teste += [[x,y,z]]
-                    break
+        extracted_count = extracted_layer.featureCount()
+        total_extract = 100.0 / extracted_count if extracted_count else 0
+        for cont, cloud_feat in enumerate(extracted_layer.getFeatures()):
+            geom = cloud_feat.geometry()
+            if geom is None or geom.isNull() or geom.isEmpty():
+                continue
+            point = geom.constGet()
+            try:
+                x, y, z = float(point.x()), float(point.y()), float(point.z())
+            except Exception:
+                vertex = geom.vertexAt(0)
+                x, y, z = float(vertex.x()), float(vertex.y()), float(vertex.z())
+            if np.isfinite(x) and np.isfinite(y) and np.isfinite(z):
+                pontos_teste.append([x, y, z])
             if feedback.isCanceled():
                 break
-            cont += 1
-            feedback.setProgress(int(cont * total))
+            feedback.setProgress(int((cont + 1) * total_extract))
+
+        feedback.pushInfo(self.tr(
+            'Points extracted in the search neighborhoods: ',
+            'Pontos extraídos nas vizinhanças de busca: '
+        ) + str(len(pontos_teste)))
+
+        if not pontos_teste:
+            raise QgsProcessingException(self.tr(
+                'No point-cloud points were found within the search neighborhoods.',
+                'Nenhum ponto da nuvem foi encontrado nas vizinhanças de busca.'
+            ))
         
         # Cálculo das discrepâncias
         feedback.pushInfo(self.tr('Altimetric calculation...', 'Cálculo das discrepâncias altimétricas...'))
+        feedback.pushInfo(self.tr('Elevation extraction method: ', 'Método de extração da altitude: ') + method_name)
         DISCREP = []
         DISTANCES = []
+        SKIPPED = 0
         total = 100.0 / source.featureCount() if source.featureCount() else 0
         for w, feat in enumerate(source.getFeatures()):
             geom = feat.geometry()
-            if coordTransf and crs != SRC:
+            if coordTransf:
                 geom.transform(coordinateTransf)
             pnt = geom.asPoint()
             z_ref = float(feat[columnIndex])
             att = feat.attributes()
-            nearestPoint = (0,0,0)
-            distMin = 1e12
-            arquivo = open(caminho, 'r')
-            for teste in pontos_teste:
-                x = teste[0]
-                y = teste[1]
-                z = teste[2]
-                dist2 = QuadDist3D(QgsPoint(x, y, z), QgsPoint(pnt.x(), pnt.y(), z_ref))
-                if dist2 < distMin:
-                    distMin = dist2
-                    nearestPoint = (x,y,z)
-            arquivo.close()
-            discrep = nearestPoint[2] - float(z_ref)
+            candidates = horizontal_candidates(pnt.x(), pnt.y())
+            z_test = None
+            support_distance = None
+            used_points = 0
+            output_x, output_y = pnt.x(), pnt.y()
+
+            if method == 0 and candidates:
+                nearest = min(
+                    candidates,
+                    key=lambda item: item[0] + (item[3] - z_ref)**2
+                )
+                support_distance = float(np.sqrt(nearest[0] + (nearest[3] - z_ref)**2))
+                z_test = nearest[3]
+                output_x, output_y = nearest[1], nearest[2]
+                used_points = 1
+
+            elif method == 2 and len(candidates) >= 3:
+                result = local_tin_elevation(pnt.x(), pnt.y(), candidates)
+                if result is not None:
+                    support_distance, z_test = result
+                    used_points = 3
+
+            elif method == 1 and len(candidates) >= 3:
+                nearest = candidates[:3]
+                distances = np.sqrt([item[0] for item in nearest])
+                if distances[0] <= 1e-12:
+                    z_test = nearest[0][3]
+                else:
+                    weights = 1.0 / np.power(distances, idw_power)
+                    z_test = float(np.sum(weights * np.array([item[3] for item in nearest])) / np.sum(weights))
+                support_distance = float(distances.max())
+                used_points = 3
+
+            if z_test is None:
+                SKIPPED += 1
+                feedback.reportError(self.tr(
+                    'Checkpoint FID {} was skipped: no valid neighborhood was found within the search radius.',
+                    'Checkpoint FID {} foi ignorado: nenhuma vizinhança válida foi encontrada dentro do raio de busca.'
+                ).format(feat.id()))
+                feedback.setProgress(int((w+1) * total))
+                continue
+
+            discrep = z_test - float(z_ref)
             DISCREP += [discrep]
-            DISTANCES += [float(np.sqrt(distMin))]
+            DISTANCES += [support_distance]
             fet = QgsFeature(Fields)
-            fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(float(nearestPoint[0]),float(nearestPoint[1]))))
-            fet.setAttributes(att + [float(np.sqrt(distMin)), float(nearestPoint[2]), float(discrep)])
+            fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(float(output_x), float(output_y))))
+            fet.setAttributes(att + [support_distance, used_points, method_name, float(z_test), float(discrep)])
             sink.addFeature(fet, QgsFeatureSink.Flag.FastInsert)
             if feedback.isCanceled():
                 break
@@ -377,6 +641,15 @@ class Accuracy_PC(QgsProcessingAlgorithm):
 
         DISCREP = array(DISCREP, dtype=float)
         DISTANCES = array(DISTANCES, dtype=float)
+
+        if len(DISCREP) < 4:
+            raise QgsProcessingException(self.tr(
+                'Fewer than four checkpoints had a valid neighborhood for quality evaluation.',
+                'Menos de quatro checkpoints apresentaram vizinhança válida para a avaliação de qualidade.'
+            ))
+
+        feedback.pushInfo(self.tr('Valid checkpoints: ', 'Checkpoints válidos: ') + str(len(DISCREP)))
+        feedback.pushInfo(self.tr('Checkpoints skipped: ', 'Checkpoints ignorados: ') + str(SKIPPED))
 
         # Estatísticas de Acurácia
         RMSE = sqrt((DISCREP*DISCREP).sum()/len(DISCREP))
@@ -610,7 +883,7 @@ class Accuracy_PC(QgsProcessingAlgorithm):
 </div>
 
 <div class="cards">
-  <div class="card"><div class="label">''' + str2HTML(self.tr('Checkpoints', 'Checkpoints')) + '''</div><div class="big">[layer_count]</div></div>
+  <div class="card"><div class="label">''' + str2HTML(self.tr('Valid checkpoints', 'Checkpoints válidos')) + '''</div><div class="big">[layer_count]</div></div>
   <div class="card"><div class="label">RMSE<sub>Z</sub></div><div class="big">[RMSE_Z] m</div></div>
   <div class="card"><div class="label">''' + str2HTML(self.tr('Mean Error', 'Erro médio')) + '''</div><div class="big">[discrepZ_mean] m</div></div>
   <div class="card"><div class="label">P95 |ΔZ|</div><div class="big">[P95] m</div></div>
@@ -620,19 +893,28 @@ class Accuracy_PC(QgsProcessingAlgorithm):
 <table>
 <tr><th>''' + str2HTML(self.tr('Item', 'Item')) + '''</th><th>''' + str2HTML(self.tr('Value', 'Valor')) + '''</th></tr>
 <tr><td>''' + str2HTML(self.tr('Point cloud', 'Nuvem de pontos')) + '''</td><td>[cloud]</td></tr>
+<tr><td>''' + str2HTML(self.tr('Total points in the input cloud', 'Total de pontos na nuvem de entrada')) + '''</td><td>[total_points]</td></tr>
+<tr><td>''' + str2HTML(self.tr('Points extracted in the search neighborhoods', 'Pontos extraídos nas vizinhanças de busca')) + '''</td><td>[extracted_points]</td></tr>
 <tr><td>''' + str2HTML(self.tr('Reference points', 'Pontos de referência')) + '''</td><td>[layer_name]</td></tr>
-<tr><td>''' + str2HTML(self.tr('Number of checkpoints', 'Número de checkpoints')) + '''</td><td>[layer_count]</td></tr>
+<tr><td>''' + str2HTML(self.tr('Input checkpoints', 'Checkpoints de entrada')) + '''</td><td>[input_count]</td></tr>
+<tr><td>''' + str2HTML(self.tr('Valid checkpoints', 'Checkpoints válidos')) + '''</td><td>[layer_count]</td></tr>
+<tr><td>''' + str2HTML(self.tr('Checkpoints without a valid neighborhood', 'Checkpoints sem vizinhança válida')) + '''</td><td>[skipped]</td></tr>
+<tr><td>''' + str2HTML(self.tr('Elevation extraction method', 'Método de extração da altitude')) + '''</td><td>[method]</td></tr>
 <tr><td>''' + str2HTML(self.tr('Search radius', 'Raio de busca')) + '''</td><td>[dist_filter] m</td></tr>
+[IDW_ROW]
 <tr><td>''' + str2HTML(self.tr('Coordinate reference system', 'Sistema de referência')) + '''</td><td>[crs]</td></tr>
 </table>
 
 <h2>''' + str2HTML(self.tr('2. Methodology', '2. Metodologia')) + '''</h2>
 <p>''' + str2HTML(self.tr(
-'For each independent checkpoint, the algorithm searches for the nearest point in the point cloud within the defined search radius. The vertical discrepancy is computed as the elevation of the nearest point minus the reference elevation. No interpolation or averaging is applied to the point cloud.',
-'Para cada checkpoint independente, o algoritmo procura o ponto mais próximo na nuvem de pontos dentro do raio de busca definido. A discrepância vertical é calculada como a altitude do ponto mais próximo menos a altitude de referência. Nenhuma interpolação ou média é aplicada à nuvem de pontos.'
+'The LAS/LAZ cloud was spatially clipped to the union of the checkpoint search neighborhoods using the native QGIS PDAL provider. Only the resulting 3D points were loaded for the calculations; the original point cloud was not modified.',
+'A nuvem LAS/LAZ foi recortada espacialmente pela união das vizinhanças de busca dos checkpoints por meio do provedor PDAL nativo do QGIS. Apenas os pontos 3D resultantes foram carregados para os cálculos; a nuvem original não foi modificada.'
 )) + '''</p>
+<p>[METHOD_DESCRIPTION]</p>
+<p>[SELECTION_NOTE]</p>
 
 <div class="note">
+[METHOD_FORMULA]
 $$\\Delta Z_i = Z_{test,i} - Z_{ref,i}$$
 $$RMSE_Z = \\sqrt{\\frac{\\sum_{i=1}^{n}(\\Delta Z_i)^2}{n}}$$
 $$MAD = median(|\\Delta_i - median(\\Delta)|)$$
@@ -695,12 +977,13 @@ $$Upper\\ Limit=Q_3+1.5 \\times IQR$$
 <div class="note">[NORMALITY_EXPLANATION]</div>
 
 <h2>''' + str2HTML(self.tr('9. Point Cloud Sampling Statistics', '9. Estatísticas de Amostragem da Nuvem')) + '''</h2>
+<p>[SUPPORT_METRIC]</p>
 <table>
 <tr><th>Metric</th><th>Distance</th></tr>
-<tr><td>Mean nearest-point distance</td><td>[dist_mean] m</td></tr>
-<tr><td>Median nearest-point distance</td><td>[dist_median] m</td></tr>
-<tr><td>Minimum nearest-point distance</td><td>[dist_min] m</td></tr>
-<tr><td>Maximum nearest-point distance</td><td>[dist_max] m</td></tr>
+<tr><td>Mean support distance</td><td>[dist_mean] m</td></tr>
+<tr><td>Median support distance</td><td>[dist_median] m</td></tr>
+<tr><td>Minimum support distance</td><td>[dist_min] m</td></tr>
+<tr><td>Maximum support distance</td><td>[dist_max] m</td></tr>
 </table>
 
 <h2>''' + str2HTML(self.tr('10. ASPRS-Oriented Checklist', '10. Checklist orientado pela ASPRS')) + '''</h2>
@@ -769,6 +1052,7 @@ email: contato@geoone.com.br
         interpretation = self.tr(
             (
                 'The evaluated point cloud achieved RMSEz = {} m based on {} independent checkpoints. '
+                'Cloud elevations were obtained using the method "{}"; {} input checkpoints had no valid neighborhood and were excluded. '
                 'The mean vertical error was {} m, indicating the vertical bias of the dataset. '
                 'The P95 absolute vertical discrepancy was {} m, meaning that 95% of the checkpoints presented |ΔZ| below this value. '
                 'Residual normality classification: {}. {} {} '
@@ -776,6 +1060,8 @@ email: contato@geoone.com.br
             ).format(
                 fnum(RMSE),
                 len(DISCREP),
+                method_name,
+                SKIPPED,
                 fnum(DISCREP.mean()),
                 fnum(P95),
                 normality_class,
@@ -784,6 +1070,7 @@ email: contato@geoone.com.br
             ),
             (
                 'A nuvem de pontos avaliada obteve RMSEz = {} m com base em {} checkpoints independentes. '
+                'As altitudes da nuvem foram obtidas pelo método "{}"; {} checkpoints de entrada não apresentaram vizinhança válida e foram excluídos. '
                 'A média das discrepâncias verticais foi {} m, indicando a tendência vertical do conjunto de dados. '
                 'O percentil P95 das discrepâncias verticais absolutas foi {} m, ou seja, 95% dos checkpoints apresentaram |ΔZ| abaixo desse valor. '
                 'Classificação da normalidade dos resíduos: {}. {} {} '
@@ -791,6 +1078,8 @@ email: contato@geoone.com.br
             ).format(
                 fnum(RMSE),
                 len(DISCREP),
+                method_name,
+                SKIPPED,
                 fnum(DISCREP.mean()),
                 fnum(P95),
                 normality_class,
@@ -802,8 +1091,18 @@ email: contato@geoone.com.br
 
         valores = {
             '[layer_name]': str2HTML(source.sourceName()),
-            '[cloud]': str2HTML(os.path.basename(caminho)),
+            '[cloud]': str2HTML(cloud_layer.name()),
+            '[total_points]': str(total_pnts),
+            '[extracted_points]': str(len(pontos_teste)),
+            '[input_count]': str(num_teste),
             '[layer_count]': str(len(DISCREP)),
+            '[skipped]': str(SKIPPED),
+            '[method]': str2HTML(method_name),
+            '[METHOD_DESCRIPTION]': str2HTML(method_description),
+            '[METHOD_FORMULA]': method_formula,
+            '[SELECTION_NOTE]': str2HTML(selection_note),
+            '[IDW_ROW]': idw_row,
+            '[SUPPORT_METRIC]': str2HTML(support_metric),
             '[dist_filter]': fnum(distProx),
             '[crs]': str2HTML(SRC.authid() + ' - ' + SRC.description() if SRC.isValid() else ''),
             '[HISTOGRAM_CHART]': histogram_chart,
