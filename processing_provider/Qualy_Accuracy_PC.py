@@ -76,37 +76,29 @@ class Accuracy_PC(QgsProcessingAlgorithm):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/quality.png'))
 
     txt_en = '''This tool can be used to evaluate the <b>altimetric (Z) positional accuracy</b> of point clouds.
-
 <b>Elevation extraction methods</b>
 1. Nearest point in 3D distance (default).
 2. IDW using the three nearest points in horizontal distance.
 3. Local plane/TIN formed by three non-collinear points surrounding the checkpoint.
-
 <b>Outputs</b>
 1. <b>Vertical discrepancies</b> between the elevation estimated from the point cloud and the reference elevation.
 2. <b>Accuracy report</b>: Cartographic Accuracy Standard report containing RMSE results and classification according to the PEC-PCD.
-
 <b>Input Requirements:</b>
  - Indexed LAS/LAZ point cloud with a valid projected CRS
  - Point layer with an altitude (Z) field
-
 The optional CRS parameter is used to define the projected calculation CRS when the reference point layer is not projected. It must match the point-cloud CRS.'''
     
     txt_pt = '''Esta ferramenta pode ser utilizada para avaliar a acurácia posicional altimétrica (Z) de nuvem de pontos.
-
 <b>Métodos de extração da altitude:</b>
 1. Ponto mais próximo em distância 3D (padrão).
 2. IDW com os três pontos mais próximos em distância horizontal.
 3. Plano local/TIN formado por três pontos não colineares envolvendo o checkpoint.
-
 <b>Saídas:</b>
 1. Discrepâncias verticais entre a altitude estimada na nuvem e a altitude de referência.
 2. Relatório do Padrão de Exatidão Cartográfica com resultado da REMQ e classificação do PEC-PCD.
-
 <b>Requisitos de Entrada:</b>
 - Nuvem LAS/LAZ indexada, com SRC projetado válido
 - Camada de pontos com campo de altitude (Z)
-
 O parâmetro SRC opcional é utilizado para definir o SRC projetado dos cálculos quando a camada de pontos de referência não estiver projetada. Ele deve coincidir com o SRC da nuvem.'''
     
     figure = 'images/tutorial/qualy_pc.jpg'
