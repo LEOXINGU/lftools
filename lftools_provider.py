@@ -149,6 +149,7 @@ from .processing_provider.Qualy_ValidateIntraclassTopology import ValidateIntrac
 from .processing_provider.Hydro_HAND import HANDModel
 from .processing_provider.Hydro_Drainage import DrainageNetwork
 from .processing_provider.Hydro_Watershed import WatershedDelineation
+from .processing_provider.Relief_ConsistentDTM import ConsistentDTM
 
 
 class LFToolsProvider(QgsProcessingProvider):
@@ -283,6 +284,7 @@ class LFToolsProvider(QgsProcessingProvider):
         self.addAlgorithm(HANDModel())
         self.addAlgorithm(DrainageNetwork())
         self.addAlgorithm(WatershedDelineation())
+        self.addAlgorithm(ConsistentDTM())
         
 
     def id(self):
