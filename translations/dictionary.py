@@ -2341,4 +2341,158 @@ Documentación de GRASS GIS: <a href="https://grass.osgeo.org/grass-stable/manua
 <p style="color:#b00020;"><b>Importante:</b> valide y corrija las geometrías individuales antes de ejecutar esta herramienta. Las geometrías nulas, vacías o no válidas se ignoran y se contabilizan en el resumen de la ejecución. Las capas de entrada no se modifican ni se corrigen automáticamente.</p>
 '''},
 
+# DEM difference and Consistent DTM
+'Consistent DTM (DTM ≤ DSM)': {'es': 'MDT consistente (MDT ≤ MDS)'},
+'Consistent DTM': {'es': 'MDT consistente'},
+'Input DTM': {'es': 'MDT de entrada'},
+'Input DSM': {'es': 'MDS de entrada'},
+'DSM resampling': {'es': 'Remuestreo del MDS'},
+'Invalid output path.': {'es': 'Ruta de salida no válida.'},
+'The output must differ from both inputs.': {'es': 'La salida debe ser distinta de ambas entradas.'},
+'Invalid processing option.': {'es': 'Opción de procesamiento no válida.'},
+'Invalid resampling method.': {'es': 'Método de remuestreo no válido.'},
+'Could not open the input rasters.': {'es': 'No se pudieron abrir los rásteres de entrada.'},
+'Both inputs must have at least one band.': {'es': 'Ambas entradas deben tener al menos una banda.'},
+'Complex raster bands are not supported.': {'es': 'No se admiten bandas ráster de tipo complejo.'},
+'Both rasters need a CRS when their grids differ.': {'es': 'Ambos rásteres necesitan un SRC cuando sus cuadrículas son diferentes.'},
+'The reference raster must have a north-up, non-rotated grid.': {'es': 'El ráster de referencia debe tener una cuadrícula orientada al norte y sin rotación.'},
+'The DTM must have a north-up, non-rotated grid.': {'es': 'El MDT debe tener una cuadrícula orientada al norte y sin rotación.'},
+'Aligning DEMs...': {'es': 'Alineando los MDE...'},
+'Aligning DSM to the DTM grid...': {'es': 'Alineando el MDS con la cuadrícula del MDT...'},
+'Could not align the DEMs.': {'es': 'No se pudieron alinear los MDE.'},
+'Could not align DSM to the DTM grid.': {'es': 'No se pudo alinear el MDS con la cuadrícula del MDT.'},
+'Could not create output GeoTIFF.': {'es': 'No se pudo crear el GeoTIFF de salida.'},
+'Canceled.': {'es': 'Cancelado.'},
+'No cells have valid values in both rasters.': {'es': 'Ninguna celda tiene valores válidos en ambos rásteres.'},
+'Valid cells: {}.': {'es': 'Celdas válidas: {}.'},
+'Valid cells: {}. Corrected cells: {}.': {'es': 'Celdas válidas: {}. Celdas corregidas: {}.'},
+'''This tool performs the difference between two Digital Elevation Models (DEM).
+Minuend is the raster from which elevations are subtracted.
+Subtrahend is the raster whose elevations are subtracted.
+The selected reference grid determines the output extent, resolution and CRS.
+The other raster is resampled to this grid, and cells without valid values in both models become NoData.
+Optionally, multiply the result by -1.''': {'es': '''Esta herramienta calcula la diferencia entre dos Modelos Digitales de Elevación (MDE).
+El minuendo es el ráster del que se restan las elevaciones.
+El sustraendo es el ráster cuyas elevaciones se restan.
+La cuadrícula de referencia seleccionada determina la extensión, la resolución y el SRC de la salida.
+El otro ráster se remuestrea a esta cuadrícula, y las celdas sin valores válidos en ambos modelos se convierten en NoData.
+Opcionalmente, multiplique el resultado por -1.'''},
+'''Creates a consistent DTM on the input DTM grid.
+For each cell with valid DTM and DSM values, output = min(DTM, DSM).
+If either value is NoData, the output is NoData.
+The DSM is resampled/reprojected to the DTM grid when necessary.
+This constraint does not reconstruct the true ground surface or correct differences in vertical reference.''': {'es': '''Crea un MDT consistente en la cuadrícula del MDT de entrada.
+Para cada celda con valores válidos en el MDT y el MDS, la salida = min(MDT, MDS).
+Si alguno de los valores es NoData, la salida será NoData.
+El MDS se remuestrea/reproyecta a la cuadrícula del MDT cuando es necesario.
+Esta restricción no reconstruye la superficie real del terreno ni corrige diferencias de referencia vertical.'''},
+
+# Qualy_Accuracy_PC.py
+'Point cloud (LAS/LAZ)': {'es': 'Nube de puntos (LAS/LAZ)'},
+'Maximum horizontal search radius (m)': {'es': 'Radio máximo de búsqueda horizontal (m)'},
+'Cloud elevation extraction method': {'es': 'Método de extracción de la altitud de la nube'},
+'Nearest point — 3D distance': {'es': 'Punto más cercano — distancia 3D'},
+'Three nearest points — horizontal IDW': {'es': 'Tres puntos más cercanos — IDW horizontal'},
+'Local plane/TIN — three non-collinear points': {'es': 'Plano local/TIN — tres puntos no colineales'},
+'IDW power': {'es': 'Potencia del IDW'},
+'For each checkpoint, the point with the shortest three-dimensional distance is selected among the point-cloud points contained in the horizontal search radius. This method preserves the discrete three-dimensional character of the point cloud and is the default method.': {'es': 'Para cada punto de control, se selecciona el punto con la menor distancia tridimensional entre los puntos de la nube contenidos en el radio de búsqueda horizontal. Este método preserva el carácter tridimensional discreto de la nube de puntos y es el método predeterminado.'},
+'For each checkpoint, the three nearest point-cloud points are selected by horizontal distance within the search radius. Elevation is estimated by inverse distance weighting (IDW) at the checkpoint XY position. Checkpoints with fewer than three candidates are not included in the statistics.': {'es': 'Para cada punto de control, se seleccionan los tres puntos de la nube más cercanos por distancia horizontal dentro del radio de búsqueda. La altitud se estima mediante ponderación por distancia inversa (IDW) en la posición XY del punto de control. Los puntos de control con menos de tres candidatos no se incluyen en las estadísticas.'},
+'For each checkpoint, candidate points are selected exclusively by horizontal distance within the search radius. Among the 12 nearest candidates, the algorithm selects the smallest valid triangle that contains the checkpoint and is formed by three non-collinear points. The point-cloud elevation is linearly interpolated on the local plane at the checkpoint XY position. Checkpoints without a valid surrounding triangle are not included in the statistics.': {'es': 'Para cada punto de control, los puntos candidatos se seleccionan exclusivamente por distancia horizontal dentro del radio de búsqueda. Entre los 12 candidatos más cercanos, el algoritmo selecciona el menor triángulo válido que contiene el punto de control y está formado por tres puntos no colineales. La altitud de la nube se interpola linealmente en el plano local, en la posición XY del punto de control. Los puntos de control sin un triángulo envolvente válido no se incluyen en las estadísticas.'},
+'The vertical discrepancy is calculated as the point-cloud elevation obtained by the selected method minus the reference elevation. In the 3D-distance method, the reference elevation participates in the selection of the nearest point; in the IDW and local-plane methods, support points are selected by horizontal distance.': {'es': 'La discrepancia vertical se calcula como la altitud de la nube obtenida mediante el método seleccionado menos la altitud de referencia. En el método de distancia 3D, la altitud de referencia interviene en la selección del punto más cercano; en los métodos IDW y de plano local, los puntos de apoyo se seleccionan por distancia horizontal.'},
+'Three-dimensional distance to the selected point': {'es': 'Distancia tridimensional al punto seleccionado'},
+'Maximum horizontal distance to the three supporting points': {'es': 'Distancia horizontal máxima a los tres puntos de apoyo'},
+'The point cloud has no valid CRS. Assign the correct CRS or reproject the cloud using the native QGIS point-cloud tools before running this algorithm.': {'es': 'La nube de puntos no tiene un SRC válido. Asigne el SRC correcto o reproyecte la nube mediante las herramientas nativas de nubes de puntos de QGIS antes de ejecutar este algoritmo.'},
+'The point cloud CRS must be projected. Reproject the cloud using the native QGIS point-cloud tools before running this algorithm.': {'es': 'El SRC de la nube de puntos debe ser proyectado. Reproyecte la nube mediante las herramientas nativas de nubes de puntos de QGIS antes de ejecutar este algoritmo.'},
+'The reference point layer has no valid projected CRS. Define its projected CRS in the CRS parameter.': {'es': 'La capa de puntos de referencia no tiene un SRC proyectado válido. Defina su SRC proyectado en el parámetro SRC.'},
+'The CRS selected for the reference points must match the point-cloud CRS ({}).': {'es': 'El SRC seleccionado para los puntos de referencia debe coincidir con el SRC de la nube de puntos ({}).'},
+'The reference point layer is geographic. Select a projected CRS matching the point-cloud CRS in the CRS parameter.': {'es': 'La capa de puntos de referencia está en un SRC geográfico. Seleccione en el parámetro SRC un SRC proyectado que coincida con el de la nube de puntos.'},
+'The CRS selected for the calculations must match the point-cloud CRS ({}).': {'es': 'El SRC seleccionado para los cálculos debe coincidir con el SRC de la nube de puntos ({}).'},
+'Extracting local point-cloud neighborhoods...': {'es': 'Extrayendo vecindades locales de la nube de puntos...'},
+'No valid reference point geometry was found.': {'es': 'No se encontró ninguna geometría válida de punto de referencia.'},
+'The native QGIS PDAL algorithms are unavailable. Install a QGIS build with PDAL support and enable the PDAL provider.': {'es': 'Los algoritmos PDAL nativos de QGIS no están disponibles. Instale una distribución de QGIS con compatibilidad con PDAL y habilite el proveedor PDAL.'},
+'Could not extract points from the LAS/LAZ cloud: {}': {'es': 'No se pudieron extraer los puntos de la nube LAS/LAZ: {}'},
+'The temporary point-cloud extraction could not be loaded.': {'es': 'No se pudo cargar la extracción temporal de la nube de puntos.'},
+'Points extracted in the search neighborhoods: ': {'es': 'Puntos extraídos en las vecindades de búsqueda: '},
+'No point-cloud points were found within the search neighborhoods.': {'es': 'No se encontraron puntos de la nube en las vecindades de búsqueda.'},
+'Elevation extraction method: ': {'es': 'Método de extracción de la altitud: '},
+'Checkpoint FID {} was skipped: no valid neighborhood was found within the search radius.': {'es': 'Se omitió el punto de control FID {}: no se encontró una vecindad válida dentro del radio de búsqueda.'},
+'Fewer than four checkpoints had a valid neighborhood for quality evaluation.': {'es': 'Menos de cuatro puntos de control presentaron una vecindad válida para la evaluación de la calidad.'},
+'Valid checkpoints: ': {'es': 'Puntos de control válidos: '},
+'Checkpoints skipped: ': {'es': 'Puntos de control omitidos: '},
+'SciPy unavailable': {'es': 'SciPy no disponible'},
+'Not assessed': {'es': 'No evaluada'},
+'Normality was not assessed because SciPy is unavailable or the sample size is insufficient.': {'es': 'La normalidad no se evaluó porque SciPy no está disponible o el tamaño de la muestra es insuficiente.'},
+'Normality not rejected': {'es': 'Normalidad no rechazada'},
+'Compatible with normality': {'es': 'Compatible con la normalidad'},
+'The Shapiro-Wilk test did not reject the null hypothesis of normality at the 5% significance level (p > 0.05).': {'es': 'La prueba de Shapiro-Wilk no rechazó la hipótesis nula de normalidad al nivel de significancia del 5 % (p > 0,05).'},
+'Normality rejected': {'es': 'Normalidad rechazada'},
+'Non-normal': {'es': 'No normal'},
+'The Shapiro-Wilk test rejected the null hypothesis of normality at the 5% significance level (p ≤ 0.05).': {'es': 'La prueba de Shapiro-Wilk rechazó la hipótesis nula de normalidad al nivel de significancia del 5 % (p ≤ 0,05).'},
+'below 5% critical value': {'es': 'por debajo del valor crítico del 5 %'},
+'above 5% critical value': {'es': 'por encima del valor crítico del 5 %'},
+'Charts were not generated because Matplotlib is unavailable in the QGIS Python environment.': {'es': 'Los gráficos no se generaron porque Matplotlib no está disponible en el entorno Python de QGIS.'},
+'Histogram of Vertical Residuals (ΔZ)': {'es': 'Histograma de los residuos verticales (ΔZ)'},
+'Vertical discrepancy ΔZ (m)': {'es': 'Discrepancia vertical ΔZ (m)'},
+'Frequency': {'es': 'Frecuencia'},
+'Could not generate histogram: {}': {'es': 'No se pudo generar el histograma: {}'},
+'CDF of Absolute Vertical Errors |ΔZ|': {'es': 'FDA de los errores verticales absolutos |ΔZ|'},
+'Absolute vertical error |ΔZ| (m)': {'es': 'Error vertical absoluto |ΔZ| (m)'},
+'Cumulative percentage (%)': {'es': 'Porcentaje acumulado (%)'},
+'Could not generate CDF chart: {}': {'es': 'No se pudo generar el gráfico de la FDA: {}'},
+'POINT CLOUD POSITIONAL ACCURACY REPORT': {'es': 'INFORME DE EXACTITUD POSICIONAL DE LA NUBE DE PUNTOS'},
+'Valid checkpoints': {'es': 'Puntos de control válidos'},
+'Mean Error': {'es': 'Error medio'},
+'Item': {'es': 'Elemento'},
+'Point cloud': {'es': 'Nube de puntos'},
+'Total points in the input cloud': {'es': 'Total de puntos en la nube de entrada'},
+'Points extracted in the search neighborhoods': {'es': 'Puntos extraídos en las vecindades de búsqueda'},
+'Input checkpoints': {'es': 'Puntos de control de entrada'},
+'Checkpoints without a valid neighborhood': {'es': 'Puntos de control sin una vecindad válida'},
+'Elevation extraction method': {'es': 'Método de extracción de la altitud'},
+'Search radius': {'es': 'Radio de búsqueda'},
+'Coordinate reference system': {'es': 'Sistema de referencia de coordenadas'},
+'The LAS/LAZ cloud was spatially clipped to the union of the checkpoint search neighborhoods using the native QGIS PDAL provider. Only the resulting 3D points were loaded for the calculations; the original point cloud was not modified.': {'es': 'La nube LAS/LAZ se recortó espacialmente mediante la unión de las vecindades de búsqueda de los puntos de control utilizando el proveedor PDAL nativo de QGIS. Solo se cargaron para los cálculos los puntos 3D resultantes; la nube de puntos original no fue modificada.'},
+'3. ASPRS-Oriented Vertical Accuracy Summary': {'es': '3. Resumen de la exactitud vertical orientado por la ASPRS'},
+'4. Histogram of Residuals': {'es': '4. Histograma de los residuos'},
+'The histogram presents the distribution of vertical residuals (ΔZ), including the mean, median, RMSEz and P95 indicators.': {'es': 'El histograma presenta la distribución de los residuos verticales (ΔZ), incluidos los indicadores de media, mediana, RMSEz y P95.'},
+'5. CDF of Absolute Errors': {'es': '5. FDA de los errores absolutos'},
+'The cumulative distribution function (CDF) summarizes the percentage of checkpoints whose absolute vertical error is smaller than a given threshold. Percentiles P68, P90, P95 and P99 are highlighted as empirical indicators of the absolute error distribution.': {'es': 'La función de distribución acumulada (FDA) resume el porcentaje de puntos de control cuyo error vertical absoluto es menor que un umbral determinado. Se destacan los percentiles P68, P90, P95 y P99 como indicadores empíricos de la distribución de los errores absolutos.'},
+'6. Percentile-based Accuracy': {'es': '6. Exactitud basada en percentiles'},
+'7. Robust Statistics and Outliers': {'es': '7. Estadísticas robustas y valores atípicos'},
+'8. Residual Normality Assessment': {'es': '8. Evaluación de la normalidad de los residuos'},
+'Classification': {'es': 'Clasificación'},
+'9. Point Cloud Sampling Statistics': {'es': '9. Estadísticas de muestreo de la nube de puntos'},
+'10. ASPRS-Oriented Checklist': {'es': '10. Lista de verificación orientada por la ASPRS'},
+'User-defined': {'es': 'Definido por el usuario'},
+'11. PEC-PCD Classification': {'es': '11. Clasificación PEC-PCD'},
+'12. Automatic Interpretation': {'es': '12. Interpretación automática'},
+'|ΔZ| ≤ P68': {'es': '|ΔZ| ≤ P68'},
+'P68 < |ΔZ| ≤ P90': {'es': 'P68 < |ΔZ| ≤ P90'},
+'P90 < |ΔZ| ≤ P95': {'es': 'P90 < |ΔZ| ≤ P95'},
+'P95 < |ΔZ| ≤ P99': {'es': 'P95 < |ΔZ| ≤ P99'},
+'|ΔZ| > P99': {'es': '|ΔZ| > P99'},
+'''This tool can be used to evaluate the <b>altimetric (Z) positional accuracy</b> of point clouds.
+<b>Elevation extraction methods</b>
+1. Nearest point in 3D distance (default).
+2. IDW using the three nearest points in horizontal distance.
+3. Local plane/TIN formed by three non-collinear points surrounding the checkpoint.
+<b>Outputs</b>
+1. <b>Vertical discrepancies</b> between the elevation estimated from the point cloud and the reference elevation.
+2. <b>Accuracy report</b>: Cartographic Accuracy Standard report containing RMSE results and classification according to the PEC-PCD.
+<b>Input Requirements:</b>
+ - Indexed LAS/LAZ point cloud with a valid projected CRS
+ - Point layer with an altitude (Z) field
+The optional CRS parameter is used to define the projected calculation CRS when the reference point layer is not projected. It must match the point-cloud CRS.''': {'es': '''Esta herramienta permite evaluar la <b>exactitud posicional altimétrica (Z)</b> de nubes de puntos.
+<b>Métodos de extracción de la altitud</b>
+1. Punto más cercano por distancia 3D (predeterminado).
+2. IDW con los tres puntos más cercanos por distancia horizontal.
+3. Plano local/TIN formado por tres puntos no colineales que envuelven el punto de control.
+<b>Salidas</b>
+1. <b>Discrepancias verticales</b> entre la altitud estimada a partir de la nube de puntos y la altitud de referencia.
+2. <b>Informe de exactitud</b>: informe del Estándar de Exactitud Cartográfica que contiene los resultados del RMSE y la clasificación según el PEC-PCD.
+<b>Requisitos de entrada:</b>
+ - Nube de puntos LAS/LAZ indexada con un SRC proyectado válido
+ - Capa de puntos con un campo de altitud (Z)
+El parámetro SRC opcional se utiliza para definir el SRC proyectado de los cálculos cuando la capa de puntos de referencia no está proyectada. Debe coincidir con el SRC de la nube de puntos.'''},
+
 }
