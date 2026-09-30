@@ -249,7 +249,12 @@ class CreateGCPfile(QgsProcessingAlgorithm):
                     X, Y, Z = pnt.x(), pnt.y(), 0
                 else:
                     X, Y, Z = geom.constGet().x(), geom.constGet().y(), geom.constGet().z()
-            arq.write(format_num.format(X) + ' ' + format_num.format(Y) + ' ' + format_num.format(Z) + ' 0 0 ' + nome + '\n')
+            arq.write(
+                nome + ' ' +
+                format_num.format(X) + ' ' +
+                format_num.format(Y) + ' ' +
+                format_num.format(Z) + '\n'
+            )
             if feedback.isCanceled():
                 break
 
