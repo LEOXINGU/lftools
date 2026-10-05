@@ -30,13 +30,14 @@ __revision__ = '$Format:%H$'
 import os
 import sys
 import inspect
+import platform
 
 from qgis.core import (QgsProject,
                        Qgis,
                        QgsCoordinateTransform,
                        QgsApplication,
                        QgsExpression)
-from qgis.PyQt.QtCore import QMetaType, QCoreApplication, QSettings, QTranslator, QUrl
+from qgis.PyQt.QtCore import Qt, QMetaType, QCoreApplication, QSettings, QTranslator, QUrl
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction, QMenu, QToolButton, QMessageBox    
 from .lftools_provider import LFToolsProvider
@@ -72,6 +73,8 @@ class LFToolsPlugin(object):
         self.plugin_dir = os.path.dirname(__file__)
         self.layerid = ''
         self.layerid2 = ''
+        self.immersive_cloud_dock = None
+        self.ImmersiveCloud_Action = None
 
     def tr(self, *string):
         return translate(string, QgsApplication.locale()[:2])
@@ -137,6 +140,17 @@ class LFToolsPlugin(object):
         self.DEM_Downloader_Action.triggered.connect(self.DEM_Downloader)
         self.toolbar.addAction(self.DEM_Downloader_Action)
 
+        # Nuvem 3D Imersiva (Potree) - Disponível apenas no Windows
+        if platform.system() == 'Windows':
+            icon = QIcon(self.plugin_dir + '/images/tools/IMMERSIVE_CLOUD.svg')
+            self.ImmersiveCloud_Action = QAction(icon, self.tr('Immersive 3D Cloud', 'Nuvem 3D Imersiva'), self.iface.mainWindow())
+            self.ImmersiveCloud_Action.setObjectName('ImmersiveCloud')
+            self.ImmersiveCloud_Action.setToolTip(self.tr('Generate portable interactive 3D point cloud viewer', 'Gerar visualizador 3D interativo e portátil para nuvem de pontos'))
+            self.ImmersiveCloud_Action.triggered.connect(self.runImmersiveCloud)
+            self.toolbar.addAction(self.ImmersiveCloud_Action)
+        else:
+            self.ImmersiveCloud_Action = None
+
         # Principais ferramentas LFTools (Mão na roda)
         menu = QMenu()
         menu.setObjectName('MainLFTools')
@@ -192,6 +206,12 @@ class LFToolsPlugin(object):
         self.iface.removeToolBarIcon(self.CopiarEstilo_Action)
         self.iface.removeToolBarIcon(self.ColarEstilo_Action)
         self.iface.removeToolBarIcon(self.DEM_Downloader_Action)
+        if hasattr(self, 'ImmersiveCloud_Action') and self.ImmersiveCloud_Action is not None:
+            self.iface.removeToolBarIcon(self.ImmersiveCloud_Action)
+            self.ImmersiveCloud_Action = None
+        if hasattr(self, 'immersive_cloud_dock') and self.immersive_cloud_dock is not None:
+            self.iface.removeDockWidget(self.immersive_cloud_dock)
+            self.immersive_cloud_dock = None
         self.iface.removeToolBarIcon(self.Coord2Layer_Action)
         self.iface.removeToolBarIcon(self.GetAttribute_Action)
         self.iface.removeToolBarIcon(self.MeasureLayer_Action)
@@ -393,3 +413,45 @@ class LFToolsPlugin(object):
         # habilitar ferramenta de vetorização
         self.iface.actionAddFeature().trigger()
         return
+
+    def runImmersiveCloud(self):
+        if platform.system() != 'Windows':
+            QMessageBox.information(
+                self.iface.mainWindow(),
+                self.tr('Immersive 3D Cloud', 'Nuvem 3D Imersiva'),
+                self.tr(
+                    'This tool is currently supported only on Windows.',
+                    'Esta ferramenta é suportada atualmente apenas no ambiente Windows.'
+                )
+            )
+            return
+
+        import importlib
+        from .immersive_cloud import config, downloader, template, worker, gui
+        importlib.reload(config)
+        importlib.reload(downloader)
+        importlib.reload(template)
+        importlib.reload(worker)
+        importlib.reload(gui)
+        from .immersive_cloud.gui import ImmersiveCloudDockWidget
+
+        if self.immersive_cloud_dock is not None:
+            try:
+                self.iface.removeDockWidget(self.immersive_cloud_dock)
+                self.immersive_cloud_dock.deleteLater()
+            except Exception:
+                pass
+            self.immersive_cloud_dock = None
+
+        self.immersive_cloud_dock = ImmersiveCloudDockWidget(self.iface.mainWindow())
+        try:
+            # Qt6
+            area = Qt.DockWidgetArea.RightDockWidgetArea
+        except AttributeError:
+            # Qt5
+            area = Qt.RightDockWidgetArea
+        self.iface.addDockWidget(area, self.immersive_cloud_dock)
+        self.immersive_cloud_dock.show()
+        self.immersive_cloud_dock.raise_()
+        self.immersive_cloud_dock.activateWindow()
+
