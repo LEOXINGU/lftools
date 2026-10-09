@@ -287,24 +287,66 @@ Para posicionamento relativo (RTK/PPK), os desvios-padrão da estação base pod
         lista = []
         dic = {}
         if tipo == 'rtklib':
+            # O RTKLIB pode exportar latitude/longitude em graus decimais
+            # ou em graus, minutos e segundos (GMS/DMS). Detecta o formato
+            # pelo cabecalho para interpretar corretamente as colunas.
+            coord_format = None
             for linha in arq.readlines():
-                if linha[0] != '%':
-                    while '  ' in linha:
-                        linha = linha.replace('  ', ' ')
-                    lista += [linha.split(' ')]
+                if linha.startswith('%'):
+                    cabecalho = linha.lower()
+                    if 'latitude(deg)' in cabecalho and 'longitude(deg)' in cabecalho:
+                        coord_format = 'decimal'
+                    elif 'latitude(d' in cabecalho and 'longitude(d' in cabecalho:
+                        coord_format = 'dms'
+                elif linha.strip():
+                    lista.append(linha.split())
             arq.close()
+
+            # Compatibilidade com arquivos RTKLIB sem a linha de cabecalho
+            # esperada: 15 campos no formato decimal e 19 no formato GMS.
+            if coord_format is None and lista:
+                if len(lista[0]) >= 19:
+                    coord_format = 'dms'
+                elif len(lista[0]) >= 15:
+                    coord_format = 'decimal'
+
+            if coord_format not in ('decimal', 'dms'):
+                raise QgsProcessingException(
+                    self.tr(
+                        'Unsupported RTKLIB coordinate format. Export latitude/longitude as decimal degrees or DMS.',
+                        'Formato de coordenadas RTKLIB nao suportado. Exporte latitude/longitude em graus decimais ou GMS.'
+                    )
+                )
+
+            def dms_to_decimal(degrees, minutes, seconds):
+                degrees = float(degrees)
+                minutes = float(minutes)
+                seconds = float(seconds)
+                signal = -1.0 if degrees < 0 else 1.0
+                return degrees + signal * (minutes / 60.0 + seconds / 3600.0)
+
             for k,pnt in enumerate(lista):
-                lat = float(pnt[2])
-                lon = float(pnt[3])
-                h = float(pnt[4])
+                if coord_format == 'dms':
+                    lat = dms_to_decimal(pnt[2], pnt[3], pnt[4])
+                    lon = dms_to_decimal(pnt[5], pnt[6], pnt[7])
+                    h = float(pnt[8])
+                    q_idx = 9
+                else:
+                    lat = float(pnt[2])
+                    lon = float(pnt[3])
+                    h = float(pnt[4])
+                    q_idx = 5
+
                 ano, mes, dia = pnt[0].split('/')
                 hora, minuto, segundo = pnt[1].split(':')
                 datahora = datetime_decimal_str(int(ano), int(mes), int(dia), int(hora), int(minuto), float(segundo))
-                quality = quality_dic[int(pnt[5])]
-                nsat = int(pnt[6])
-                slat = float(pnt[7])
-                slon = float(pnt[8])
-                sh = float(pnt[9])
+
+                quality_code = int(pnt[q_idx])
+                quality = quality_dic.get(quality_code, str(quality_code))
+                nsat = int(pnt[q_idx + 1])
+                slat = float(pnt[q_idx + 2])
+                slon = float(pnt[q_idx + 3])
+                sh = float(pnt[q_idx + 4])
 
                 # Calcula sigmas propagados
                 sigma_x_prop = math.sqrt(slon**2 + sigma_x_base**2)
