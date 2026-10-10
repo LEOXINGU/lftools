@@ -3,7 +3,7 @@ name=LF Tools
 qgisMinimumVersion=3.44
 qgisMaximumVersion=4.99
 description=Comprehensive solutions for cartographic production, surveying, drone mapping, GNSS data import, geospatial database management, digital image processing, and spatial analysis.
-version=2.18.0
+version=2.18.1
 author=Leandro França
 email=suporte@geoone.com.br
 
@@ -40,6 +40,7 @@ donation=https://www.paypal.com/ncp/payment/8V3C6PEAMQAYG
 # França, L. (YEAR). LFTools: Comprehensive solutions for cartographic production, surveying, drone mapping, GNSS data import, geospatial database management, digital image processing, and spatial analysis. (VERSION X.X.X) [QGIS plugin]. Retrieved from https://plugins.qgis.org/plugins/LFTools/
 
 changelog=
+  2.18.1 - Enhanced azimuth-distance reconstruction with point and line outputs, optional vertex codes, closure diagnostics and styled labels; fixed deedtable3 for lines and multilines, and added INCRA calculations to deedtable2, deedtable3 and deedtext.
   2.18.0 - Added Consistent DTM tool and enhanced Point Cloud Positional Accuracy with direct LAS/LAZ support and multiple elevation-estimation methods.
   2.17.0 - Added a complete HAND workflow with drainage extraction, stream ordering, automatic styling, and organized outputs.
   2.16.0 - Added the Validate Geometries and Validate Intraclass Topology tools with issue detection and quality report generation.
