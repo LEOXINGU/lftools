@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="cloudGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#29B6F6"/>
+      <stop offset="100%" stop-color="#0288D1"/>
+    </linearGradient>
+    <linearGradient id="cubeGradTop" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#81C784"/>
+      <stop offset="100%" stop-color="#4CAF50"/>
+    </linearGradient>
+    <linearGradient id="cubeGradRight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#388E3C"/>
+      <stop offset="100%" stop-color="#2E7D32"/>
+    </linearGradient>
+    <linearGradient id="cubeGradLeft" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#43A047"/>
+      <stop offset="100%" stop-color="#1B5E20"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Nuvem de Fundo -->
+  <path d="M46 38c6.6 0 12-5.4 12-12 0-6.1-4.6-11.1-10.5-11.9C46.3 8.3 40.7 4 34 4c-7.3 0-13.4 5.2-14.7 12.1C18.6 16 17.8 16 17 16c-6.6 0-12 5.4-12 12 0 6.4 5 11.6 11.3 12" 
+        fill="none" stroke="url(#cloudGrad)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Cubo 3D Isométrico Central (Símbolo de Potree / 3D) -->
+  <g transform="translate(32, 40)">
+    <!-- Top Face -->
+    <polygon points="0,-16 14,-8 0,0 -14,-8" fill="url(#cubeGradTop)" stroke="#2E7D32" stroke-width="1.2"/>
+    <!-- Left Face -->
+    <polygon points="-14,-8 0,0 0,16 -14,8" fill="url(#cubeGradLeft)" stroke="#1B5E20" stroke-width="1.2"/>
+    <!-- Right Face -->
+    <polygon points="0,0 14,-8 14,8 0,16" fill="url(#cubeGradRight)" stroke="#1B5E20" stroke-width="1.2"/>
+  </g>
+
+  <!-- Pontos da Nuvem (LiDAR Dots) -->
+  <circle cx="16" cy="18" r="2" fill="#00E676"/>
+  <circle cx="26" cy="12" r="2.2" fill="#FFEB3B"/>
+  <circle cx="38" cy="10" r="2" fill="#FF5722"/>
+  <circle cx="48" cy="18" r="2.2" fill="#00E5FF"/>
+  <circle cx="53" cy="28" r="1.8" fill="#E040FB"/>
+  <circle cx="11" cy="27" r="1.8" fill="#76FF03"/>
+</svg>
