@@ -19,6 +19,7 @@ __copyright__ = '(C) 2021, Leandro França'
 from qgis.core import (QgsApplication,
                        Qgis,
                        QgsGeometry,
+                       QgsWkbTypes,
                        QgsFeature,
                        QgsProcessingParameterEnum,
                        QgsProcessingParameterNumber,
@@ -27,7 +28,7 @@ from qgis.core import (QgsApplication,
                        QgsProcessingAlgorithm,
                        QgsProcessingParameterFeatureSource,
                        QgsProcessingParameterFeatureSink)
-from math import atan2, degrees, fabs
+from math import atan2, degrees, hypot, isfinite
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
 import os
@@ -61,8 +62,12 @@ class DirectionalMerge(QgsProcessingAlgorithm):
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/vetor.png'))
 
-    txt_en = 'This algorithm merges lines that touch at their starting or ending points and has the same direction (given a tolerance in degrees). <p>For the attributes can be considered:</p>1 - merge lines that have the same attributes; or</li><li>2 - keep the attributes of the longest line.</li>'
-    txt_pt = 'Este algoritmo mescla linhas que se tocam nos seus pontos inicial ou final e tem a mesma direção (dada uma tolerância em graus).<p>Para os atributos pode ser considerado:</p><li>1 - mesclar linhas que tenham os mesmos atributos; ou</li><li>2 - manter os atributos da linha maior.</li>'
+    txt_en = ('This algorithm merges lines that share a starting or ending XY point and have compatible directions, within an angular tolerance from 0 to 90 degrees (inclusive). '
+              '<p>Attributes:</p><ul><li>1 - merge only lines with identical attributes;</li><li>2 - keep the attributes of the longest original line part in each merged chain.</li></ul>'
+              '<p>Null, empty and degenerate parts are skipped with a warning. Closed lines are preserved. There is no distance-based snapping.</p>')
+    txt_pt = ('Este algoritmo mescla linhas que compartilham uma extremidade XY e apresentam direções compatíveis, dentro de uma tolerância angular de 0 a 90 graus (inclusive). '
+              '<p>Atributos:</p><ul><li>1 - mesclar apenas linhas com atributos idênticos;</li><li>2 - manter os atributos da maior parte linear original de cada cadeia mesclada.</li></ul>'
+              '<p>Partes nulas, vazias e degeneradas são ignoradas com aviso. Linhas fechadas são preservadas. Não há ajuste por tolerância de distância.</p>')
     figure = 'images/tutorial/vect_directional_merge.jpg'
 
     def shortHelpString(self):
@@ -110,7 +115,9 @@ class DirectionalMerge(QgsProcessingAlgorithm):
                 self.ANGLE,
                 self.tr('Tolerance in degrees', 'Tolerância em graus'),
                 type = QgsProcessingParameterNumber.Type.Double,
-                defaultValue = 30
+                defaultValue = 30,
+                minValue = 0,
+                maxValue = 90
                 )
             )
 
@@ -144,7 +151,7 @@ class DirectionalMerge(QgsProcessingAlgorithm):
             self.ANGLE,
             context
         )
-        if tol is None or tol > 90 or tol < 0:
+        if not isfinite(tol) or tol > 90 or tol < 0:
             raise QgsProcessingException(self.tr('The input angle must be between 0 and 90 degrees!', 'O ângulo de entrada deve ser entre 0 e 90 graus!'))
 
 
@@ -153,220 +160,150 @@ class DirectionalMerge(QgsProcessingAlgorithm):
             self.OUTPUT,
             context,
             linhas.fields(),
-            linhas.wkbType(),
-            linhas.sourceCrs()
+            QgsWkbTypes.linearType(linhas.wkbType()),
+            linhas.sourceCrs(),
+            # Partes de uma mesma feicao podem repetir a chave primaria.
+            QgsFeatureSink.SinkFlag.RegeneratePrimaryKey
+            if QgsWkbTypes.isMultiType(linhas.wkbType()) else QgsFeatureSink.SinkFlags()
         )
         if sink is None:
             raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT))
 
-        # Criar lista com informacoes das feicoes
+        # Cada registro guarda tambem o comprimento da maior parte ORIGINAL.
+        # Assim, uma cadeia acumulada nao passa a dominar a escolha dos atributos.
         feedback.pushInfo(self.tr('Calculating feature informations...', 'Calculando informações das feições...'))
         lista = []
-        for feature in linhas.getFeatures():
-                lista += self.pontos_ang(feature)
-
-        # Criar uma nova lista com as feicoes finais mescladas
-        nova_lista = []
-        # Remover os aneis lineares da lista e acrescentar na nova lista
-        ind = 0
-        while ind < len(lista)-1:
-            P_ini = lista[ind][1]
-            P_fim = lista[ind][2]
-            if P_ini == P_fim:
-                nova_lista += [lista[ind][0]]
-                del lista[ind]
-            else:
-                ind +=1
-
-        # Mesclar linhas que se tocam e tem a mesma direcao (com mesmo atributo)
-        feedback.pushInfo(self.tr('Merging lines...', 'Mesclando linhas...'))
-        if atributos == 0:
-            while len(lista)>1:
-                tam = len(lista)
-                for i in range(0,tam-1):
-                    mergeou = False
-                    # Ponto inicial e final da feicao A
-                    coord_A = lista[i][0]
-                    P_ini_A = lista[i][1]
-                    P_fim_A = lista[i][2]
-                    ang_ini_A = lista[i][3]
-                    ang_fim_A = lista[i][4]
-                    att_A = lista[i][5]
-                    for j in range(i+1,tam):
-                        # Ponto inicial e final da feicao B
-                        coord_B = lista[j][0]
-                        P_ini_B = lista[j][1]
-                        P_fim_B = lista[j][2]
-                        ang_ini_B = lista[j][3]
-                        ang_fim_B = lista[j][4]
-                        att_B = lista[j][5]
-                        if att_A == att_B:
-                            # 4 possibilidades
-                            # 1 - Ponto final de A igual ao ponto inicial de B
-                            if (P_fim_A == P_ini_B) and (fabs(ang_fim_A-ang_ini_B)<tol or fabs(360-fabs(ang_fim_A-ang_ini_B))<tol):
-                                mergeou = True
-                                break
-                            # 2 - Ponto inicial de A igual ao ponto final de B
-                            elif (P_ini_A == P_fim_B) and (fabs(ang_ini_A-ang_fim_B)<tol or fabs(360-fabs(ang_ini_A-ang_fim_B))<tol):
-                                mergeou = True
-                                break
-                            # 3 - Ponto incial de A igual ao ponto inicial de B
-                            elif (P_ini_A == P_ini_B) and (fabs(ang_ini_A- self.contraAz(ang_ini_B))<tol or fabs(360-fabs(ang_ini_A - self.contraAz(ang_ini_B)))<tol):
-                                mergeou = True
-                                break
-                            # 4 - Ponto final de A igual ao ponto final de B
-                            elif (P_fim_A == P_fim_B) and (fabs(ang_fim_A - self.contraAz(ang_fim_B))<tol or fabs(360-fabs(ang_fim_A - self.contraAz(ang_fim_B)))<tol):
-                                mergeou = True
-                                break
-                    if mergeou:
-                        geom_A = QgsGeometry.fromPolylineXY(coord_A)
-                        geom_B = QgsGeometry.fromPolylineXY(coord_B)
-                        new_geom = geom_A.combine(geom_B)
-
-                        new_feat = QgsFeature()
-                        new_feat.setAttributes(att_A)
-                        new_feat.setGeometry(new_geom)
-
-                        if new_geom.isMultipart():
-                            nova_lista += [[coord_A, att_A], [coord_B, att_B]]
-                            del lista[i], lista[j-1]
-                            break
-                        else:
-                            del lista[i], lista[j-1]
-                            lista = self.pontos_ang(new_feat)+lista
-                            break
-                    if not(mergeou):
-                        # Tirar a geometria que nao se conecta com nada da lista
-                        nova_lista += [[coord_A, att_A]]
-                        del lista[i]
-                        break
-                if len(lista)==1:
-                    nova_lista += [[lista[0][0], lista[0][5]]]
-
-        # Mesclar os que se tocam e tem mesma direcao (preservar atributos da linha maior)
-        if atributos == 1:
-            while len(lista)>1:
-                tam = len(lista)
-                for i in range(0,tam-1):
-                    mergeou = False
-                    # Ponto inicial e final da feicao A
-                    coord_A = lista[i][0]
-                    P_ini_A = lista[i][1]
-                    P_fim_A = lista[i][2]
-                    ang_ini_A = lista[i][3]
-                    ang_fim_A = lista[i][4]
-                    att_A = lista[i][5]
-                    for j in range(i+1,tam):
-                        # Ponto inicial e final da feicao B
-                        coord_B = lista[j][0]
-                        P_ini_B = lista[j][1]
-                        P_fim_B = lista[j][2]
-                        ang_ini_B = lista[j][3]
-                        ang_fim_B = lista[j][4]
-                        att_B = lista[j][5]
-                        # 4 possibilidades
-                        # 1 - Ponto final de A igual ao ponto inicial de B
-                        if (P_fim_A == P_ini_B) and (fabs(ang_fim_A-ang_ini_B)<tol or fabs(360-fabs(ang_fim_A-ang_ini_B))<tol):
-                            mergeou = True
-                            break
-                        # 2 - Ponto inicial de A igual ao ponto final de B
-                        elif (P_ini_A == P_fim_B) and (fabs(ang_ini_A-ang_fim_B)<tol or fabs(360-fabs(ang_ini_A-ang_fim_B))<tol):
-                            mergeou = True
-                            break
-                        # 3 - Ponto incial de A igual ao ponto inicial de B
-                        elif (P_ini_A == P_ini_B) and (fabs(ang_ini_A - self.contraAz(ang_ini_B))<tol or fabs(360-fabs(ang_ini_A - self.contraAz(ang_ini_B)))<tol):
-                            mergeou = True
-                            break
-                        # 4 - Ponto final de A igual ao ponto final de B
-                        elif (P_fim_A == P_fim_B) and (fabs(ang_fim_A - self.contraAz(ang_fim_B))<tol or fabs(360-fabs(ang_fim_A - self.contraAz(ang_fim_B)))<tol):
-                            mergeou = True
-                            break
-                    if mergeou:
-                        geom_A = QgsGeometry.fromPolylineXY(coord_A)
-                        geom_B = QgsGeometry.fromPolylineXY(coord_B)
-                        new_geom = geom_A.combine(geom_B)
-
-                        length_A = geom_A.length()
-                        length_B = geom_B.length()
-                        if length_A > length_B:
-                            att = att_A
-                        else:
-                            att = att_B
-                        new_feat = QgsFeature()
-                        new_feat.setAttributes(att)
-                        new_feat.setGeometry(new_geom)
-
-                        if new_geom.isMultipart():
-                            nova_lista += [[coord_A, att_A], [coord_B, att_B]]
-                            del lista[i], lista[j-1]
-                            break
-                        else:
-                            del lista[i], lista[j-1]
-                            lista = self.pontos_ang(new_feat)+lista
-                            break
-                    if not(mergeou):
-                        # Tirar a geometria que nao se conecta com nada da lista
-                        nova_lista += [[coord_A, att_A]]
-                        del lista[i]
-                        break
-                if len(lista)==1:
-                    nova_lista += [[lista[0][0], lista[0][5]]]
-
-        # Criando o shapefile de saida
-        feedback.pushInfo(self.tr('Saving output...', 'Salvando saída...'))
-        n_pnts = len(nova_lista)
-        total = 100.0 /n_pnts if n_pnts else 0
-        for k, item in enumerate(nova_lista):
-            fet = QgsFeature()
-            fet.setGeometry(QgsGeometry.fromPolylineXY(item[0]))
-            fet.setAttributes(item[1])
-            sink.addFeature(fet, QgsFeatureSink.Flag.FastInsert)
+        total = max(1, linhas.featureCount())
+        for k, feature in enumerate(linhas.getFeatures()):
             if feedback.isCanceled():
-                break
-            feedback.setProgress(int((k+1) * total))
+                return {self.OUTPUT: dest_id}
+            lista.extend(self.pontos_ang(feature, feedback))
+            feedback.setProgress(int(20 * (k + 1) / total))
 
+        feedback.pushInfo(self.tr('Merging lines...', 'Mesclando linhas...'))
+        nova_lista = []
+        total = max(1, len(lista))
+        while lista:
+            if feedback.isCanceled():
+                return {self.OUTPUT: dest_id}
+            atual = lista.pop(0)
+            # Aneis existentes ou formados por uma mescla nao recebem ramificacoes.
+            while not self.same_xy(atual[1], atual[2]):
+                for j, proxima in enumerate(lista):
+                    if feedback.isCanceled():
+                        return {self.OUTPUT: dest_id}
+                    if self.same_xy(proxima[1], proxima[2]):
+                        continue
+                    if atributos == 0 and atual[5] != proxima[5]:
+                        continue
+                    coord = self.merge_coords(atual, proxima, tol)
+                    if coord is None:
+                        continue
+                    # Empates preservam os atributos do primeiro registro.
+                    maior = atual if atual[6] >= proxima[6] else proxima
+                    atual = self.line_info(coord, maior[5], maior[6])
+                    del lista[j]
+                    break
+                else:
+                    break
+            nova_lista.append(atual)
+            feedback.setProgress(int(20 + 60 * (1 - len(lista) / total)))
+
+        feedback.pushInfo(self.tr('Saving output...', 'Salvando saída...'))
+        total = max(1, len(nova_lista))
+        multipart = QgsWkbTypes.isMultiType(linhas.wkbType())
+        for k, item in enumerate(nova_lista):
+            if feedback.isCanceled():
+                return {self.OUTPUT: dest_id}
+            # fromPolyline preserva Z/M; asPolyline/fromPolylineXY descartam Z/M.
+            geom = QgsGeometry.fromPolyline(item[0])
+            if multipart and not geom.convertToMultiType():
+                raise QgsProcessingException(self.tr(
+                    'Could not create multipart output.',
+                    'Não foi possível criar a saída multiparte.'))
+            fet = QgsFeature(linhas.fields())
+            fet.setGeometry(geom)
+            fet.setAttributes(item[5])
+            if not sink.addFeature(fet, QgsFeatureSink.Flag.FastInsert):
+                raise QgsProcessingException(self.tr(
+                    'Could not save an output feature.',
+                    'Não foi possível salvar uma feição de saída.'))
+            feedback.setProgress(int(80 + 20 * (k + 1) / total))
+
+        feedback.setProgress(100)
         feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
         feedback.pushInfo(self.tr('Leandro Franca - Cartographic Engineer', 'Leandro França - Eng Cart'))
-
         return {self.OUTPUT: dest_id}
 
-    def pontos_ang(self, feature):
-            att = feature.attributes()
-            geom = feature.geometry()
-            if not geom.isMultipart():
-                coord = geom.asPolyline()
-                # Tangente entre o primeiro e segundo ponto
-                Xa = coord[0].x()
-                Xb = coord[1].x()
-                Ya = coord[0].y()
-                Yb = coord[1].y()
-                ang_ini = degrees(atan2(Yb-Ya,Xb-Xa))
-                Xa = coord[-2].x()
-                Xb = coord[-1].x()
-                Ya = coord[-2].y()
-                Yb = coord[-1].y()
-                ang_fim = degrees(atan2(Yb-Ya,Xb-Xa))
-                return [[coord, coord[0], coord[-1], ang_ini, ang_fim, att]]
-            else:
-                coord = geom.asMultiPolyline()
-                itens = []
-                for item in coord:
-                    Xa = item[0].x()
-                    Xb = item[1].x()
-                    Ya = item[0].y()
-                    Yb = item[1].y()
-                    ang_ini = degrees(atan2(Yb-Ya,Xb-Xa))
-                    Xa = item[-2].x()
-                    Xb = item[-1].x()
-                    Ya = item[-2].y()
-                    Yb = item[-1].y()
-                    ang_fim = degrees(atan2(Yb-Ya,Xb-Xa))
-                    itens += [[item, item[0], item[-1], ang_ini, ang_fim, att]]
-                return itens
+    @staticmethod
+    def same_xy(a, b):
+        # A tolerancia do algoritmo e angular, nao uma distancia de ajuste.
+        return a.x() == b.x() and a.y() == b.y()
 
-    # Funcao para dar a direcao oposta
+    @staticmethod
+    def angle_diff(a, b):
+        return abs((a - b + 180.0) % 360.0 - 180.0)
+
+    def merge_coords(self, a, b, tol):
+        # Concatenar os vertices evita que a uniao GEOS (combine) devolva uma
+        # MultiLineString mesmo quando as duas linhas podem formar uma cadeia.
+        # O vertice comum e incluido apenas uma vez.
+        if self.same_xy(a[2], b[1]) and self.angle_diff(a[4], b[3]) <= tol:
+            return a[0] + b[0][1:]
+        if self.same_xy(a[1], b[2]) and self.angle_diff(a[3], b[4]) <= tol:
+            return b[0] + a[0][1:]
+        if self.same_xy(a[1], b[1]) and self.angle_diff(a[3], b[3] + 180) <= tol:
+            return list(reversed(a[0])) + b[0][1:]
+        if self.same_xy(a[2], b[2]) and self.angle_diff(a[4], b[4] + 180) <= tol:
+            return a[0] + list(reversed(b[0]))[1:]
+        return None
+
+    def line_info(self, coord, att, longest=None):
+        if len(coord) < 2 or any(not isfinite(p.x()) or not isfinite(p.y()) for p in coord):
+            return None
+        # Vertices repetidos nas extremidades nao definem uma tangente.
+        inicio = next((p for p in coord[1:] if not self.same_xy(p, coord[0])), None)
+        fim = next((p for p in reversed(coord[:-1]) if not self.same_xy(p, coord[-1])), None)
+        if inicio is None or fim is None:
+            return None
+        ang_ini = degrees(atan2(inicio.y() - coord[0].y(), inicio.x() - coord[0].x()))
+        ang_fim = degrees(atan2(coord[-1].y() - fim.y(), coord[-1].x() - fim.x()))
+        if longest is None:
+            longest = sum(hypot(b.x() - a.x(), b.y() - a.y())
+                          for a, b in zip(coord, coord[1:]))
+        return [coord, coord[0], coord[-1], ang_ini, ang_fim, att, longest]
+
+    def pontos_ang(self, feature, feedback=None):
+        geom = feature.geometry()
+        if geom.isNull() or geom.isEmpty():
+            if feedback is not None:
+                feedback.pushWarning(self.tr(
+                    'Feature {} skipped: null or empty geometry.',
+                    'Feição {} ignorada: geometria nula ou vazia.').format(feature.id()))
+            return []
+        # Trabalhar em uma copia e segmentizar curvas, preservando vertices Z/M.
+        geom = QgsGeometry(geom)
+        geom.convertToStraightSegment()
+        partes = geom.asGeometryCollection() if geom.isMultipart() else [geom]
+        itens = []
+        for numero, parte in enumerate(partes, 1):
+            if feedback is not None and feedback.isCanceled():
+                break
+            if parte.type() != Qgis.GeometryType.Line:
+                raise QgsProcessingException(self.tr(
+                    'Feature {} contains a non-line geometry.',
+                    'A feição {} contém uma geometria que não é linear.').format(feature.id()))
+            item = self.line_info(list(parte.vertices()), feature.attributes())
+            if item is None:
+                if feedback is not None:
+                    feedback.pushWarning(self.tr(
+                        'Feature {}, part {} skipped: insufficient distinct XY vertices or non-finite coordinates.',
+                        'Feição {}, parte {} ignorada: vértices XY distintos insuficientes ou coordenadas não finitas.'
+                    ).format(feature.id(), numero))
+                continue
+            itens.append(item)
+        return itens
+
+    # Funcao mantida para compatibilidade.
     def contraAz(self, x):
-        if x<=0:
-            return x+180
-        else:
-            return x-180
+        return x + 180 if x <= 0 else x - 180
