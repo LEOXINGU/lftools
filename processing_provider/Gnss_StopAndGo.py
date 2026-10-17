@@ -18,6 +18,10 @@ __copyright__ = '(C) 2022, Leandro França'
 from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (Qgis,
                        QgsFeatureSink,
+                       QgsFeature,
+                       QgsFields,
+                       QgsDistanceArea,
+                       QgsPointXY,
                        QgsField,
                        QgsPoint,
                        QgsGeometry,
@@ -31,11 +35,9 @@ from qgis.core import (Qgis,
 
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
-from lftools.geocapt.topogeo import meters2degrees, str_decimal_to_datetime
 
-import numpy as np
+from math import isfinite
 from datetime import datetime
-import codecs
 import os
 from qgis.PyQt.QtGui import QIcon
 
@@ -73,7 +75,7 @@ Input data:
 ◼️ GNSS point layer from RTKLIB or IBGE-PPP from .pos file
 ◼️ Minimum time to survey the point in minutes
 ◼️ Tolerance in centimeters to consider the static point'''
-    txt_pt = '''Encontra os pontos centrais (vértices) das concentrações de pontos levantados pelo método Seminemático (stop and go) provenientes do processamento de dados GNSS.
+    txt_pt = '''Encontra os pontos centrais (vértices) das concentrações de pontos levantados pelo método Semicinemático (stop and go) provenientes do processamento de dados GNSS.
 Dados de entrada:
 ◼️ Camada do tipo ponto gerada do arquivo .pos do RTKLIB ou IBGE-PPP
 ◼️ Tempo mínimo de levantamento do ponto em minutos
@@ -145,142 +147,147 @@ Dados de entrada:
 
     def processAlgorithm(self, parameters, context, feedback):
 
-        layer = self.parameterAsSource(
-            parameters,
-            self.INPUT,
-            context
-        )
+        layer = self.parameterAsSource(parameters, self.INPUT, context)
         if layer is None:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.INPUT))
 
-        tempo_min = self.parameterAsDouble(
-            parameters,
-            self.TIME,
-            context
-        )
-        if not tempo_min:
+        tempo_min = self.parameterAsDouble(parameters, self.TIME, context) * 60.0
+        dist_max = self.parameterAsDouble(parameters, self.DIST, context) / 100.0
+        if not isfinite(tempo_min) or tempo_min <= 0:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.TIME))
-        tempo_min *= 60 # segudos
-
-        dist_max = self.parameterAsDouble(
-            parameters,
-            self.DIST,
-            context
-        )
-        if not dist_max:
+        if not isfinite(dist_max) or dist_max <= 0:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.DIST))
-        dist_max /= 1e2 # metros
 
-        Fields = layer.fields()
-        itens  = {"start_time": QMetaType.Type.QString,
-                  "end_time": QMetaType.Type.QString,
-                  "count": QMetaType.Type.Int,
-                  "group": QMetaType.Type.Int
-             }
-        for item in itens:
-            Fields.append(QgsField(item, itens[item]))
+        source_fields = layer.fields()
+        time_index = -1
+        for name in (self.tr('datetime', 'datahora'), 'datetime', 'datahora'):
+            time_index = source_fields.lookupField(name)
+            if time_index >= 0:
+                break
+        height_index = source_fields.lookupField('h')
+        if time_index < 0 or height_index < 0:
+            raise QgsProcessingException(
+                self.tr('Check the input layer!', 'Verifique a camada de entrada!')
+                + ' (datetime / datahora, h)')
 
-        (sink, dest_id) = self.parameterAsSink( parameters, self.OUTPUT, context, Fields, Qgis.WkbType.PointZ, layer.sourceCrs())
+        # Copy the schema; avoid duplicate metadata fields if the input already
+        # contains a previous result. No input feature is modified.
+        metadata = {'start_time': QMetaType.Type.QString,
+                    'end_time': QMetaType.Type.QString,
+                    'count': QMetaType.Type.Int,
+                    'group': QMetaType.Type.Int,
+                    'duration_s': QMetaType.Type.Double}
+        Fields = QgsFields()
+        attribute_indices = []
+        for index, field in enumerate(source_fields):
+            if field.name().lower() not in metadata:
+                Fields.append(field)
+                attribute_indices.append(index)
+        for name, field_type in metadata.items():
+            Fields.append(QgsField(name, field_type))
+
+        # Provider iteration order (and FID order) is not a time sequence.
+        # Retain the feature itself so the central point's attributes always
+        # belong to the current stop, even when coordinates are repeated.
+        records = []
+        for feat in layer.getFeatures():
+            if feedback.isCanceled():
+                return {}
+            try:
+                geom = feat.geometry()
+                if geom.isEmpty():
+                    raise ValueError('empty geometry')
+                if geom.isMultipart():
+                    points = geom.asMultiPoint()
+                    if len(points) != 1:
+                        raise ValueError('expected one GNSS point per epoch')
+                    point = points[0]
+                else:
+                    point = geom.asPoint()
+                if not all(isfinite(v) for v in (point.x(), point.y(), float(feat[height_index]))):
+                    raise ValueError('non-finite coordinates')
+                value = feat[time_index]
+                if hasattr(value, 'toPyDateTime'):
+                    epoch = value.toPyDateTime()
+                elif isinstance(value, datetime):
+                    epoch = value
+                else:
+                    epoch = datetime.fromisoformat(str(value).strip().replace('Z', '+00:00'))
+                if not isinstance(epoch, datetime):
+                    raise ValueError('invalid datetime')
+                time_text = (epoch.isoformat(sep=' ') if isinstance(value, datetime)
+                             or hasattr(value, 'toPyDateTime') else str(value))
+                records.append((epoch, feat.id(), QgsFeature(feat),
+                                QgsPointXY(point.x(), point.y()), time_text))
+            except Exception as error:
+                raise QgsProcessingException(
+                    self.tr('Check the input layer!', 'Verifique a camada de entrada!')
+                    + ' FID {}: {}'.format(feat.id(), error)) from error
+
+        try:
+            records.sort(key=lambda record: (record[0], record[1]))
+        except (TypeError, ValueError) as error:
+            raise QgsProcessingException(
+                self.tr('Check the input layer!', 'Verifique a camada de entrada!')
+                + ' (datetime / datahora)') from error
+
+        # Measure horizontal distances in meters on the source CRS ellipsoid,
+        # for both geographic and projected input layers.
+        distance = QgsDistanceArea()
+        distance.setSourceCrs(layer.sourceCrs(), context.transformContext())
+        ellipsoid = layer.sourceCrs().ellipsoidAcronym()
+        if not ellipsoid or not distance.setEllipsoid(ellipsoid):
+            if not distance.setEllipsoid('WGS84'):
+                raise QgsProcessingException(
+                    self.tr('Check the input layer!', 'Verifique a camada de entrada!'))
+
+        (sink, dest_id) = self.parameterAsSink(
+            parameters, self.OUTPUT, context, Fields,
+            Qgis.WkbType.PointZ, layer.sourceCrs())
         if sink is None:
             raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT))
 
+        # A stop is a maximal chronological run of neighboring epochs within
+        # the distance tolerance. The first moving epoch starts the next run;
+        # it must not extend the duration of the stop which just ended.
+        groups = []
+        start = 0
+        for index in range(1, len(records) + 1):
+            if feedback.isCanceled():
+                return {self.OUTPUT: dest_id}
+            if (index == len(records)
+                    or distance.measureLine(records[index - 1][3], records[index][3]) > dist_max):
+                duration = (records[index - 1][0] - records[start][0]).total_seconds()
+                if duration >= tempo_min:
+                    groups.append((start, index, duration))
+                start = index
 
-        # Transformar distancia para graus
-        extensao = layer.sourceExtent()
-        SRC = layer.sourceCrs()
-        y_max = extensao.yMaximum()
-        y_min = extensao.yMinimum()
-        dist_max = meters2degrees(dist_max, (y_min+y_max)/2, SRC)
-
-        x, y = [],[]
-        pontos = []
-        for feat in layer.getFeatures():
-            x += [feat.geometry().asPoint().x()]
-            y += [feat.geometry().asPoint().y()]
-
-        w = np.ones(len(x))
-
-        def CentralFeature(x, y):
-            dist_soma = 1e15
-            indice = -1
-            for i in range(len(x)):
-                x1 = x[i]
-                y1 = y[i]
-                soma = 0
-                for j in range(len(y)):
-                    x2 = x[j]
-                    y2 = y[j]
-                    soma += np.sqrt((x1 - x2)**2 + (y1 - y2)**2)
-                if soma < dist_soma:
-                    dist_soma = soma
-                    indice = i
-            return x[indice], y[indice]
-
-        # Saber se o ponto está parado em um ponto
-        X, Y = [],[]
-        datahora = []
-        for feat in layer.getFeatures():
-            X += [feat.geometry().asPoint().x()]
-            Y += [feat.geometry().asPoint().y()]
-            datahora += [feat[self.tr('datetime', 'datahora')]]
-
-        cont = 1
-        try:
-            t_ini = datahora[0]
-        except:
-            raise QgsProcessingException(self.tr('Check the input layer!', 'Verifique a camada de entrada!'))
-        grupos = {}
-        x, y = [],[]
-        for i in range(len(X)-1):
-            x1 = X[i]
-            y1 = Y[i]
-            x2 = X[i+1]
-            y2 = Y[i+1]
-            t = datahora[i+1]
-            if np.sqrt((x1 - x2)**2 + (y1 - y2)**2) < dist_max:
-                x += [x1]
-                y += [y1]
-            else:
-                intervalo = str_decimal_to_datetime(t) - str_decimal_to_datetime(t_ini)
-                intervalo = intervalo.total_seconds()
-                if  intervalo > tempo_min: # se ficou parado pelo tempo mínimo
-                    grupos[cont] = {'x': x, 'y': y, 't_ini': t_ini, 't_fim': t}
-                    cont += 1
-                t_ini = t
-                x, y = [],[]
-
-        # Última leva
-        intervalo = str_decimal_to_datetime(t) - str_decimal_to_datetime(t_ini)
-        intervalo = intervalo.total_seconds()
-        if  intervalo > tempo_min:
-            grupos[cont] = {'x': x, 'y': y, 't_ini': t_ini, 't_fim': t}
-
-        # Calcular feição central
         feedback.pushInfo(self.tr('Calculating central features...', 'Calculando feições centrais...'))
-        for grupo in grupos:
-            x = grupos[grupo]['x']
-            y = grupos[grupo]['y']
-            if len(x) > 0:
-                central_X, central_Y = CentralFeature(x, y)
-                # Pegar atributos do ponto central
-                for feat in layer.getFeatures():
-                    geom = feat.geometry()
-                    if geom.isMultipart():
-                        pnt = geom.asMultiPoint()[0]
-                    else:
-                        pnt = geom.asPoint()
-                    if pnt.x() == central_X and pnt.y() == central_Y:
-                        att = feat.attributes()
-                        break
-                pnt = QgsGeometry(QgsPoint(float(central_X), float(central_Y), float(feat['h'])))
-                att += [grupos[grupo]['t_ini'], grupos[grupo]['t_fim'], len(x), str(grupo)]
-                feat.setGeometry(pnt)
-                feat.setAttributes(att)
-                sink.addFeature(feat, QgsFeatureSink.Flag.FastInsert)
+        for group_id, (start, end, duration) in enumerate(groups, 1):
+            group = records[start:end]
+            # Central observed feature (medoid), not an averaged coordinate:
+            # its height, precision and other attributes remain consistent.
+            sums = [0.0] * len(group)
+            for i in range(len(group)):
                 if feedback.isCanceled():
-                    break
+                    return {self.OUTPUT: dest_id}
+                for j in range(i + 1, len(group)):
+                    separation = distance.measureLine(group[i][3], group[j][3])
+                    sums[i] += separation
+                    sums[j] += separation
+            central = group[min(range(len(group)), key=lambda i: sums[i])]
+            source_feat = central[2]
+            point = central[3]
+            output_feat = QgsFeature(Fields)
+            output_feat.setGeometry(QgsGeometry(QgsPoint(
+                point.x(), point.y(), float(source_feat[height_index]))))
+            attributes = [source_feat[index] for index in attribute_indices]
+            attributes += [group[0][4], group[-1][4], len(group), group_id, duration]
+            output_feat.setAttributes(attributes)
+            if not sink.addFeature(output_feat, QgsFeatureSink.Flag.FastInsert):
+                raise QgsProcessingException(sink.lastError())
+            feedback.setProgress(100.0 * group_id / len(groups))
 
         feedback.pushInfo(self.tr('Operation completed successfully!', 'Operação finalizada com sucesso!'))
         feedback.pushInfo(self.tr('Leandro Franca - Cartographic Engineer', 'Leandro França - Eng Cart'))
-
         return {self.OUTPUT: dest_id}
