@@ -1584,6 +1584,7 @@ def deedtable(layer_name, ini, fim, titulo, decimal, fontsize, tipo, azimuth_dis
     <p>Note 2: Types: 'proj' - projected, 'geo' - geographic, 'both' - both coordinate systems.</p>
     <p>Note 3: Use 'geo-suffix' for geographic with suffix.</p>
     <p>Note 4: The value of "precision" can be an integer that will be applied to coordinate and distance, or an array with 3 numbers for the precision of the coordinates, azimuth and distances, respectively.</p>
+    <p>Note 5: INCRA (4) uses 2 decimal places for projected coordinates, heights and distances, 3 for geographic seconds, and azimuths truncated to whole minutes.</p>
 
     <h2>Exemples:</h2>
     <ul>
@@ -1598,6 +1599,7 @@ def deedtable(layer_name, ini, fim, titulo, decimal, fontsize, tipo, azimuth_dis
       <li>azimuth_dist = 1 ➡️ Layer or projection CRS</li>
       <li>azimuth_dist = 2 ➡️ Local Tangent Plane (LTP)</li>
       <li>azimuth_dist = 3 ➡️ LTP distance and Puissant azimuth</li>
+      <li>azimuth_dist = 4 ➡️ INCRA</li>
     </ul>
     """
     # Novos parâmetros: decimal, tipo, azimuth_dist
@@ -1626,6 +1628,15 @@ def deedtable(layer_name, ini, fim, titulo, decimal, fontsize, tipo, azimuth_dis
         prec_geo = decimal + 2
         prec_Azimute = 1
         format_dist = '{:,.Xf}'.replace('X', str(decimal))
+
+    format_azimute = DD2DMS
+    if azimuth_dist == 4: # INCRA: mesmo padrão do Processing
+        format_utm = '{:,.2f}'
+        format_h = '{:,.2f}'
+        prec_geo = 3
+        prec_Azimute = -1
+        format_dist = '{:,.2f}'
+        format_azimute = azimuteTrucandoINCRA
 
     # Templates HTML
     texto, linha, cabec = template_table(tipo, azimuth_dist, '3d')
@@ -1660,6 +1671,11 @@ def deedtable(layer_name, ini, fim, titulo, decimal, fontsize, tipo, azimuth_dis
     pol = QgsPolygon(anel_ext)
     geomGeo = QgsGeometry(pol)
 
+    if azimuth_dist == 4: # INCRA
+        coords_INCRA = [pnts_GEO[k+1][0] for k in range(tam)]
+        anel_INCRA = QgsLineString(coords_INCRA + [coords_INCRA[0]])
+        geomGeoINCRA = QgsGeometry(QgsPolygon(anel_INCRA))
+
     if azimuth_dist == 1: # Projetadas (Ex: UTM)
         for k in range(tam):
             pntA = pnts_UTM[k+1][0]
@@ -1678,6 +1694,13 @@ def deedtable(layer_name, ini, fim, titulo, decimal, fontsize, tipo, azimuth_dis
             pntA = pnts_GEO[k+1][0]
             pntB = pnts_GEO[1 if k+2 > tam else k+2][0]
             Az, dist = AzimuteDistanciaSGL(pntA, pntB, geomGeo, crsGeo, 'puissant')
+            Az_lista += [Az]
+            Dist += [dist]
+    elif azimuth_dist == 4: # INCRA
+        for k in range(tam):
+            pntA = pnts_GEO[k+1][0]
+            pntB = pnts_GEO[1 if k+2 > tam else k+2][0]
+            Az, dist = AzimuteDistanciaINCRA(pntA, pntB, geomGeoINCRA, crsGeo)
             Az_lista += [Az]
             Dist += [dist]
     elif azimuth_dist == 0: # Sem cálculo de Azimute e distância
@@ -1702,7 +1725,7 @@ def deedtable(layer_name, ini, fim, titulo, decimal, fontsize, tipo, azimuth_dis
                  'lonn': lonn,
                  'latn': latn,
                  'Ln': pnts_UTM[k+1][2] + '/' + pnts_UTM[1 if k+2 > tam else k+2][2],
-                 'Az_n': tr(DD2DMS(Az_lista[k], prec_Azimute), DD2DMS(Az_lista[k], prec_Azimute).replace('.', ',')),
+                 'Az_n': tr(format_azimute(Az_lista[k], prec_Azimute), format_azimute(Az_lista[k], prec_Azimute).replace('.', ',')),
                  'Dn': tr(format_dist.format(Dist[k]), format_dist.format(Dist[k]).replace(',', 'X').replace('.', ',').replace('X', '.'))
                  }
         for item in itens:
