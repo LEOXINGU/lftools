@@ -313,7 +313,7 @@
   <featureBlendMode>0</featureBlendMode>
   <attributeactions>
     <defaultAction key="Canvas" value="{be2a9d4e-0d1b-4526-ab4c-d3eded113190}"/>
-    <actionsetting name="Open photo" id="{d9697a4d-24ca-4163-b1f2-b0bdcd6bbb89}" isEnabledOnlyWhenEditable="0" type="1" shortTitle="" icon="" capture="0" notificationMessage="" action="import os&#xa;os.popen(r'[%&quot;path&quot;%]')&#xa;">
+    <actionsetting name="Open photo" id="{d9697a4d-24ca-4163-b1f2-b0bdcd6bbb89}" isEnabledOnlyWhenEditable="0" type="1" shortTitle="" icon="" capture="0" notificationMessage="" action="from qgis.PyQt.QtCore import QUrl&#xa;from qgis.PyQt.QtGui import QDesktopServices&#xa;QDesktopServices.openUrl(QUrl.fromLocalFile(r'[%&quot;path&quot;%]'))&#xa;">
       <actionScope id="Field"/>
       <actionScope id="Feature"/>
       <actionScope id="Layer"/>
