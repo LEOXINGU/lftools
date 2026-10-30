@@ -44,6 +44,7 @@ from lftools.geocapt.cartography import (FusoHemisf,
                                          AzimuteDistanciaINCRA,
                                          areaSGL, areaINCRA,
                                          perimetroSGL, perimetroINCRA,
+                                         comprimentoPerimetroArredondado,
                                          azimuteTrucandoINCRA
                                          )
 from lftools.geocapt.topogeo import (str2HTML,
@@ -313,6 +314,7 @@ class DescriptiveMemorial(QgisAlgorithm):
         format_h = '{:,.Xf}'.replace('X', str(prec_h))
         if len(decimal) == 1:
             decimal_geo = int(decimal[0]) + 2
+            decimal_dist = int(decimal[0])
             format_dist = '{:,.Xf}'.replace('X', decimal[0])
             decimal_area = int(decimal[0])
             format_perim =  '{:,.Xf}'.replace('X', decimal[0])
@@ -320,6 +322,7 @@ class DescriptiveMemorial(QgisAlgorithm):
         elif len(decimal) == 5:
             decimal_geo = int(decimal[0])
             decimal_azim = int(decimal[1])
+            decimal_dist = int(decimal[2])
             format_dist = '{:,.Xf}'.replace('X', decimal[2])
             decimal_area = int(decimal[3])
             format_perim =  '{:,.Xf}'.replace('X', decimal[4])
@@ -333,6 +336,7 @@ class DescriptiveMemorial(QgisAlgorithm):
             format_utm = '{:,.2f}'
             format_h = '{:,.2f}'
             decimal_geo = 3
+            decimal_dist = 2
             format_dist = '{:,.2f}'
             decimal_azim = -1
             format_perim = '{:,.2f}'
@@ -923,15 +927,24 @@ class DescriptiveMemorial(QgisAlgorithm):
 
         geom1 = feat1.geometry()
         if calculo in (0,1): # Projetadas (Ex: UTM)
-            geom1.transform(coordinateTransformer)
-            area1 = geom1.area()
-            perimeter1 = geom1.length()
+            # O perímetro deve coincidir com a soma das distâncias exibidas
+            # no memorial: cada segmento é arredondado antes da soma.
+            perimeter1 = comprimentoPerimetroArredondado(
+                geom1, crsGeo, decimal_dist, 1
+            )
+            geomArea = QgsGeometry(geom1)
+            geomArea.transform(coordinateTransformer)
+            area1 = geomArea.area()
         elif calculo == 6: # INCRA/SIGEF
             area1 = areaINCRA(geom1, crsGeo)
-            perimeter1 = perimetroINCRA(geom1, crsGeo)
+            perimeter1 = comprimentoPerimetroArredondado(
+                geom1, crsGeo, decimal_dist, 4
+            )
         else: # SGL
             area1 = areaSGL(geom1, crsGeo)
-            perimeter1 = perimetroSGL(geom1, crsGeo)
+            perimeter1 = comprimentoPerimetroArredondado(
+                geom1, crsGeo, decimal_dist, 3
+            )
 
         if calculo in (1,3,5,6): # Transformação para hectares
             area1 /= 1e4
