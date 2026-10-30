@@ -26,7 +26,23 @@ __date__ = '2021-03-19'
 __copyright__ = '(C) 2021 by Leandro Franca'
 
 
-from qgis.core import *
+from qgis.core import (
+    NULL,
+    QgsApplication,
+    QgsCoordinateReferenceSystem,
+    QgsCoordinateTransform,
+    QgsEllipsoidUtils,
+    QgsExpression,
+    QgsFeatureRequest,
+    QgsGeometry,
+    QgsLineString,
+    QgsPoint,
+    QgsPointXY,
+    QgsPolygon,
+    QgsProject,
+    QgsSpatialIndex,
+    QgsWkbTypes,
+)
 from qgis.utils import qgsfunction
 from lftools.geocapt.cartography import (map_sistem,
                                          MeridianConvergence,
@@ -749,7 +765,7 @@ def areaLTP (geometry, layer_crs, feature, parent):
     geomGeo = geom
     try:
         return areaSGL(geomGeo, crsGeo)
-    except:
+    except Exception:
         return tr('Check the geometry type!', 'Verifique o tipo de geometria!')
 
 
@@ -784,7 +800,7 @@ def areaLTP2 (feature, parent, context):
     geomGeo = geom
     try:
         return areaSGL(geomGeo, crsGeo)
-    except:
+    except Exception:
         return tr('Check the geometry type!', 'Verifique o tipo de geometria!')
 
 
@@ -819,7 +835,7 @@ def perimeterLTP (geometry, layer_crs, feature, parent):
     geomGeo = geom
     try:
         return perimetroSGL(geomGeo, crsGeo)
-    except:
+    except Exception:
         return tr('Check the geometry type!', 'Verifique o tipo de geometria!')
 
 
@@ -854,7 +870,7 @@ def perimeterLTP2 (feature, parent, context):
     geomGeo = geom
     try:
         return perimetroSGL(geomGeo, crsGeo)
-    except:
+    except Exception:
         return tr('Check the geometry type!', 'Verifique o tipo de geometria!')
 
 
@@ -890,7 +906,7 @@ def lengthLTP (geometry, layer_crs, dimension, feature, parent):
     geomGeo = geom
     try:
         return comprimentoSGL(geomGeo, crsGeo, dimension)
-    except:
+    except Exception:
         return tr('Check the geometry type', 'Verifique o tipo de geometria')
 
 
@@ -926,7 +942,7 @@ def lengthLTP2 (feature, parent, context):
     geomGeo = geom
     try:
         return comprimentoSGL(geomGeo, crsGeo, dimension)
-    except:
+    except Exception:
         return tr('Check the geometry type', 'Verifique o tipo de geometria')
 
 
@@ -962,7 +978,7 @@ def lengthLTP3 (feature, parent, context):
     geomGeo = geom
     try:
         return comprimentoSGL(geomGeo, crsGeo, dimension)
-    except:
+    except Exception:
         return tr('Check the geometry type', 'Verifique o tipo de geometria')
 
 
@@ -1012,13 +1028,13 @@ def roundedLength(geometry, layer_crs, precision, method, feature, parent):
 
         try:
             precision = int(precision)
-        except:
+        except Exception:
             return tr('Precision must be an integer greater than or equal to zero!',
                       'A precisão deve ser um número inteiro maior ou igual a zero!')
 
         try:
             method = int(method)
-        except:
+        except Exception:
             return tr('Method must be an integer from 0 to 4!',
                       'O método deve ser um número inteiro de 0 a 4!')
 
@@ -1104,7 +1120,7 @@ If a geographic CRS is selected, the original coordinates will be <b>converted t
             return None
         else:
             return float(area_triangulo_3d(P1, P2, P3))
-    except:
+    except Exception:
         return tr('Check the geometry type!', 'Verifique o tipo de geometria!')
 
 
@@ -1906,7 +1922,7 @@ def deedtable2(prefix, titulo, decimal, fontsize, tipo, azimuth_dist, feature, p
             exp = QgsExpression(filter)
             if id not in campos or nome not in campos:
                 prefixo = str(prefix)
-        except:
+        except Exception:
             prefixo = str(prefix)
 
         # Pegando valores dos pontos
@@ -1938,7 +1954,7 @@ def deedtable2(prefix, titulo, decimal, fontsize, tipo, azimuth_dist, feature, p
             try:
                 projecao = SRC.description().split(r' / ')[-1]
                 PROJ = tr(projecao, projecao.replace('zone', 'fuso'))
-            except:
+            except Exception:
                 PROJ = SRC.description()
 
         else: # Geográfico
@@ -1970,7 +1986,7 @@ def deedtable2(prefix, titulo, decimal, fontsize, tipo, azimuth_dist, feature, p
             try:
                 projecao = CRS_projeto.description().split(r' / ')[-1]
                 PROJ = tr(projecao, projecao.replace('zone', 'fuso'))
-            except:
+            except Exception:
                 PROJ = SRC.description()
 
         # Calculo dos Azimutes e Distancias
@@ -2197,7 +2213,7 @@ def deedtable3(prefix, titulo, decimal, fontsize, tipo, azimuth_dist, feature, p
             exp = QgsExpression(filter)
             if id not in campos or nome not in campos:
                 prefixo = str(prefix)
-        except:
+        except Exception:
             prefixo = str(prefix)
 
         # Pegando valores dos pontos
@@ -2229,7 +2245,7 @@ def deedtable3(prefix, titulo, decimal, fontsize, tipo, azimuth_dist, feature, p
             try:
                 projecao = SRC.description().split(r' / ')[-1]
                 PROJ = tr(projecao, projecao.replace('zone', 'fuso'))
-            except:
+            except Exception:
                 PROJ = SRC.description()
 
         else: # Geográfico
@@ -2261,7 +2277,7 @@ def deedtable3(prefix, titulo, decimal, fontsize, tipo, azimuth_dist, feature, p
             try:
                 projecao = CRS_projeto.description().split(r' / ')[-1]
                 PROJ = tr(projecao, projecao.replace('zone', 'fuso'))
-            except:
+            except Exception:
                 PROJ = SRC.description()
 
         # Calculo dos Azimutes e Distancias
@@ -2489,7 +2505,7 @@ def deedtext(description, estilo, prefix, decimal, calculation, fontsize, featur
             exp = QgsExpression(filter)
             if id not in campos or nome not in campos:
                 prefixo = str(prefix)
-        except:
+        except Exception:
             prefixo = str(prefix)
 
         if not SRC.isGeographic(): # Projetado
@@ -2520,7 +2536,7 @@ def deedtext(description, estilo, prefix, decimal, calculation, fontsize, featur
             try:
                 projecao = SRC.description().split(r' / ')[-1]
                 PROJ = tr(projecao, projecao.replace('zone', 'fuso'))
-            except:
+            except Exception:
                 PROJ = SRC.description()
 
         else: # Geográfico
@@ -2552,7 +2568,7 @@ def deedtext(description, estilo, prefix, decimal, calculation, fontsize, featur
             try:
                 projecao = CRS_projeto.description().split(r' / ')[-1]
                 PROJ = tr(projecao, projecao.replace('zone', 'fuso'))
-            except:
+            except Exception:
                 PROJ = SRC.description()
 
         # Calculo dos Azimutes e Distancias
@@ -2716,7 +2732,7 @@ def deedtext(description, estilo, prefix, decimal, calculation, fontsize, featur
             exp = QgsExpression(filter)
             if id not in campos or nome not in campos:
                 descr_pnt_ini = description
-        except: # >>>>>>>>>>>>>>>>> Apenas inserir a descrição do ponto inicial
+        except Exception: # >>>>>>>>>>>>>>>>> Apenas inserir a descrição do ponto inicial
             descr_pnt_ini = description
 
         if TipoGeometria == 1:
@@ -2790,7 +2806,7 @@ def deedtext(description, estilo, prefix, decimal, calculation, fontsize, featur
             FINAL = text_ini + LINHAS + text_fim
             return FINAL
 
-        except: # >>>>>>>>>>>>>>>>> puxar nome dos confrontantes
+        except Exception: # >>>>>>>>>>>>>>>>> puxar nome dos confrontantes
 
             # conteudo do memorial
             text_ini = tr('<p style="text-align: justify; font-size: [FONTSIZE]px; ">The description of this perimeter begins at the vertex <b>[Vn]</b>, with coordinates [XXX], ',
@@ -2855,7 +2871,7 @@ def deedtext(description, estilo, prefix, decimal, calculation, fontsize, featur
                 for item in itens:
                     try:
                         linha0 = linha0.replace(item, itens[item])
-                    except:
+                    except Exception:
                         return(tr('Invalid adjoiner line in [X] and [Y] coordinates! Perform layers topological validation!',
                                   'Linha de confrontante inválida nas coordenadas [X] e [Y]! Execute a validação topológica das camadas!').replace('[X]',itens['[Xn]']).replace('[Y]',itens['[Yn]']))
                 LINHAS += linha0
@@ -2960,7 +2976,7 @@ def geoneighbors(prefix, testada, borderer_field, coord_type, precision, fontsiz
             exp = QgsExpression(filter)
             if id not in campos or nome not in campos:
                 frontLot = str(testada)
-        except:
+        except Exception:
             frontLot = str(testada)
 
         vizinhos = []
@@ -3009,7 +3025,7 @@ def geoneighbors(prefix, testada, borderer_field, coord_type, precision, fontsiz
             exp = QgsExpression(filter)
             if id not in campos or nome not in campos:
                 prefixo = str(prefix)
-        except:
+        except Exception:
             prefixo = str(prefix)
 
         # Pegando valores dos pontos
@@ -3041,7 +3057,7 @@ def geoneighbors(prefix, testada, borderer_field, coord_type, precision, fontsiz
             try:
                 projecao = SRC.description().split(r' / ')[-1]
                 PROJ = tr(projecao, projecao.replace('zone', 'fuso'))
-            except:
+            except Exception:
                 PROJ = SRC.description()
 
         else: # Geográfico
@@ -3073,7 +3089,7 @@ def geoneighbors(prefix, testada, borderer_field, coord_type, precision, fontsiz
             try:
                 projecao = CRS_projeto.description().split(r' / ')[-1]
                 PROJ = tr(projecao, projecao.replace('zone', 'fuso'))
-            except:
+            except Exception:
                 PROJ = SRC.description()
 
         # Calculo dos Azimutes e Distancias
@@ -3265,7 +3281,7 @@ def layer_schema(layer_name, not_rela, feature, parent):
     else:
         try:
             lista = '+geom: ' + QgsWkbTypes.displayString(layer.wkbType()) + '<br>'
-        except:
+        except Exception:
             lista = ''
 
     for field in header:
