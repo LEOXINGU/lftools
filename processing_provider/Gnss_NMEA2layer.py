@@ -19,6 +19,7 @@ from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (
     Qgis,
     QgsApplication,
+    QgsCoordinateReferenceSystem,
     QgsFeature,
     QgsFeatureSink,
     QgsField,
@@ -148,7 +149,7 @@ Modos:
             QgsProcessingParameterCrs(
                 self.CRS,
                 self.tr('CRS', 'SRC'),
-                eval(self.tr("QgsCoordinateReferenceSystem('EPSG:4326')", "QgsCoordinateReferenceSystem('EPSG:4674')"))
+                QgsCoordinateReferenceSystem(self.tr('EPSG:4326', 'EPSG:4674'))
                 )
             )
 
