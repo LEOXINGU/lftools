@@ -137,7 +137,7 @@ Obs.: Para criação de mais de um "clone", os novos nomes dos bancos devem ser 
             QgsProcessingParameterEnum(
                 self.VERSION,
                 self.tr('PostgreSQL version', 'Versão do PostgreSQL'),
-				options = self.versions,
+                options = self.versions,
                 defaultValue = postgresql_version
             )
         )

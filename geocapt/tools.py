@@ -14,8 +14,16 @@ __author__ = 'Leandro França'
 __date__ = '2024-10-07'
 __copyright__ = '(C) 2024, Leandro França'
 
-from qgis.core import *
-from qgis.gui import *
+from qgis.core import (
+    Qgis,
+    QgsApplication,
+    QgsCoordinateReferenceSystem,
+    QgsCoordinateTransform,
+    QgsGeometry,
+    QgsPointXY,
+    QgsProject,
+)
+
 from lftools.translations.translate import translate
 
 LOC = QgsApplication.locale()[:2]
@@ -87,7 +95,7 @@ def DefinirUTM(iface):
 
         mensagem = tr('New CRS defined to zone {} and hemisphere {}.', 'Novo SRC definido para o Fuso {} e Hemisfério {}').format(fuso, hemisf)
         iface.messageBar().pushMessage("Projeção", mensagem, level=Qgis.MessageLevel.Info)
-    except:
+    except Exception:
         # Verificar se a extensão do mapa é válida para UTM
         mensagem = tr('Make sure the canvas extent is valid for a UTM projection!', 'Verifique se a extensão da tela é válida para uma projeção UTM!')
         iface.messageBar().pushMessage("Projeção", mensagem, level=Qgis.MessageLevel.Warning)

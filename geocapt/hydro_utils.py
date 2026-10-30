@@ -655,7 +655,7 @@ def create_vector_network(
                 float(slope_pct),
             ]
         )
-        sink.addFeature(feature, QgsFeatureSink.FastInsert)
+        sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
         feedback.setProgress(
             progress_start
             + int((100 - progress_start) * (position + 1) / total_starts)

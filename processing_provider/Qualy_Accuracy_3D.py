@@ -17,13 +17,66 @@ __copyright__ = '(C) 2026, Leandro França'
 
 from qgis.PyQt.QtCore import QMetaType
 from qgis.PyQt.QtGui import QIcon, QColor, QFont
-from qgis.core import *
+from qgis.core import (
+    Qgis,
+    QgsApplication,
+    QgsArrowSymbolLayer,
+    QgsCoordinateTransform,
+    QgsFeature,
+    QgsFeatureSink,
+    QgsField,
+    QgsFields,
+    QgsLineString,
+    QgsLineSymbol,
+    QgsPalLayerSettings,
+    QgsProcessingAlgorithm,
+    QgsProcessingException,
+    QgsProcessingParameterCrs,
+    QgsProcessingParameterFeatureSink,
+    QgsProcessingParameterFeatureSource,
+    QgsProcessingParameterField,
+    QgsProcessingParameterFileDestination,
+    QgsProcessingParameterNumber,
+    QgsProcessingUtils,
+    QgsProject,
+    QgsRuleBasedRenderer,
+    QgsTextBufferSettings,
+    QgsTextFormat,
+    QgsVectorLayerSimpleLabeling,
+)
 from numpy import sqrt, array
 import numpy as np
 from datetime import datetime
 import base64
 from io import BytesIO
-from lftools.geocapt.imgs import *
+from lftools.geocapt.imgs import Imgs, lftools_logo
+from qgis.core import (
+    Qgis,
+    QgsApplication,
+    QgsArrowSymbolLayer,
+    QgsCoordinateTransform,
+    QgsFeature,
+    QgsFeatureSink,
+    QgsField,
+    QgsFields,
+    QgsLineString,
+    QgsLineSymbol,
+    QgsPalLayerSettings,
+    QgsProcessingAlgorithm,
+    QgsProcessingException,
+    QgsProcessingParameterCrs,
+    QgsProcessingParameterFeatureSink,
+    QgsProcessingParameterFeatureSource,
+    QgsProcessingParameterField,
+    QgsProcessingParameterFileDestination,
+    QgsProcessingParameterNumber,
+    QgsProcessingUtils,
+    QgsProject,
+    QgsRuleBasedRenderer,
+    QgsTextBufferSettings,
+    QgsTextFormat,
+    QgsVectorLayerSimpleLabeling,
+)
 from lftools.translations.translate import translate
 from lftools.geocapt.topogeo import str2HTML
 from lftools.geocapt.cartography import PEC

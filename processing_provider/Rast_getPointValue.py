@@ -128,15 +128,15 @@ class GetPointValue(QgsProcessingAlgorithm):
         )
 
         opcoes = [self.tr('Nearest','Vizinho mais próximo'),
-				  self.tr('Bilinear'),
-				  self.tr('Bicubic','Bicúbica')
+                  self.tr('Bilinear'),
+                  self.tr('Bicubic','Bicúbica')
                ]
 
         self.addParameter(
             QgsProcessingParameterEnum(
                 self.RESAMPLING,
                 self.tr('Interpolation method', 'Método de Interpolação'),
-				options = opcoes,
+                options = opcoes,
                 defaultValue= 1
             )
         )

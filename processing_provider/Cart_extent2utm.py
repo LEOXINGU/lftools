@@ -16,10 +16,53 @@ __date__ = '2019-12-29'
 __copyright__ = '(C) 2019, Leandro França'
 
 from qgis.PyQt.QtCore import QMetaType
-from qgis.core import *
+from qgis.core import (
+    Qgis,
+    QgsApplication,
+    QgsCoordinateReferenceSystem,
+    QgsCoordinateTransform,
+    QgsFeature,
+    QgsFeatureSink,
+    QgsField,
+    QgsFields,
+    QgsGeometry,
+    QgsPoint,
+    QgsPointXY,
+    QgsProcessingAlgorithm,
+    QgsProcessingException,
+    QgsProcessingParameterBoolean,
+    QgsProcessingParameterCrs,
+    QgsProcessingParameterEnum,
+    QgsProcessingParameterExtent,
+    QgsProcessingParameterFeatureSink,
+    QgsProject,
+)
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
-from lftools.geocapt.cartography import *
+from lftools.geocapt.cartography import ChartSize, FusoHemisf, MeridianConvergence, inom2mi, map_sistem, reprojectPoints
+import math
+import numpy as np
+from qgis.core import (
+    Qgis,
+    QgsApplication,
+    QgsCoordinateReferenceSystem,
+    QgsCoordinateTransform,
+    QgsFeature,
+    QgsFeatureSink,
+    QgsField,
+    QgsFields,
+    QgsGeometry,
+    QgsPoint,
+    QgsPointXY,
+    QgsProcessingAlgorithm,
+    QgsProcessingException,
+    QgsProcessingParameterBoolean,
+    QgsProcessingParameterCrs,
+    QgsProcessingParameterEnum,
+    QgsProcessingParameterExtent,
+    QgsProcessingParameterFeatureSink,
+    QgsProject,
+)
 import os
 from qgis.PyQt.QtGui import QIcon
 from lftools import geomag
@@ -99,20 +142,20 @@ class Extent2UTMGrid(QgsProcessingAlgorithm):
         scales = [self.tr('1:1,000,000','1:1.000.000'),
                   self.tr('1:500,000','1:500.000'),
                   self.tr('1:250,000','1:250.000'),
-				  self.tr('1:100,000','1:100.000'),
-				  self.tr('1:50,000','1:50.000'),
-				  self.tr('1:25,000','1:25.000'),
-				  self.tr('1:10,000','1:10.000'),
-				  self.tr('1:5,000','1:5.000'),
-				  self.tr('1:2,000','1:2.000'),
-				  self.tr('1:1,000','1:1.000')
+                  self.tr('1:100,000','1:100.000'),
+                  self.tr('1:50,000','1:50.000'),
+                  self.tr('1:25,000','1:25.000'),
+                  self.tr('1:10,000','1:10.000'),
+                  self.tr('1:5,000','1:5.000'),
+                  self.tr('1:2,000','1:2.000'),
+                  self.tr('1:1,000','1:1.000')
                ]
 
         self.addParameter(
             QgsProcessingParameterEnum(
                 self.SCALE,
                 self.tr('Scale', 'Escala'),
-				options = scales,
+                options = scales,
                 defaultValue= 0
             )
         )

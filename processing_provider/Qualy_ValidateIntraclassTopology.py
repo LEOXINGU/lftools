@@ -203,7 +203,7 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
         self.addParameter(QgsProcessingParameterMultipleLayers(
             self.INPUTS,
             self.tr('Vector layers', 'Camadas vetoriais'),
-            QgsProcessing.TypeVectorAnyGeometry
+            QgsProcessing.SourceType.TypeVectorAnyGeometry
         ))
         self.addParameter(QgsProcessingParameterFeatureSource(
             self.MAPPING_AREA,
@@ -211,7 +211,7 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
                 'Mapping area (optional single polygon)',
                 'Área de mapeamento (polígono único opcional)'
             ),
-            types=[QgsProcessing.TypeVectorPolygon],
+            types=[QgsProcessing.SourceType.TypeVectorPolygon],
             optional=True
         ))
         self.addParameter(QgsProcessingParameterNumber(
@@ -317,11 +317,11 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
 
     def _geometry_type_name(self, layer):
         geometry_type = QgsWkbTypes.geometryType(layer.wkbType())
-        if geometry_type == QgsWkbTypes.PointGeometry:
+        if geometry_type == QgsWkbTypes.GeometryType.PointGeometry:
             return self.tr('Point', 'Ponto')
-        if geometry_type == QgsWkbTypes.LineGeometry:
+        if geometry_type == QgsWkbTypes.GeometryType.LineGeometry:
             return self.tr('Line', 'Linha')
-        if geometry_type == QgsWkbTypes.PolygonGeometry:
+        if geometry_type == QgsWkbTypes.GeometryType.PolygonGeometry:
             return self.tr('Polygon', 'Polígono')
         return self.tr('Unknown', 'Desconhecida')
 
@@ -342,7 +342,7 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
         if geometry is None or geometry.isNull() or geometry.isEmpty():
             return None
         geometry_type = QgsWkbTypes.geometryType(geometry.wkbType())
-        if geometry_type == QgsWkbTypes.PointGeometry:
+        if geometry_type == QgsWkbTypes.GeometryType.PointGeometry:
             try:
                 point = geometry.asPoint()
                 if ValidateIntraclassTopology._finite_point(point):
@@ -368,11 +368,11 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
         if geometry is None or geometry.isNull() or geometry.isEmpty():
             return []
         geometry_type = QgsWkbTypes.geometryType(geometry.wkbType())
-        if geometry_type == QgsWkbTypes.PointGeometry:
+        if geometry_type == QgsWkbTypes.GeometryType.PointGeometry:
             if geometry.isMultipart():
                 return [QgsPointXY(point) for point in geometry.asMultiPoint()]
             return [QgsPointXY(geometry.asPoint())]
-        if QgsWkbTypes.flatType(geometry.wkbType()) == QgsWkbTypes.GeometryCollection:
+        if QgsWkbTypes.flatType(geometry.wkbType()) == QgsWkbTypes.Type.GeometryCollection:
             points = []
             for part in geometry.asGeometryCollection():
                 points.extend(ValidateIntraclassTopology._extract_points(part))
@@ -702,7 +702,7 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
 
         error_sink, error_dest = self.parameterAsSink(
             parameters, self.ERRORS, context, error_fields,
-            QgsWkbTypes.Point, first_crs
+            QgsWkbTypes.Type.Point, first_crs
         )
         if error_sink is None:
             raise QgsProcessingException(self.invalidSinkError(parameters, self.ERRORS))
@@ -802,12 +802,12 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
             for indexed_feature in features:
                 index.addFeature(indexed_feature)
 
-            if geometry_type == QgsWkbTypes.PointGeometry:
+            if geometry_type == QgsWkbTypes.GeometryType.PointGeometry:
                 self._validate_points(
                     layer, features, feature_map, feature_ids, index,
                     topology_tolerance, register, feedback
                 )
-            elif geometry_type == QgsWkbTypes.LineGeometry:
+            elif geometry_type == QgsWkbTypes.GeometryType.LineGeometry:
                 boundary_exempt_counts[layer.name()] += self._validate_lines(
                     layer, features, feature_map, feature_ids, index,
                     topology_tolerance, near_tolerance,
@@ -815,7 +815,7 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
                     mapping_boundary, boundary_tolerance,
                     register, feedback
                 )
-            elif geometry_type == QgsWkbTypes.PolygonGeometry:
+            elif geometry_type == QgsWkbTypes.GeometryType.PolygonGeometry:
                 self._validate_polygons(
                     layer, features, feature_map, feature_ids, index,
                     topology_tolerance, min_overlap_area,
@@ -918,7 +918,7 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
                     continue
                 intersection = geometry.intersection(candidate_geometry)
                 intersection_type = QgsWkbTypes.geometryType(intersection.wkbType())
-                if intersection_type == QgsWkbTypes.LineGeometry:
+                if intersection_type == QgsWkbTypes.GeometryType.LineGeometry:
                     length = intersection.length()
                     if length >= min_overlap_length:
                         register(
@@ -927,7 +927,7 @@ class ValidateIntraclassTopology(QgsProcessingAlgorithm):
                             point=self._representative_point(intersection),
                             value=length, threshold=min_overlap_length
                         )
-                elif intersection_type == QgsWkbTypes.PointGeometry:
+                elif intersection_type == QgsWkbTypes.GeometryType.PointGeometry:
                     for point in self._extract_points(intersection):
                         has_first = self._has_vertex(
                             vertices[feature.id()], point, tolerance

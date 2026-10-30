@@ -109,7 +109,7 @@ class ConfidenceEllipse(QgsProcessingAlgorithm):
             QgsProcessingParameterEnum(
                 self.TAM,
                 self.tr('Size', 'Tamanho'),
-				options = tipos,
+                options = tipos,
                 defaultValue = 1
             )
         )

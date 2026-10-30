@@ -145,7 +145,7 @@ class VerticalAdjustment(QgsProcessingAlgorithm):
             QgsProcessingParameterEnum(
                 self.METHOD,
                 self.tr('Method', 'Método'),
-				options = tipos,
+                options = tipos,
                 defaultValue= 0
             )
         )
@@ -158,7 +158,7 @@ class VerticalAdjustment(QgsProcessingAlgorithm):
             QgsProcessingParameterEnum(
                 self.RESAMPLING,
                 self.tr('Interpolation', 'Interpolação'),
-				options = interp,
+                options = interp,
                 defaultValue = 1
             )
         )

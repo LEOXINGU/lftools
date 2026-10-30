@@ -54,9 +54,6 @@ class OverviewsJPEG(QgsProcessingAlgorithm):
     def groupId(self):
         return 'drones'
 
-    def tags(self):
-        return 'GeoOne,drone,compression,reduce,size,JPEG,JPG,photometric,compact,image,overviews,piramides,faster,velocity'.split(',')
-
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/drone.png'))
 
@@ -104,7 +101,7 @@ class OverviewsJPEG(QgsProcessingAlgorithm):
             QgsProcessingParameterEnum(
                 self.TYPE_GEN,
                 self.tr('Resampling method', 'Método de reamostragem'),
-				options = self.generalization,
+                options = self.generalization,
                 defaultValue= 1
             )
         )

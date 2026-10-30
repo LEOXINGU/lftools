@@ -109,7 +109,7 @@ class StandardDistance(QgsProcessingAlgorithm):
             QgsProcessingParameterEnum(
                 self.TAM,
                 self.tr('Circle Size', 'Tamanho do círculo'),
-				options = tipos,
+                options = tipos,
                 defaultValue = 1
             )
         )

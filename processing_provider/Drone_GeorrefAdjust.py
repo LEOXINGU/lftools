@@ -147,7 +147,7 @@ class GeorrefAdjust(QgsProcessingAlgorithm):
             QgsProcessingParameterEnum(
                 self.METHOD,
                 self.tr('Method', 'Método'),
-				options = tipos,
+                options = tipos,
                 defaultValue= 2
             )
         )
@@ -160,7 +160,7 @@ class GeorrefAdjust(QgsProcessingAlgorithm):
             QgsProcessingParameterEnum(
                 self.RESAMPLING,
                 self.tr('Interpolation', 'Interpolação'),
-				options = interp,
+                options = interp,
                 defaultValue= 0
             )
         )

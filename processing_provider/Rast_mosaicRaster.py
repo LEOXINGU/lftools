@@ -130,7 +130,7 @@ class MosaicRaster(QgsProcessingAlgorithm):
             QgsProcessingParameterEnum(
                 self.OVERLAP,
                 self.tr('Ovelap', 'Sobreposição'),
-				options = sobrep,
+                options = sobrep,
                 defaultValue= 0
             )
         )
@@ -143,7 +143,7 @@ class MosaicRaster(QgsProcessingAlgorithm):
             QgsProcessingParameterEnum(
                 self.RESAMPLING,
                 self.tr('Interpolation', 'Interpolação'),
-				options = interp,
+                options = interp,
                 defaultValue= 0
             )
         )

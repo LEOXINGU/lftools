@@ -36,7 +36,7 @@ from qgis.core import (Qgis,
                        QgsCoordinateTransform)
 from math import atan, pi, sqrt, floor
 import math
-from lftools.geocapt.imgs import *
+from lftools.geocapt.imgs import Imgs, img2html_resized, lftools_logo
 from lftools.translations.translate import translate
 from lftools.geocapt.cartography import (FusoHemisf,
                                          geom2PointList,
@@ -138,7 +138,7 @@ class AreaPerimterReport(QgsProcessingAlgorithm):
                 self.CALC,
                 self.tr('Calculation of azimuths, distances and area',
                         'Cálculo de azimutes, distâncias e área'),
-				options = tipos,
+                options = tipos,
                 defaultValue = 0
             )
         )
@@ -277,7 +277,7 @@ class AreaPerimterReport(QgsProcessingAlgorithm):
         # Precisão da altitude
         try:
             prec_h = int(decimal[0]) # teste se precisão das coordenadas é número inteiro
-        except:
+        except Exception:
             prec_h = round(10*(float(decimal[0]) - math.floor(float(decimal[0]))))
             decimal[0] = str(int(float(decimal[0])))
 
@@ -384,7 +384,7 @@ class AreaPerimterReport(QgsProcessingAlgorithm):
             try:
                 ordem_comp += [feat[sequencia]]
                 codigo_item = feat[codigo]
-            except:
+            except Exception:
                 raise QgsProcessingException(self.tr('Check that your layer "limit_point_p" has the correct field names for the TopoGeo model! More information: https://bit.ly/3FDNQGC', 'Verifique se sua camada "Ponto Limite" está com os nomes dos campos corretos para o modelo TopoGeo! Mais informações: https://geoone.com.br/ebooks/livro2/'))
             if not codigo_item or codigo_item in ['', ' ']:
                 raise QgsProcessingException(self.tr('The code attribute must be filled in for all features!', 'O atributo código deve ser preenchido para todas as feições!'))
@@ -504,7 +504,7 @@ SIRGAS2000<br>
                         }
             for item in itens:
                     FIM = FIM.replace(item, itens[item])
-        except:
+        except Exception:
             raise QgsProcessingException(self.tr('Check that your layer "property_area_a" has the correct field names for the TopoGeo model! More information: https://bit.ly/3FDNQGC', 'Verifique se sua camada "Área do imóvel" está com os nomes dos campos corretos para o modelo TopoGeo! Mais informações: https://geoone.com.br/ebooks/livro2/'))
 
         LINHAS = INICIO

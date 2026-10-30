@@ -15,7 +15,16 @@ __author__ = 'Leandro França'
 __date__ = '2020-02-07'
 __copyright__ = '(C) 2020, Leandro França'
 
-from qgis.core import *
+from qgis.core import (
+    QgsApplication,
+    QgsProcessingAlgorithm,
+    QgsProcessingException,
+    QgsProcessingParameterBoolean,
+    QgsProcessingParameterFileDestination,
+    QgsProcessingParameterString,
+    QgsProject,
+    QgsVectorLayer,
+)
 from numpy import radians, array, sin, cos, sqrt, matrix, zeros, floor, identity, diag
 from numpy.linalg import pinv, norm
 from lftools.geocapt.imgs import Imgs

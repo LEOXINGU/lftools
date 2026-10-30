@@ -56,9 +56,6 @@ class RescaleTo8bits(QgsProcessingAlgorithm):
     def groupId(self):
         return 'raster'
 
-    def tags(self):
-        return 'GeoOne,8bits,rescale,histograma,radiometric,transform,16bits,reduce,compress'.split(',')
-
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/raster.png'))
 
@@ -111,7 +108,7 @@ class RescaleTo8bits(QgsProcessingAlgorithm):
             QgsProcessingParameterEnum(
                 self.TYPE,
                 self.tr('Rescale type', 'Tipo de Reescalonamento'),
-				options = opcoes,
+                options = opcoes,
                 defaultValue= 1
             )
         )

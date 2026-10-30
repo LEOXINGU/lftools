@@ -26,7 +26,6 @@ from qgis.core import (Qgis,
                        QgsProcessingParameterFileDestination,
                        QgsProcessingParameterRasterLayer,
                        QgsApplication,
-                       QgsProject,
                        QgsRasterLayer,
                        QgsCoordinateTransform,
                        QgsCoordinateReferenceSystem)
@@ -132,7 +131,7 @@ class SupervisedClassification(QgsProcessingAlgorithm):
             QgsProcessingParameterEnum(
                 self.METHOD,
                 self.tr('Method', 'Método'),
-				options = metodos,
+                options = metodos,
                 defaultValue = 0
             )
         )
@@ -145,7 +144,7 @@ class SupervisedClassification(QgsProcessingAlgorithm):
             QgsProcessingParameterEnum(
                 self.SIZE,
                 self.tr('Size (only for Parallelepiped and Ellipsoid Methods)', 'Tamanho (apenas para os Métodos do Paralelepípedo e Elipsoide)'),
-				options = tam,
+                options = tam,
                 defaultValue= 2
             )
         )
@@ -238,7 +237,7 @@ class SupervisedClassification(QgsProcessingAlgorithm):
         for k in range(n_bands):
             bandas += [image.GetRasterBand(k+1).ReadAsArray()]
         Pixel_Nulo = image.GetRasterBand(1).GetNoDataValue()
-        if Pixel_Nulo == None:
+        if Pixel_Nulo is None:
             Pixel_Nulo = 0
         cols = image.RasterXSize
         rows = image.RasterYSize

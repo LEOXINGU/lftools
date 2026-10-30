@@ -230,7 +230,7 @@ class RTKCorrection(QgsProcessingAlgorithm):
     def ValidarPointZ_WKT(self, wkt_texto, descricao):
             try:
                 geom = QgsGeometry.fromWkt(wkt_texto)
-            except:
+            except Exception:
                 raise QgsProcessingException(
                     self.tr('Invalid {} WKT: {}'.format(descricao, wkt_texto),
                             'WKT inválido para {}: {}'.format(descricao, wkt_texto))
@@ -252,7 +252,7 @@ class RTKCorrection(QgsProcessingAlgorithm):
 
             try:
                 float(pnt.z())
-            except:
+            except Exception:
                 raise QgsProcessingException(
                     self.tr('Invalid Z coordinate in {}: {}'.format(descricao, wkt_texto),
                             'Coordenada Z inválida em {}: {}'.format(descricao, wkt_texto))
@@ -431,7 +431,7 @@ class RTKCorrection(QgsProcessingAlgorithm):
                     sigma_x_rover = float(str(sigma_x_rover).replace(',', '.'))
                     sigma_y_rover = float(str(sigma_y_rover).replace(',', '.'))
                     sigma_z_rover = float(str(sigma_z_rover).replace(',', '.'))
-                except:
+                except Exception:
                     raise QgsProcessingException(
                         self.tr(
                             'Feature ID {} has invalid rover sigma values.'.format(feat.id()),

@@ -22,7 +22,27 @@ import tempfile
 import random
 import colorsys
 from lftools.geocapt.topogeo import azimute, geod2geoc, geoc2enu
-from qgis.core import *
+from qgis.core import (
+    Qgis,
+    QgsClassificationJenks,
+    QgsCoordinateReferenceSystem,
+    QgsCoordinateTransform,
+    QgsEllipsoidUtils,
+    QgsGeometry,
+    QgsLineString,
+    QgsMarkerSymbol,
+    QgsMultiLineString,
+    QgsMultiPolygon,
+    QgsPalLayerSettings,
+    QgsPoint,
+    QgsPointXY,
+    QgsPolygon,
+    QgsProject,
+    QgsSingleSymbolRenderer,
+    QgsTextBufferSettings,
+    QgsTextFormat,
+    QgsVectorLayerSimpleLabeling,
+)
 from qgis.PyQt.QtGui import QFont, QColor
 
 from qgis._3d import (
@@ -125,7 +145,7 @@ def ellipsoidFromCRS(crs):
         ellps = crs.ellipsoidAcronym()
         if ellps:
             return ellps
-    except:
+    except Exception:
         pass
     return 'Unknown'
 
@@ -332,7 +352,7 @@ def AzimuteDistanciaSGL(pntA, pntB, geomGeo, crsGeo, tipoAz):
     pnts = np.hstack(coordsXYZ)
     try:
         pnts = Unicos(pnts[0]) # remover duplicados
-    except:
+    except Exception:
         pnts = Unicos(pnts)
     cotas = 0
     for pnt in pnts:
@@ -554,7 +574,7 @@ def _alturaPonto(pnt):
     try:
         z = pnt.z()
         return 0.0 if math.isnan(z) else float(z)
-    except:
+    except Exception:
         return 0.0
 
 
@@ -1158,7 +1178,7 @@ def LayerIs3D(camada):
         tem_coordenada_Z = False
         for feicao in camada.getFeatures():
             geometria = feicao.geometry()
-            if geometria and geometria.isEmpty() == False:
+            if geometria and geometria.isEmpty() is False:
                 # Verificar os vértices da geometria
                 for parte in geometria.parts():
                     for coordenada in parte.vertices():
@@ -1346,7 +1366,7 @@ try:
     ALT_CLAMP_ABSOLUTE = Qgis.AltitudeClamping.Absolute
     ALT_CLAMP_RELATIVE = Qgis.AltitudeClamping.Relative
     ALT_CLAMP_TERRAIN  = Qgis.AltitudeClamping.Terrain
-except:
+except Exception:
     ALT_CLAMP_ABSOLUTE = Qgs3DTypes.AltClampAbsolute
     ALT_CLAMP_RELATIVE = Qgs3DTypes.AltClampRelative
     ALT_CLAMP_TERRAIN  = Qgs3DTypes.AltClampTerrain
@@ -1588,19 +1608,19 @@ def map_sistem(lon, lat, ScaleD=1e6):
                 sinalx = sinal_
             c2 = centro + array([2*sinal[0], sinal[1]])*valores[:,2]
             sinal_ = sign(array([lon, lat]) - c2)
-            if sinal_[0]==1 and sinal_[1]==1 and ok == False:
+            if sinal_[0]==1 and sinal_[1]==1 and ok is False:
                 nome+='-III'
                 centro = c2
                 sinalx = sinal_
-            elif sinal_[0]==1 and sinal_[1]==-1 and ok == False:
+            elif sinal_[0]==1 and sinal_[1]==-1 and ok is False:
                 nome+='-VI'
                 centro = c2
                 sinalx = sinal_
-            elif sinal_[0]==-1 and sinal_[1]==1 and ok == False:
+            elif sinal_[0]==-1 and sinal_[1]==1 and ok is False:
                 nome+='-II'
                 centro = c2
                 sinalx = sinal_
-            elif sinal_[0]==-1 and sinal_[1]==-1 and ok == False:
+            elif sinal_[0]==-1 and sinal_[1]==-1 and ok is False:
                 nome+='-V'
                 centro = c2
                 sinalx = sinal_
@@ -1619,19 +1639,19 @@ def map_sistem(lon, lat, ScaleD=1e6):
                 sinalx = sinal_
             c2 = centro + array([2*sinal[0], sinal[1]])*valores[:,2]
             sinal_ = sign(array([lon, lat]) - c2)
-            if sinal_[0]==1 and sinal_[1]==1 and ok == False:
+            if sinal_[0]==1 and sinal_[1]==1 and ok is False:
                 nome+='-II'
                 centro = c2
                 sinalx = sinal_
-            elif sinal_[0]==1 and sinal_[1]==-1 and ok == False:
+            elif sinal_[0]==1 and sinal_[1]==-1 and ok is False:
                 nome+='-V'
                 centro = c2
                 sinalx = sinal_
-            elif sinal_[0]==-1 and sinal_[1]==1 and ok == False:
+            elif sinal_[0]==-1 and sinal_[1]==1 and ok is False:
                 nome+='-I'
                 centro = c2
                 sinalx = sinal_
-            elif sinal_[0]==-1 and sinal_[1]==-1 and ok == False:
+            elif sinal_[0]==-1 and sinal_[1]==-1 and ok is False:
                 nome+='-IV'
                 centro = c2
                 sinalx = sinal_
@@ -1687,19 +1707,19 @@ def map_sistem(lon, lat, ScaleD=1e6):
                 sinalx = sinal_
             c2 = centro + array([sinal[0], 2*sinal[1]])*valores[:,5]
             sinal_ = sign(array([lon, lat]) - c2)
-            if sinal_[0]==1 and sinal_[1]==1 and ok == False:
+            if sinal_[0]==1 and sinal_[1]==1 and ok is False:
                 nome+='-B'
                 centro = c2
                 sinalx = sinal_
-            elif sinal_[0]==1 and sinal_[1]==-1 and ok == False:
+            elif sinal_[0]==1 and sinal_[1]==-1 and ok is False:
                 nome+='-D'
                 centro = c2
                 sinalx = sinal_
-            elif sinal_[0]==-1 and sinal_[1]==1 and ok == False:
+            elif sinal_[0]==-1 and sinal_[1]==1 and ok is False:
                 nome+='-A'
                 centro = c2
                 sinalx = sinal_
-            elif sinal_[0]==-1 and sinal_[1]==-1 and ok == False:
+            elif sinal_[0]==-1 and sinal_[1]==-1 and ok is False:
                 nome+='-C'
                 centro = c2
                 sinalx = sinal_
@@ -1718,19 +1738,19 @@ def map_sistem(lon, lat, ScaleD=1e6):
                 sinalx = sinal_
             c2 = centro + array([sinal[0], 2*sinal[1]])*valores[:,5]
             sinal_ = sign(array([lon, lat]) - c2)
-            if sinal_[0]==1 and sinal_[1]==1 and ok == False:
+            if sinal_[0]==1 and sinal_[1]==1 and ok is False:
                 nome+='-D'
                 centro = c2
                 sinalx = sinal_
-            elif sinal_[0]==1 and sinal_[1]==-1 and ok == False:
+            elif sinal_[0]==1 and sinal_[1]==-1 and ok is False:
                 nome+='-F'
                 centro = c2
                 sinalx = sinal_
-            elif sinal_[0]==-1 and sinal_[1]==1 and ok == False:
+            elif sinal_[0]==-1 and sinal_[1]==1 and ok is False:
                 nome+='-C'
                 centro = c2
                 sinalx = sinal_
-            elif sinal_[0]==-1 and sinal_[1]==-1 and ok == False:
+            elif sinal_[0]==-1 and sinal_[1]==-1 and ok is False:
                 nome+='-E'
                 centro = c2
                 sinalx = sinal_
@@ -1771,19 +1791,19 @@ def map_sistem(lon, lat, ScaleD=1e6):
                 sinalx = sinal_
             c2 = centro + array([2*sinal[0], sinal[1]])*valores[:,7]
             sinal_ = sign(array([lon, lat]) - c2)
-            if sinal_[0]==1 and sinal_[1]==1 and ok == False:
+            if sinal_[0]==1 and sinal_[1]==1 and ok is False:
                 nome+='-3'
                 centro = c2
                 sinalx = sinal_
-            elif sinal_[0]==1 and sinal_[1]==-1 and ok == False:
+            elif sinal_[0]==1 and sinal_[1]==-1 and ok is False:
                 nome+='-6'
                 centro = c2
                 sinalx = sinal_
-            elif sinal_[0]==-1 and sinal_[1]==1 and ok == False:
+            elif sinal_[0]==-1 and sinal_[1]==1 and ok is False:
                 nome+='-2'
                 centro = c2
                 sinalx = sinal_
-            elif sinal_[0]==-1 and sinal_[1]==-1 and ok == False:
+            elif sinal_[0]==-1 and sinal_[1]==-1 and ok is False:
                 nome+='-5'
                 centro = c2
                 sinalx = sinal_
@@ -1802,19 +1822,19 @@ def map_sistem(lon, lat, ScaleD=1e6):
                 sinalx = sinal_
             c2 = centro + array([2*sinal[0], sinal[1]])*valores[:,7]
             sinal_ = sign(array([lon, lat]) - c2)
-            if sinal_[0]==1 and sinal_[1]==1 and ok == False:
+            if sinal_[0]==1 and sinal_[1]==1 and ok is False:
                 nome+='-2'
                 centro = c2
                 sinalx = sinal_
-            elif sinal_[0]==1 and sinal_[1]==-1 and ok == False:
+            elif sinal_[0]==1 and sinal_[1]==-1 and ok is False:
                 nome+='-5'
                 centro = c2
                 sinalx = sinal_
-            elif sinal_[0]==-1 and sinal_[1]==1 and ok == False:
+            elif sinal_[0]==-1 and sinal_[1]==1 and ok is False:
                 nome+='-1'
                 centro = c2
                 sinalx = sinal_
-            elif sinal_[0]==-1 and sinal_[1]==-1 and ok == False:
+            elif sinal_[0]==-1 and sinal_[1]==-1 and ok is False:
                 nome+='-4'
                 centro = c2
                 sinalx = sinal_

@@ -39,7 +39,7 @@ from qgis.core import (QgsApplication,
                        QgsProcessingParameterFeatureSink)
 
 import re, os
-from lftools.geocapt.imgs import *
+from lftools.geocapt.imgs import Imgs
 from lftools.geocapt.cartography import LabelConf, SymbolSimplePoint
 from lftools.translations.translate import translate
 from lftools.geocapt.topogeo import dms2dd
@@ -96,11 +96,11 @@ class PointsFromText(QgsProcessingAlgorithm):
                       <b><a href="https://regex101.com/" target="_blank">'''+ self.tr('Click here for testing your regular expression (RegEx).',
                                     'Clique aqui para testar sua expressão regular (RegEx).') +'''</a><br>
                                     <b>Longitude Regex:</b>
-                                    (-?\d{1,3}[\s°º˚]\s*\d{1,2}[\s'`´]\s*\d{1,2}[,.]\d+\s*["''″]?\s*[WE])
+                                    (-?\\d{1,3}[\\s°º˚]\\s*\\d{1,2}[\\s'`´]\\s*\\d{1,2}[,.]\\d+\\s*["''″]?\\s*[WE])
                                     <b>Latitude Regex:</b>
-                                    (-?\d{1,3}[\s°º˚]\s*\d{1,2}[\s'`´]\s*\d{1,2}[,.]\d+\s*["''″]?\s*[SN])
+                                    (-?\\d{1,3}[\\s°º˚]\\s*\\d{1,2}[\\s'`´]\\s*\\d{1,2}[,.]\\d+\\s*["''″]?\\s*[SN])
                                     <b>INCRA code:</b>
-                                    \s*[A-Z0-9]{3,4}-[MPV]-\d{1,5}
+                                    \\s*[A-Z0-9]{3,4}-[MPV]-\\d{1,5}
                                     <br>
                                     '''+ self.tr('Author: Leandro Franca', 'Autor: Leandro França')+'''</b>
                       </p>'''+ social_BW + '''</div>
@@ -286,7 +286,7 @@ class PointsFromText(QgsProcessingAlgorithm):
                 try:
                     lista_X += [dms2dd(x_list[k])]
                     lista_Y += [dms2dd(y_list[k])]
-                except:
+                except Exception:
                     raise QgsProcessingException(self.tr('Error in coordinate {}!', 'Erro na coordenada {}!').format(x_list[k]))
 
         else:
@@ -300,7 +300,7 @@ class PointsFromText(QgsProcessingAlgorithm):
                             txt += s
                     try:
                         lista_X += [float(txt)]
-                    except:
+                    except Exception:
                         raise QgsProcessingException(self.tr('Error in coordinate {}!', 'Erro na coordenada {}!').format(x_list[k]))
 
                     txt = ''
@@ -309,7 +309,7 @@ class PointsFromText(QgsProcessingAlgorithm):
                             txt += s
                     try:
                         lista_Y += [float(txt)]
-                    except:
+                    except Exception:
                         raise QgsProcessingException(self.tr('Error in coordinate {}!', 'Erro na coordenada {}!').format(y_list[k]))
             else:
                 for k in range(tam):
@@ -320,7 +320,7 @@ class PointsFromText(QgsProcessingAlgorithm):
                     txt = txt.replace(',','.')
                     try:
                         lista_X += [float(txt)]
-                    except:
+                    except Exception:
                         raise QgsProcessingException(self.tr('Error in coordinate {}!', 'Erro na coordenada {}!').format(x_list[k]))
 
                     txt = ''
@@ -330,7 +330,7 @@ class PointsFromText(QgsProcessingAlgorithm):
                     txt = txt.replace(',','.')
                     try:
                         lista_Y += [float(txt)]
-                    except:
+                    except Exception:
                         raise QgsProcessingException(self.tr('Error in coordinate {}!', 'Erro na coordenada {}!').format(y_list[k]))
 
 

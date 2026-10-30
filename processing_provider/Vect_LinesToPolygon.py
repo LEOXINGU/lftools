@@ -157,7 +157,7 @@ class LinesToPolygon(QgsProcessingAlgorithm):
                 if pnt_fimA.intersects(pnt_iniB):
                     jus = featB.id()
 
-                if mont != None and jus != None:
+                if mont is not None and jus is not None:
                     break
 
             linhas[featA.id()] = {'mont': mont, 'jus': jus, 'coords': coords}
@@ -166,10 +166,10 @@ class LinesToPolygon(QgsProcessingAlgorithm):
         feedback.pushInfo(self.tr('Validating connected features...', 'Validando feições conectadas...' ))
         sentinela = False
         for linha in linhas:
-            if linhas[linha]['mont'] == None:
+            if linhas[linha]['mont'] is None:
                 pnt = linhas[linha]['coords'][0]
                 sentinela = True
-            if linhas[linha]['jus'] == None:
+            if linhas[linha]['jus'] is None:
                 pnt = linhas[linha]['coords'][-1]
                 sentinela = True
             if sentinela:

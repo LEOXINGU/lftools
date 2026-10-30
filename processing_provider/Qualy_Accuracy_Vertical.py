@@ -16,14 +16,67 @@ __date__ = '2026-06-09'
 __copyright__ = '(C) 2026, Leandro França'
 
 from qgis.PyQt.QtCore import QMetaType
-from qgis.core import *
+from qgis.core import (
+    Qgis,
+    QgsApplication,
+    QgsCoordinateReferenceSystem,
+    QgsCoordinateTransform,
+    QgsFeature,
+    QgsFeatureSink,
+    QgsField,
+    QgsMarkerSymbol,
+    QgsPalLayerSettings,
+    QgsProcessingAlgorithm,
+    QgsProcessingException,
+    QgsProcessingParameterCrs,
+    QgsProcessingParameterEnum,
+    QgsProcessingParameterFeatureSink,
+    QgsProcessingParameterFeatureSource,
+    QgsProcessingParameterField,
+    QgsProcessingParameterFileDestination,
+    QgsProcessingParameterNumber,
+    QgsProcessingParameterRasterLayer,
+    QgsProcessingUtils,
+    QgsProject,
+    QgsRuleBasedRenderer,
+    QgsTextBufferSettings,
+    QgsTextFormat,
+    QgsVectorLayerSimpleLabeling,
+)
 from numpy import sqrt, array, mean, std, pi, sin, floor, ceil
 from osgeo import osr, gdal
 import numpy as np
 from datetime import datetime
 import base64
 from io import BytesIO
-from lftools.geocapt.imgs import *
+from lftools.geocapt.imgs import Imgs, lftools_logo
+from qgis.core import (
+    Qgis,
+    QgsApplication,
+    QgsCoordinateReferenceSystem,
+    QgsCoordinateTransform,
+    QgsFeature,
+    QgsFeatureSink,
+    QgsField,
+    QgsMarkerSymbol,
+    QgsPalLayerSettings,
+    QgsProcessingAlgorithm,
+    QgsProcessingException,
+    QgsProcessingParameterCrs,
+    QgsProcessingParameterEnum,
+    QgsProcessingParameterFeatureSink,
+    QgsProcessingParameterFeatureSource,
+    QgsProcessingParameterField,
+    QgsProcessingParameterFileDestination,
+    QgsProcessingParameterNumber,
+    QgsProcessingParameterRasterLayer,
+    QgsProcessingUtils,
+    QgsProject,
+    QgsRuleBasedRenderer,
+    QgsTextBufferSettings,
+    QgsTextFormat,
+    QgsVectorLayerSimpleLabeling,
+)
 from lftools.translations.translate import translate
 from lftools.geocapt.topogeo import str2HTML
 from lftools.geocapt.cartography import PEC
@@ -302,7 +355,7 @@ class Accuracy_Vertical(QgsProcessingAlgorithm):
         image = gdal.Open(MDE.dataProvider().dataSourceUri())
         band = image.GetRasterBand(1).ReadAsArray()
         NULO = image.GetRasterBand(1).GetNoDataValue()
-        if NULO == None:
+        if NULO is None:
             NULO = -9999
         prj = image.GetProjection()
         SRC = QgsCoordinateReferenceSystem()

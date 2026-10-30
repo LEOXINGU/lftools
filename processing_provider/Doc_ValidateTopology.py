@@ -33,7 +33,7 @@ from qgis.core import (Qgis,
                        QgsProcessingParameterFeatureSource,
                        QgsProcessingParameterFeatureSink)
 import os
-from lftools.geocapt.imgs import *
+from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
 from lftools.geocapt.cartography import LabelConf, SymbolSimplePoint
 from qgis.PyQt.QtGui import QIcon

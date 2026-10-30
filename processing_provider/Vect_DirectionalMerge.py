@@ -105,7 +105,7 @@ class DirectionalMerge(QgsProcessingAlgorithm):
             QgsProcessingParameterEnum(
                 self.TYPE,
                 self.tr('Attributes', 'Atributos'),
-				options = tipo,
+                options = tipo,
                 defaultValue= 1
             )
         )

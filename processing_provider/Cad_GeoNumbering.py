@@ -121,10 +121,10 @@ Obs.: Este algoritmo utiliza o centroide da feição para ordenar geograficament
         )
 
         opcoes = [self.tr('North to South, West to East','Norte para Sul, Oeste para Leste'),
-				  self.tr('North to South, East to West','Norte para Sul, Leste para Oeste'),
-				  self.tr('West to East, North to South','Oeste para Leste, Norte para Sul'),
-				  self.tr('West to East, South to North','Oeste para Leste, Sul para Norte'),
-				  self.tr('South to North, West to East','Sul para Norte, Oeste para Leste'),
+                  self.tr('North to South, East to West','Norte para Sul, Leste para Oeste'),
+                  self.tr('West to East, North to South','Oeste para Leste, Norte para Sul'),
+                  self.tr('West to East, South to North','Oeste para Leste, Sul para Norte'),
+                  self.tr('South to North, West to East','Sul para Norte, Oeste para Leste'),
                   self.tr('South to North, East to West','Sul para Norte, Leste para Oeste'),
                   self.tr('East to West, North to South','Leste para Oeste, Norte para Sul'),
                   self.tr('East to West, South to North','Leste para Oeste, Sul para Norte')
@@ -134,7 +134,7 @@ Obs.: Este algoritmo utiliza o centroide da feição para ordenar geograficament
             QgsProcessingParameterEnum(
                 self.METHOD,
                 self.tr('Method', 'Método'),
-				options = opcoes,
+                options = opcoes,
                 defaultValue= 0
             )
         )

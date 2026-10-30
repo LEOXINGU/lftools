@@ -16,7 +16,16 @@ __date__ = '2019-10-06'
 __copyright__ = '(C) 2020, Leandro França'
 
 from qgis.PyQt.QtCore import QMetaType
-from qgis.core import *
+from qgis.core import (
+    Qgis,
+    QgsApplication,
+    QgsField,
+    QgsProcessingAlgorithm,
+    QgsProcessingException,
+    QgsProcessingParameterEnum,
+    QgsProcessingParameterMultipleLayers,
+    QgsProcessingParameterNumber,
+)
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
 import os
@@ -96,7 +105,7 @@ class MeasureLayers(QgsProcessingAlgorithm):
             QgsProcessingParameterEnum(
                 self.DISTANCE,
                 self.tr('Distance Units', 'Unidade de distância'),
-				options = units_dist,
+                options = units_dist,
                 defaultValue= 0
             )
         )
@@ -105,7 +114,7 @@ class MeasureLayers(QgsProcessingAlgorithm):
             QgsProcessingParameterEnum(
                 self.AREA,
                 self.tr('Area Units', 'Unidade de Área'),
-				options = units_area,
+                options = units_area,
                 defaultValue= 0
             )
         )
@@ -128,7 +137,7 @@ class MeasureLayers(QgsProcessingAlgorithm):
             QgsProcessingParameterEnum(
                 self.TYPE,
                 self.tr('Calculation', 'Cálculo'),
-				options = tipo,
+                options = tipo,
                 defaultValue = 0
             )
         )

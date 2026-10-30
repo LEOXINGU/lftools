@@ -92,16 +92,16 @@ class FrontLotLine(QgsProcessingAlgorithm):
         )
 
         opcoes = [self.tr('Northmost','Mais ao Norte'),
-				  self.tr('Southernmost','Mais ao Sul'),
-				  self.tr('Eastmost','Mais ao Leste'),
-				  self.tr('Westmost','Mais ao Oeste')
+                  self.tr('Southernmost','Mais ao Sul'),
+                  self.tr('Eastmost','Mais ao Leste'),
+                  self.tr('Westmost','Mais ao Oeste')
                ]
 
         self.addParameter(
             QgsProcessingParameterEnum(
                 self.START,
                 self.tr('Start', 'Início'),
-				options = opcoes,
+                options = opcoes,
                 defaultValue = 0
             )
         )
@@ -325,5 +325,5 @@ class FrontLotLine(QgsProcessingAlgorithm):
             feedback.pushInfo(self.tr('Leandro Franca - Cartographic Engineer', 'Leandro França - Eng Cart'))
 
             return {self.OUTPUT: dest_id}
-        except:
+        except Exception:
             raise QgsProcessingException(self.tr('Check if the input layer topology is correct!','Verifique se a topologia da camada está correta!'))

@@ -35,7 +35,7 @@ from qgis.core import (Qgis,
                        QgsCoordinateTransform)
 
 import os
-from lftools.geocapt.imgs import *
+from lftools.geocapt.imgs import Imgs, img2html_resized, lftools_logo
 from lftools.translations.translate import translate
 from lftools.geocapt.cartography import CentralMeridian, FusoHemisf
 from lftools.geocapt.topogeo import dd2dms, str2HTML
@@ -410,12 +410,12 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
                     '[OBS]': str2HTML(ponto['observation']),
                     '[SRC]': self.tr(SRC, SRC.replace('zone', 'fuso'))
                         }
-        except:
+        except Exception:
             raise QgsProcessingException(self.tr('Check that your layer "reference_point_p" has the correct field names for the TopoGeo model! More information: https://bit.ly/3FDNQGC', 'Verifique se sua camada "Ponto de Referência Geodésica" está com os nomes dos campos corretos para o modelo TopoGeo! Mais informações: https://geoone.com.br/ebooks/livro2/'))
 
         try:
             project_folder = os.path.dirname(QgsProject.instance().fileName())
-        except:
+        except Exception:
             project_folder = ''
         
         filepath = self.VerificarArquivo(project_folder, ponto['mark_photo'])
@@ -458,7 +458,7 @@ class SurveyMarkDoc(QgsProcessingAlgorithm):
                 return relative_path
             else:
                 raise QgsProcessingException(self.tr('Verify if the file {} exists!', 'Verifique se o arquivo {} existe!').format(filepath))
-        except:
+        except Exception:
             raise QgsProcessingException(self.tr('Verify if the file {} exists!', 'Verifique se o arquivo {} existe!').format(filepath))
     
     def VerificarJPEG(self, filepath):

@@ -124,7 +124,7 @@ class ImportPhotos(QgsProcessingAlgorithm):
             QgsProcessingParameterEnum(
                 self.STYLE,
                 self.tr('Layer Style', 'Estilo da camada'),
-				options = STYLES,
+                options = STYLES,
                 defaultValue= 0
             )
         )
@@ -249,7 +249,7 @@ class ImportPhotos(QgsProcessingAlgorithm):
                     minLat, minLon = exif['GPSInfo'][2][1][0], exif['GPSInfo'][4][1][0]
                     segLat = exif['GPSInfo'][2][2][0]/float(exif['GPSInfo'][2][2][1])
                     segLon = exif['GPSInfo'][4][2][0]/float(exif['GPSInfo'][4][2][1])
-                except:
+                except Exception:
                     grausLat,grausLon = exif['GPSInfo'][2][0], exif['GPSInfo'][4][0]
                     minLat, minLon = exif['GPSInfo'][2][1], exif['GPSInfo'][4][1]
                     segLat = exif['GPSInfo'][2][2]
@@ -258,7 +258,7 @@ class ImportPhotos(QgsProcessingAlgorithm):
                     lat = sinal_lat*(float(grausLat)+minLat/60.0+segLat/3600.0)
                     lon = sinal_lon*(float(grausLon)+minLon/60.0+segLon/3600.0)
                 return lat, lon
-            except:
+            except Exception:
                 return 0,0
 
         # Funcao para pegar Azimute
@@ -280,7 +280,7 @@ class ImportPhotos(QgsProcessingAlgorithm):
             hora = int(data_hora[3])
             minuto = int(data_hora[4])
             segundo = int(data_hora[5])
-            data_hora = unicode(datetime.datetime(ano, mes, dia, hora, minuto, segundo))
+            data_hora = str(datetime.datetime(ano, mes, dia, hora, minuto, segundo))
             return data_hora
         
         # Mensagem de erro
@@ -340,7 +340,7 @@ class ImportPhotos(QgsProcessingAlgorithm):
                     date_time = None
                     altitude = None
                     img.close()
-                except:
+                except Exception:
                     lon = 0
                     exif = {}
                 if 'GPSInfo' in exif:
@@ -351,7 +351,7 @@ class ImportPhotos(QgsProcessingAlgorithm):
                         if 6 in exif['GPSInfo']:
                             try:
                                 altitude = float(exif['GPSInfo'][6][0])/exif['GPSInfo'][6][1]
-                            except:
+                            except Exception:
                                 altitude = float(exif['GPSInfo'][6])
                 if 'DateTimeOriginal' in exif:
                     date_time = data_hora(exif['DateTimeOriginal'])
@@ -373,7 +373,7 @@ class ImportPhotos(QgsProcessingAlgorithm):
                         FlightYaw, FlightPitch, FlightRoll, GimbalYaw, GimbalPitch, GimbalRoll = self.extract_dji_orientation(filepath)
                     if not CalcAz:
                         feature = QgsFeature(fields)
-                        feature.setGeometry(QgsGeometry(QgsPoint(lon, lat, altitude if altitude != None else 0)))
+                        feature.setGeometry(QgsGeometry(QgsPoint(lon, lat, altitude if altitude is not None else 0)))
                         att = [arquivo, lon, lat, altitude, Az, date_time, filepath, fabricante, modelo]
                         if YPR:
                             att[4] = FlightYaw
@@ -396,7 +396,7 @@ class ImportPhotos(QgsProcessingAlgorithm):
 
                 try:
                     meta_dict = {TAGS[key] : img.tag[key] for key in img.tag_v2}
-                except:
+                except Exception:
                     exif = img.getexif()
                     meta_dict = {}
                     for tag_id, value in exif.items():
@@ -431,7 +431,7 @@ class ImportPhotos(QgsProcessingAlgorithm):
                     altitude = eval(str(tags['GPSAltitude']))
                     try:
                         date_time = data_hora(meta_dict['DateTime'][0])
-                    except:
+                    except Exception:
                         date_time = data_hora(meta_dict['DateTime'])
                     if 'Make' in meta_dict:
                         if isinstance(meta_dict['Make'], tuple):
@@ -454,7 +454,7 @@ class ImportPhotos(QgsProcessingAlgorithm):
                             FlightYaw, FlightPitch, FlightRoll, GimbalYaw, GimbalPitch, GimbalRoll = self.extract_dji_orientation(filepath)
                         if not CalcAz:
                             feature = QgsFeature(fields)
-                            feature.setGeometry(QgsGeometry(QgsPoint(lon, lat, altitude if altitude != None else 0)))
+                            feature.setGeometry(QgsGeometry(QgsPoint(lon, lat, altitude if altitude is not None else 0)))
                             att = [arquivo, lon, lat, altitude, Az, date_time, filepath, fabricante, modelo]
                             if YPR:
                                 att += [FlightYaw, FlightPitch, FlightRoll, GimbalYaw, GimbalPitch, GimbalRoll]
@@ -490,7 +490,7 @@ class ImportPhotos(QgsProcessingAlgorithm):
             for att in Atributos:
                 feature = QgsFeature(fields)
                 lon, lat = att[1], att[2]
-                h = att[3] if att[3] != None else 0
+                h = att[3] if att[3] is not None else 0
                 feature.setGeometry(QgsGeometry(QgsPoint(float(lon), float(lat), float(h))))
                 feature.setAttributes(att)
                 sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)

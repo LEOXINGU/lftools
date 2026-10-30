@@ -145,7 +145,7 @@ Saída: Camada de multipoint com precisões posicionais em metros e outras estat
             QgsProcessingParameterEnum(
                 self.COND,
                 self.tr('Condition', 'Condição'),
-				options = tipos,
+                options = tipos,
                 defaultValue = 2
             )
         )
@@ -164,7 +164,7 @@ Saída: Camada de multipoint com precisões posicionais em metros e outras estat
             QgsProcessingParameterEnum(
                 self.STATS,
                 self.tr('Statistics', 'Estatísticas'),
-				options = self.OPTIONS,
+                options = self.OPTIONS,
                 allowMultiple = True,
                 defaultValue = [2,4]
             )

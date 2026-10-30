@@ -17,7 +17,16 @@ __copyright__ = '(C) 2021, Leandro França'
 
 from qgis.utils import iface
 from qgis.PyQt.QtCore import QCoreApplication
-from qgis.core import *
+from qgis.core import (
+    Qgis,
+    QgsApplication,
+    QgsProcessingAlgorithm,
+    QgsProcessingException,
+    QgsProcessingParameterEnum,
+    QgsProcessingParameterField,
+    QgsProcessingParameterFile,
+    QgsProcessingParameterVectorLayer,
+)
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
 import os, shutil
@@ -103,7 +112,7 @@ class CopySelectedPhotos(QgsProcessingAlgorithm):
             QgsProcessingParameterEnum(
                 self.OPTION,
                 self.tr('Option', 'Opção'),
-				options = opt,
+                options = opt,
                 defaultValue= 0
             )
         )

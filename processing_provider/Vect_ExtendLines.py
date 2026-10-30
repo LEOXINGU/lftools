@@ -106,7 +106,7 @@ class ExtendLines(QgsProcessingAlgorithm):
             QgsProcessingParameterEnum(
                 self.TYPE,
                 self.tr('Attributes', 'Atributos'),
-				options = tipo,
+                options = tipo,
                 defaultValue= 0
             )
         )

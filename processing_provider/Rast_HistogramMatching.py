@@ -23,7 +23,6 @@ from qgis.core import (Qgis,
                        QgsProcessingParameterFileDestination,
                        QgsProcessingParameterRasterLayer,
                        QgsApplication,
-                       QgsProject,
                        QgsRasterLayer)
 
 from math import floor, ceil

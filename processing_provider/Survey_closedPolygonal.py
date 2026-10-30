@@ -16,12 +16,28 @@ __date__ = '2019-10-06'
 __copyright__ = '(C) 2019, Leandro França'
 
 from qgis.PyQt.QtCore import QMetaType
-from qgis.core import *
+from qgis.core import (
+    Qgis,
+    QgsApplication,
+    QgsFeature,
+    QgsFeatureSink,
+    QgsField,
+    QgsFields,
+    QgsGeometry,
+    QgsPointXY,
+    QgsProcessingAlgorithm,
+    QgsProcessingException,
+    QgsProcessingParameterCrs,
+    QgsProcessingParameterFeatureSink,
+    QgsProcessingParameterFileDestination,
+    QgsProcessingParameterPoint,
+    QgsProcessingParameterString,
+)
 import processing
 from numpy import sin, cos, modf, radians, sqrt, floor
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
-from lftools.geocapt.topogeo import *
+from lftools.geocapt.topogeo import String2NumberList, String2StringList, dd2dms, dms2dd, str2HTML
 import os
 from qgis.PyQt.QtGui import QIcon
 

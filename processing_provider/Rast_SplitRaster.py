@@ -24,7 +24,6 @@ from qgis.core import (Qgis,
                        QgsProcessingParameterNumber,
                        QgsProcessingParameterRasterLayer,
                        QgsApplication,
-                       QgsProject,
                        QgsRasterLayer)
 
 from math import floor, ceil

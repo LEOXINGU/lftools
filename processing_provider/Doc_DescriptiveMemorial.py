@@ -36,7 +36,8 @@ from qgis.core import (Qgis,
 from processing.algs.qgis.QgisAlgorithm import QgisAlgorithm
 from math import atan, pi, sqrt, floor
 import math
-from lftools.geocapt.imgs import *
+from lftools.geocapt.imgs import Imgs, img2html_resized, lftools_logo
+from qgis.core import QgsGeometry
 from lftools.translations.translate import translate
 from lftools.geocapt.cartography import (FusoHemisf,
                                          geom2PointList,
@@ -161,7 +162,7 @@ class DescriptiveMemorial(QgisAlgorithm):
             QgsProcessingParameterEnum(
                 self.COORD,
                 self.tr('Coordinates', 'Coordenadas'),
-				options = opcoes,
+                options = opcoes,
                 defaultValue= 2
             )
         )
@@ -180,7 +181,7 @@ class DescriptiveMemorial(QgisAlgorithm):
                 self.CALC,
                 self.tr('Calculation of azimuths, distances and area',
                         'Cálculo de azimutes, distâncias e área'),
-				options = tipos,
+                options = tipos,
                 defaultValue = 0
             )
         )
@@ -306,7 +307,7 @@ class DescriptiveMemorial(QgisAlgorithm):
         # Precisão da altitude
         try:
             prec_h = int(decimal[0]) # teste se precisão das coordenadas é número inteiro
-        except:
+        except Exception:
             prec_h = round(10*(float(decimal[0]) - math.floor(float(decimal[0]))))
             decimal[0] = str(int(float(decimal[0])))
 
@@ -457,7 +458,7 @@ class DescriptiveMemorial(QgisAlgorithm):
                         raise QgsProcessingException(self.tr('Coordinate point ({}, {}) of the "boundary_element_l" layer has no correspondent in the "limit_point_p" layer!',
                                                              'Ponto de coordenadas ({}, {}) da camada "Elemento Confrontante" não possui correspondente na camada "Ponto Limite"!').format(pnt.y(), pnt.x()))
 
-    		# Verificar se cada vértice da camada parcela (polígono) tem o correspondente da camada vétice (ponto)
+            # Verificar se cada vértice da camada parcela (polígono) tem o correspondente da camada vétice (ponto)
             for feat1 in area.getFeatures():
                 geom1 = feat1.geometry()
                 if geom1.isMultipart():
@@ -915,7 +916,7 @@ class DescriptiveMemorial(QgisAlgorithm):
             owner = feat1['owner']
             try:
                 cpf = feat1['owner_id']
-            except:
+            except Exception:
                 cpf = ''
             state = feat1['state']
             transcript = feat1['transcript']

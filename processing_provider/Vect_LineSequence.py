@@ -120,7 +120,7 @@ class LineSequence(QgsProcessingAlgorithm):
             QgsProcessingParameterEnum(
                 self.TYPE,
                 self.tr('Type', 'Tipo'),
-				options = tipos,
+                options = tipos,
                 defaultValue = 0
             )
         )

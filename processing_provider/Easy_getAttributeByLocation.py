@@ -15,7 +15,18 @@ __author__ = 'Leandro França'
 __date__ = '2022-01-02'
 __copyright__ = '(C) 2022, Leandro França'
 
-from qgis.core import *
+from qgis.core import (
+    Qgis,
+    QgsApplication,
+    QgsCoordinateTransform,
+    QgsProcessingAlgorithm,
+    QgsProcessingException,
+    QgsProcessingParameterBoolean,
+    QgsProcessingParameterEnum,
+    QgsProcessingParameterField,
+    QgsProcessingParameterVectorLayer,
+    QgsSpatialIndex,
+)
 import processing
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
@@ -137,7 +148,7 @@ Os campos de origem e de destino devem ser indicadas para preenchimento dos atri
             QgsProcessingParameterEnum(
                 self.TOPOLOGY,
                 self.tr('Intersection with the centroid (Topology)', 'Interseção com o centróide (Topologia)'),
-				options = tipos,
+                options = tipos,
                 defaultValue= 0
             )
         )

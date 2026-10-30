@@ -137,7 +137,7 @@ Nota: Para realizar esta operação, é necessário que o banco de dados esteja 
             QgsProcessingParameterEnum(
                 self.VERSION,
                 self.tr('PostgreSQL version', 'Versão do PostgreSQL'),
-				options = self.versions,
+                options = self.versions,
                 defaultValue = postgresql_version
             )
         )

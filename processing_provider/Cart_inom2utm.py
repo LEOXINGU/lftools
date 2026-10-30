@@ -16,7 +16,24 @@ __date__ = '2019-10-06'
 __copyright__ = '(C) 2019, Leandro França'
 
 from qgis.PyQt.QtCore import QMetaType
-from qgis.core import *
+from qgis.core import (
+    Qgis,
+    QgsApplication,
+    QgsCoordinateReferenceSystem,
+    QgsCoordinateTransform,
+    QgsFeature,
+    QgsFeatureSink,
+    QgsField,
+    QgsFields,
+    QgsGeometry,
+    QgsPointXY,
+    QgsProcessingAlgorithm,
+    QgsProcessingException,
+    QgsProcessingParameterCrs,
+    QgsProcessingParameterEnum,
+    QgsProcessingParameterFeatureSink,
+    QgsProcessingParameterString,
+)
 from numpy import array
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
@@ -95,7 +112,7 @@ class Inom2utmGrid(QgsProcessingAlgorithm):
             QgsProcessingParameterEnum(
                 self.TYPE,
                 self.tr('Type', 'Tipo'),
-				options = tipos,
+                options = tipos,
                 defaultValue = 0
             )
         )
@@ -105,8 +122,8 @@ class Inom2utmGrid(QgsProcessingAlgorithm):
                 self.CRS,
                 self.tr('Grid CRS', 'SRC da Moldura'),
                 'ProjectCrs'
-			)
-		)
+            )
+        )
 
         # 'OUTPUT'
         self.addParameter(

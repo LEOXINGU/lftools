@@ -15,7 +15,18 @@ __author__ = 'Leandro França'
 __date__ = '2024-11-10'
 __copyright__ = '(C) 2024, Leandro França'
 
-from qgis.core import *
+from qgis.core import (
+    Qgis,
+    QgsApplication,
+    QgsExpression,
+    QgsFeatureRequest,
+    QgsProcessingAlgorithm,
+    QgsProcessingException,
+    QgsProcessingParameterField,
+    QgsProcessingParameterMultipleLayers,
+    QgsProcessingParameterString,
+    QgsProcessingParameterVectorLayer,
+)
 import numpy as np
 from lftools.geocapt.imgs import Imgs
 from lftools.geocapt.cartography import LayerIs3D

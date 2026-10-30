@@ -181,7 +181,7 @@ Documentação do GRASS GIS: <a href="https://grass.osgeo.org/grass-stable/manua
                     'Drainage initiation threshold',
                     'Limiar para iniciar a drenagem',
                 ),
-                type=QgsProcessingParameterNumber.Double,
+                type=QgsProcessingParameterNumber.Type.Double,
                 minValue=0.000001,
                 defaultValue=1000.0,
             )
@@ -206,7 +206,7 @@ Documentação do GRASS GIS: <a href="https://grass.osgeo.org/grass-stable/manua
                     'Memory available to GRASS (MB)',
                     'Memória disponível para o GRASS (MB)',
                 ),
-                type=QgsProcessingParameterNumber.Integer,
+                type=QgsProcessingParameterNumber.Type.Integer,
                 minValue=64,
                 defaultValue=500,
             )
@@ -416,7 +416,7 @@ Documentação do GRASS GIS: <a href="https://grass.osgeo.org/grass-stable/manua
             self.DRAINAGE_VECTOR,
             context,
             fields,
-            QgsWkbTypes.LineString,
+            QgsWkbTypes.Type.LineString,
             dem_layer.crs(),
         )
         if sink is None:

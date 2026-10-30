@@ -194,7 +194,7 @@ class ValidateGeometries(QgsProcessingAlgorithm):
         self.addParameter(QgsProcessingParameterMultipleLayers(
             self.INPUTS,
             self.tr('Vector layers', 'Camadas vetoriais'),
-            QgsProcessing.TypeVectorAnyGeometry
+            QgsProcessing.SourceType.TypeVectorAnyGeometry
         ))
 
         self.addParameter(QgsProcessingParameterNumber(
@@ -401,10 +401,10 @@ class ValidateGeometries(QgsProcessingAlgorithm):
         geometry_type = QgsWkbTypes.geometryType(geometry.wkbType())
         multipart = geometry.isMultipart()
 
-        if geometry_type == QgsWkbTypes.LineGeometry:
+        if geometry_type == QgsWkbTypes.GeometryType.LineGeometry:
             return geometry.asMultiPolyline() if multipart else [geometry.asPolyline()]
 
-        if geometry_type == QgsWkbTypes.PolygonGeometry:
+        if geometry_type == QgsWkbTypes.GeometryType.PolygonGeometry:
             polygons = geometry.asMultiPolygon() if multipart else [geometry.asPolygon()]
             return [ring for polygon in polygons for ring in polygon]
 
@@ -529,7 +529,7 @@ class ValidateGeometries(QgsProcessingAlgorithm):
             self.ERRORS,
             context,
             error_fields,
-            QgsWkbTypes.Point,
+            QgsWkbTypes.Type.Point,
             first_crs
         )
         if error_sink is None:
@@ -540,7 +540,7 @@ class ValidateGeometries(QgsProcessingAlgorithm):
             self.OCCURRENCES,
             context,
             occurrence_fields,
-            QgsWkbTypes.NoGeometry,
+            QgsWkbTypes.Type.NoGeometry,
             first_crs
         )
         if occurrence_sink is None:
@@ -650,12 +650,12 @@ class ValidateGeometries(QgsProcessingAlgorithm):
                 anchor = self._first_vertex(geometry)
 
                 if (
-                    geometry_type == QgsWkbTypes.LineGeometry
+                    geometry_type == QgsWkbTypes.GeometryType.LineGeometry
                     and metric_geometry.length() == 0
                 ):
                     register('VGE003', layer, feature_id, point=anchor, value=0.0)
                 elif (
-                    geometry_type == QgsWkbTypes.PolygonGeometry
+                    geometry_type == QgsWkbTypes.GeometryType.PolygonGeometry
                     and metric_geometry.area() == 0
                 ):
                     register('VGE003', layer, feature_id, point=anchor, value=0.0)
@@ -731,7 +731,7 @@ class ValidateGeometries(QgsProcessingAlgorithm):
 
                 if check_min_size:
                     if (
-                        geometry_type == QgsWkbTypes.LineGeometry
+                        geometry_type == QgsWkbTypes.GeometryType.LineGeometry
                         and metric_geometry.length() < min_length
                     ):
                         register(
@@ -739,7 +739,7 @@ class ValidateGeometries(QgsProcessingAlgorithm):
                             value=metric_geometry.length(), threshold=min_length
                         )
                     elif (
-                        geometry_type == QgsWkbTypes.PolygonGeometry
+                        geometry_type == QgsWkbTypes.GeometryType.PolygonGeometry
                         and metric_geometry.area() < min_area
                     ):
                         register(
@@ -747,7 +747,7 @@ class ValidateGeometries(QgsProcessingAlgorithm):
                             value=metric_geometry.area(), threshold=min_area
                         )
 
-                if check_holes and geometry_type == QgsWkbTypes.PolygonGeometry:
+                if check_holes and geometry_type == QgsWkbTypes.GeometryType.PolygonGeometry:
                     try:
                         source_holes = self._polygon_holes(geometry)
                         metric_holes = self._polygon_holes(metric_geometry)

@@ -160,7 +160,7 @@ class ImportRaster(QgsProcessingAlgorithm):
             QgsProcessingParameterEnum(
                 self.VERSION,
                 self.tr('PostgreSQL version', 'Versão do PostgreSQL'),
-				options = self.versions,
+                options = self.versions,
                 defaultValue = postgresql_version
             )
         )
@@ -174,7 +174,7 @@ class ImportRaster(QgsProcessingAlgorithm):
             QgsProcessingParameterEnum(
                 self.TYPE,
                 self.tr('Options', 'Opções'),
-				options = tipos,
+                options = tipos,
                 defaultValue= 2
             )
         )

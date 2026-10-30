@@ -15,7 +15,20 @@ __author__ = 'Leandro França'
 __date__ = '2022-01-05'
 __copyright__ = '(C) 2021, Leandro França'
 
-from qgis.core import *
+from qgis.core import (
+    Qgis,
+    QgsApplication,
+    QgsFeatureRequest,
+    QgsGeometry,
+    QgsLineString,
+    QgsMultiPolygon,
+    QgsPolygon,
+    QgsProcessingAlgorithm,
+    QgsProcessingException,
+    QgsProcessingParameterBoolean,
+    QgsProcessingParameterEnum,
+    QgsProcessingParameterVectorLayer,
+)
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
 from lftools.geocapt.cartography import geom2PointList, OrientarPoligono, Mesclar_Multilinhas
@@ -93,31 +106,31 @@ class PolygonOrientation(QgsProcessingAlgorithm):
         )
 
         orient = [self.tr('Clockwise','Horário'),
-				  self.tr('Counterclockwise','Anti-horário'),
-				  self.tr('Do not change','Não alterar')
+                  self.tr('Counterclockwise','Anti-horário'),
+                  self.tr('Do not change','Não alterar')
                ]
 
         self.addParameter(
             QgsProcessingParameterEnum(
                 self.ORIENTATION,
                 self.tr('Orientation', 'Orientação'),
-				options = orient,
+                options = orient,
                 defaultValue= 0
             )
         )
 
         opcoes = [self.tr('Polygon sequence (do not change)','Sequência do polígono (não alterar)'),
-				  self.tr('Northmost','Mais ao Norte'),
-				  self.tr('Southernmost','Mais ao Sul'),
-				  self.tr('Eastmost','Mais ao Leste'),
-				  self.tr('Westmost','Mais ao Oeste')
+                  self.tr('Northmost','Mais ao Norte'),
+                  self.tr('Southernmost','Mais ao Sul'),
+                  self.tr('Eastmost','Mais ao Leste'),
+                  self.tr('Westmost','Mais ao Oeste')
                ]
 
         self.addParameter(
             QgsProcessingParameterEnum(
                 self.FIRST,
                 self.tr('First point', 'Primeiro Ponto'),
-				options = opcoes,
+                options = opcoes,
                 defaultValue= 1
             )
         )

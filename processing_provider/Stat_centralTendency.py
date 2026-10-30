@@ -120,7 +120,7 @@ Observação: Camada em um SRC projetado obtém resultado mais acurados.'''
             QgsProcessingParameterEnum(
                 self.STATS,
                 self.tr('Statistics', 'Estatística'),
-				options = tipos,
+                options = tipos,
                 defaultValue = 1
             )
         )

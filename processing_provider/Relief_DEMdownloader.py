@@ -15,10 +15,25 @@ __author__ = 'Leandro França'
 __date__ = '2024-11-09'
 __copyright__ = '(C) 2024, Leandro França'
 
-from qgis.core import *
+from qgis.core import (
+    QgsApplication,
+    QgsCoordinateReferenceSystem,
+    QgsCoordinateTransform,
+    QgsGeometry,
+    QgsPoint,
+    QgsProcessingAlgorithm,
+    QgsProcessingException,
+    QgsProcessingParameterBoolean,
+    QgsProcessingParameterEnum,
+    QgsProcessingParameterExtent,
+    QgsProcessingParameterFileDestination,
+    QgsProcessingUtils,
+    QgsProject,
+    QgsRasterLayer,
+)
 from lftools.geocapt.imgs import Imgs
 from lftools.geocapt.cartography import reprojectPoints, gerar_tiles, folder_10x10_for_tile
-from lftools.geocapt.dem import *
+from lftools.geocapt.dem import ANADEM_tiles, COPDEM30_tiles, FABDEM_tiles, GMTED_tiles, SRTM_tiles
 from lftools.translations.translate import translate
 import os
 import gzip
@@ -104,7 +119,7 @@ class DEMdownloader(QgsProcessingAlgorithm):
             QgsProcessingParameterEnum(
                 self.DATASET,
                 self.tr('DEM', 'MDE'),
-				options = self.dataset,
+                options = self.dataset,
                 defaultValue= 0
             )
         )
@@ -120,7 +135,7 @@ class DEMdownloader(QgsProcessingAlgorithm):
             QgsProcessingParameterEnum(
                 self.STYLE,
                 self.tr('Symbology', 'Simbologia'),
-				options = estilos,
+                options = estilos,
                 defaultValue= 1
             )
         )
@@ -274,7 +289,7 @@ class DEMdownloader(QgsProcessingAlgorithm):
                     hgt_path = self.gunzip_file(out_path)
                     try:
                         os.remove(out_path)  # remove o .gz após descompactar
-                    except:
+                    except Exception:
                         pass
                     rasters += [hgt_path]
                 else:
@@ -335,7 +350,7 @@ class DEMdownloader(QgsProcessingAlgorithm):
         for rst in rasters:
             try:
                 os.remove(rst)
-            except:
+            except Exception:
                 pass
 
         

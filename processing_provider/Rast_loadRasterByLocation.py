@@ -231,7 +231,7 @@ class LoadRasterByLocation(QgsProcessingAlgorithm):
                     for caminho in selecao:
                         head, tail = os.path.split(caminho)
                         shutil.copy2(caminho, os.path.join(saida, tail))
-            except:
+            except Exception:
                 feedback.pushInfo(self.tr('Problem opening the file: {}'.format(file_path), 'Problema para abrir o arquivo: {}'.format(file_path)))
 
             if feedback.isCanceled():

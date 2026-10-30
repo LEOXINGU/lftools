@@ -115,7 +115,7 @@ class PointCloudAdjust(QgsProcessingAlgorithm):
             QgsProcessingParameterEnum(
                 self.HORIZONTAL,
                 self.tr('Method of horizontal adjustment', 'Método de ajuste horizontal'),
-				options = horiz_ajust,
+                options = horiz_ajust,
                 defaultValue= 2
             )
         )
@@ -127,7 +127,7 @@ class PointCloudAdjust(QgsProcessingAlgorithm):
             QgsProcessingParameterEnum(
                 self.VERTICAL,
                 self.tr('Method of vertical adjustment', 'Método de ajuste vertical'),
-				options = vert_ajust,
+                options = vert_ajust,
                 defaultValue = 1
             )
         )
@@ -260,7 +260,7 @@ class PointCloudAdjust(QgsProcessingAlgorithm):
                 else:
                     linha = '{:.2f} {:.2f} {:.2f}' + (len(lista)-3)*' {}' + '\n'
                     arq_out.write(linha.format(X_novo, Y_novo, Z_novo, *lista[3:]))
-            except:
+            except Exception:
                 pass
             if feedback.isCanceled():
                 break

@@ -15,7 +15,21 @@ __author__ = 'Leandro França'
 __date__ = '2019-11-02'
 __copyright__ = '(C) 2019, Leandro França'
 
-from qgis.core import *
+from qgis.core import (
+    Qgis,
+    QgsApplication,
+    QgsFeature,
+    QgsFeatureSink,
+    QgsGeometry,
+    QgsPoint,
+    QgsPointXY,
+    QgsProcessingAlgorithm,
+    QgsProcessingException,
+    QgsProcessingParameterCrs,
+    QgsProcessingParameterFeatureSink,
+    QgsProcessingParameterFeatureSource,
+    QgsProcessingParameterField,
+)
 import processing
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
@@ -189,11 +203,11 @@ class CoordinatesToLayer(QgsProcessingAlgorithm):
                 try:
                     X = float(X.replace(',','.'))
                     Y = float(Y.replace(',','.'))
-                except:
+                except Exception:
                     try:
                         X = dms2dd(X.replace(',','.'))
                         Y = dms2dd(Y.replace(',','.'))
-                    except:
+                    except Exception:
                         valido = False
 
             if Z_field:
@@ -201,7 +215,7 @@ class CoordinatesToLayer(QgsProcessingAlgorithm):
                 if isinstance(Z, str):
                     try:
                         Z = float(Z.replace(',','.'))
-                    except:
+                    except Exception:
                         valido = False
                         feedback.pushInfo(self.tr('Feature id {} has attributes Z={} incompatible for point geometry!'.format(feat.id(), att[Z_id]),
                                                   'Feição de id {} tem atributos Z={} incompatível para geometria ponto!'.format(feat.id(),att[Z_id]) ))

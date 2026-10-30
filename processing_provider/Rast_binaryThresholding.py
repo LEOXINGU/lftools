@@ -130,7 +130,7 @@ Uma classe irá corresponder aos valores compreendidos dentro do intervalo dos l
             QgsProcessingParameterEnum(
                 self.METHOD,
                 self.tr('Calculation of thresholds', 'Cálculo dos limiares'),
-				options = opcoes,
+                options = opcoes,
                 defaultValue= 3
             )
         )
@@ -207,7 +207,7 @@ Uma classe irá corresponder aos valores compreendidos dentro do intervalo dos l
                     lim_max = a
                 else:
                     raise QgsProcessingException(self.tr('The maximum and minimum thresholds cannot be the same!', 'O limiares máximo e mínimo não podem ser iguais!'))
-            except:
+            except Exception:
                 raise QgsProcessingException(self.tr('Check that the minimum and maximum threshold values are correct!', 'Verifique se os valores de limiares mínimo e máximo estão corretos!'))
 
         metodo = self.parameterAsEnum(
@@ -316,7 +316,7 @@ Uma classe irá corresponder aos valores compreendidos dentro do intervalo dos l
                         for y in range(tam[1]):
                             if recorte[x][y]:
                                 valores += [float(recorte_img[x][y])]
-            except: #ponto elif layer.wkbType() == Qgis.GeometryType.Point:
+            except Exception: #ponto elif layer.wkbType() == Qgis.GeometryType.Point:
                 for feat in layer.getFeatures():
                     geom = feat.geometry() if mesmoSRC else reprojectPoints(feat.geometry(), coordinateTransformer)
                     if geom.isMultipart():

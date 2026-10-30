@@ -38,7 +38,7 @@ from numpy import radians, arctan, pi, sin, cos, matrix, sqrt, degrees, array, d
 from numpy.linalg import norm, pinv, inv
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
-from lftools.geocapt.topogeo import *
+from lftools.geocapt.topogeo import DifAz, String2NumberList, String2StringList, azimute, dd2dms, dms2dd, str2HTML
 import os
 from qgis.PyQt.QtGui import QIcon
 
@@ -234,10 +234,13 @@ class TraverseAdjustment(QgsProcessingAlgorithm):
         Jac = zeros([n_d, n_par])
         pnts2 = [B] + pnts + [Y]
         for k in range(n_d):
-            I = pnts2[k]
-            J = pnts2[k+1]
-            IJ = norm(array(J) - array(I))
-            linha = [(I[0]-J[0])/IJ, (I[1]-J[1])/IJ, (J[0]-I[0])/IJ, (J[1]-I[1])/IJ]
+            point_i = pnts2[k]
+            point_j = pnts2[k+1]
+            segment_length = norm(array(point_j) - array(point_i))
+            linha = [(point_i[0]-point_j[0])/segment_length,
+                     (point_i[1]-point_j[1])/segment_length,
+                     (point_j[0]-point_i[0])/segment_length,
+                     (point_j[1]-point_i[1])/segment_length]
             if k == 0:
                 Jac[k, 0:2] = linha[2:]
             elif k < (n_d-1):
@@ -251,12 +254,12 @@ class TraverseAdjustment(QgsProcessingAlgorithm):
         pnts2 = [A, B] + pnts + [Y, Z]
         for k in range(n_angs):
             B = pnts2[k]
-            I = pnts2[k+1]
+            point_i = pnts2[k+1]
             F = pnts2[k+2]
-            IB = norm(array(B) - array(I))
-            IF = norm(array(F) - array(I))
-            linha = [(I[1]-B[1])/IB**2, (B[0]-I[0])/IB**2, (B[1]-I[1])/IB**2 - (F[1]-I[1])/IF**2,
-                     (I[0]-B[0])/IB**2 - (I[0]-F[0])/IF**2, (F[1]-I[1])/IF**2, (I[0]-F[0])/IF**2]
+            IB = norm(array(B) - array(point_i))
+            IF = norm(array(F) - array(point_i))
+            linha = [(point_i[1]-B[1])/IB**2, (B[0]-point_i[0])/IB**2, (B[1]-point_i[1])/IB**2 - (F[1]-point_i[1])/IF**2,
+                     (point_i[0]-B[0])/IB**2 - (point_i[0]-F[0])/IF**2, (F[1]-point_i[1])/IF**2, (point_i[0]-F[0])/IF**2]
             linha = list(self.rho*array(linha))
             if n_par > 2:
                 if k == 0:
@@ -439,9 +442,9 @@ class TraverseAdjustment(QgsProcessingAlgorithm):
 
         while cont < cont_max:
             F_Xo = self.F_X_d(pnts, B, Y) + self.F_X_a(pnts, A, B, Y, Z)
-            J = matrix(list(self.Jacobiana_d(pnts, B, Y, n_d, n_par)) + list(self.Jacobiana_a(pnts, A, B, Y, Z, n_angs, n_par)))
+            jacobian = matrix(list(self.Jacobiana_d(pnts, B, Y, n_d, n_par)) + list(self.Jacobiana_a(pnts, A, B, Y, Z, n_angs, n_par)))
             L = matrix(Lb - F_Xo)
-            delta = pinv(J.T*P*J)*J.T*P*L
+            delta = pinv(jacobian.T*P*jacobian)*jacobian.T*P*L
             Xa = array(Xo) + array(delta)
             cont += 1
             #print('Iteração:', cont, '\ncoord:', Xa.T, '\ndelta:', delta.T)
@@ -466,10 +469,10 @@ class TraverseAdjustment(QgsProcessingAlgorithm):
         La = Lb + V
 
         # MVC de Xa
-        SigmaXa = sigma2[0,0]*pinv(J.T*P*J)
+        SigmaXa = sigma2[0,0]*pinv(jacobian.T*P*jacobian)
 
         # MVC de La
-        SigmaLa = J*SigmaXa*J.T
+        SigmaLa = jacobian*SigmaXa*jacobian.T
 
         # MVC de Lb
         var_priori = 1.0

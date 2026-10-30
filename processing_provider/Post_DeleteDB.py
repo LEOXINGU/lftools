@@ -134,7 +134,7 @@ Obs.:
             QgsProcessingParameterEnum(
                 self.VERSION,
                 self.tr('PostgreSQL version', 'Versão do PostgreSQL'),
-				options = self.versions,
+                options = self.versions,
                 defaultValue = postgresql_version
             )
         )

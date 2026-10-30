@@ -102,7 +102,7 @@ class CompressJPEG(QgsProcessingAlgorithm):
             QgsProcessingParameterEnum(
                 self.TYPE,
                 self.tr('Compression Type', 'Tipo de Compressão'),
-				options = ['JPEG_PHOTOMETRIC','JPEG', 'PHOTOMETRIC'],
+                options = ['JPEG_PHOTOMETRIC','JPEG', 'PHOTOMETRIC'],
                 defaultValue= 0
             )
         )
@@ -111,7 +111,7 @@ class CompressJPEG(QgsProcessingAlgorithm):
             QgsProcessingParameterEnum(
                 self.QUALITY,
                 self.tr('Quality', 'Qualidade'),
-				options = ['65%', '75%', '85%'],
+                options = ['65%', '75%', '85%'],
                 defaultValue= 1
             )
         )

@@ -109,7 +109,7 @@ O processo de filtragem é feito utilizando matrizes denominadas máscaras (ou k
             QgsProcessingParameterEnum(
                 self.KERNEL,
                 self.tr('Filter', 'Filtro'),
-				options = tipos,
+                options = tipos,
                 defaultValue= 0
             )
         )

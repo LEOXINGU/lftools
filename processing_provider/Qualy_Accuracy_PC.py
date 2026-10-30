@@ -16,13 +16,72 @@ __date__ = '2026-09-26'
 __copyright__ = '(C) 2026, Leandro França'
 
 from qgis.PyQt.QtCore import QMetaType
-from qgis.core import *
+from qgis.core import (
+    Qgis,
+    QgsApplication,
+    QgsCoordinateTransform,
+    QgsFeature,
+    QgsFeatureSink,
+    QgsField,
+    QgsGeometry,
+    QgsMarkerSymbol,
+    QgsPalLayerSettings,
+    QgsPointXY,
+    QgsProcessing,
+    QgsProcessingAlgorithm,
+    QgsProcessingException,
+    QgsProcessingParameterCrs,
+    QgsProcessingParameterEnum,
+    QgsProcessingParameterFeatureSink,
+    QgsProcessingParameterFeatureSource,
+    QgsProcessingParameterField,
+    QgsProcessingParameterFileDestination,
+    QgsProcessingParameterNumber,
+    QgsProcessingParameterPointCloudLayer,
+    QgsProcessingUtils,
+    QgsProject,
+    QgsRuleBasedRenderer,
+    QgsTextBufferSettings,
+    QgsTextFormat,
+    QgsVectorLayer,
+    QgsVectorLayerSimpleLabeling,
+)
 from numpy import sqrt, array, mean, std, pi, sin
 import numpy as np
 from datetime import datetime
 import base64
 from io import BytesIO
-from lftools.geocapt.imgs import *
+from lftools.geocapt.imgs import Imgs, lftools_logo
+from qgis.core import (
+    Qgis,
+    QgsApplication,
+    QgsCoordinateTransform,
+    QgsFeature,
+    QgsFeatureSink,
+    QgsField,
+    QgsGeometry,
+    QgsMarkerSymbol,
+    QgsPalLayerSettings,
+    QgsPointXY,
+    QgsProcessing,
+    QgsProcessingAlgorithm,
+    QgsProcessingException,
+    QgsProcessingParameterCrs,
+    QgsProcessingParameterEnum,
+    QgsProcessingParameterFeatureSink,
+    QgsProcessingParameterFeatureSource,
+    QgsProcessingParameterField,
+    QgsProcessingParameterFileDestination,
+    QgsProcessingParameterNumber,
+    QgsProcessingParameterPointCloudLayer,
+    QgsProcessingUtils,
+    QgsProject,
+    QgsRuleBasedRenderer,
+    QgsTextBufferSettings,
+    QgsTextFormat,
+    QgsVectorLayer,
+    QgsVectorLayerSimpleLabeling,
+)
 from lftools.translations.translate import translate
 from lftools.geocapt.topogeo import str2HTML
 from lftools.geocapt.cartography import PEC

@@ -228,7 +228,7 @@ Os operadores suportados são: + , - , * , /'''
                         INDICE = formula
             else:
                 raise QgsProcessingException(self.tr('Check the input formula!', 'Verifique a fórmula de entrada!'))
-        except:
+        except Exception:
             raise QgsProcessingException(self.tr('Check if your formula is correct!', 'Verifique se sua fórmula está correta!'))
 
         # Criate driver

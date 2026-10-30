@@ -126,17 +126,17 @@ class SequencePoints(QgsProcessingAlgorithm):
         )
 
         opcoes = [self.tr('Polygon sequence','Sequência do polígono'),
-				  self.tr('Northmost','Mais ao Norte'),
-				  self.tr('Southernmost','Mais ao Sul'),
-				  self.tr('Eastmost','Mais ao Leste'),
-				  self.tr('Westmost','Mais ao Oeste')
+                  self.tr('Northmost','Mais ao Norte'),
+                  self.tr('Southernmost','Mais ao Sul'),
+                  self.tr('Eastmost','Mais ao Leste'),
+                  self.tr('Westmost','Mais ao Oeste')
                ]
 
         self.addParameter(
             QgsProcessingParameterEnum(
                 self.FIRST,
                 self.tr('First point', 'Primeiro Ponto'),
-				options = opcoes,
+                options = opcoes,
                 defaultValue= 0
             )
         )

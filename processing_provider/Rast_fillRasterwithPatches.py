@@ -117,7 +117,7 @@ class FillRasterwithPatches(QgsProcessingAlgorithm):
             QgsProcessingParameterEnum(
                 self.RESAMPLING,
                 self.tr('Interpolation', 'Interpolação'),
-				options = interp,
+                options = interp,
                 defaultValue= 0
             )
         )
@@ -206,7 +206,7 @@ class FillRasterwithPatches(QgsProcessingAlgorithm):
             feedback.pushInfo(self.tr('Opening Band Alpha...', 'Abrindo Banda Alfa...'))
             band4 = image.GetRasterBand(4).ReadAsArray()
         Pixel_Nulo = image.GetRasterBand(1).GetNoDataValue()
-        if Pixel_Nulo == None:
+        if Pixel_Nulo is None:
             Pixel_Nulo = 0
         image=None # Fechar imagem
 
@@ -236,7 +236,7 @@ class FillRasterwithPatches(QgsProcessingAlgorithm):
             lry = uly + (Rem_rows * yres)
             bbox = [ulx, lrx, lry, uly]
             Rem_nulo = Rem.GetRasterBand(1).GetNoDataValue()
-            if Rem_nulo == None:
+            if Rem_nulo is None:
                 Rem_nulo = 0
             Rem_band1 = Rem.GetRasterBand(1).ReadAsArray()
             if n_bands >1:

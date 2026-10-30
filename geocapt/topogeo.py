@@ -359,12 +359,12 @@ def str_decimal_to_datetime(dt_str):
 # Hora GPS
 def gpsdate(Y, M, DoM, Hr, Mn, Sc):
     '''
-    		Inputs:
-    		  Year, Month, Day, Hour, Min, Sec
+            Inputs:
+              Year, Month, Day, Hour, Min, Sec
 
-    		Returns: year, month, day of month, day of year, GPS week,
-    			 day of GPS week, second of GPS week, Julian day,
-    			 decimal year.
+            Returns: year, month, day of month, day of year, GPS week,
+                 day of GPS week, second of GPS week, Julian day,
+                 decimal year.
     '''
     UT = Hr + Mn/60 + Sc/3600
     if M <= 2:

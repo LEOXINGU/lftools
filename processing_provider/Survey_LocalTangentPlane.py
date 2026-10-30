@@ -16,7 +16,27 @@ __date__ = '2019-10-28'
 __copyright__ = '(C) 2019, Leandro França'
 
 from qgis.PyQt.QtCore import QMetaType
-from qgis.core import *
+from qgis.core import (
+    Qgis,
+    QgsApplication,
+    QgsCoordinateReferenceSystem,
+    QgsEllipsoidUtils,
+    QgsFeature,
+    QgsFeatureSink,
+    QgsField,
+    QgsFields,
+    QgsGeometry,
+    QgsPointXY,
+    QgsProcessingAlgorithm,
+    QgsProcessingException,
+    QgsProcessingParameterCrs,
+    QgsProcessingParameterEnum,
+    QgsProcessingParameterFeatureSink,
+    QgsProcessingParameterFeatureSource,
+    QgsProcessingParameterField,
+    QgsProcessingParameterNumber,
+    QgsProcessingParameterString,
+)
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
 from lftools.geocapt.topogeo import geod2geoc, geoc2geod, geoc2enu, enu2geoc, dd2dms, dms2dd
@@ -115,7 +135,7 @@ Saiba mais:'''
             QgsProcessingParameterEnum(
                 self.TYPE,
                 self.tr('Input Coordinates type', 'Tipo de Coordenadas de Entrada'),
-				options = types,
+                options = types,
                 defaultValue= 0
             )
         )

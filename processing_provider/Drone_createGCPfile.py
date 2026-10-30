@@ -212,7 +212,7 @@ class CreateGCPfile(QgsProcessingAlgorithm):
             t = str(geom.constGet().z())
             try:
                 t = str(geom.constGet().z())
-            except:
+            except Exception:
                 t = 'nan'
             if t == 'nan':
                 eh3d = False
@@ -242,7 +242,7 @@ class CreateGCPfile(QgsProcessingAlgorithm):
             if z_field:
                 try:
                     X, Y, Z = pnt.x(), pnt.y(), float(str(feat[z_field]).replace(',','.'))
-                except:
+                except Exception:
                     raise QgsProcessingException(f'Invalid Z value {str(feat[z_field])} for feature ID {feat.id()}')
             else:
                 if not eh3d:

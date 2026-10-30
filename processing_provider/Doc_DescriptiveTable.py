@@ -26,7 +26,6 @@ from qgis.core import (Qgis,
                        QgsProcessingAlgorithm,
                        QgsProcessingParameterNumber,
                        QgsProcessingParameterString,
-                       QgsProcessingParameterNumber,
                        QgsProcessingParameterEnum,
                        QgsPoint, QgsLineString, QgsPolygon,
                        QgsGeometry,
@@ -165,7 +164,7 @@ class DescriptiveTable(QgsProcessingAlgorithm):
 
         tipos = [self.tr('Planimetric (E,N)','Planimétrico (E,N)'),
                   self.tr('Planimetric (N,E)','Planimétrico (N,E)'),
-				  self.tr('E, N, h, azimuth, distance', 'E, N, h, azimute, distância'),
+                  self.tr('E, N, h, azimuth, distance', 'E, N, h, azimute, distância'),
                   self.tr('E, N, h'),
                   self.tr('Lon, Lat, h, azimuth, distance', 'Lon, Lat, h, azimute, distância'),
                   self.tr('Lon, Lat, h'),
@@ -181,7 +180,7 @@ class DescriptiveTable(QgsProcessingAlgorithm):
             QgsProcessingParameterEnum(
                 self.MODEL,
                 self.tr('Model', 'Modelo'),
-				options = tipos,
+                options = tipos,
                 defaultValue= 0
             )
         )
@@ -197,7 +196,7 @@ class DescriptiveTable(QgsProcessingAlgorithm):
                 self.CALC,
                 self.tr('Calculation of azimuths and distances',
                         'Cálculo de azimutes e distâncias'),
-				options = calc,
+                options = calc,
                 defaultValue = 0
             )
         )
@@ -245,7 +244,7 @@ class DescriptiveTable(QgsProcessingAlgorithm):
                                          context)
         if titulo is None:
             titulo = ''
-        if not titulo in ['',' ']:
+        if titulo not in ['',' ']:
             titulo = ' - ' + titulo
 
         fontsize = self.parameterAsInt(
@@ -270,7 +269,7 @@ class DescriptiveTable(QgsProcessingAlgorithm):
         # Precisão da altitude
         try:
             prec_h = int(decimal[0]) # teste se precisão das coordenadas é número inteiro
-        except:
+        except Exception:
             prec_h = round(10*(float(decimal[0]) - math.floor(float(decimal[0]))))
             decimal[0] = str(int(float(decimal[0])))
 
@@ -347,9 +346,9 @@ class DescriptiveTable(QgsProcessingAlgorithm):
             try:
                 ordem_comp += [feat[sequencia]]
                 codigo_item = feat[codigo]
-            except:
+            except Exception:
                 raise QgsProcessingException(self.tr('Check that your layer "limit_point_p" has the correct field names for the TopoGeo model! More information: https://bit.ly/3FDNQGC', 'Verifique se sua camada "Ponto Limite" está com os nomes dos campos corretos para o modelo TopoGeo! Mais informações: https://geoone.com.br/ebook_gratis/'))
-            if not codigo_item or codigo_item in ['', ' ']:
+            if codigo_item or codigo_item not in ['', ' ']:
                 raise QgsProcessingException(self.tr('The code attribute must be filled in for all features!', 'O atributo código deve ser preenchido para todas as feições!'))
         ordem_comp.sort()
         if ordem_list != ordem_comp:

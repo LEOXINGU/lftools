@@ -25,7 +25,7 @@ from qgis.core import (Qgis,
                        QgsApplication,
                        QgsProject,
                        QgsRasterLayer,
-                       QgsCoordinateReferenceSystem)
+                       )
 
 from osgeo import osr, gdal_array, gdal #https://gdal.org/python/
 from math import floor, ceil

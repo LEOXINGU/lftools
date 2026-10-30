@@ -54,9 +54,6 @@ class RandomDist(QgsProcessingAlgorithm):
     def displayName(self):
         return self.tr('Gaussian random points', 'Pontos aleatórios gaussiano')
 
-    def tags(self):
-        return 'GeoOne,gaussian,random,distribution,normal,mean,variance'.split(',')
-
     def group(self):
         return self.tr('Spatial Statistics', 'Estatística Espacial')
 
@@ -64,7 +61,7 @@ class RandomDist(QgsProcessingAlgorithm):
         return 'spatialstatistics'
 
     def tags(self):
-        return self.tr('random,gauss,confidence,deviational,standard,tendency,dispertion,directional,trend,confidence,covariance,mvc').split(',')
+        return self.tr('random,GeoOne,gaussian,random,distribution,normal,mean,variance,gauss,confidence,deviational,standard,tendency,dispertion,directional,trend,confidence,covariance,mvc').split(',')
 
     def icon(self):
         return QIcon(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images/statistics.png'))

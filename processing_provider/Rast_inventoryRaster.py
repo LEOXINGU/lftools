@@ -130,7 +130,7 @@ class InventoryRaster(QgsProcessingAlgorithm):
             QgsProcessingParameterEnum(
                 self.GEOMETRY,
                 self.tr('Geometry', 'Geometria'),
-				options = [self.tr('Polygon','Polígono'), self.tr('Point','Ponto')],
+                options = [self.tr('Polygon','Polígono'), self.tr('Point','Ponto')],
                 defaultValue= 0
             )
         )

@@ -14,13 +14,13 @@ __author__ = 'Leandro França'
 __date__ = '2021-11-04'
 __copyright__ = '(C) 2021, Leandro França'
 
-from qgis.core import *
-from qgis.gui import *
+from qgis.core import QgsApplication, QgsGeometry, QgsPointXY, QgsProcessingException
+
 from lftools.geocapt.topogeo import str2HTML
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
-from qgis.core import *
-from qgis.gui import *
+from qgis.core import QgsApplication, QgsGeometry, QgsPointXY, QgsProcessingException
+
 import numpy as np
 from numpy.linalg import norm, det, inv, solve
 

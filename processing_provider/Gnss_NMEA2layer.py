@@ -16,7 +16,26 @@ __date__ = '2022-02-27'
 __copyright__ = '(C) 2022, Leandro França'
 
 from qgis.PyQt.QtCore import QMetaType
-from qgis.core import *
+from qgis.core import (
+    Qgis,
+    QgsApplication,
+    QgsFeature,
+    QgsFeatureSink,
+    QgsField,
+    QgsFields,
+    QgsPoint,
+    QgsProcessingAlgorithm,
+    QgsProcessingException,
+    QgsProcessingLayerPostProcessorInterface,
+    QgsProcessingParameterCrs,
+    QgsProcessingParameterEnum,
+    QgsProcessingParameterFeatureSink,
+    QgsProcessingParameterFile,
+    QgsProcessingParameterNumber,
+    QgsProcessingUtils,
+    QgsRuleBasedRenderer,
+    QgsSymbol,
+)
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
 from lftools.geocapt.cartography import raioMedioGauss
@@ -110,7 +129,7 @@ Modos:
             QgsProcessingParameterEnum(
                 self.TYPE,
                 self.tr('Attributes', 'Atributos'),
-				options = tipo,
+                options = tipo,
                 defaultValue= 0
             )
         )
@@ -216,7 +235,7 @@ Modos:
                         dia = int(partes[9][0:2])
                         mes = int(partes[9][2:4])
                         ano = int(partes[9][4:6])+2000
-            except:
+            except Exception:
                 pass
 
         arq.close()
@@ -265,7 +284,7 @@ Modos:
                 feat.setGeometry(QgsPoint(pnt[1],pnt[0], pnt[2]))
                 try:
                     data_hora = str(datetime.datetime(ano, mes, dia, pnt[-5], pnt[-4], int(pnt[-3])))
-                except:
+                except Exception:
                     data_hora = None
                 feat.setAttributes(pnt[0:5] + [data_hora] + pnt[5:8] + pnt[-2:]  ) # lat, lon, h, H, N, HDOP, VDOP, PDOP, hora, min, seg, quality, num_sat
                 sink.addFeature(feat, QgsFeatureSink.Flag.FastInsert)
@@ -286,7 +305,7 @@ Modos:
             try:
                 data_hora_ini = str(datetime.datetime(ano, mes, dia, int(valores[0, -5]), int(valores[0, -4]), int(float(valores[0, -3]))))
                 data_hora_fim = str(datetime.datetime(ano, mes, dia, int(valores[-1, -5]), int(valores[-1, -4]), int(float(valores[-1, -3]))))
-            except:
+            except Exception:
                 data_hora_ini, data_hora_fim = None, None
             # Raio Médio de Gauss
             R = raioMedioGauss(lat, self.tr('EPSG:4326','EPSG:4674'))
@@ -321,7 +340,7 @@ Modos:
             try:
                 data_hora_ini = str(datetime.datetime(ano, mes, dia, int(valores[0, -5]), int(valores[0, -4]), int(float(valores[0, -3]))))
                 data_hora_fim = str(datetime.datetime(ano, mes, dia, int(valores[-1, -5]), int(valores[-1, -4]), int(float(valores[-1, -3]))))
-            except:
+            except Exception:
                 data_hora_ini, data_hora_fim = None, None
             # Raio Médio de Gauss
             R = raioMedioGauss(lat, self.tr('EPSG:4326','EPSG:4674'))

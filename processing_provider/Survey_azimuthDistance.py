@@ -128,10 +128,10 @@ class AzimuthDistance(QgsProcessingAlgorithm):
             defaultValue=False))
         self.addParameter(QgsProcessingParameterFeatureSink(
             self.OUTPUT_POINTS, self.tr('Vertices', 'Vértices'),
-            type=QgsProcessing.TypeVectorPoint))
+            type=QgsProcessing.SourceType.TypeVectorPoint))
         self.addParameter(QgsProcessingParameterFeatureSink(
             self.OUTPUT_LINES, self.tr('Traverse sides', 'Lados da poligonal'),
-            type=QgsProcessing.TypeVectorLine))
+            type=QgsProcessing.SourceType.TypeVectorLine))
 
     @staticmethod
     def _split_values(text, keep_empty=False):

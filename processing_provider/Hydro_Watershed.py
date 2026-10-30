@@ -217,7 +217,7 @@ Documentação do GRASS GIS: <a href="https://grass.osgeo.org/grass-stable/manua
                     'Drainage initiation threshold',
                     'Limiar para iniciar a drenagem',
                 ),
-                type=QgsProcessingParameterNumber.Double,
+                type=QgsProcessingParameterNumber.Type.Double,
                 minValue=0.000001,
                 defaultValue=1000.0,
             )
@@ -261,7 +261,7 @@ Documentação do GRASS GIS: <a href="https://grass.osgeo.org/grass-stable/manua
                     'Maximum adjustment distance (m)',
                     'Distância máxima de ajuste (m)',
                 ),
-                type=QgsProcessingParameterNumber.Double,
+                type=QgsProcessingParameterNumber.Type.Double,
                 minValue=0.0,
                 defaultValue=100.0,
             )
@@ -273,7 +273,7 @@ Documentação do GRASS GIS: <a href="https://grass.osgeo.org/grass-stable/manua
                     'Memory available to GRASS (MB)',
                     'Memória disponível para o GRASS (MB)',
                 ),
-                type=QgsProcessingParameterNumber.Integer,
+                type=QgsProcessingParameterNumber.Type.Integer,
                 minValue=64,
                 defaultValue=500,
             )
@@ -657,7 +657,7 @@ Documentação do GRASS GIS: <a href="https://grass.osgeo.org/grass-stable/manua
             self.DRAINAGE_VECTOR,
             context,
             fields,
-            QgsWkbTypes.LineString,
+            QgsWkbTypes.Type.LineString,
             dem_layer.crs(),
         )
         if drainage_sink is None:
@@ -1089,7 +1089,7 @@ Documentação do GRASS GIS: <a href="https://grass.osgeo.org/grass-stable/manua
             self.OUTLET_POINTS,
             context,
             fields,
-            QgsWkbTypes.Point,
+            QgsWkbTypes.Type.Point,
             crs,
         )
         if sink is None:
@@ -1107,7 +1107,7 @@ Documentação do GRASS GIS: <a href="https://grass.osgeo.org/grass-stable/manua
                 original_point.y(),
             ]
         )
-        sink.addFeature(original, QgsFeatureSink.FastInsert)
+        sink.addFeature(original, QgsFeatureSink.Flag.FastInsert)
         adjusted = QgsFeature(fields)
         adjusted.setGeometry(QgsGeometry.fromPointXY(adjusted_point))
         adjusted.setAttributes(
@@ -1119,7 +1119,7 @@ Documentação do GRASS GIS: <a href="https://grass.osgeo.org/grass-stable/manua
                 adjusted_point.y(),
             ]
         )
-        sink.addFeature(adjusted, QgsFeatureSink.FastInsert)
+        sink.addFeature(adjusted, QgsFeatureSink.Flag.FastInsert)
         return destination
 
     def _create_basin_vector(
@@ -1206,7 +1206,7 @@ Documentação do GRASS GIS: <a href="https://grass.osgeo.org/grass-stable/manua
             self.BASIN_VECTOR,
             context,
             fields,
-            QgsWkbTypes.MultiPolygon,
+            QgsWkbTypes.Type.MultiPolygon,
             crs,
         )
         if sink is None:
@@ -1224,5 +1224,5 @@ Documentação do GRASS GIS: <a href="https://grass.osgeo.org/grass-stable/manua
                 float(adjustment_m),
             ]
         )
-        sink.addFeature(feature, QgsFeatureSink.FastInsert)
+        sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
         return sink, destination

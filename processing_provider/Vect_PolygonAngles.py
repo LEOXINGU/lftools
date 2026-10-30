@@ -16,7 +16,23 @@ __date__ = '2019-11-02'
 __copyright__ = '(C) 2019, Leandro França'
 
 from qgis.PyQt.QtCore import QMetaType
-from qgis.core import *
+from qgis.core import (
+    Qgis,
+    QgsApplication,
+    QgsFeature,
+    QgsFeatureSink,
+    QgsField,
+    QgsFields,
+    QgsGeometry,
+    QgsPointXY,
+    QgsProcessingAlgorithm,
+    QgsProcessingException,
+    QgsProcessingParameterFeatureSink,
+    QgsProcessingParameterFeatureSource,
+    QgsProcessingParameterField,
+    QgsProcessingParameterNumber,
+    QgsProcessingUtils,
+)
 from math import pi
 from numpy.linalg import norm
 import numpy as np
@@ -347,7 +363,7 @@ class CalculatePolygonAngles(QgsProcessingAlgorithm):
                                                 ])
                         sink3.addFeature(fet, QgsFeatureSink.Flag.FastInsert)
 
-                    except:
+                    except Exception:
                         feedback.reportError(self.tr('Angle line outside polygon bounds! Reduce radius size (distance).', 'Linha de ângulo fora dos limites do polígono! Reduza o tamanho do raio (distância).') + ' ID: {}, vertex: {}'.format(feat.id(), ponto))
 
 

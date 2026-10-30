@@ -30,7 +30,6 @@ from qgis.core import (Qgis,
                        QgsProcessingParameterFeatureSink,
                        QgsProcessingParameterRasterLayer,
                        QgsApplication,
-                       QgsProject,
                        QgsCoordinateTransform,
                        QgsCoordinateReferenceSystem)
 
@@ -135,7 +134,7 @@ Os valores das células do raster onde o centro do pixel se encontra exatamente 
             QgsProcessingParameterEnum(
                 self.STATISTICS,
                 self.tr('Statistics', 'Estatísticas'),
-				options = self.STATS,
+                options = self.STATS,
                 allowMultiple = True,
                 defaultValue = [0,2,4]
             )
@@ -203,7 +202,7 @@ Os valores das células do raster onde o centro do pixel se encontra exatamente 
         prj = image.GetProjection()
         n_bands = image.RasterCount
         Pixel_Nulo = image.GetRasterBand(1).GetNoDataValue()
-        if Pixel_Nulo == None:
+        if Pixel_Nulo is None:
             Pixel_Nulo = 0
         cols = image.RasterXSize
         rows = image.RasterYSize

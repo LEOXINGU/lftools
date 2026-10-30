@@ -16,7 +16,27 @@ __date__ = '2022-06-13'
 __copyright__ = '(C) 2022, Leandro França'
 
 from qgis.PyQt.QtCore import QMetaType
-from qgis.core import *
+from qgis.core import (
+    Qgis,
+    QgsApplication,
+    QgsCoordinateReferenceSystem,
+    QgsFeature,
+    QgsFeatureSink,
+    QgsField,
+    QgsFields,
+    QgsPoint,
+    QgsProcessingAlgorithm,
+    QgsProcessingException,
+    QgsProcessingLayerPostProcessorInterface,
+    QgsProcessingParameterCrs,
+    QgsProcessingParameterEnum,
+    QgsProcessingParameterFeatureSink,
+    QgsProcessingParameterFile,
+    QgsProcessingParameterNumber,
+    QgsProcessingUtils,
+    QgsRuleBasedRenderer,
+    QgsSymbol,
+)
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
 from lftools.geocapt.vemos import vemos
@@ -119,7 +139,7 @@ Para posicionamento relativo (RTK/PPK), os desvios-padrão da estação base pod
             QgsProcessingParameterEnum(
                 self.TYPE,
                 self.tr('Type', 'Tipo'),
-				options = tipo,
+                options = tipo,
                 defaultValue = 0
             )
         )
@@ -152,7 +172,7 @@ Para posicionamento relativo (RTK/PPK), os desvios-padrão da estação base pod
             QgsProcessingParameterEnum(
                 self.VEMOS,
                 self.tr('Velocity Model', 'Modelo de Velocidade'),
-				options = vemos,
+                options = vemos,
                 defaultValue= 0
             )
         )

@@ -15,7 +15,24 @@ __author__ = 'Leandro França'
 __date__ = '2023-08-22'
 __copyright__ = '(C) 2023, Leandro França'
 
-from qgis.core import *
+from qgis.core import (
+    Qgis,
+    QgsApplication,
+    QgsExpression,
+    QgsExpressionContext,
+    QgsExpressionContextScope,
+    QgsExpressionContextUtils,
+    QgsProcessingAlgorithm,
+    QgsProcessingException,
+    QgsProcessingFeatureSourceDefinition,
+    QgsProcessingParameterBoolean,
+    QgsProcessingParameterExpression,
+    QgsProcessingParameterFeatureSource,
+    QgsProcessingParameterField,
+    QgsProcessingParameterFile,
+    QgsProcessingParameterString,
+    QgsProject,
+)
 from lftools.geocapt.imgs import Imgs
 from lftools.translations.translate import translate
 import os, subprocess
@@ -273,6 +290,6 @@ class ExportASCII(QgsProcessingAlgorithm):
         feedback.pushInfo(self.tr('Leandro França - Eng Cart', 'Leandro Franca - Cartographic Engineer'))
         try:
             subprocess.Popen(r'explorer /select,"{}"'.format(output))
-        except:
+        except Exception:
             pass
         return {self.FOLDER: pasta}

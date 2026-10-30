@@ -15,7 +15,20 @@ __author__ = 'Leandro França'
 __date__ = '2019-11-08'
 __copyright__ = '(C) 2019, Leandro França'
 
-from qgis.core import *
+from qgis.core import (
+    Qgis,
+    QgsApplication,
+    QgsCoordinateTransform,
+    QgsFeature,
+    QgsFeatureSink,
+    QgsProcessingAlgorithm,
+    QgsProcessingException,
+    QgsProcessingParameterEnum,
+    QgsProcessingParameterFeatureSink,
+    QgsProcessingParameterFeatureSource,
+    QgsProcessingParameterFileDestination,
+    QgsProject,
+)
 import numpy as np
 from numpy.linalg import norm, inv, pinv, det, solve
 from lftools.geocapt.imgs import Imgs
@@ -113,7 +126,7 @@ Com esta ferramenta é possível realizar o correto georreferenciamento de arqui
             QgsProcessingParameterEnum(
                 self.METHOD,
                 self.tr('Method', 'Método'),
-				options = tipos,
+                options = tipos,
                 defaultValue= 2
             )
         )
@@ -156,7 +169,7 @@ Com esta ferramenta é possível realizar o correto georreferenciamento de arqui
         for feat in deslc.getFeatures():
             try:
                 coords = feat.geometry().asPolyline()
-            except:
+            except Exception:
                 raise QgsProcessingException(self.tr('The geometry type of vectors layer must be Polyline!', 'O tipo de geometria da camada de deslocamento (vetores) deve ser Polyline!'))
             if len(coords) != 2:
                 raise QgsProcessingException(self.tr('The vectors must be lines with exactly two vertices!', 'Os vetores devem ser linhas com extamente dois vértices!'))

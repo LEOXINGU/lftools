@@ -211,67 +211,67 @@ class KmlPhotos(QgsProcessingAlgorithm):
         texto = '''<?xml version="1.0" encoding="UTF-8"?>
         <kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">
         <Document>
-        	<name>[FILENAME]</name>
-        	<StyleMap id="msn_camera">
-        		<Pair>
-        			<key>normal</key>
-        			<styleUrl>#sn_camera</styleUrl>
-        		</Pair>
-        		<Pair>
-        			<key>highlight</key>
-        			<styleUrl>#sh_camera</styleUrl>
-        		</Pair>
-        	</StyleMap>
-        	<Style id="sh_camera">
-        		<IconStyle>
-        			<scale>1.4</scale>
-        			<Icon>
-        				<href>http://maps.google.com/mapfiles/kml/shapes/camera.png</href>
-        			</Icon>
-        			<hotSpot x="0.5" y="0" xunits="fraction" yunits="fraction"/>
-        		</IconStyle>
-        		<BalloonStyle>
-        		</BalloonStyle>
-        		<ListStyle>
-        		</ListStyle>
-        	</Style>
-        	<Style id="sn_camera">
-        		<IconStyle>
-        			<scale>1.2</scale>
-        			<Icon>
-        				<href>http://maps.google.com/mapfiles/kml/shapes/camera.png</href>
-        			</Icon>
-        			<hotSpot x="0.5" y="0" xunits="fraction" yunits="fraction"/>
-        		</IconStyle>
-        		<BalloonStyle>
-        		</BalloonStyle>
-        		<ListStyle>
-        		</ListStyle>
-        	</Style>
-        	[LUGARES]
+            <name>[FILENAME]</name>
+            <StyleMap id="msn_camera">
+                <Pair>
+                    <key>normal</key>
+                    <styleUrl>#sn_camera</styleUrl>
+                </Pair>
+                <Pair>
+                    <key>highlight</key>
+                    <styleUrl>#sh_camera</styleUrl>
+                </Pair>
+            </StyleMap>
+            <Style id="sh_camera">
+                <IconStyle>
+                    <scale>1.4</scale>
+                    <Icon>
+                        <href>http://maps.google.com/mapfiles/kml/shapes/camera.png</href>
+                    </Icon>
+                    <hotSpot x="0.5" y="0" xunits="fraction" yunits="fraction"/>
+                </IconStyle>
+                <BalloonStyle>
+                </BalloonStyle>
+                <ListStyle>
+                </ListStyle>
+            </Style>
+            <Style id="sn_camera">
+                <IconStyle>
+                    <scale>1.2</scale>
+                    <Icon>
+                        <href>http://maps.google.com/mapfiles/kml/shapes/camera.png</href>
+                    </Icon>
+                    <hotSpot x="0.5" y="0" xunits="fraction" yunits="fraction"/>
+                </IconStyle>
+                <BalloonStyle>
+                </BalloonStyle>
+                <ListStyle>
+                </ListStyle>
+            </Style>
+            [LUGARES]
         </Document>
         </kml>
         '''
 
         ponto_txt  = '''<Placemark>
-        		<name>[TITULO]</name>
-        		<description>[DESCR]<![CDATA[<img src="data:image/jpg;base64,[FOTO]">]]></description>
-        		<LookAt>
-        			<longitude>[LON]</longitude>
-        			<latitude>[LAT]</latitude>
-        			<altitude>[ALTITUDE]</altitude>
-        			<heading>-2.595305769485352</heading>
-        			<tilt>0</tilt>
-        			<range>1383584.739067059</range>
-        			<gx:altitudeMode>relativeToSeaFloor</gx:altitudeMode>
-        		</LookAt>
-        		<styleUrl>#msn_camera</styleUrl>
-        		<Point>
-        			<gx:drawOrder>1</gx:drawOrder>
-        			<coordinates>[LON],[LAT],[ALTITUDE]</coordinates>
-        		</Point>
-        	</Placemark>
-        	'''
+                <name>[TITULO]</name>
+                <description>[DESCR]<![CDATA[<img src="data:image/jpg;base64,[FOTO]">]]></description>
+                <LookAt>
+                    <longitude>[LON]</longitude>
+                    <latitude>[LAT]</latitude>
+                    <altitude>[ALTITUDE]</altitude>
+                    <heading>-2.595305769485352</heading>
+                    <tilt>0</tilt>
+                    <range>1383584.739067059</range>
+                    <gx:altitudeMode>relativeToSeaFloor</gx:altitudeMode>
+                </LookAt>
+                <styleUrl>#msn_camera</styleUrl>
+                <Point>
+                    <gx:drawOrder>1</gx:drawOrder>
+                    <coordinates>[LON],[LAT],[ALTITUDE]</coordinates>
+                </Point>
+            </Placemark>
+            '''
 
         campos = [field.name() for field in layer.fields()]
 

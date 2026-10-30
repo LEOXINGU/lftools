@@ -191,7 +191,7 @@ class CreateHolesInRaster(QgsProcessingAlgorithm):
             feedback.pushInfo(self.tr('Opening Band Alpha...', 'Abrindo Banda Alfa...'))
             band4 = image.GetRasterBand(4).ReadAsArray()
         Pixel_Nulo = image.GetRasterBand(1).GetNoDataValue()
-        if Pixel_Nulo == None:
+        if Pixel_Nulo is None:
             Pixel_Nulo = 0
         image=None # Fechar imagem
 
