@@ -517,6 +517,233 @@ def azimuteTrucandoINCRA(dd, prec=-1):
     return f"{sinal}{graus}°{minutos:02d}'"
 
 
+# ------------------------------------------------------------
+#  COMPRIMENTO / PERÍMETRO PELA SOMA DOS SEGMENTOS ARREDONDADOS
+# ------------------------------------------------------------
+
+def _partesLinearesMedida(geom):
+    """
+    Retorna as partes lineares usadas no cálculo de comprimento/perímetro.
+
+    Para linhas e multilinhas, considera todas as partes.
+    Para polígonos e multipolígonos, considera somente os anéis externos,
+    mantendo o mesmo conceito de perímetro adotado nas rotinas cadastrais
+    do LFTools (os anéis internos não compõem o perímetro do imóvel).
+    """
+    if geom is None or geom.isNull() or geom.isEmpty():
+        return []
+
+    tipo = geom.type()
+    coords = geom2PointList(geom)
+
+    if tipo == Qgis.GeometryType.Line:
+        if geom.isMultipart():
+            return coords
+        return [coords]
+
+    elif tipo == Qgis.GeometryType.Polygon:
+        if geom.isMultipart():
+            return [poligono[0] for poligono in coords if poligono and poligono[0]]
+        return [coords[0]] if coords and coords[0] else []
+
+    raise ValueError('A geometria deve ser linha, multilinha, polígono ou multipolígono.')
+
+
+def _alturaPonto(pnt):
+    """Retorna a altura do ponto, adotando zero quando Z não existir."""
+    try:
+        z = pnt.z()
+        return 0.0 if math.isnan(z) else float(z)
+    except:
+        return 0.0
+
+
+def _geomParaGeografica(geom, crs):
+    """Converte uma cópia da geometria para o SRC geográfico associado ao SRC informado."""
+    if crs is None or not crs.isValid():
+        raise ValueError('SRC inválido.')
+
+    crsGeo = QgsCoordinateReferenceSystem(crs.geographicCrsAuthId())
+    if not crsGeo.isValid():
+        raise ValueError('Não foi possível determinar o SRC geográfico associado.')
+
+    geomGeo = QgsGeometry(geom)
+    if crs != crsGeo:
+        coordinateTransformer = QgsCoordinateTransform(
+            crs, crsGeo, QgsProject.instance().transformContext()
+        )
+        resultado = geomGeo.transform(coordinateTransformer)
+        if resultado != Qgis.GeometryOperationResult.Success:
+            raise ValueError('Não foi possível transformar a geometria para coordenadas geográficas.')
+
+    return geomGeo, crsGeo
+
+
+def _origemLTPFeicao(geomGeo, partesGeo, crsGeo):
+    """Origem LTP no centroide da feição e na altitude média dos vértices únicos."""
+    centroide = geomGeo.centroid().asPoint()
+
+    alturas = []
+    vistos = set()
+    for parte in partesGeo:
+        for pnt in parte:
+            chave = (float(pnt.x()), float(pnt.y()), _alturaPonto(pnt))
+            if chave not in vistos:
+                vistos.add(chave)
+                alturas.append(chave[2])
+
+    h0 = float(np.mean(alturas)) if alturas else 0.0
+    lon0 = centroide.x()
+    lat0 = centroide.y()
+    return lon0, lat0, h0, OrigemSGL(lon0, lat0, h0, crsGeo)
+
+
+def _origemINCRAFeicao(partesGeo, crsGeo):
+    """
+    Origem segundo o critério utilizado nas rotinas INCRA/SIGEF do LFTools:
+    média aritmética das coordenadas dos vértices e das respectivas alturas.
+    """
+    lon, lat, alt = [], [], []
+
+    for parte in partesGeo:
+        pts = parte
+        # Em anéis fechados o último vértice repete o primeiro e não deve
+        # participar novamente do cálculo do centro médio.
+        if len(pts) > 1 and pts[0].x() == pts[-1].x() and pts[0].y() == pts[-1].y():
+            pts = pts[:-1]
+
+        for pnt in pts:
+            lon.append(pnt.x())
+            lat.append(pnt.y())
+            alt.append(_alturaPonto(pnt))
+
+    if not lon:
+        raise ValueError('A geometria não possui vértices suficientes para o cálculo.')
+
+    lon0 = float(np.mean(lon))
+    lat0 = float(np.mean(lat))
+    h0 = float(np.mean(alt))
+    return lon0, lat0, h0, OrigemSGL(lon0, lat0, h0, crsGeo)
+
+
+def _distanciaLTP(pntA, pntB, lon0, lat0, origem):
+    """Calcula a distância 2D entre dois pontos em um Plano Tangente Local."""
+    X0, Y0, Z0, a, f = origem
+
+    XA, YA, ZA = geod2geoc(pntA.x(), pntA.y(), _alturaPonto(pntA), a, f)
+    XB, YB, ZB = geod2geoc(pntB.x(), pntB.y(), _alturaPonto(pntB), a, f)
+
+    Ea, Na, Ua = geoc2enu(XA, YA, ZA, lon0, lat0, X0, Y0, Z0)
+    Eb, Nb, Ub = geoc2enu(XB, YB, ZB, lon0, lat0, X0, Y0, Z0)
+
+    return distEuclidiana2D(QgsPointXY(Ea, Na), QgsPointXY(Eb, Nb))
+
+
+def comprimentoPerimetroArredondado(geom, crs, precision=2, method=0):
+    """
+    Calcula comprimento (linha/multilinha) ou perímetro (polígono/multipolígono)
+    pela soma das distâncias de cada segmento APÓS o arredondamento individual.
+
+    Esse procedimento garante que o total coincida exatamente com a soma das
+    distâncias apresentadas, por exemplo, em um memorial descritivo.
+
+    Parameters
+    ----------
+    geom : QgsGeometry
+        Geometria de linha, multilinha, polígono ou multipolígono.
+    crs : QgsCoordinateReferenceSystem
+        SRC da geometria de entrada.
+    precision : int, optional
+        Número de casas decimais usado para arredondar cada segmento.
+    method : int, optional
+        Método de cálculo das distâncias:
+            0 - Coordenadas da própria geometria (distância cartesiana 2D).
+            1 - Coordenadas projetadas para o SRC do projeto.
+            2 - Local Tangent Plane (LTP), com origem no centro de cada segmento.
+            3 - Local Tangent Plane (LTP), com origem no centroide da feição.
+            4 - SGL/INCRA, com origem no centro médio dos vértices da feição.
+
+    Returns
+    -------
+    float
+        Soma dos comprimentos dos segmentos individualmente arredondados.
+        Nos métodos 1 a 4, o resultado é métrico quando os SRCs são adequados.
+        No método 0, a unidade é a unidade do SRC da geometria.
+    """
+    if geom is None or geom.isNull() or geom.isEmpty():
+        return 0.0
+
+    if not isinstance(precision, int) or isinstance(precision, bool) or precision < 0:
+        raise ValueError('precision deve ser um número inteiro maior ou igual a zero.')
+
+    if method not in (0, 1, 2, 3, 4):
+        raise ValueError('method deve ser 0, 1, 2, 3 ou 4.')
+
+    if geom.type() not in (Qgis.GeometryType.Line, Qgis.GeometryType.Polygon):
+        raise ValueError('A geometria deve ser linha, multilinha, polígono ou multipolígono.')
+
+    # Métodos cartesianos -------------------------------------------------
+    if method in (0, 1):
+        geomCalc = QgsGeometry(geom)
+
+        if method == 1:
+            crsProjeto = QgsProject.instance().crs()
+            if not crsProjeto.isValid():
+                raise ValueError('O SRC do projeto é inválido.')
+            if crsProjeto.isGeographic():
+                raise ValueError('O SRC do projeto deve ser projetado para o método 1.')
+
+            if crs != crsProjeto:
+                coordinateTransformer = QgsCoordinateTransform(
+                    crs, crsProjeto, QgsProject.instance().transformContext()
+                )
+                resultado = geomCalc.transform(coordinateTransformer)
+                if resultado != Qgis.GeometryOperationResult.Success:
+                    raise ValueError('Não foi possível transformar a geometria para o SRC do projeto.')
+
+        partes = _partesLinearesMedida(geomCalc)
+        total = 0.0
+        for parte in partes:
+            for k in range(len(parte)-1):
+                dist = distEuclidiana2D(parte[k], parte[k+1])
+                total += round(float(dist), precision)
+
+        return round(float(total), precision)
+
+    # Métodos baseados em Plano Tangente Local ---------------------------
+    geomGeo, crsGeo = _geomParaGeografica(geom, crs)
+    partesGeo = _partesLinearesMedida(geomGeo)
+
+    origemFeicao = None
+    if method == 3:
+        lon0, lat0, h0, origemFeicao = _origemLTPFeicao(geomGeo, partesGeo, crsGeo)
+    elif method == 4:
+        lon0, lat0, h0, origemFeicao = _origemINCRAFeicao(partesGeo, crsGeo)
+
+    total = 0.0
+    for parte in partesGeo:
+        for k in range(len(parte)-1):
+            pntA = parte[k]
+            pntB = parte[k+1]
+
+            if method == 2:
+                # Para um segmento reto de dois vértices, o centroide do segmento
+                # coincide com a média das coordenadas dos seus extremos.
+                lonSeg = (pntA.x() + pntB.x()) / 2.0
+                latSeg = (pntA.y() + pntB.y()) / 2.0
+                hSeg = (_alturaPonto(pntA) + _alturaPonto(pntB)) / 2.0
+                origemSeg = OrigemSGL(lonSeg, latSeg, hSeg, crsGeo)
+                dist = _distanciaLTP(pntA, pntB, lonSeg, latSeg, origemSeg)
+            else:
+                dist = _distanciaLTP(pntA, pntB, lon0, lat0, origemFeicao)
+
+            total += round(float(dist), precision)
+
+    # O último round apenas elimina resíduos binários de ponto flutuante;
+    # os valores que efetivamente compõem a soma já foram arredondados acima.
+    return round(float(total), precision)
+
+
 # ---------------
 #  CARTOGRAFIA
 # ---------------

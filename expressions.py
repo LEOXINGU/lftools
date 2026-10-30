@@ -43,6 +43,7 @@ from lftools.geocapt.cartography import (map_sistem,
                                          AzimuteDistanciaINCRA,
                                          azimuteTrucandoINCRA,
                                          areaSGL, perimetroSGL, comprimentoSGL,
+                                         comprimentoPerimetroArredondado,
                                          inom2mi as INOM2MI)
 from lftools.geocapt.topogeo import (dd2dms as DD2DMS,
                                      dms2dd as DMS2DD,
@@ -964,6 +965,68 @@ def lengthLTP3 (feature, parent, context):
     except:
         return tr('Check the geometry type', 'Verifique o tipo de geometria')
 
+
+
+@qgsfunction(args='auto', group='LF Tools')
+def roundedLength(geometry, layer_crs, precision, method, feature, parent):
+    """
+    Calculates the length of lines/multilines or the perimeter of polygons/multipolygons by summing the length of each segment after individually rounding it to the selected number of decimal places. This ensures that the final total exactly matches the sum of the rounded segment distances shown, for example, in a descriptive memorial.
+
+    <h2>Parameters:</h2>
+    <ul>
+      <li><b>geometry</b>: line, multiline, polygon or multipolygon geometry.</li>
+      <li><b>layer_crs</b>: CRS of the input geometry.</li>
+      <li><b>precision</b>: number of decimal places used to round each segment before summing.</li>
+      <li><b>method</b>: distance calculation method:</li>
+      <ul>
+        <li>0 - Original geometry coordinates (2D Cartesian distance).</li>
+        <li>1 - Coordinates projected to the project CRS.</li>
+        <li>2 - Local Tangent Plane (LTP), with origin at the center of each segment.</li>
+        <li>3 - Local Tangent Plane (LTP), with origin at the feature centroid.</li>
+        <li>4 - INCRA Local Geodetic System (SGL), with origin at the mean center of the feature vertices.</li>
+      </ul>
+    </ul>
+
+    <p><b>Note:</b> For polygon and multipolygon geometries, only exterior rings are used in the perimeter calculation.</p>
+
+    <h2>Examples:</h2>
+    <ul>
+      <li>roundedLength($geometry, @layer_crs, 2, 0) -> length/perimeter using the original coordinates</li>
+      <li>roundedLength($geometry, @layer_crs, 2, 1) -> length/perimeter in the project CRS</li>
+      <li>roundedLength($geometry, @layer_crs, 2, 2) -> sum of rounded segment lengths using an LTP for each segment</li>
+      <li>roundedLength($geometry, @layer_crs, 2, 3) -> sum of rounded segment lengths using one LTP for the feature</li>
+      <li>roundedLength($geometry, @layer_crs, 2, 4) -> sum of rounded segment lengths using the INCRA criterion</li>
+    </ul>
+
+    <div>
+    <p><b>About the LTP:</b></p>
+    <p>
+    <b><a href="https://geoone.com.br/sistema-geodesico-local/" target="_blank">França, L. Local Geodetic Coordinate System. GeoOne. 2022.</a></b>
+    </p>
+    </div>
+    """
+    try:
+        crs = QgsCoordinateReferenceSystem(layer_crs)
+        if not crs.isValid():
+            return tr('Invalid CRS!', 'SRC inválido!')
+
+        try:
+            precision = int(precision)
+        except:
+            return tr('Precision must be an integer greater than or equal to zero!',
+                      'A precisão deve ser um número inteiro maior ou igual a zero!')
+
+        try:
+            method = int(method)
+        except:
+            return tr('Method must be an integer from 0 to 4!',
+                      'O método deve ser um número inteiro de 0 a 4!')
+
+        return comprimentoPerimetroArredondado(geometry, crs, precision, method)
+
+    except Exception as e:
+        return tr('Check the geometry, CRS, precision and calculation method! ',
+                  'Verifique a geometria, o SRC, a precisão e o método de cálculo! ') + str(e)
 
 
 @qgsfunction(args='auto', group='LF Tools')

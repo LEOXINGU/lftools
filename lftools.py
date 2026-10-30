@@ -55,7 +55,7 @@ exprs = (coord2inom, fieldstat, dd2dms, projectCRS, layerCRS, magneticdec, mainA
          removespetialchar, deedtable2, deedtable3, areaLTP, deedtext, geoneighbors, gpsdate,
          str2html, img2html, dinamictable, perimeterLTP, lengthLTP, areaLTP2, perimeterLTP2,
          lengthLTP2, lengthLTP3, layer_schema, azimuth_by_sequence, classify, triangle_area_3d,
-         azimuth2bearing, bearing2azimuth)
+         azimuth2bearing, bearing2azimuth, roundedLength)
 
 cmd_folder = os.path.split(inspect.getfile(inspect.currentframe()))[0]
 
