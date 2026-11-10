@@ -31,6 +31,7 @@ from qgis.core import (Qgis,
                        QgsProcessingParameterString,
                        QgsProcessingParameterBoolean,
                        QgsProcessingException,
+                       QgsVariantUtils,
                        QgsProcessingParameterFileDestination,
                        QgsApplication)
 from processing.algs.qgis.QgisAlgorithm import QgisAlgorithm
@@ -422,7 +423,7 @@ class DescriptiveMemorial(QgisAlgorithm):
                 else:
                     ordem_comp += [feat['sequence']]
                     codigo_item = feat['code']
-                if not codigo_item or codigo_item in ['', ' ']:
+                if QgsVariantUtils.isNull(codigo_item) or not str(codigo_item).strip():
                     raise QgsProcessingException(self.tr('The code attribute must be filled in for all features!', 'O atributo código deve ser preenchido para todas as feições!'))
             ordem_comp.sort()
             if ordem_list != ordem_comp:
@@ -434,7 +435,7 @@ class DescriptiveMemorial(QgisAlgorithm):
                     att2 = feat['confrontan']
                 else:
                     att2 = feat['borderer']
-                if not att2 or att2 in ['', ' ']:
+                if QgsVariantUtils.isNull(att2) or not str(att2).strip():
                     raise QgsProcessingException(self.tr("The confrontant's name must be filled in for all features!", 'O nome do confrontante deve ser preenchido para todas as feições!'))
 
         # Validando a Topologia dos dados de entrada
@@ -653,7 +654,7 @@ class DescriptiveMemorial(QgisAlgorithm):
         if atributos:
             for fieldname in campos_area_teste:
                 att = feat1[fieldname]
-                if not att or att in ['', ' ']:
+                if QgsVariantUtils.isNull(att) or not str(att).strip():
                     raise QgsProcessingException(self.tr('The attribute {} of the polygon layer must be filled!', 'O atributo {} da camada polígono do imóvel deve ser preenchido!').format(fieldname))
 
         # Transformar Coordenadas de Geográficas para o sistema UTM

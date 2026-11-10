@@ -31,6 +31,7 @@ from qgis.core import (Qgis,
                        QgsProcessingParameterBoolean,
                        QgsProcessingParameterFileDestination,
                        QgsApplication,
+                       QgsVariantUtils,
                        QgsProject,
                        QgsPoint,
                        QgsCoordinateTransform)
@@ -386,7 +387,7 @@ class AreaPerimterReport(QgsProcessingAlgorithm):
                 codigo_item = feat[codigo]
             except Exception:
                 raise QgsProcessingException(self.tr('Check that your layer "limit_point_p" has the correct field names for the TopoGeo model! More information: https://bit.ly/3FDNQGC', 'Verifique se sua camada "Ponto Limite" está com os nomes dos campos corretos para o modelo TopoGeo! Mais informações: https://geoone.com.br/ebooks/livro2/'))
-            if not codigo_item or codigo_item in ['', ' ']:
+            if QgsVariantUtils.isNull(codigo_item) or not str(codigo_item).strip():
                 raise QgsProcessingException(self.tr('The code attribute must be filled in for all features!', 'O atributo código deve ser preenchido para todas as feições!'))
         ordem_comp.sort()
         if ordem_list != ordem_comp:
@@ -397,7 +398,7 @@ class AreaPerimterReport(QgsProcessingAlgorithm):
         fieldnames = ['property', 'county', 'state'] if modeloBD == 'TG' else ['denominacao', 'municipio', 'uf']
         for fieldname in fieldnames:
             att = feat1[fieldname]
-            if not att or att in ['', ' ']:
+            if QgsVariantUtils.isNull(att) or not str(att).strip():
                 raise QgsProcessingException(self.tr('All attributes of the class "property_polygon" must be filled!', 'Todos os atributos da classe "area_imovel" devem ser preenchidos!'))
 
 

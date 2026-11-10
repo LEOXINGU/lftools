@@ -34,6 +34,7 @@ from qgis.core import (Qgis,
                        QgsApplication,
                        QgsProject,
                        QgsCoordinateTransform,
+                       QgsVariantUtils,
                        QgsCoordinateReferenceSystem)
 
 import os, math
@@ -348,8 +349,14 @@ class DescriptiveTable(QgsProcessingAlgorithm):
                 codigo_item = feat[codigo]
             except Exception:
                 raise QgsProcessingException(self.tr('Check that your layer "limit_point_p" has the correct field names for the TopoGeo model! More information: https://bit.ly/3FDNQGC', 'Verifique se sua camada "Ponto Limite" está com os nomes dos campos corretos para o modelo TopoGeo! Mais informações: https://geoone.com.br/ebook_gratis/'))
-            if codigo_item or codigo_item not in ['', ' ']:
-                raise QgsProcessingException(self.tr('The code attribute must be filled in for all features!', 'O atributo código deve ser preenchido para todas as feições!'))
+            
+            # Verificar se o código está preenchido
+            if QgsVariantUtils.isNull(codigo_item) or not str(codigo_item).strip():
+                raise QgsProcessingException(self.tr(
+                    'The code attribute must be filled in for all features!',
+                    'O atributo código deve ser preenchido para todas as feições!'
+                ))
+
         ordem_comp.sort()
         if ordem_list != ordem_comp:
             raise QgsProcessingException(self.tr('The point sequence field must be filled in correctly!', 'O campo de sequência dos pontos deve preenchido corretamente!'))
