@@ -126,6 +126,72 @@ class SpotElevation(QgsProcessingAlgorithm):
             )
         )
 
+    def _read_elevation_band(self, raster_band, feedback):
+        """Read band 1, with a block fallback for incompatible RasterIO bindings."""
+        version_error = 'Unhandled version of GDALRasterIOExtraArg'
+        gdal.ErrorReset()
+        try:
+            values = raster_band.ReadAsArray()
+        except RuntimeError as error:
+            if version_error not in str(error):
+                raise
+        else:
+            if values is not None:
+                return values
+            message = gdal.GetLastErrorMsg()
+            if version_error not in message:
+                raise QgsProcessingException(message or self.tr(
+                    'Could not read raster band 1.', 'Não foi possível ler a banda 1 do raster.'
+                ))
+
+        feedback.pushInfo(self.tr(
+            'GDAL RasterIO version mismatch. Reading band 1 in native blocks...',
+            'Versão incompatível do RasterIO do GDAL. Lendo a banda 1 em blocos nativos...'
+        ))
+        gdal.ErrorReset()
+        data_type = raster_band.DataType
+        dtype = gdal_array.GDALTypeCodeToNumericTypeCode(data_type)
+        # GDAL stores complex integers as interleaved real and imaginary values.
+        complex_components = {
+            gdal.GDT_CInt16: np.int16,
+            gdal.GDT_CInt32: np.int32,
+        }
+        component_type = complex_components.get(data_type)
+        if data_type == getattr(gdal, 'GDT_CFloat16', None):
+            component_type = np.float16
+        storage_type = np.float16 if data_type == getattr(gdal, 'GDT_Float16', None) else dtype
+        if dtype is None or (component_type is None and
+                             np.dtype(storage_type).itemsize != gdal.GetDataTypeSize(data_type) // 8):
+            raise QgsProcessingException(self.tr(
+                'Unsupported data type for GDAL block reading.',
+                'Tipo de dado não suportado na leitura por blocos do GDAL.'
+            ))
+
+        cols, rows = raster_band.XSize, raster_band.YSize
+        block_cols, block_rows = raster_band.GetBlockSize()
+        values = np.empty((rows, cols), dtype=dtype)
+        for block_y, row in enumerate(range(0, rows, block_rows)):
+            height = min(block_rows, rows - row)
+            for block_x, col in enumerate(range(0, cols, block_cols)):
+                if feedback.isCanceled():
+                    raise QgsProcessingException(self.tr('Processing canceled.', 'Processamento cancelado.'))
+                width = min(block_cols, cols - col)
+                raw = raster_band.ReadBlock(block_x, block_y)
+                if raw is None:
+                    raise QgsProcessingException(gdal.GetLastErrorMsg() or self.tr(
+                        'Could not read a block from raster band 1.',
+                        'Não foi possível ler um bloco da banda 1 do raster.'
+                    ))
+                if component_type is None:
+                    block = np.frombuffer(raw, dtype=storage_type).reshape(block_rows, block_cols)
+                    values[row:row + height, col:col + width] = block[:height, :width]
+                else:
+                    block = np.frombuffer(raw, dtype=component_type).reshape(block_rows, block_cols, 2)
+                    target = values[row:row + height, col:col + width]
+                    target.real = block[:height, :width, 0]
+                    target.imag = block[:height, :width, 1]
+        return values
+
     def processAlgorithm(self, parameters, context, feedback):
 
         from lftools.dependencies import ensure_matplotlib
@@ -167,7 +233,7 @@ class SpotElevation(QgsProcessingAlgorithm):
         feedback.pushInfo(self.tr('Opening raster file...', 'Abrindo arquivo Raster...'))
         # Abrir Raster layer como array
         image = gdal.Open(RasterIN)
-        band = image.GetRasterBand(1).ReadAsArray()
+        band = self._read_elevation_band(image.GetRasterBand(1), feedback)
         prj = image.GetProjection()
         geotransform = image.GetGeoTransform()
         SRC = QgsCoordinateReferenceSystem()
@@ -339,3 +405,4 @@ class SpotElevation(QgsProcessingAlgorithm):
         processing.run("lftools:magicstyles", params)
         layer.triggerRepaint()
         return {}
+
