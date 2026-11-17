@@ -33,6 +33,12 @@ import inspect
 
 from qgis.core import (QgsProject,
                        Qgis,
+                       QgsPointXY,
+                       QgsPoint,
+                       QgsVectorLayer,
+                       QgsField,
+                       QgsFeature,
+                       QgsGeometry,
                        QgsCoordinateTransform,
                        QgsApplication,
                        QgsExpression)
